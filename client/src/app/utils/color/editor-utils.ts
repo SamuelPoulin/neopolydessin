@@ -1,15 +1,7 @@
 import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
 import { FilterType } from '@components/pages/export-modal/filter-type.enum';
 import { BaseShape } from '@models/shapes/base-shape';
-import { BoundingBox } from '@models/shapes/bounding-box';
-import { BrushPath } from '@models/shapes/brush-path';
-import { CompositeLine } from '@models/shapes/composite-line';
-import { CompositeParticle } from '@models/shapes/composite-particle';
-import { Ellipse } from '@models/shapes/ellipse';
-import { Line } from '@models/shapes/line';
 import { Path } from '@models/shapes/path';
-import { Polygon } from '@models/shapes/polygon';
-import { Rectangle } from '@models/shapes/rectangle';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { Color } from '@utils/color/color';
 import { Coordinate } from '@utils/math/coordinate';
@@ -118,32 +110,8 @@ export class EditorUtils {
     let shape: BaseShape;
     const id = preserveId ? data.id : undefined;
     switch (data.type) {
-      case 'BoundingBox':
-        shape = new BoundingBox(undefined, id);
-        break;
-      case 'BrushPath':
-        shape = new BrushPath(undefined, id);
-        break;
-      case 'CompositeLine':
-        shape = new CompositeLine(undefined, id);
-        break;
-      case 'CompositeParticle':
-        shape = new CompositeParticle(undefined, id);
-        break;
-      case 'Ellipse':
-        shape = new Ellipse(undefined, undefined, undefined, id);
-        break;
-      case 'Line':
-        shape = new Line(undefined, undefined, id);
-        break;
       case 'Path':
         shape = new Path(undefined, id);
-        break;
-      case 'Polygon':
-        shape = new Polygon(undefined, undefined, id);
-        break;
-      case 'Rectangle':
-        shape = new Rectangle(undefined, undefined, undefined, id);
         break;
       default:
         throw ShapeError.typeNotFound(data.type);

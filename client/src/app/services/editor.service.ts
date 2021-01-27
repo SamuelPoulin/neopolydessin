@@ -24,8 +24,6 @@ export class EditorService {
   private previewShapes: BaseShape[];
   private readonly _commandReceiver: CommandReceiver;
 
-  readonly selection: Selection;
-
   readonly gridProperties: GridProperties;
   view: DrawingSurfaceComponent;
   loading: boolean;
@@ -40,7 +38,6 @@ export class EditorService {
       this.saveLocally();
     });
 
-    this.selection = new Selection();
     this.tools = new Map<ToolType, Tool>();
     this.initTools();
 
