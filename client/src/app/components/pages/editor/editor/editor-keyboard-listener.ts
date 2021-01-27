@@ -3,7 +3,6 @@ import { KeyboardListenerService } from '@services/event-listeners/keyboard-list
 import { ModalType } from '@services/modal/modal-type.enum';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
 import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
-import { SelectionTool } from '@tools/editing-tools/selection-tool/selection-tool';
 import { ToolType } from '@tools/tool-type.enum';
 
 export class EditorKeyboardListener extends KeyboardListenerService {
@@ -12,61 +11,12 @@ export class EditorKeyboardListener extends KeyboardListenerService {
 
     this.addEvents([
       [
-        KeyboardListenerService.getIdentifier('l'),
-        () => {
-          editorComponent.currentToolType = ToolType.Line;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('3'),
-        () => {
-          editorComponent.currentToolType = ToolType.Polygon;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('a'),
-        () => {
-          editorComponent.currentToolType = ToolType.Spray;
-        },
-      ],
-      [
         KeyboardListenerService.getIdentifier('c'),
         () => {
           editorComponent.currentToolType = ToolType.Pen;
         },
       ],
-      [
-        KeyboardListenerService.getIdentifier('w'),
-        () => {
-          editorComponent.currentToolType = ToolType.Brush;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('1'),
-        () => {
-          editorComponent.currentToolType = ToolType.Rectangle;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('i'),
-        () => {
-          editorComponent.currentToolType = ToolType.Pipette;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('s'),
-        () => {
-          editorComponent.currentToolType = ToolType.Select;
-          return false;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('a', true),
-        () => {
-          (editorComponent.editorService.tools.get(ToolType.Select) as SelectionTool).selectAll();
-          return false;
-        },
-      ],
+
       [
         KeyboardListenerService.getIdentifier('+', false),
         () => {
@@ -93,30 +43,9 @@ export class EditorKeyboardListener extends KeyboardListenerService {
         },
       ],
       [
-        KeyboardListenerService.getIdentifier('b'),
-        () => {
-          editorComponent.currentToolType = ToolType.ColorFill;
-          return false;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('r'),
-        () => {
-          editorComponent.currentToolType = ToolType.ColorApplicator;
-          return false;
-        },
-      ],
-      [
         KeyboardListenerService.getIdentifier('e'),
         () => {
           editorComponent.currentToolType = ToolType.Eraser;
-          return false;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('2'),
-        () => {
-          editorComponent.currentToolType = ToolType.Ellipse;
           return false;
         },
       ],
@@ -151,41 +80,6 @@ export class EditorKeyboardListener extends KeyboardListenerService {
         KeyboardListenerService.getIdentifier('e', true),
         () => {
           editorComponent.dialog.openByName(ModalType.EXPORT);
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('c', true, false),
-        () => {
-          editorComponent.editorService.copySelectedShapes();
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('x', true, false),
-        () => {
-          editorComponent.editorService.cutSelectedShapes();
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('v', true, false),
-        () => {
-          editorComponent.editorService.pasteClipboard();
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('d', true, false),
-        () => {
-          editorComponent.editorService.duplicateSelectedShapes();
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('delete', false, false),
-        () => {
-          editorComponent.editorService.deleteSelectedShapes();
           return true;
         },
       ],
