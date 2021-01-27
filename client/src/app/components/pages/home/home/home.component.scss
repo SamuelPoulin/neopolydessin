@@ -1,0 +1,33 @@
+#main-container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid lightgrey;
+  border-radius: 25px;
+  margin: 200px auto;
+  min-width: 200px;
+  max-width: 600px;
+}
+
+#main-container-title {
+  text-align: center;
+  margin-top: 50px;
+}
+
+#main-container-buttons {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  margin-bottom: 50px;
+}
+
+#main-container-buttons > button {
+  margin-bottom: 10px;
+  width: 200px;
+  color: white;
+  background-color: cornflowerblue;
+}
+
+#main-container-buttons > button:disabled {
+  background-color: lightgrey;
+}

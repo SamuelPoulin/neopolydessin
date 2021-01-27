@@ -1,0 +1,26 @@
+@import "src/assets/globalTheme";
+
+::ng-deep .mat-tooltip {
+  font-size: 100%;
+  border-radius: 50px;
+}
+
+.default {
+  color: $accent;
+  background-color: transparent;
+}
+
+.default:hover {
+  &:enabled {
+    background-color: rgba(70, 70, 70, 0.75);
+  }
+}
+
+.selected {
+  color: $accent;
+  background-color: $secondary;
+}
+
+.mat-icon-button:disabled {
+  opacity: 50%;
+}

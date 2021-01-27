@@ -1,0 +1,88 @@
+<div id="color-picker" [ngClass]="isVertical ? 'vertical' : 'horizontal'">
+  <div *ngIf=showHistory>
+    <app-color-history (colorSelectedEvent)='closed.emit()'></app-color-history>
+  </div>
+  <div id=canvas-container [ngClass]="isVertical ? 'vertical' : 'horizontal'" >
+    <canvas #canvas
+      id='color-square'
+      [ngClass]="isVertical ? 'canvas-v' : 'canvas-h'"
+      width="{{size}}"
+      height="{{size}}"
+      (mousemove)="onMouseMove($event)"
+      (mousedown)="onMouseDown($event)">
+    </canvas>
+
+    <div id='lightness-section' [ngClass]='!isVertical ? "vertical" : "horizontal"'>
+      <app-color-lightness
+        [ngClass]="!isVertical ? 'lightness-v' : 'lightness-h'"
+        [color]="color"
+        [length]=225
+        (colorChanged)="colorChange($event)"
+        [isVertical]="!isVertical"
+      ></app-color-lightness>
+      <div id='color-preview'
+        [ngClass]="!isVertical ? 'preview-v' : 'preview-h'"
+        [style.opacity]=color.a
+        [style.background-color]=color.rgbString
+      ></div>
+    </div>
+  </div>
+  <div id='color-components'>
+    <form #form [formGroup]="formGroup" id=color-components-form [ngClass]="isVertical ? 'vertical components-v' : 'vertical components-h'">
+      <app-hex-input  #redinput
+        id="red-color-input"
+        [errorMessages]="hexInputErrorMessages"
+        [maxLength]=2
+        [value]="color.rHex"
+        (valueChange)="rgbChange(redinput.value, 'r')"
+        [formGroup]="formGroup">
+        R:
+      </app-hex-input>
+      <app-hex-input #greeninput
+        id="green-color-input"
+        [errorMessages]="hexInputErrorMessages"
+        [maxLength]=2
+        [value]="color.gHex"
+        (valueChange)="rgbChange(greeninput.value, 'g')"
+        [formGroup]="formGroup">
+        V:
+      </app-hex-input>
+      <app-hex-input #blueinput
+        id="blue-color-input"
+        [errorMessages]="hexInputErrorMessages"
+        [maxLength]=2
+        [value]="color.bHex"
+        (valueChange)="rgbChange(blueinput.value, 'b')"
+        [formGroup]="formGroup">
+        B:
+      </app-hex-input>
+      <app-hex-input #hexinput
+        id="hex-color-input"
+        [length]=6
+        prefix="#"
+        [errorMessages]="hexInputErrorMessages"
+        [value]="color.hex"
+        (valueChange)="hexChange(hexinput.value)"
+        [formGroup]="formGroup">Hex:
+      </app-hex-input>
+    </form>
+    <div *ngIf='showHistory' id='alpha-form'>
+      <app-alpha [color]='color'
+        [length]=225
+        (colorChanged)="alphaChangeColor($event)"
+        [isVertical]="isVertical"
+      ></app-alpha>
+      <app-number-input #alphainput
+        max=100
+        min=0
+        (valueChange)=alphaChange(alphainput.value)
+        [value]='alpha'
+      >Alpha:
+      </app-number-input>
+    </div>
+  </div>
+  <div *ngIf=showHistory id='buttons'>
+    <button mat-raised-button id='btn-cancel' (click)='cancel()' [disabled]=colorHasChanged>Annuler</button>
+    <button mat-raised-button id='btn-confirm' (click)='confirm()' [disabled]=!colorHasChanged>Confirmer</button>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<button [id]="id" mat-icon-button [disabled]="disable"
+        [matTooltip]="tooltipName"
+        [matTooltipPosition]="tooltipPosition"
+        [ngClass]="(selected)?'selected':'default'">
+  <mat-icon *ngIf="!src">{{iconName}}</mat-icon>
+  <img *ngIf="src" [src]="src" [height]="imgHeight" [width]="imgWidth" alt=""/>
+</button>

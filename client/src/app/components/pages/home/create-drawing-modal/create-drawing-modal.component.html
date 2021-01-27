@@ -1,0 +1,17 @@
+<app-abstract-modal>
+  <div content>
+    <form [formGroup]="formGroup">
+      <div id='size-form'>
+        <app-number-input allowExternalUpdatesWhenFocused=true suffix="px" [min]=1 [max]=9999 [(value)]='width' [formGroup]="formGroup">Largeur:</app-number-input>
+        <app-number-input allowExternalUpdatesWhenFocused=true suffix="px" [min]=1 [max]=9999 [(value)]='height' [formGroup]="formGroup">Hauteur:</app-number-input>
+      </div>
+      <app-color-picker [isVertical]=false #colorpicker [formGroup]="formGroup"></app-color-picker>
+    </form>
+  </div>
+  <div actions>
+    <button id="btn-create" mat-stroked-button (click)="onCreateClick()"
+            [disabled]="formGroup.invalid">
+      Créer
+    </button>
+  </div>
+</app-abstract-modal>

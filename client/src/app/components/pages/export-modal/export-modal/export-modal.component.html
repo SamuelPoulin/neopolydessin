@@ -1,0 +1,51 @@
+<app-abstract-modal>
+  <div content>
+    <img id="preview" [src]="previewURL">
+    <form [formGroup]="formGroup">
+      <app-name-input id="inputName" [formGroup]="formGroup" [(value)]="fileName" >Nom du fichier
+      </app-name-input>
+      <mat-form-field [formGroup]="formGroup">
+        <mat-label>Extension</mat-label>
+        <mat-select [(value)]="selectedExtension"  name="extensions" (selectionChange)="changeExtension()" required=true>
+          <mat-option *ngFor="let ext of extensions" [value]="ext">
+            {{ext}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field [formGroup]="formGroup">
+        <mat-label>Filtres</mat-label>
+        <mat-select [(value)]="selectedFilter" name="extensions" (selectionChange)="addFilterToPreview()">
+          <mat-option *ngFor="let filter of filters" [value]="filter">
+            {{filter}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Envoyer par courriel
+          </mat-panel-title>
+          <mat-panel-description>
+            Optionnel
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div id="toolaccordion">
+          <form [formGroup]="sendFormGroup">
+            <app-name-input id="inputUserName" [formGroup]="sendFormGroup" [(value)]="userName" required=true>Votre nom
+            </app-name-input>
+            <app-email-input id="inputEmail" [formGroup]="sendFormGroup" [(value)]="email" required=true>Votre email
+            </app-email-input>
+          </form>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <p></p>
+  </div>
+  <div actions>
+    <a mat-stroked-button [disabled]="!valid" id="save-button" [href]="valid ? href : ''" [download]="fullName">Sauvegarder</a>
+    <button mat-stroked-button [disabled]="!emailValid" id="send-button"
+      (click)="send()">Envoyer</button>
+  </div>
+</app-abstract-modal>

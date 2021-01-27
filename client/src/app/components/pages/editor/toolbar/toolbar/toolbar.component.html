@@ -1,0 +1,68 @@
+<div id="toolbar-container">
+  <div id="toolbar-top-buttons">
+    <icon-button id="back-button" iconName="arrow_back" (click)="navigate('')"></icon-button>
+    <div *ngFor='let tool of toolTypeKeys'>
+      <icon-button id='{{toolButtonId(tool)}}' [tooltipName]="toolbarNames.get(tool)"
+                   iconName="{{toolbarIcons.get(tool)}}" [selected]="currentToolType === tool"
+                   (click)="selectTool(tool)">
+      </icon-button>
+    </div>
+  </div>
+  <div id="toolbar-middle-buttons">
+    <icon-button id="swap-button" iconName="swap_horiz" (click)="editorService.colorsService.swapColors()"></icon-button>
+    <div id='toolbar-color-buttons'>
+      <div id="toolbar-primary-color" [style.background-color]="primaryColor.hexString"
+           (click)="editColor(SelectedColorType.primary)" [ngStyle]="{'z-index': 1}">
+      </div>
+      <div id="toolbar-secondary-color" [style.background-color]="secondaryColor.hexString"
+           (click)="editColor(SelectedColorType.secondary)" [ngStyle]="{'z-index':drawerOpened && selectedColor ? 2 : 0}">
+      </div>
+    </div>
+    <icon-button id="toolbar-grid-button"
+                 [iconName]="editorService.gridProperties.visibility.value === 'Visible' ? 'grid_on':'grid_off'"
+                 tooltipName="Grille"
+                 (click)="editGrid()">
+    </icon-button>
+  </div>
+  <div id="toolbar-bottom-buttons">
+    <icon-button id="redo" iconName="redo" tooltipName="Rétablir" [disable]="!editorService.commandReceiver.canRedo"
+                 (click)="redo()">
+    </icon-button>
+    <icon-button id="undo" iconName="undo" tooltipName="Annuler" [disable]="!editorService.commandReceiver.canUndo"
+                 (click)="undo()">
+    </icon-button>
+    <icon-button id="help-button" iconName="help" tooltipName="Guide d'utilisation" (click)="openGuide()"></icon-button>
+    <icon-button id="save-button" iconName="save" tooltipName="Sauvegarder" (click)="openChooseExportSave()"></icon-button>
+  </div>
+</div>
+<mat-drawer-container>
+  <mat-drawer #drawer mode="side">
+    <mat-drawer-content [ngSwitch]="currentToolType">
+      <div *ngIf=!toolbarType>
+        <app-selection-toolbar *ngSwitchCase="ToolType.Select" class='toolbar-selection-section'></app-selection-toolbar>
+        <app-pen-toolbar *ngSwitchCase='ToolType.Pen' class='toolbar-tool-section'></app-pen-toolbar>
+        <app-brush-toolbar *ngSwitchCase='ToolType.Brush' class='toolbar-tool-section'></app-brush-toolbar>
+        <app-rectangle-toolbar *ngSwitchCase='ToolType.Rectangle' class='toolbar-tool-section'></app-rectangle-toolbar>
+        <app-ellipse-toolbar *ngSwitchCase='ToolType.Ellipse' class='toolbar-tool-section'></app-ellipse-toolbar>
+        <app-line-toolbar *ngSwitchCase='ToolType.Line' class='toolbar-tool-section'></app-line-toolbar>
+        <app-polygon-toolbar *ngSwitchCase='ToolType.Polygon' class='toolbar-tool-section'></app-polygon-toolbar>
+        <app-spray-toolbar *ngSwitchCase='ToolType.Spray' class='toolbar-tool-section'></app-spray-toolbar>
+        <app-eraser-toolbar *ngSwitchCase='ToolType.Eraser' class='toolbar-tool-section'></app-eraser-toolbar>
+        <app-fill-toolbar *ngSwitchCase='ToolType.ColorFill' class='toolbar-tool-section'></app-fill-toolbar>
+      </div>
+      <div *ngIf='toolbarType === ToolbarType.colorPicker' [ngSwitch]="SelectedColorType" class="toolbar-tool-section">
+        <h3 class="toolbar-option-section">Options du color picker</h3>
+        <label *ngSwitchCase="SelectedColorType.primary">Couleur primaire</label>
+        <label *ngSwitchCase="SelectedColorType.secondary">Couleur secondaire</label>
+        <app-color-picker [isVertical]=true [showHistory]=true #colorPicker [color]="color" (colorChanged)="handleColorChanged($event)"
+          (closed)='close()'></app-color-picker>
+        <button id='btn-update-background' mat-flat-button (click)='updateBackground(colorPicker.color)'>
+          Appliquer comme couleur de fond
+        </button>
+      </div>
+      <div *ngIf='toolbarType === ToolbarType.grid'>
+        <app-grid-toolbar class='toolbar-tool-section'></app-grid-toolbar>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer>
+</mat-drawer-container>

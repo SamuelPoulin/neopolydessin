@@ -1,0 +1,27 @@
+#editor-container {
+  background-color: rgb(73, 70, 66);
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+app-drawing-surface {
+  position: absolute;
+  left: 60px;
+  top: 0;
+}
+
+app-grid{
+  position: absolute;
+  margin: 4px;
+  top: 4px;
+  left: 4px;
+  pointer-events: none;
+}
+
+mat-spinner{
+  top: 50%;
+  left: 50%;
+}

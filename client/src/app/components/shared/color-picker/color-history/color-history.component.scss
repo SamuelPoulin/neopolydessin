@@ -1,0 +1,11 @@
+#color-history {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  .color-history-button{
+    border-style: solid;
+    cursor: pointer;
+    width:20px;
+    height:20px;
+  }
+}

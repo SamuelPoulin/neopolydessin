@@ -1,0 +1,15 @@
+<div id="main-container" *ngIf="!this.deleted">
+  <img id="preview-image" [src]="previewURL">
+  <div id="title-container">
+    <h3>{{drawing.name}}</h3>
+  </div>
+  <div id="tag-container">
+    <button mat-flat-button *ngFor="let tag of drawing.tags">
+      {{tag}}
+    </button>
+  </div>
+  <div id="actions-container">
+    <button mat-flat-button id="delete-button" (click)="delete()">Supprimer</button>
+    <button mat-flat-button id="choose-button" (click)="choose()">Choisir</button>
+  </div>
+</div>

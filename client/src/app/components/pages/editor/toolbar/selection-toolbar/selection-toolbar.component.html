@@ -1,0 +1,18 @@
+<icon-button id="copy" tooltipName="Copier" [src]="'../../../../../../../assets/ico_copy.png'"
+            [disable]="!hasSelectedShapes" (click)="copy()">
+</icon-button>
+<icon-button id="cut" tooltipName="Couper" [src]="'../../../../../../assets/ico_cut.png'"
+            [disable]="!hasSelectedShapes" (click)="cut()">
+</icon-button>
+<icon-button id="duplicate" tooltipName="Dupliquer" [src]="'../../../../../../assets/ico_duplicate.png'"
+            [disable]="!hasSelectedShapes" (click)="duplicate()">
+</icon-button>
+<icon-button id="paste" tooltipName="Coller" [src]="'../../../../../../assets/ico_paste.png'"
+            [disable]="!hasShapesInClipboard" (click)="paste()">
+</icon-button>
+<icon-button id="selectAll" tooltipName="Sélectionner tout" [src]="'../../../../../../assets/ico_selectall.png'"
+            [disable]="!hasShapes" (click)="selectAll()">
+</icon-button>
+<icon-button id="delete" tooltipName="Supprimer" [src]="'../../../../../../assets/ico_delete.png'"
+            [disable]="!hasSelectedShapes" (click)="delete()">
+</icon-button>

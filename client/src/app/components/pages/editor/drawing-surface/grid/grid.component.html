@@ -1,0 +1,15 @@
+<svg id="svgGrid" [attr.width]="width" [attr.height]="height">
+	<defs>
+		<pattern id="smallGrid" [attr.width]="size" [attr.height]="size" patternUnits="userSpaceOnUse">
+			<path [attr.d]=generateGridPath(size)
+			      fill="none" stroke="black" stroke-width="0.5" [attr.stroke-opacity]="opacity"></path>
+		</pattern>
+		<pattern id="largeGrid" [attr.width]="largeSize" [attr.height]="largeSize" patternUnits="userSpaceOnUse">
+			<rect [attr.width]="largeSize" [attr.height]="largeSize" fill="url(#smallGrid)"></rect>
+			<path [attr.d]=generateGridPath(largeSize)
+			      fill="none" stroke="black" stroke-width="1" [attr.stroke-opacity]="opacity">
+			</path>
+		</pattern>
+	</defs>
+	<rect [attr.width]="width" [attr.height]="height" fill="url(#largeGrid)"></rect>
+</svg>

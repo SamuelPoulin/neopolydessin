@@ -1,0 +1,12 @@
+<app-number-input allowDecimals="true"
+                  [suffix]="suffix"
+                  [min]=property.minValue
+                  [max]=property.maxValue
+                  [allowDecimals]=allowDecimals
+                  [(numberValue)]="property.value">
+  <ng-content></ng-content>
+</app-number-input>
+<mat-slider [min]="property.minValue"
+            [max]="property.maxValue" [step]="sliderStep" thumbLabel="true"
+            [(ngModel)]="property.value">
+</mat-slider>

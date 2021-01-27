@@ -1,0 +1,7 @@
+--require ts-node/register
+--require test/mocha.env
+--require source-map-support/register
+--full-trace
+--recursive
+app/**/*.spec.ts
+--timeout 10000

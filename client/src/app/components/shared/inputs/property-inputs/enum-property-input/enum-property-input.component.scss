@@ -1,0 +1,26 @@
+@import "src/assets/globalTheme";
+
+:host{
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-top-color: $bordercolor;
+  border-top-style: solid;
+  border-top-width: thin;
+  width: 100%;
+}
+
+label{
+  color: $accent;
+}
+
+.enum-props-radio-group{
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+}
+
+.enum-props-radio-btn{
+  color: $accent;
+  margin: 5px;
+}
+

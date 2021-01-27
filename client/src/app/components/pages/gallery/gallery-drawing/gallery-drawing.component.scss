@@ -1,0 +1,46 @@
+#main-container {
+  max-width: 350px;
+  font-family: 'Roboto', sans-serif;
+  border-radius: 5px;
+  background-color:rgb(240,240,240);
+  border: 1px solid lightgrey;
+}
+
+#preview-image {
+  border-radius: 5px 5px 0px 0px;
+  height: 150px;
+  width: 100%;
+  background-color: red;
+}
+
+#title-container {
+  text-align: center;
+  padding: 10px;
+  h3 {
+    width: 100%;
+    margin: 0px;
+  }
+}
+
+#tag-container {
+  display: flex;
+  padding: 10px;
+  flex-flow: row wrap;
+  justify-content: space-evenly;
+}
+
+#actions-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+#delete-button {
+  background-color: red;
+  color: white;
+}
+
+button {
+  margin: 5px;
+  font-size: 16px;
+}

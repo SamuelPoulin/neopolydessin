@@ -1,0 +1,76 @@
+.canvas-v{
+  margin-bottom: 1rem;
+}
+.canvas-h{
+  margin-right: 1rem;
+}
+canvas {
+  border-style: solid;
+  width: 294px;
+  height: 294px;
+}
+.vertical {
+  flex-direction: column;
+  display: flex;
+}
+.horizontal{
+  display:flex;
+}
+
+#lightness-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  #color-preview {
+    border-style: solid;
+    width: 50px;
+    height: 50px;
+  }
+
+  .preview-v,
+  .lightness-v{
+    margin-right: 1rem;
+  }
+}
+#lightness-section.vertical{
+  height: 300px;
+}
+#lightness-section.horizontal{
+  margin-bottom: 1rem;
+}
+
+#color-components {
+  display: flex;
+  justify-content: space-between;
+
+  #color-components-form.components-v{
+    margin-right: 1rem;
+  }
+
+  #alpha-form {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+
+    app-alpha {
+      align-self: flex-end;
+    }
+
+    app-number-input {
+      width: 58px;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+#buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+
+  button {
+    width: 40%;
+  }
+
+}

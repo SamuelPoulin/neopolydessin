@@ -1,0 +1,14 @@
+@import "src/assets/globalTheme";
+
+:host{
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-top-color: $bordercolor;
+  border-top-style: solid;
+  border-top-width: thin;
+  width:100%;
+}
+mat-slider{
+  width: 100%;
+  color: $accent;
+}

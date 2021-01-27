@@ -1,0 +1,122 @@
+@import "src/assets/globalTheme";
+
+#toolbar-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: fixed;
+  width: 60px;
+  height: calc(100vh - 0px);
+  background-color: $primary;
+  z-index: 1000;
+}
+
+#toolbar-top-buttons, #toolbar-middle-buttons, #toolbar-bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#toolbar-bottom-buttons{
+  padding-bottom: 10px;
+  background-color: $secondary;
+}
+
+#toolbar-middle-buttons {
+  height: 100%;
+  justify-content: flex-end;
+}
+
+#swap-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 30px;
+  width: 30px;
+}
+
+#toolbar-color-buttons{
+  position: relative;
+  align-self: flex-start;
+  height: 60px;
+}
+
+#toolbar-primary-color {
+  border: 1px solid $accent;
+  height: 35px;
+  width: 35px;
+  z-index: 1000;
+  position: absolute;
+  left: 5px;
+  top:5px;
+}
+
+#toolbar-secondary-color {
+  border: 1px solid $accent;
+  height: 35px;
+  width: 35px;
+  z-index: 500;
+  position: absolute;
+  left: 20px;
+  top:20px;
+}
+
+icon-button {
+  width: 40px;
+  height: 40px;
+  color: $accent;
+}
+
+mat-drawer-container {
+  position: fixed;
+  margin-left: 60px;
+  height: calc(100vh - 0px);
+  overflow: visible;
+}
+
+mat-drawer {
+  box-shadow: $elevationShadow;
+  background-color: $primaryDark;
+}
+
+mat-drawer-content {
+  margin: 0 !important;
+}
+
+.toolbar-tool-section {
+  display: flex;
+  padding: 25px;
+  width: 300px;
+  flex-direction: column;
+  align-items: flex-start;
+  app-color-picker{
+    width: 100%;
+  }
+}
+
+.toolbar-selection-section {
+  display: flex;
+  padding-left: 10px;
+  width: 50px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.toolbar-option-section {
+  display: flex;
+  align-self: flex-start;
+  color: $accent;
+  margin-bottom: 25px;
+}
+
+#color-square {
+  width: 150px;
+}
+
+#btn-update-background {
+  color: black;
+  width: 100%;
+}
