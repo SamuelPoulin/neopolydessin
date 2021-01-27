@@ -1,5 +1,4 @@
 import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
-import { FilterType } from '@components/pages/export-modal/filter-type.enum';
 import { BaseShape } from '@models/shapes/base-shape';
 import { Path } from '@models/shapes/path';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
@@ -63,33 +62,6 @@ export class EditorUtils {
     const g = data[indices[1]];
     const b = data[indices[2]];
     return Color.rgb255(r, g, b);
-  }
-
-  static addFilter(surface: DrawingSurfaceComponent, filter: FilterType): void {
-    switch (filter) {
-      case FilterType.EMPTY:
-        surface.svg.setAttribute('filter', 'none');
-        break;
-      case FilterType.BLACKWHITE:
-        surface.svg.setAttribute('filter', 'grayscale(100%)');
-        break;
-      case FilterType.BLUR:
-        surface.svg.setAttribute('filter', 'blur(5px)');
-        break;
-      case FilterType.INVERT:
-        surface.svg.setAttribute('filter', 'invert(100%)');
-        break;
-      case FilterType.SATURATE:
-        surface.svg.setAttribute('filter', 'saturate(200%)');
-        break;
-      case FilterType.SEPIA:
-        surface.svg.setAttribute('filter', 'sepia(100%)');
-        break;
-    }
-  }
-
-  static removeFilter(surface: DrawingSurfaceComponent): void {
-    surface.svg.removeAttribute('filter');
   }
 
   /**
