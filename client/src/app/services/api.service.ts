@@ -12,6 +12,7 @@ export class APIService {
   static readonly INVALID_DATA_MSG: string = 'Les données soumises ne sont pas valides';
   static readonly SERVER_PROBLEM_MSG: string = 'Problèmes de serveurs, essayez plus tard';
   static readonly FILE_TOO_LARGE_MSG: string = 'Votre format png est probablement trop gros';
+  static readonly ALLO: string = 'allo';
 
   private static API_BASE_URL: string;
   private static API_DATABASE_ROUTE: string;
