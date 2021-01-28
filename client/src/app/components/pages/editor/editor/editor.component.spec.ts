@@ -6,17 +6,11 @@ import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/t
 import { RouterTestingModule } from '@angular/router/testing';
 import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
-import { SelectionTool } from '@tools/editing-tools/selection-tool/selection-tool';
 import { of } from 'rxjs';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { CreateDrawingModalComponent } from 'src/app/components/pages/home/create-drawing-modal/create-drawing-modal.component';
 import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
-import { Rectangle } from 'src/app/models/shapes/rectangle';
-import { LineTool } from 'src/app/models/tools/creator-tools/line-tool/line-tool';
-import { RectangleTool } from 'src/app/models/tools/creator-tools/shape-tools/rectangle-tool';
-import { BrushTool } from 'src/app/models/tools/creator-tools/stroke-tools/brush-tool/brush-tool';
-import { PenTool } from 'src/app/models/tools/creator-tools/stroke-tools/pen-tool/pen-tool';
 import { mouseDown } from 'src/app/models/tools/creator-tools/stroke-tools/stroke-tool.spec';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
@@ -100,36 +94,8 @@ describe('EditorComponent', () => {
   it('should cancel current drawing on tool change', () => {
     component.currentToolType = ToolType.Pen;
     const cancelSpy = spyOn(component.editorService.tools.get(ToolType.Pen) as Tool, 'cancel');
-    component.currentToolType = ToolType.Brush;
+    component.currentToolType = ToolType.Eraser;
     expect(cancelSpy).toHaveBeenCalled();
-  });
-
-  it('should select the line tool', () => {
-    component.currentToolType = ToolType.Line;
-    const currentTool = component.currentTool as Tool;
-    expect(currentTool.constructor.name).toEqual(LineTool.name);
-  });
-
-  it('should select the rectangle tool', () => {
-    component.currentToolType = ToolType.Rectangle;
-
-    const currentTool = component.currentTool as Tool;
-    expect(currentTool.constructor.name).toEqual(RectangleTool.name);
-  });
-
-  it('should select the brush tool', () => {
-    component.currentToolType = ToolType.Brush;
-
-    const currentTool = component.currentTool as Tool;
-    expect(currentTool.constructor.name).toEqual(BrushTool.name);
-  });
-
-  it('should select the pen tool after selecting the brush tool', () => {
-    component.currentToolType = ToolType.Brush;
-    component.currentToolType = ToolType.Pen;
-
-    const currentTool = component.currentTool as Tool;
-    expect(currentTool.constructor.name).toEqual(PenTool.name);
   });
 
   it('can get current tool', () => {
@@ -233,13 +199,4 @@ describe('EditorComponent', () => {
     expect(component['keyboardListener'].listening).toEqual(true);
   });
 
-  it('should select shape on shapeClicked', () => {
-    component.currentToolType = ToolType.Select;
-    const tool = component.currentTool as SelectionTool;
-    const selectShapeSpy = spyOn(tool, 'selectShape');
-    const shape = new Rectangle();
-    component.shapeClicked(shape);
-
-    expect(selectShapeSpy).toHaveBeenCalledWith(shape, false);
-  });
 });

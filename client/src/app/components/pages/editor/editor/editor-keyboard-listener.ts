@@ -1,6 +1,5 @@
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
-import { ModalType } from '@services/modal/modal-type.enum';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
 import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
 import { ToolType } from '@tools/tool-type.enum';
@@ -75,21 +74,7 @@ export class EditorKeyboardListener extends KeyboardListenerService {
           }
           return true;
         },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('e', true),
-        () => {
-          editorComponent.dialog.openByName(ModalType.EXPORT);
-          return true;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('s', true),
-        () => {
-          editorComponent.dialog.openByName(ModalType.SAVE);
-          return true;
-        },
-      ],
+      ]
     ]);
 
     this.defaultEventAction = (e) => {
