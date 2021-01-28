@@ -5,14 +5,34 @@
     "start": "ng serve --open",
     "build": "ng build --prod",
     "start:electron": "ng build --base-href ./ && electron .",
-    "build:electron": "ng build --prod && electron-packager . --asar=true --ignore=/node_modules --ignore=/e2e --ignore=/src --overwrite --out=./build",
+    "build:electron": "ng build --prod && electron-builder",
     "format": "prettier --config ../.prettierrc.yaml --write \"src/**/*\"",
     "test:ci": "ng test --no-watch --no-progress --browsers ChromeHeadlessNoSandbox",
     "test": "ng test",
     "coverage": "ng test --code-coverage --sourceMap=true",
     "lint": "ng lint --type-check --format stylish"
   },
-  "main": "main.js",
+  "main": "electron-main.js",
+  "build": {
+    "appId": "log3900-204.polydessin",
+    "productName": "PolyDessin",
+    "protocols": {
+      "name": "polydessin-protocol",
+      "schemes": [
+        "polydessin"
+      ]
+    },
+    "directories": {
+      "output": "build",
+      "buildResources": "resources"
+    },
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "resources/icon.png",
+      "dist/client/*"
+    ]
+  },
   "resolutions": {
     "@babel/preset-env": "7.5.5"
   },
@@ -48,7 +68,7 @@
     "@types/node": "~8.9.4",
     "codelyzer": "^5.2.2",
     "electron": "^11.2.1",
-    "electron-packager": "^15.2.0",
+    "electron-builder": "^22.9.1",
     "hammerjs": "^2.0.8",
     "husky": "^4.3.8",
     "jasmine-core": "^3.6.0",
@@ -82,6 +102,7 @@
     "@angular/router": "~8.1.2",
     "@types/form-data": "^2.5.0",
     "axios": "^0.21.1",
+    "custom-electron-titlebar": "^3.2.6",
     "dotenv": "^8.2.0",
     "form-data": "^3.0.0",
     "puppeteer": "^2.1.1",

@@ -10,9 +10,14 @@ let appWindow
 function initWindow() {
   appWindow = new BrowserWindow({
     // fullscreen: true,
+    icon: url.format(path.join(__dirname, '/resources/icon.png')),
     height: 800,
     width: 1000,
+    frame: false,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      enableRemoteModule: true,
+      allowRunningInsecureContent: false,
       nodeIntegration: true
     }
   })
@@ -20,7 +25,7 @@ function initWindow() {
   // Electron Build Path
   appWindow.loadURL(
     url.format({
-      pathname: path.join(__dirname, `/dist/client/index.html`),
+      pathname: path.join(__dirname, 'dist/client/index.html'),
       protocol: "file:",
       slashes: true
     })
@@ -51,3 +56,5 @@ app.on('activate', function () {
     initWindow()
   }
 })
+
+app.setAsDefaultProtocolClient('polydessin');
