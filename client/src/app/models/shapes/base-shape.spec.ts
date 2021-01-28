@@ -1,5 +1,4 @@
 /* tslint:disable:no-magic-numbers */
-import { ContourType } from '@models/tool-properties/creator-tool-properties/contour-type.enum';
 import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
@@ -61,7 +60,6 @@ describe('BaseShape', () => {
     component.strokeWidth = 5;
     component.primaryColor = Color.RED;
     component.secondaryColor = Color.BLUE;
-    component.contourType = ContourType.FILLED;
     component.updateProperties();
 
     const shape = new BaseShapeImpl('rect', component.id);

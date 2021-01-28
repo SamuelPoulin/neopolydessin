@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
 import { SharedModule } from '@components/shared/shared.module';
 import { BaseShape } from '@models/shapes/base-shape';
-import { Ellipse } from '@models/shapes/ellipse';
 import { Rectangle } from '@models/shapes/rectangle';
 import { EditorService } from '@services/editor.service';
 import { NumericProperty } from '@tool-properties/props/numeric-property/numeric-property';
@@ -50,15 +49,15 @@ describe('EraserTool', () => {
       eraser['selectedIndexes'] = [0, 1];
     });
 
-    const ellipse = new Ellipse();
-    eraser['editorService'].shapes.push(ellipse);
+    const rectangle = new Rectangle();
+    eraser['editorService'].shapes.push(rectangle);
     eraser['isActive'] = true;
-    spyOn(eraser['editorService'], 'findShapeById').and.returnValue(ellipse);
+    spyOn(eraser['editorService'], 'findShapeById').and.returnValue(rectangle);
 
     eraser.handleMouseMove(mouseMove(new Coordinate()));
 
-    expect(eraseSpy).toHaveBeenCalledWith(ellipse);
-    expect(eraser['removedShapes'][0]).toEqual(ellipse);
+    expect(eraseSpy).toHaveBeenCalledWith(rectangle);
+    expect(eraser['removedShapes'][0]).toEqual(rectangle);
   });
 
   it('erases selected shape and updates selection on mouse down', () => {
@@ -68,22 +67,22 @@ describe('EraserTool', () => {
       eraser['selectedIndexes'] = [0, 1];
     });
 
-    const ellipse = new Ellipse();
-    eraser['editorService'].shapes.push(ellipse);
+    const rectangle = new Rectangle();
+    eraser['editorService'].shapes.push(rectangle);
     eraser['isActive'] = true;
-    spyOn(eraser['editorService'], 'findShapeById').and.returnValue(ellipse);
+    spyOn(eraser['editorService'], 'findShapeById').and.returnValue(rectangle);
 
     eraser.handleMouseDown(mouseDown(new Coordinate()));
 
-    expect(eraseSpy).toHaveBeenCalledWith(ellipse);
-    expect(eraser['removedShapes'][0]).toEqual(ellipse);
+    expect(eraseSpy).toHaveBeenCalledWith(rectangle);
+    expect(eraser['removedShapes'][0]).toEqual(rectangle);
   });
 
   it('sends the command on mouseup if there are shapes to remove', () => {
     const addCommandSpy = spyOn(eraser.editorService.commandReceiver, 'add');
 
-    const ellipse = new Ellipse();
-    eraser['removedShapes'] = [ellipse];
+    const rectangle = new Rectangle();
+    eraser['removedShapes'] = [rectangle];
     eraser['isActive'] = true;
 
     eraser.handleMouseUp(mouseUp(new Coordinate()));
