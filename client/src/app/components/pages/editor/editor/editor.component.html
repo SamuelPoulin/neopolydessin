@@ -4,7 +4,6 @@
     (editorBackgroundChanged)="changeBackground($event)"
     (mouseleave)="setToolbarState(false)"
     (guideButtonClicked)="openGuide()"
-    (chooseExportSaveButtonClicked)="openChooseExportSave()"
     (mouseenter)='setToolbarState(true)'
   ></app-toolbar>
   <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
@@ -15,7 +14,6 @@
     (mousemove)="handleMouseEvent($event)"
     (mouseleave)="handleMouseEvent($event)"
     (contextmenu)="handleMouseEvent($event)"
-    (shapeRightClicked)="shapeClicked($event, true)"
   >
 	  <app-grid
 			  [width]=surfaceWidth
