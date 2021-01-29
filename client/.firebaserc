@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "production": "log2990-104",
-    "dev": "log2990-104-dev",
-    "staging": "log2990-104-staging"
-  }
-}
