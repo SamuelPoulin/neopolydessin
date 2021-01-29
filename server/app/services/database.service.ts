@@ -141,15 +141,15 @@ export class DatabaseService {
 
   async deleteDrawing(id: string): Promise<DrawingResponse<Drawing>> {
     return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndDelete(id, (err: Error, doc: Drawing) => {
+      drawingModel.findByIdAndDelete(id, null, (err: Error, doc: Drawing) => {
         resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
       });
     });
   }
 
-  async updateDrawing(id: string, body: string): Promise<DrawingResponse<Drawing>> {
+  async updateDrawing(id: string, body: Drawing): Promise<DrawingResponse<Drawing>> {
     return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndUpdate(id, body, (err: Error, doc: Drawing) => {
+      drawingModel.findByIdAndUpdate(id, body, null, (err: Error, doc: Drawing) => {
         resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
       });
     });
