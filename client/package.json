@@ -33,9 +33,6 @@
       "dist/client/*"
     ]
   },
-  "resolutions": {
-    "@babel/preset-env": "7.5.5"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
