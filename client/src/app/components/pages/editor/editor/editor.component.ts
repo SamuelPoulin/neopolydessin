@@ -5,8 +5,6 @@ import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
 import { LocalSaveService } from '@services/localsave.service';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
-import { BaseShape } from 'src/app/models/shapes/base-shape';
-import { SimpleSelectionTool } from 'src/app/models/tools/editing-tools/simple-selection-tool';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { EditorService } from 'src/app/services/editor.service';
@@ -106,15 +104,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.dialog.openByName(ModalType.GUIDE);
   }
 
-  openChooseExportSave(): void {
-    const confirmDialog = this.dialog.openByName(ModalType.CHOOSE_EXPORT_SAVE);
-    if (confirmDialog) {
-      confirmDialog.afterClosed().subscribe((result) => {
-        this.dialog.openByName(result);
-      });
-    }
-  }
-
   openCreateModal(): void {
     const confirmDialog = this.dialog.openByName(ModalType.CONFIRM);
     if (confirmDialog) {
@@ -123,12 +112,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
           this.dialog.openByName(ModalType.CREATE);
         }
       });
-    }
-  }
-
-  shapeClicked(shape: BaseShape, rightClick: boolean = false): void {
-    if (this.currentTool instanceof SimpleSelectionTool) {
-      (this.currentTool as SimpleSelectionTool).selectShape(shape, rightClick);
     }
   }
 
