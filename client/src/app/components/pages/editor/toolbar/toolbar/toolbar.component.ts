@@ -55,30 +55,10 @@ export class ToolbarComponent {
 
     this.toolbarIcons = new Map<ToolType | string, string>([
       [ToolType.Pen, 'edit'],
-      [ToolType.Brush, 'brush'],
-      [ToolType.Rectangle, 'crop_square'],
-      [ToolType.Line, 'show_chart'],
-      [ToolType.Ellipse, 'panorama_fish_eye'],
-      [ToolType.Pipette, 'colorize'],
-      [ToolType.Polygon, 'category'],
-      [ToolType.Spray, 'blur_on'],
-      [ToolType.ColorApplicator, 'color_lens'],
-      [ToolType.ColorFill, 'format_paint'],
-      [ToolType.Select, 'near_me'],
       [ToolType.Eraser, 'delete_outline'],
     ]);
     this.toolbarNames = new Map<ToolType | string, string>([
       [ToolType.Pen, 'Crayon'],
-      [ToolType.Brush, 'Pinceau'],
-      [ToolType.Rectangle, 'Rectangle'],
-      [ToolType.Line, 'Ligne'],
-      [ToolType.Ellipse, 'Ellipse'],
-      [ToolType.Pipette, 'Sélection de couleur'],
-      [ToolType.Polygon, 'Polygone'],
-      [ToolType.Spray, 'Aérosol'],
-      [ToolType.ColorApplicator, 'Applicateur de couleur'],
-      [ToolType.ColorFill, 'Outil de remplissage'],
-      [ToolType.Select, 'Sélection'],
       [ToolType.Eraser, 'Efface'],
     ]);
   }

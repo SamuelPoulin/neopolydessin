@@ -44,7 +44,7 @@ describe('UserGuideComponent', () => {
     expect(nextSubjectSpy).toHaveBeenCalled();
   });
   it('should call previousSubject on Precedent button clicked', () => {
-    component.selectSubject(GuideSubject.Brush);
+    component.selectSubject(GuideSubject.Pen);
     fixture.detectChanges();
     const previousSubjectSpy = spyOn(component, 'previousSubject');
     fixture.debugElement.nativeElement.querySelector('#prevButton').click();
@@ -65,7 +65,7 @@ describe('UserGuideComponent', () => {
     // tslint:disable-next-line:no-any
     const openCategoriesSpy = spyOn<any>(component, 'openCategories').and.callThrough();
 
-    component.selectedSubject = component.subjects.Brush;
+    component.selectedSubject = component.subjects.Pen;
     component.previousSubject();
     fixture.detectChanges();
     expect(selectSubjectSpy).toHaveBeenCalled();
@@ -73,8 +73,8 @@ describe('UserGuideComponent', () => {
   });
 
   it('selectSubject should change the subject', () => {
-    component.selectSubject(component.subjects.Rectangle);
-    expect(component.selectedSubject).toEqual(component.subjects.Rectangle);
+    component.selectSubject(component.subjects.Pen);
+    expect(component.selectedSubject).toEqual(component.subjects.Pen);
   });
   it('Next subject should be subject plus 1', () => {
     const liveSubject = component.selectedSubject;
@@ -82,7 +82,7 @@ describe('UserGuideComponent', () => {
     expect(component.selectedSubject).toEqual(liveSubject + 1);
   });
   it('Next subject should be subject plus 1', () => {
-    component.selectedSubject = component.subjects.Brush;
+    component.selectedSubject = component.subjects.Eraser;
     const liveSubject = component.selectedSubject;
     component.nextSubject();
     expect(component.selectedSubject).toEqual(liveSubject + 1);

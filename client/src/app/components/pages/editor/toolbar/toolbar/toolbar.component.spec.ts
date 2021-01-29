@@ -5,23 +5,15 @@ import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/t
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EraserToolbarComponent } from '@components/pages/editor/toolbar/eraser-toolbar/eraser-toolbar.component';
-import { FillToolbarComponent } from '@components/pages/editor/toolbar/fill-toolbar/fill-toolbar.component';
 import { GridToolbarComponent } from '@components/pages/editor/toolbar/grid-toolbar/grid-toolbar.component';
-import { SelectionToolbarComponent } from '@components/pages/editor/toolbar/selection-toolbar/selection-toolbar.component';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
-import { BrushToolbarComponent } from 'src/app/components/pages/editor/toolbar/brush-toolbar/brush-toolbar.component';
-import { EllipseToolbarComponent } from 'src/app/components/pages/editor/toolbar/ellipse-toolbar/ellipse-toolbar.component';
-import { LineToolbarComponent } from 'src/app/components/pages/editor/toolbar/line-toolbar/line-toolbar.component';
 import { PenToolbarComponent } from 'src/app/components/pages/editor/toolbar/pen-toolbar/pen-toolbar.component';
-import { RectangleToolbarComponent } from 'src/app/components/pages/editor/toolbar/rectangle-toolbar/rectangle-toolbar.component';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { UserGuideModule } from 'src/app/components/pages/user-guide/user-guide.module';
 import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { Color } from 'src/app/utils/color/color';
-import { PolygonToolbarComponent } from '../polygon-toolbar/polygon-toolbar.component';
-import { SprayToolbarComponent } from '../spray-toolbar/spray-toolbar.component';
 import createSpyObj = jasmine.createSpyObj;
 
 describe('ToolbarComponent', () => {
@@ -36,16 +28,8 @@ describe('ToolbarComponent', () => {
       declarations: [
         ToolbarComponent,
         PenToolbarComponent,
-        BrushToolbarComponent,
-        RectangleToolbarComponent,
-        LineToolbarComponent,
-        EllipseToolbarComponent,
-        PolygonToolbarComponent,
-        SprayToolbarComponent,
         EraserToolbarComponent,
         GridToolbarComponent,
-        FillToolbarComponent,
-        SelectionToolbarComponent,
       ],
     })
       .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [UserGuideModalComponent] } })
@@ -79,46 +63,6 @@ describe('ToolbarComponent', () => {
     fixture.detectChanges();
 
     expect(component.currentToolType).toBe(ToolType.Pen);
-  });
-
-  it('should select the rectangle tool', () => {
-    const rectangleButton = fixture.debugElement.nativeElement.querySelector('#btn-rectangle-tool');
-    rectangleButton.click();
-    fixture.detectChanges();
-
-    expect(component.currentToolType).toBe(ToolType.Rectangle);
-  });
-
-  it('should select the polygon tool', () => {
-    const polygonButton = fixture.debugElement.nativeElement.querySelector('#btn-polygon-tool');
-    polygonButton.click();
-    fixture.detectChanges();
-
-    expect(component.currentToolType).toBe(ToolType.Polygon);
-  });
-
-  it('should select the line tool', () => {
-    const lineButton = fixture.debugElement.nativeElement.querySelector('#btn-line-tool');
-    lineButton.click();
-    fixture.detectChanges();
-
-    expect(component.currentToolType).toBe(ToolType.Line);
-  });
-
-  it('should select the brush tool', () => {
-    const brushButton = fixture.debugElement.nativeElement.querySelector('#btn-brush-tool');
-    brushButton.click();
-    fixture.detectChanges();
-
-    expect(component.currentToolType).toBe(ToolType.Brush);
-  });
-
-  it('should select the spray tool', () => {
-    const brushButton = fixture.debugElement.nativeElement.querySelector('#btn-spray-tool');
-    brushButton.click();
-    fixture.detectChanges();
-
-    expect(component.currentToolType).toBe(ToolType.Spray);
   });
 
   it('should select the primary color and the secondary color when clicking associated squares', () => {
