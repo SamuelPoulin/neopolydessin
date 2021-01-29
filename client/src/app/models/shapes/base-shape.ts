@@ -1,4 +1,3 @@
-import { ContourType } from '@tool-properties/creator-tool-properties/contour-type.enum';
 import { MathUtils } from '@utils/math/math-utils';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
@@ -19,7 +18,6 @@ export abstract class BaseShape {
   strokeWidth: number;
   secondaryColor: Color;
   primaryColor: Color;
-  contourType: ContourType;
 
   abstract get origin(): Coordinate;
   abstract set origin(c: Coordinate);
@@ -85,7 +83,6 @@ export abstract class BaseShape {
     this.strokeWidth = 1;
     this.secondaryColor = Color.BLACK;
     this.primaryColor = Color.WHITE;
-    this.contourType = ContourType.FILLED_CONTOUR;
 
     this.updateProperties();
   }
@@ -104,7 +101,6 @@ export abstract class BaseShape {
     this.strokeWidth = data.strokeWidth;
     this.primaryColor = Color.copy(data.primaryColor);
     this.secondaryColor = Color.copy(data.secondaryColor);
-    this.contourType = data.contourType;
 
     this.updateProperties();
   }
@@ -121,15 +117,9 @@ export abstract class BaseShape {
   }
 
   updateProperties(): void {
-    const hasStroke = this.contourType !== ContourType.FILLED;
-    const hasFill = this.contourType !== ContourType.CONTOUR;
-
     this.svgNode.style.strokeWidth = this.strokeWidth.toString();
     this.svgNode.style.strokeOpacity = this.secondaryColor.a.toString();
     this.svgNode.style.fillOpacity = this.primaryColor.a.toString();
-
-    this.svgNode.style.stroke = hasStroke ? this.secondaryColor.rgbString : BaseShape.CSS_NONE;
-    this.svgNode.style.fill = hasFill ? this.primaryColor.rgbString : BaseShape.CSS_NONE;
   }
 
   highlight(color: Color, thickness: number): void {

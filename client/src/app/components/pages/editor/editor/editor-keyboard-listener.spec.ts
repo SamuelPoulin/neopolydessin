@@ -13,7 +13,6 @@ import { SharedModule } from '@components/shared/shared.module';
 import { EditorService } from '@services/editor.service';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
 import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
-import { SelectionTool } from '@tools/editing-tools/selection-tool/selection-tool';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
 
@@ -60,54 +59,9 @@ describe('EditorKeyboardListener', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it('should select the brush tool when typing w', () => {
-    keyboardListener.handle(keyDown('w'));
-    expect(component.currentToolType).toEqual(ToolType.Brush);
-  });
-
-  it('should select the rectangle tool when typing 1', () => {
-    keyboardListener.handle(keyDown('1'));
-    expect(component.currentToolType).toEqual(ToolType.Rectangle);
-  });
-
-  it('should select the ellipse tool when typing 2', () => {
-    keyboardListener.handle(keyDown('2'));
-    expect(component.currentToolType).toEqual(ToolType.Ellipse);
-  });
-
-  it('should select the line tool when typing l', () => {
-    keyboardListener.handle(keyDown('l'));
-    expect(component.currentToolType).toEqual(ToolType.Line);
-  });
-
-  it('should select the pipette tool when typing i', () => {
-    keyboardListener.handle(keyDown('i'));
-    expect(component.currentToolType).toEqual(ToolType.Pipette);
-  });
-
-  it('should select the polygon tool when typing 3', () => {
-    keyboardListener.handle(keyDown('3'));
-    expect(component.currentToolType).toEqual(ToolType.Polygon);
-  });
-
-  it('should select the color applicator tool when typing r', () => {
-    keyboardListener.handle(keyDown('r'));
-    expect(component.currentToolType).toEqual(ToolType.ColorApplicator);
-  });
-
   it('should select the eraser tool when typing e', () => {
     keyboardListener.handle(keyDown('e'));
     expect(component.currentToolType).toEqual(ToolType.Eraser);
-  });
-
-  it('should select the spray tool when typing a', () => {
-    keyboardListener.handle(keyDown('a'));
-    expect(component.currentToolType).toEqual(ToolType.Spray);
-  });
-
-  it('should select the color fill tool when typing b', () => {
-    keyboardListener.handle(keyDown('b'));
-    expect(component.currentToolType).toEqual(ToolType.ColorFill);
   });
 
   it('should decrement grid size when typing -', () => {
@@ -152,58 +106,4 @@ describe('EditorKeyboardListener', () => {
     expect(component.editorService.gridProperties.visibility.value).toEqual(GridVisibility.visible);
   });
 
-  it('should select selection tool on typing s', () => {
-    keyboardListener.handle(keyDown('s'));
-    expect(component.currentToolType).toEqual(ToolType.Select);
-    const currentTool = component.currentTool as Tool;
-    expect(currentTool.constructor.name).toEqual(SelectionTool.name);
-  });
-
-  it('should select all on ctrl a', () => {
-    const selectAllSpy = spyOn(component.editorService['tools'].get(ToolType.Select) as SelectionTool, 'selectAll');
-    keyboardListener.handle(keyDown('a', false, true));
-    expect(selectAllSpy).toHaveBeenCalled();
-  });
-
-  it('should open export dialog on ctrl e', () => {
-    const openDialogSpy = spyOn(component.dialog, 'openByName');
-    keyboardListener.handle(keyDown('e', false, true));
-    expect(openDialogSpy).toHaveBeenCalledWith('export');
-  });
-
-  it('should open save dialog on ctrl e', () => {
-    const openDialogSpy = spyOn(component.dialog, 'openByName');
-    keyboardListener.handle(keyDown('s', false, true));
-    expect(openDialogSpy).toHaveBeenCalledWith('save');
-  });
-
-  it('can copy', () => {
-    const copySpy = spyOn(component.editorService, 'copySelectedShapes');
-    keyboardListener.handle(keyDown('c', false, true));
-    expect(copySpy).toHaveBeenCalled();
-  });
-
-  it('can cut', () => {
-    const cutSpy = spyOn(component.editorService, 'cutSelectedShapes');
-    keyboardListener.handle(keyDown('x', false, true));
-    expect(cutSpy).toHaveBeenCalled();
-  });
-
-  it('can paste ', () => {
-    const pasteSpy = spyOn(component.editorService, 'pasteClipboard');
-    keyboardListener.handle(keyDown('v', false, true));
-    expect(pasteSpy).toHaveBeenCalled();
-  });
-
-  it('can duplicate', () => {
-    const dulicateSpy = spyOn(component.editorService, 'duplicateSelectedShapes');
-    keyboardListener.handle(keyDown('d', false, true));
-    expect(dulicateSpy).toHaveBeenCalled();
-  });
-
-  it('can delete', () => {
-    const deleteSpy = spyOn(component.editorService, 'deleteSelectedShapes');
-    keyboardListener.handle(keyDown('delete', false, false));
-    expect(deleteSpy).toHaveBeenCalled();
-  });
 });

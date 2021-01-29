@@ -32,23 +32,14 @@
                  (click)="undo()">
     </icon-button>
     <icon-button id="help-button" iconName="help" tooltipName="Guide d'utilisation" (click)="openGuide()"></icon-button>
-    <icon-button id="save-button" iconName="save" tooltipName="Sauvegarder" (click)="openChooseExportSave()"></icon-button>
   </div>
 </div>
 <mat-drawer-container>
   <mat-drawer #drawer mode="side">
     <mat-drawer-content [ngSwitch]="currentToolType">
       <div *ngIf=!toolbarType>
-        <app-selection-toolbar *ngSwitchCase="ToolType.Select" class='toolbar-selection-section'></app-selection-toolbar>
         <app-pen-toolbar *ngSwitchCase='ToolType.Pen' class='toolbar-tool-section'></app-pen-toolbar>
-        <app-brush-toolbar *ngSwitchCase='ToolType.Brush' class='toolbar-tool-section'></app-brush-toolbar>
-        <app-rectangle-toolbar *ngSwitchCase='ToolType.Rectangle' class='toolbar-tool-section'></app-rectangle-toolbar>
-        <app-ellipse-toolbar *ngSwitchCase='ToolType.Ellipse' class='toolbar-tool-section'></app-ellipse-toolbar>
-        <app-line-toolbar *ngSwitchCase='ToolType.Line' class='toolbar-tool-section'></app-line-toolbar>
-        <app-polygon-toolbar *ngSwitchCase='ToolType.Polygon' class='toolbar-tool-section'></app-polygon-toolbar>
-        <app-spray-toolbar *ngSwitchCase='ToolType.Spray' class='toolbar-tool-section'></app-spray-toolbar>
         <app-eraser-toolbar *ngSwitchCase='ToolType.Eraser' class='toolbar-tool-section'></app-eraser-toolbar>
-        <app-fill-toolbar *ngSwitchCase='ToolType.ColorFill' class='toolbar-tool-section'></app-fill-toolbar>
       </div>
       <div *ngIf='toolbarType === ToolbarType.colorPicker' [ngSwitch]="SelectedColorType" class="toolbar-tool-section">
         <h3 class="toolbar-option-section">Options du color picker</h3>
