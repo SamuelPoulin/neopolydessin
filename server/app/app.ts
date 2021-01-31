@@ -24,13 +24,13 @@ export class Application {
   private config(): void {
     // Middlewares configuration
     fs.readFile('emailAPI.env', (err, data) => {
-        process.env.API_KEY = data.toString().split('@')[0];
+      process.env.API_KEY = data.toString().split('@')[0];
     });
     this.app.use(logger('dev'));
-    this.app.use(bodyParser.json({limit: '25mb'}));
+    this.app.use(bodyParser.json({ limit: '25mb' }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
     this.app.use(cookieParser());
-    this.app.use(cors());
+    this.app.use(cors({ optionsSuccessStatus: 200 }));
   }
 
   private bindRoutes(): void {
