@@ -1,0 +1,41 @@
+stages:
+    - build
+    - test
+    - deploy
+
+build_server:
+    stage: build
+    script:
+        - echo "Build serveur"
+
+build_electron:
+    stage: build
+    script:
+        - echo "Build electron"
+
+
+test_server:
+    stage: test
+    script:
+        - echo "Test electron"
+    
+
+test_electron:
+    stage: test
+    script:
+        - echo "Test electron"
+
+
+deploy_dev:
+    stage: deploy
+    only:
+        - develop
+    script:
+        - echo "Deploy dev"
+
+deploy_prod:
+    stage: deploy
+    only:
+        - master
+    script:
+        - echo "Deploy prod"
