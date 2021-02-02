@@ -22,8 +22,8 @@ export class DatabaseController {
     });
 
     this.router.get('/drawing', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const name = req.query.name == null ? '' : req.query.name;
-      const tag = req.query.tag;
+      const name = req.query.name == null ? '' : req.query.name as string;
+      const tag = req.query.tag as string;
 
       this.databaseService.searchDrawings(name, tag).then((results) => {
         DatabaseService.handleResults(res, results);
