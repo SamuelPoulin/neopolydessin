@@ -17,17 +17,11 @@ export class HomeComponent {
   guideModalType: ModalType;
   private readonly keyboardListener: HomeKeyboardListener;
 
-  constructor(
-    private router: Router,
-    private dialog: ModalDialogService,
-    private localSaveService: LocalSaveService,
-    //private socketService: SocketService,
-  ) {
+  constructor(private router: Router, private dialog: ModalDialogService, private localSaveService: LocalSaveService) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
     this.guideModalType = ModalType.GUIDE;
     this.keyboardListener = new HomeKeyboardListener(this);
-    //console.log(this.socketService.socket.id);
   }
 
   openModal(link: ModalType = ModalType.CREATE): void {
