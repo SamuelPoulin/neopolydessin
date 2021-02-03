@@ -20,7 +20,7 @@ export class SocketIo {
 
     bindIoEvents(): void {
         this.io.on('connection', (socket: Socket) => {
-            console.log('Connected with ${socket.id} \n');
+            console.log(`Connected with ${socket.id} \n`);
 
             socket.on('NewPlayer', (playerName: string) => {
                 console.log(playerName);
@@ -30,7 +30,7 @@ export class SocketIo {
 
             socket.on('ChatMessage', (messageReceived: string) => {
                 console.log(messageReceived);
-                socket.broadcast.emit('msg', {msg: messageReceived, playerName: this.players[socket.id]});
+                socket.broadcast.emit('msg', { msg: messageReceived, playerName: this.players[socket.id] });
             });
 
             socket.on('disconnect', () => {
