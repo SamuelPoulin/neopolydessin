@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-cd ../client
+cd client
 npm install
 npm run test

@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-cd ../server
+cd server
 npm install
 npm run test
