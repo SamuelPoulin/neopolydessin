@@ -21,7 +21,7 @@ export class ModalDialogService extends MatDialog {
         case ModalType.CONFIRM:
           return this.open(ConfirmModalComponent, {});
         case ModalType.CHAT:
-          return this.open(ChatProtoComponent, {});
+          return this.open(ChatProtoComponent, {height: '80%', width: '80%'});
       }
     }
     return null;

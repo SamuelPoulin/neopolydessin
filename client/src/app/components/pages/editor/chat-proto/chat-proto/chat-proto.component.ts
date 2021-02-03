@@ -11,6 +11,7 @@ import { SocketService } from '@services/socket-service.service';
 export class ChatProtoComponent extends AbstractModalComponent implements OnInit {
 
   @ViewChild('list', { static: false}) list:ElementRef;
+  @ViewChild('scroll', { static: false}) scroll:ElementRef;
   ioServiceSub: any;
   message: string;
   constructor(private socketService: SocketService, 
@@ -26,6 +27,7 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
   private createIoComponentConnection(): void {
     this.ioServiceSub = this.socketService.receiveMessage().subscribe((message: any) => {
       this.addMsgToChat("received", message.msg);
+      this.scrollToBottom();
     });
   }
 
@@ -33,14 +35,17 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
     const msgToAdd = this.renderer.createElement("li");
     msgToAdd.innerHTML = playerName + ": " + message;
     this.renderer.appendChild(this.list.nativeElement, msgToAdd);
-    //document.getElementById('message-list').appendChild(msgToAdd);
-    //this.SendMessage();
+    this.scrollToBottom();
   }
 
-  private SendMessage(): void {
+  public SendMessage(): void {
     this.socketService.sendMessage(this.message);
     this.addMsgToChat('tempPlayerName', this.message);
     this.message = '';
+  }
+
+  private scrollToBottom(): void {
+    this.scroll.nativeElement.scrollTop = this.scroll.nativeElement.scrollHeight;
   }
 
 }
