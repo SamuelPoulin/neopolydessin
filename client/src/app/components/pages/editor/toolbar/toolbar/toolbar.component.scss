@@ -6,7 +6,7 @@
   justify-content: space-between;
   position: fixed;
   width: 60px;
-  height: calc(100vh - 0px);
+  height: calc(100vh - 30px);
   background-color: $primary;
   z-index: 1000;
 }
@@ -68,6 +68,7 @@ icon-button {
   width: 40px;
   height: 40px;
   color: $accent;
+  margin: 5px 0px;
 }
 
 mat-drawer-container {

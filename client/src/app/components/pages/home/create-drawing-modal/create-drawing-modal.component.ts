@@ -47,8 +47,8 @@ export class CreateDrawingModalComponent extends AbstractModalComponent implemen
       this.windowWidth = window.innerWidth - CreateDrawingModalComponent.MARGIN_WIDTH;
       this.windowHeight = window.innerHeight - CreateDrawingModalComponent.MARGIN_HEIGHT;
 
-      this.width = this.windowWidth.toString();
-      this.height = this.windowHeight.toString();
+      this.width = (this.windowWidth - 8).toString();
+      this.height = (this.windowHeight - 30 - 4).toString();
       this.changeDetectorRef.detectChanges();
     }
   }

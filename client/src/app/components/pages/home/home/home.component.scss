@@ -1,19 +1,27 @@
 #main-container {
   display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100vw;
+  height: calc(100vh - 30px);
+}
+
+#menu-container {
+  display: flex;
   flex-direction: column;
   border: 1px solid lightgrey;
   border-radius: 25px;
-  margin: 200px auto;
   min-width: 200px;
-  max-width: 600px;
+  width: 500px;
 }
 
-#main-container-title {
+#menu-container-title {
   text-align: center;
   margin-top: 50px;
 }
 
-#main-container-buttons {
+#menu-container-buttons {
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -21,13 +29,13 @@
   margin-bottom: 50px;
 }
 
-#main-container-buttons > button {
+#menu-container-buttons > button {
   margin-bottom: 10px;
   width: 200px;
   color: white;
   background-color: cornflowerblue;
 }
 
-#main-container-buttons > button:disabled {
+#menu-container-buttons > button:disabled {
   background-color: lightgrey;
 }
