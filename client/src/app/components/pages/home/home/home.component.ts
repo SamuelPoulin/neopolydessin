@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { EditorParams } from '@components/pages/editor/editor/editor-params';
 import { HomeKeyboardListener } from '@components/pages/home/home/home-keyboard-listener';
 import { LocalSaveService } from '@services/localsave.service';
-import { SocketService } from '@services/socket-service.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 
@@ -22,13 +21,13 @@ export class HomeComponent {
     private router: Router,
     private dialog: ModalDialogService,
     private localSaveService: LocalSaveService,
-    private socketService: SocketService,
+    //private socketService: SocketService,
   ) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
     this.guideModalType = ModalType.GUIDE;
     this.keyboardListener = new HomeKeyboardListener(this);
-    console.log(this.socketService.socket.id);
+    //console.log(this.socketService.socket.id);
   }
 
   openModal(link: ModalType = ModalType.CREATE): void {
@@ -41,6 +40,10 @@ export class HomeComponent {
 
   openGallery(): void {
     this.dialog.openByName(ModalType.GALLERY);
+  }
+
+  openChat(): void {
+    this.dialog.openByName(ModalType.CHAT);
   }
 
   @HostListener('window:keydown', ['$event'])

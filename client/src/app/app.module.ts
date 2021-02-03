@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { ChatProtoComponent } from '@components/pages/editor/chat-proto/chat-proto/chat-proto.component';
 import { EditorModule } from '@components/pages/editor/editor.module';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { HomeModule } from '@components/pages/home/home.module';
@@ -24,6 +25,6 @@ import { AppComponent } from './app.component';
   ],
   declarations: [AppComponent],
   bootstrap: [AppComponent],
-  entryComponents: [UserGuideModalComponent],
+  entryComponents: [UserGuideModalComponent, ChatProtoComponent],
 })
 export class AppModule { }
