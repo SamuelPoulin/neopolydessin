@@ -1,16 +1,16 @@
 import * as http from 'http';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
-import * as socketio from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @injectable()
 export class SocketIo {
 
-    io: socketio.Server;
+    io: Server;
     players: string[] = [];
 
     init(server: http.Server): void {
-        this.io = require('socket.io')(server, {
+        this.io = new Server(server, {
             cors: {
                 origin: '*'
             }
@@ -19,7 +19,7 @@ export class SocketIo {
     }
 
     bindIoEvents(): void {
-        this.io.on('connection', (socket: socketio.Socket) => {
+        this.io.on('connection', (socket: Socket) => {
             console.log('Connected with ${socket.id} \n');
 
             socket.on('NewPlayer', (playerName: string) => {
