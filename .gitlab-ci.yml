@@ -11,13 +11,15 @@ build_server:
 build_electron:
     stage: build
     script:
-        - echo "Build electron"
+        - echo "Should fail"
+        - ./pipeline/fail.sh
 
 
 test_server:
     stage: test
     script:
-        - echo "Test electron"
+        - echo "Test server"
+        
     
 
 test_electron:
