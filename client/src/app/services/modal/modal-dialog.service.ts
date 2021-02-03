@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
+import { ChatProtoComponent } from '@components/pages/editor/chat-proto/chat-proto/chat-proto.component';
 import { CreateDrawingModalComponent } from 'src/app/components/pages/home/create-drawing-modal/create-drawing-modal.component';
 import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
@@ -19,6 +20,8 @@ export class ModalDialogService extends MatDialog {
           return this.open(UserGuideModalComponent, {});
         case ModalType.CONFIRM:
           return this.open(ConfirmModalComponent, {});
+        case ModalType.CHAT:
+          return this.open(ChatProtoComponent, {height: '80%', width: '80%'});
       }
     }
     return null;
