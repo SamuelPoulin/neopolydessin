@@ -11,21 +11,24 @@ build_server:
 build_electron:
     stage: build
     script:
-        - echo "Should fail"
-        - ./pipeline/fail.sh
+        - echo "Should pass"
+        - ./pipeline/pass.sh
 
 
 test_server:
     stage: test
+    allow_failure: true
     script:
         - echo "Test server"
-        
+        - ./pipeline/test_server.sh
     
 
 test_electron:
     stage: test
+    allow_failure: true
     script:
         - echo "Test electron"
+        - ./pipeline/test_electron.sh
 
 
 deploy_dev:
