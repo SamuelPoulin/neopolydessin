@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientLeger">
-        <activity android:name=".ui.connexion.view.ConnexionActivity">
+        <activity android:name=".ui.mainmenu.view.MainmenuActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
