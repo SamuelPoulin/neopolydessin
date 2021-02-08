@@ -4,9 +4,9 @@ import { injectable } from 'inversify';
 
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
-import drawingModel, { Drawing } from '../../models/drawing';
+import accountModel, { Account } from '../../models/account';
 
-export interface DrawingResponse<T> {
+export interface Response<T> {
   statusCode: number;
   documents: T;
 }
@@ -26,11 +26,11 @@ export class DatabaseService {
     }
   }
 
-  private static determineStatus(err: Error, results: Drawing | Drawing[]): number {
+  private static determineStatus(err: Error, results: Account | Account[]): number {
     return err ? httpStatus.INTERNAL_SERVER_ERROR : results ? httpStatus.OK : httpStatus.NOT_FOUND;
   }
 
-  static handleResults(res: express.Response, results: DrawingResponse<Drawing> | DrawingResponse<Drawing[]>): void {
+  static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
     results.documents ? res.status(results.statusCode).json(results.documents) : res.sendStatus(results.statusCode);
   }
 
@@ -53,7 +53,7 @@ export class DatabaseService {
         process.env.MONGODB_KEY,
         DatabaseService.CONNECTION_OPTIONS,
         (err: mongoose.Error) => {
-          err ? console.error(err.message) : console.log('Connected to MongoDB Atlas Cloud');
+          err ? console.error(err.message) : console.log('Connected to MongoDB');
         },
       );
     }
@@ -66,91 +66,89 @@ export class DatabaseService {
     }
   }
 
-  async getAllDrawings(): Promise<DrawingResponse<Drawing[]>> {
-    return new Promise<DrawingResponse<Drawing[]>>((resolve) => {
-      drawingModel.find({}, (err: Error, docs: Drawing[]) => {
-        const status = DatabaseService.determineStatus(err, docs);
-        resolve({ statusCode: status, documents: docs });
-      });
-    });
-  }
-
-  async searchDrawings(name: string, tags: string | string[]): Promise<DrawingResponse<Drawing[]>> {
-    return new Promise<DrawingResponse<Drawing[]>>((resolve) => {
-      if (tags.length !== 0 && tags instanceof Array) {
-        const regex = [];
-        for (let i = 0; i < tags.length; ++i) {
-          regex[i] = new RegExp('^' + tags[i]);
-        }
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-            tags: { $all: regex },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      } else if (tags !== '') {
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-            tags: { $regex: '.*' + tags + '.*' },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      } else {
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      }
-    });
-  }
-
-  async getDrawingById(id: string): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findById(id, (err: Error, doc: Drawing) => {
+  async getAccountByUsername(id: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findOne({ username: id }, (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async addDrawing(body: Drawing): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      const drawing = {
-        name: body.name,
-        tags: body.tags,
-        data: body.data,
-        color: body.color,
-        width: body.width,
-        height: body.height,
-        previewURL: body.previewURL
-      } as Drawing;
-      const model = new drawingModel(drawing);
-      model.save((err: mongoose.Error, doc: Drawing) => {
-        const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
+  async getAccountByEmail(mail: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findOne({ email: mail }, (err: Error, doc: Account) => {
+        const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async deleteDrawing(id: string): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndDelete(id, null, (err: Error, doc: Drawing) => {
+  async createAccount(body: Account): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve, reject) => {
+      const account = {
+        name: body.name,
+        username: body.username,
+        email: body.email,
+        password: body.password,
+      } as Account;
+      const model = new accountModel(account);
+
+      this.getAccountByUsername(account.username).then((found) => {
+        if (found.documents !== null) {
+          reject('Username already taken');
+        }
+        this.getAccountByEmail(account.email).then((foundByEmail) => {
+          if (foundByEmail.documents !== null) {
+            reject('Email already taken');
+          } else {
+            model.save((err: mongoose.Error, doc: Account) => {
+              const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
+              resolve({ statusCode: status, documents: doc });
+            });
+          }
+        });
+      });
+    });
+  }
+
+  async deleteAccount(id: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findOneAndDelete({ username: id }, null, (err: Error, doc: Account) => {
         resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
       });
     });
   }
 
-  async updateDrawing(id: string, body: Drawing): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndUpdate(id, body, null, (err: Error, doc: Drawing) => {
-        resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+  async updateAccount(id: string, body: Account): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve, reject) => {
+      let canUpdate = true;
+      this.getAccountByUsername(id).then((found) => {
+        if (found.statusCode !== httpStatus.NOT_FOUND) {
+          if (found.documents.username !== id) {
+            this.getAccountByUsername(found.documents.username).then((foundByUsername) => {
+              if (foundByUsername.documents !== null) {
+                canUpdate = false;
+              }
+            });
+          }
+          if (canUpdate && found.documents.email !== body.email) {
+            this.getAccountByEmail(found.documents.username).then((foundByEmail) => {
+              if (foundByEmail.documents !== null) {
+                canUpdate = false;
+              }
+            });
+          }
+          if (canUpdate) {
+            accountModel.findOneAndUpdate({ username: id }, body, null, (err: Error, doc: Account) => {
+              resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+            });
+          } else {
+            reject('Couldn\'t update account. Username or Email is already taken');
+          }
+        } else {
+          reject('Couldn\'t update account. Account doesn\'t exist');
+        }
       });
     });
   }

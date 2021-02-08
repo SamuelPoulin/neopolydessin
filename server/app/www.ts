@@ -9,7 +9,7 @@ void (async () => {
   try {
     process.env.MONGODB_KEY = fs.readFileSync('mongo.env').toString();
   } catch (err) {
-    console.log('Could not load an API env file. Make sure both env files are under server/ Exiting...');
+    console.log('Could not load an API env file. Make sure env files are under server/ Exiting...');
     process.exit(0);
   }
 

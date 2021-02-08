@@ -15,42 +15,31 @@ export class DatabaseController {
   private configureRouter(): void {
     this.router = express.Router();
 
-    this.router.get('/drawings', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.getAllDrawings().then((results) => {
+    this.router.get('/account/:username', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.databaseService.getAccountByUsername(req.params.username).then((results) => {
         DatabaseService.handleResults(res, results);
       });
     });
 
-    this.router.get('/drawing', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const name = req.query.name == null ? '' : req.query.name as string;
-      const tag = req.query.tag as string;
+    this.router.post('/account', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.databaseService.createAccount(req.body).then((results) => {
+        DatabaseService.handleResults(res, results);
+      }).catch((error) => {
+        res.json(error);
+      });
+    });
 
-      this.databaseService.searchDrawings(name, tag).then((results) => {
+    this.router.delete('/account/:username', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.databaseService.deleteAccount(req.params.username).then((results) => {
         DatabaseService.handleResults(res, results);
       });
     });
 
-    this.router.get('/drawings/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.getDrawingById(req.params.id).then((results) => {
+    this.router.post('/account/:username', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.databaseService.updateAccount(req.params.username, req.body).then((results) => {
         DatabaseService.handleResults(res, results);
-      });
-    });
-
-    this.router.post('/drawings', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.addDrawing(req.body).then((results) => {
-        DatabaseService.handleResults(res, results);
-      });
-    });
-
-    this.router.delete('/drawings/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.deleteDrawing(req.params.id).then((results) => {
-        DatabaseService.handleResults(res, results);
-      });
-    });
-
-    this.router.post('/drawings/:id', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.updateDrawing(req.params.id, req.body).then((results) => {
-        DatabaseService.handleResults(res, results);
+      }).catch((error) => {
+        res.json(error);
       });
     });
   }
