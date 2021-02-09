@@ -3,6 +3,11 @@ stages:
     - test
     - deploy
 
+cache:
+  key: node
+  paths:
+    - .npm/
+
 build_server:
     stage: build
     script:
