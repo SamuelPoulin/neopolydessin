@@ -14,6 +14,15 @@ export class DatabaseController {
     this.configureRouter();
   }
 
+  private badRequestIfValidationFailed(req: express.Request, res: express.Response, func: () => void) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
+    } else {
+      func();
+    }
+  }
+
   private configureRouter(): void {
     this.router = express.Router();
 
@@ -28,56 +37,44 @@ export class DatabaseController {
         }
       })
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
+      this.badRequestIfValidationFailed(req, res, () => {
         this.databaseService.createAccount(req.body).then((results) => {
           DatabaseService.handleResults(res, results);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      }
+      });
     });
 
     this.router.post('/auth/login', [
       body('username').exists(),
       body('password').exists()
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
+      this.badRequestIfValidationFailed(req, res, () => {
         this.databaseService.login(req.body).then((tokens: string[]) => {
           res.header('authorization', tokens[0]).json({ data: { accessToken: tokens[0], refreshToken: tokens[1] } });
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      }
+      })
     });
 
     this.router.post('/auth/refresh', [
       body('refreshToken').exists()
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
+      this.badRequestIfValidationFailed(req, res, () => {
         this.databaseService.refreshToken(req.body.refreshToken).then((newAccesToken) => {
           res.status(httpStatus.OK).json({ data: { accessToken: newAccesToken } });
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      }
+      });
     });
 
     this.router.delete('/auth/logout', [
       body('refreshToken').exists()
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
-      } else {
+      this.badRequestIfValidationFailed(req, res, () => {
         this.databaseService.logout(req.body.refreshToken).then((successfull) => {
           if (successfull) {
             res.status(httpStatus.OK).json({ success: 'User logged out' });
@@ -85,7 +82,7 @@ export class DatabaseController {
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      }
+      });
     });
 
     this.router.get('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -100,11 +97,19 @@ export class DatabaseController {
       });
     });
 
-    this.router.post('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
-        DatabaseService.handleResults(res, results);
-      }).catch((error: ErrorMsg) => {
-        res.status(error.statusCode).json(error.message);
+    this.router.post('/account', jwtVerify, [
+      body('_id').isEmpty(),
+      body('name').optional(),
+      body('username').optional(),
+      body('email').optional(),
+      body('password').isEmpty(),
+    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.badRequestIfValidationFailed(req, res, () => {
+        this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
+          DatabaseService.handleResults(res, results);
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
       });
     });
   }
