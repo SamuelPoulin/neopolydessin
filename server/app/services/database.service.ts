@@ -1,10 +1,14 @@
+import * as bcrypt from 'bcrypt';
 import * as express from 'express';
 import * as httpStatus from 'http-status-codes';
 import { injectable } from 'inversify';
-
+import * as jwt from 'jsonwebtoken';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
+import { login } from '../../../common/communication/login';
+import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
+import refreshModel, { Refresh } from '../../models/refresh';
 
 export interface Response<T> {
   statusCode: number;
@@ -17,6 +21,8 @@ export class DatabaseService {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   };
+
+  readonly SALT_ROUNDS: number = 10;
 
   mongoMS: MongoMemoryServer;
 
@@ -66,6 +72,15 @@ export class DatabaseService {
     }
   }
 
+  async getAccountById(id: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findById(id, (err: Error, doc: Account) => {
+        const status = DatabaseService.determineStatus(err, doc);
+        resolve({ statusCode: status, documents: doc });
+      });
+    });
+  }
+
   async getAccountByUsername(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve) => {
       accountModel.findOne({ username: id }, (err: Error, doc: Account) => {
@@ -84,7 +99,7 @@ export class DatabaseService {
     });
   }
 
-  async createAccount(body: Account): Promise<Response<Account>> {
+  async createAccount(body: Register): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       const account = {
         name: body.name,
@@ -96,15 +111,18 @@ export class DatabaseService {
 
       this.getAccountByUsername(account.username).then((found) => {
         if (found.documents !== null) {
-          reject('Username already taken');
+          reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username already taken'));
         }
         this.getAccountByEmail(account.email).then((foundByEmail) => {
           if (foundByEmail.documents !== null) {
-            reject('Email already taken');
+            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Email already taken'));
           } else {
-            model.save((err: mongoose.Error, doc: Account) => {
-              const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
-              resolve({ statusCode: status, documents: doc });
+            bcrypt.hash(model.password, this.SALT_ROUNDS, (error, hash) => {
+              model.password = hash;
+              model.save((err: mongoose.Error, doc: Account) => {
+                const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
+                resolve({ statusCode: status, documents: doc });
+              });
             });
           }
         });
@@ -112,10 +130,87 @@ export class DatabaseService {
     });
   }
 
+  async login(loginInfo: login): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.getAccountByUsername(loginInfo.username).then((results) => {
+        const account = results.documents;
+        if (account !== null) {
+          bcrypt.compare(loginInfo.password, account.password).then((match) => {
+            if (match && process.env.JWT_KEY && process.env.JWT_REFRESH_KEY) {
+
+              // generate jwt access token
+              const jwtToken = jwt.sign(
+                { _id: account._id },
+                process.env.JWT_KEY,
+                { expiresIn: '5m' });
+
+              // generate jwt refresh token for session
+              const jwtRefreshToken = jwt.sign(
+                { _id: account._id },
+                process.env.JWT_REFRESH_KEY,
+                { expiresIn: '1d' });
+
+              // store refresh token in db
+              refreshModel.findOneAndUpdate({ accountId: account._id },
+                { accountId: account._id, token: jwtRefreshToken },
+                { upsert: true, useFindAndModify: false },
+                (err: Error, doc: Refresh) => {
+                  if (err) {
+                    reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                  }
+                });
+              resolve([jwtToken, jwtRefreshToken]);
+            } else {
+              reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
+            }
+          });
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'Wrong username'));
+        }
+      });
+    });
+  }
+
+  async refreshToken(refreshToken: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      refreshModel.findOne({ token: refreshToken }, (err: Error, doc: Refresh) => {
+        if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
+          reject(this.rejectMessage(httpStatus.FORBIDDEN, 'Acces denied'));
+        } else {
+          const decodedPayload = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY);
+          const newAccesToken = jwt.sign(
+            { _id: decodedPayload },
+            process.env.JWT_KEY,
+            { expiresIn: '5m' }
+          );
+          resolve(newAccesToken);
+        }
+      });
+    });
+  }
+
+  async logout(refreshToken: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      refreshModel.findOneAndDelete({ token: refreshToken }, undefined, (err: Error, doc: Refresh) => {
+        if (err) {
+          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  }
+
   async deleteAccount(id: string): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve) => {
-      accountModel.findOneAndDelete({ username: id }, null, (err: Error, doc: Account) => {
-        resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+    return new Promise<Response<Account>>((resolve, reject) => {
+      refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
+        this.logout(doc.token).then((successfull) => {
+          accountModel.findByIdAndDelete(id, null, (error: Error, acc: Account) => {
+            resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+          });
+        }).catch((error) => {
+          reject(error);
+        });
       });
     });
   }
@@ -123,7 +218,8 @@ export class DatabaseService {
   async updateAccount(id: string, body: Account): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       let canUpdate = true;
-      this.getAccountByUsername(id).then((found) => {
+
+      this.getAccountById(id).then((found) => {
         if (found.statusCode !== httpStatus.NOT_FOUND) {
           if (found.documents.username !== id) {
             this.getAccountByUsername(found.documents.username).then((foundByUsername) => {
@@ -144,12 +240,16 @@ export class DatabaseService {
               resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
             });
           } else {
-            reject('Couldn\'t update account. Username or Email is already taken');
+            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
           }
         } else {
           reject('Couldn\'t update account. Account doesn\'t exist');
         }
       });
     });
+  }
+
+  rejectMessage(errorCode: number, message: string): object {
+    return { status: errorCode, error: message };
   }
 }
