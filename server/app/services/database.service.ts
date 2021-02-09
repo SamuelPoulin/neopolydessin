@@ -3,6 +3,7 @@ import * as express from 'express';
 import * as httpStatus from 'http-status-codes';
 import { injectable } from 'inversify';
 import * as jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
@@ -13,6 +14,11 @@ import refreshModel, { Refresh } from '../../models/refresh';
 export interface Response<T> {
   statusCode: number;
   documents: T;
+}
+
+export interface ErrorMsg {
+  statusCode: number;
+  message: string;
 }
 
 @injectable()
@@ -74,16 +80,16 @@ export class DatabaseService {
 
   async getAccountById(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve) => {
-      accountModel.findById(id, (err: Error, doc: Account) => {
+      accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async getAccountByUsername(id: string): Promise<Response<Account>> {
+  async getAccountByUsername(userName: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve) => {
-      accountModel.findOne({ username: id }, (err: Error, doc: Account) => {
+      accountModel.findOne({ username: userName }, (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
@@ -150,16 +156,22 @@ export class DatabaseService {
                 process.env.JWT_REFRESH_KEY,
                 { expiresIn: '1d' });
 
-              // store refresh token in db
-              refreshModel.findOneAndUpdate({ accountId: account._id },
-                { accountId: account._id, token: jwtRefreshToken },
-                { upsert: true, useFindAndModify: false },
-                (err: Error, doc: Refresh) => {
-                  if (err) {
-                    reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
-                  }
-                });
-              resolve([jwtToken, jwtRefreshToken]);
+              refreshModel.findOneAndDelete({ accountId: account._id }, undefined, (err: Error, doc: Refresh) => {
+                if (err) {
+                  reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                }
+              });
+
+              const refresh = new refreshModel({
+                _id: new mongoose.Types.ObjectId(),
+                accountId: account._id,
+                token: jwtRefreshToken
+              });
+              refreshModel.create(refresh).then((doc: Refresh) => {
+                resolve([jwtToken, doc.token]);
+              }).catch((err: Error) => {
+                reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+              })
             } else {
               reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
             }
@@ -194,8 +206,11 @@ export class DatabaseService {
       refreshModel.findOneAndDelete({ token: refreshToken }, undefined, (err: Error, doc: Refresh) => {
         if (err) {
           reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
-        } else {
+        }
+        if (doc) {
           resolve(true);
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'User is not logged in'));
         }
       });
     });
@@ -218,38 +233,39 @@ export class DatabaseService {
   async updateAccount(id: string, body: Account): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       let canUpdate = true;
-
-      this.getAccountById(id).then((found) => {
+      this.getAccountById(id).then(async (found) => {
         if (found.statusCode !== httpStatus.NOT_FOUND) {
-          if (found.documents.username !== id) {
-            this.getAccountByUsername(found.documents.username).then((foundByUsername) => {
+          if (found.documents.username !== body.username) {
+            await this.getAccountByUsername(body.username).then((foundByUsername) => {
+              console.log(foundByUsername);
               if (foundByUsername.documents !== null) {
                 canUpdate = false;
               }
             });
           }
           if (canUpdate && found.documents.email !== body.email) {
-            this.getAccountByEmail(found.documents.username).then((foundByEmail) => {
+            await this.getAccountByEmail(body.email).then((foundByEmail) => {
               if (foundByEmail.documents !== null) {
                 canUpdate = false;
               }
             });
           }
           if (canUpdate) {
-            accountModel.findOneAndUpdate({ username: id }, body, null, (err: Error, doc: Account) => {
+            accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false }, (err: Error, doc: Account) => {
+              // console.log(err);
               resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
             });
           } else {
             reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
           }
         } else {
-          reject('Couldn\'t update account. Account doesn\'t exist');
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, "Account doesn't exist"));
         }
       });
     });
   }
 
-  rejectMessage(errorCode: number, message: string): object {
-    return { status: errorCode, error: message };
+  rejectMessage(errorCode: number, message: string): ErrorMsg {
+    return { statusCode: errorCode, message: message };
   }
 }

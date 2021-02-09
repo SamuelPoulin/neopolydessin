@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 
 export interface Refresh extends mongoose.Document {
+    _id: string;
     accountId: string;
     token: string;
 }
