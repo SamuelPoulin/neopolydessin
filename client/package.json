@@ -103,6 +103,7 @@
     "dotenv": "^8.2.0",
     "form-data": "^3.0.0",
     "karma-electron": "^6.3.3",
+    "puppeteer": "^7.0.1",
     "rxjs": "~6.4.0",
     "tslib": "^1.14.1",
     "tslint-defocus": "^2.0.6",
