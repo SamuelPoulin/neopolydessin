@@ -9,4 +9,4 @@ package-lock.json
 
 # Code Coverage Folder
 coverage/
-server/emailAPI.env
+server/*.env
