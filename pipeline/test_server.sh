@@ -2,5 +2,7 @@
 
 echo "$USER"
 cd server
-npm ci --cache .npm --prefer-offline
+ls
+ls node_modules
+npm i
 npm run test

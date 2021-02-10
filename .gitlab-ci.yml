@@ -3,11 +3,6 @@ stages:
     - test
     - deploy
 
-cache:
-  key: node
-  paths:
-    - .npm/
-
 build_server:
     stage: build
     script:
@@ -23,6 +18,15 @@ build_electron:
 test_server:
     stage: test
     allow_failure: true
+    cache:
+        when: 'always'
+        key:
+            files:
+                - server/package-lock.json
+        paths:
+            - server/node_modules/
+    needs:
+        - build_server
     script:
         - echo "Test server"
         - ./pipeline/test_server.sh
@@ -31,6 +35,15 @@ test_server:
 test_electron:
     stage: test
     allow_failure: true
+    cache:
+        when: 'always'
+        key:
+            files:
+                - client/package-lock.json
+        paths:
+            - client/node_modules/
+    needs:
+        - build_electron
     script:
         - echo "Test electron"
         - ./pipeline/test_electron.sh
