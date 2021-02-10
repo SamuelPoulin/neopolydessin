@@ -105,8 +105,8 @@ export class DatabaseService {
     });
   }
 
-  async createAccount(body: Register): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve, reject) => {
+  async createAccount(body: Register): Promise<Response<string>> {
+    return new Promise<Response<string>>((resolve, reject) => {
       const account = {
         name: body.name,
         username: body.username,
@@ -127,7 +127,7 @@ export class DatabaseService {
               model.password = hash;
               model.save((err: mongoose.Error, doc: Account) => {
                 const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
-                resolve({ statusCode: status, documents: doc });
+                resolve({ statusCode: status, documents: 'Account successfully created' });
               });
             });
           }
@@ -252,7 +252,6 @@ export class DatabaseService {
           }
           if (canUpdate) {
             accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false }, (err: Error, doc: Account) => {
-              // console.log(err);
               resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
             });
           } else {

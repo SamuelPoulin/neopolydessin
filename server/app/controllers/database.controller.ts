@@ -39,7 +39,7 @@ export class DatabaseController {
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
       this.badRequestIfValidationFailed(req, res, () => {
         this.databaseService.createAccount(req.body).then((results) => {
-          DatabaseService.handleResults(res, results);
+          res.status(results.statusCode).json(results.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
