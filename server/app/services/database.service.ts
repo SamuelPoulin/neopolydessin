@@ -210,7 +210,6 @@ export class DatabaseService {
 
   async checkIfLoggedIn(id: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      console.log(id);
       refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
         if (err) {
           reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
