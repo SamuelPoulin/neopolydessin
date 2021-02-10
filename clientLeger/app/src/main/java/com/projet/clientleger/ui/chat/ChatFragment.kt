@@ -4,8 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.projet.clientleger.R
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
+import kotlinx.android.synthetic.main.fragment_chat.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -32,6 +37,28 @@ class ChatFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sendButton.setOnClickListener(){
+            //passe ici
+            sendButton()
+        }
+    }
+    private fun sendButton(){
+        val text:String = (chatBox.text).toString()
+        addMessage(text)
+        chatBox.text.clear()
+        //envoyer le message à la db
+        //ajoute le message à la boite de chat locale
+    }
+    private fun addMessage(text:String){
+        if(text.isNotEmpty()){
+            val messageView:TextView = TextView(activity)
+            messageView.textSize = 20f
+            messageView.text = text
+            messageBox.addView(messageView)
+        }
+    }
     companion object {
         /**
          * Use this factory method to create a new instance of

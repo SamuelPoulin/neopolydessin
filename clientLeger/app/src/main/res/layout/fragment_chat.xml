@@ -8,23 +8,45 @@
 
     <ScrollView
         android:layout_width="fill_parent"
-        android:background="#9ea0b4"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <TextView
+        android:layout_height="690dp"
+        android:layout_weight="1"
+        android:background="#9ea0b4">
+
+        <LinearLayout
+            android:id="@+id/messageBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/chatText"
-            android:text="works!"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chatText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="works!"
+                android:textSize="20sp" />
+        </LinearLayout>
+
     </ScrollView>
+
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content">
+
         <EditText
-            android:layout_width="match_parent"
+            android:id="@+id/chatBox"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
-            android:hint="message here">
-        </EditText>
+            android:layout_weight="0.8"
+            android:layout_gravity="fill_vertical"
+            android:hint="message here"></EditText>
+
+        <ImageButton
+            android:id="@+id/sendButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.2"
+            android:layout_gravity="fill_vertical"
+            android:src="@drawable/sendmessageicon" />
     </LinearLayout>
 
 </LinearLayout>
