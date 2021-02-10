@@ -4,17 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.projet.clientleger.R
-import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.android.synthetic.main.fragment_chat.*
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 // TODO: Rename parameter arguments, choose names that match
@@ -50,8 +44,9 @@ class ChatFragment : Fragment() {
     }
     private fun sendButton(){
         val text:String = (chatBox.text).toString()
+        val adjustedText:String = text.replace("(?m)^[ \t]*\r?\n".toRegex(), "")
         val timestamp = getTimestamp()
-        addMessage(text, timestamp)
+        addMessage(adjustedText, timestamp)
         chatBox.text.clear()
 
         //envoyer le message à la db
@@ -62,7 +57,7 @@ class ChatFragment : Fragment() {
         return LocalDateTime.now().format(formatter)
     }
     private fun addMessage(text:String, timestamp:String){
-        if(text.isNotEmpty()){
+        if(text.isNotBlank()){
             val formattedText:String = ("[$timestamp] $text")
             val messageView:TextView = TextView(activity)
             messageView.textSize = 20f
