@@ -14,12 +14,27 @@ export class DatabaseController {
     this.configureRouter();
   }
 
-  private badRequestIfValidationFailed(req: express.Request, res: express.Response, func: () => void) {
+  private badRequestIfValidationFailed(req: express.Request, res: express.Response, func: () => void): void {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
     } else {
       func();
+    }
+  }
+
+  private unauthorizedIfLoggedOut(req: express.Request, res: express.Response, func: () => void): void {
+    const accountId = req.params._id;
+    if (accountId) {
+      this.databaseService.checkIfLoggedIn(accountId).then((isLoggedIn) => {
+        if (isLoggedIn) {
+          func();
+        }
+      }).catch((error: ErrorMsg) => {
+        res.status(error.statusCode).json(error.message);
+      });
+    } else {
+      res.status(httpStatus.UNAUTHORIZED).json('Access denied');
     }
   }
 
@@ -56,7 +71,7 @@ export class DatabaseController {
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      })
+      });
     });
 
     this.router.post('/auth/refresh', [
@@ -86,14 +101,18 @@ export class DatabaseController {
     });
 
     this.router.get('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.getAccountById(req.params._id).then((results) => {
-        DatabaseService.handleResults(res, results);
+      this.unauthorizedIfLoggedOut(req, res, () => {
+        this.databaseService.getAccountById(req.params._id).then((results) => {
+          DatabaseService.handleResults(res, results);
+        });
       });
     });
 
     this.router.delete('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.deleteAccount(req.params._id).then((results) => {
-        DatabaseService.handleResults(res, results);
+      this.unauthorizedIfLoggedOut(req, res, () => {
+        this.databaseService.deleteAccount(req.params._id).then((results) => {
+          DatabaseService.handleResults(res, results);
+        });
       });
     });
 
@@ -105,10 +124,12 @@ export class DatabaseController {
       body('password').isEmpty(),
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
       this.badRequestIfValidationFailed(req, res, () => {
-        this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
-          DatabaseService.handleResults(res, results);
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
+        this.unauthorizedIfLoggedOut(req, res, () => {
+          this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
+            DatabaseService.handleResults(res, results);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
         });
       });
     });

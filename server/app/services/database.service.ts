@@ -21,6 +21,12 @@ export interface ErrorMsg {
   message: string;
 }
 
+interface AccessToken {
+  _id: string;
+  iat: number;
+  exp: number;
+}
+
 @injectable()
 export class DatabaseService {
   private static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
@@ -79,6 +85,7 @@ export class DatabaseService {
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
+    console.log(id);
     return new Promise<Response<Account>>((resolve) => {
       accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
@@ -171,7 +178,7 @@ export class DatabaseService {
                 resolve([jwtToken, doc.token]);
               }).catch((err: Error) => {
                 reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
-              })
+              });
             } else {
               reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
             }
@@ -187,15 +194,30 @@ export class DatabaseService {
     return new Promise<string>((resolve, reject) => {
       refreshModel.findOne({ token: refreshToken }, (err: Error, doc: Refresh) => {
         if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
-          reject(this.rejectMessage(httpStatus.FORBIDDEN, 'Acces denied'));
+          reject(this.rejectMessage(httpStatus.FORBIDDEN, 'Access denied'));
         } else {
-          const decodedPayload = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY);
+          const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
           const newAccesToken = jwt.sign(
-            { _id: decodedPayload },
+            { _id: decodedPayload._id },
             process.env.JWT_KEY,
             { expiresIn: '5m' }
           );
           resolve(newAccesToken);
+        }
+      });
+    });
+  }
+
+  async checkIfLoggedIn(id: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      console.log(id);
+      refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
+        if (err) {
+          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+        } else if (doc) {
+          resolve(true);
+        } else {
+          reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Access denied'));
         }
       });
     });
@@ -264,7 +286,7 @@ export class DatabaseService {
     });
   }
 
-  rejectMessage(errorCode: number, message: string): ErrorMsg {
-    return { statusCode: errorCode, message: message };
+  rejectMessage(errorCode: number, msg: string): ErrorMsg {
+    return { statusCode: errorCode, message: msg };
   }
 }
