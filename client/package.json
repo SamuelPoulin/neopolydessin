@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.0.1",
   "scripts": {
-    "start": "ng serve --open",
+    "start": "ng serve --open --watch",
     "build": "ng build --prod",
     "start:electron": "ng build --base-href \"\" && electron .",
     "build:electron": "ng build --base-href \"\" --prod && electron-builder",

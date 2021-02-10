@@ -1,6 +1,8 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { RouterModule } from "@angular/router";
+import { ChatModule } from "@components/pages/chat/chat.module";
+import { ChatComponent } from "@components/pages/chat/chat/chat.component";
 import { EditorModule } from "@components/pages/editor/editor.module";
 import { EditorComponent } from "@components/pages/editor/editor/editor.component";
 import { HomeModule } from "@components/pages/home/home.module";
@@ -15,12 +17,14 @@ import { AppComponent } from "./app.component";
     BrowserModule,
     SharedModule,
     HomeModule,
+    ChatModule,
     EditorModule,
     UserGuideModule,
     RouterModule.forRoot(
       [
         { path: "", component: HomeComponent },
         { path: "edit", component: EditorComponent },
+        { path: "chat", component: ChatComponent },
       ],
       { useHash: true }
     ),

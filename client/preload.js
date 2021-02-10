@@ -14,27 +14,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   menu.append(
     new MenuItem({
-      label: "Item 1",
+      label: "View",
       submenu: [
         {
-          label: "Subitem 1",
-          click: () =>
-            dialog.showMessageBox(null, {
-              type: "info",
-              title: "Subtitle 1",
-              message: "Subtitle 1",
-              detail: "You have clicked on subtitle 1",
-              buttons: ["Ok"],
-            }),
-        },
-        {
-          label: "New editor",
+          label: "Chat",
           click: () => {
             chatWindow = new BrowserWindow({
-              // fullscreen: true,
               icon: url.format(path.join(__dirname, "/resources/icon.png")),
-              height: 800,
-              width: 1000,
+              width: 350,
+              height: 750,
               frame: false,
               webPreferences: {
                 preload: path.join(__dirname, "preload.js"),
@@ -49,7 +37,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 pathname: path.join(__dirname, "dist/client/index.html"),
                 protocol: "file:",
                 slashes: true,
-                hash: "/edit;width=400;height=400",
+                hash: "/chat",
               })
             );
           },
