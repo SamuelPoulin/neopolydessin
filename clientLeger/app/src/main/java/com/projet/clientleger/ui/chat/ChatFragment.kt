@@ -45,7 +45,6 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sendButton.setOnClickListener(){
-            //passe ici
             sendButton()
         }
     }
@@ -69,6 +68,9 @@ class ChatFragment : Fragment() {
             messageView.textSize = 20f
             messageView.text = formattedText
             messageBox.addView(messageView)
+            scrollbar.post{
+                scrollbar.fullScroll(View.FOCUS_DOWN)
+            }
         }
     }
     companion object {
