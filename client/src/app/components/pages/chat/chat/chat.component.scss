@@ -13,33 +13,6 @@
   padding-top: 90px;
 }
 
-.chat-message-peer, .chat-message-user {
-  display: flex;
-  padding: 12px 15px;
-  max-width: 50%;
-  margin: 10px 25px;
-}
-
-.chat-message-peer {
-  background-color: white;
-  border-radius: 0 10px 10px 10px;
-}
-
-.chat-message-user {
-  align-self: flex-end;
-
-  background-color: #2196f3;
-  border-radius: 10px 0 10px 10px;
-}
-
-.chat-message-peer-content {
-  color: #03071e;
-}
-
-.chat-message-user-content {
-  color: white;
-}
-
 #chat-header {
   position: fixed;
   top: 0;

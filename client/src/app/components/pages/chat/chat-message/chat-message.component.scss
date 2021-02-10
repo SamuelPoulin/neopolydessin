@@ -1,0 +1,24 @@
+.chat-message {
+  display: flex;
+  padding: 12px 15px;
+  max-width: 50%;
+  margin: 10px 25px;
+
+  background-color: white;
+  border-radius: 0 10px 10px 10px;
+}
+
+.chat-message-content {
+  color: #03071e;
+}
+
+.chat-message-user {
+  align-self: flex-end;
+
+  background-color: #2196f3;
+  border-radius: 10px 0 10px 10px;
+}
+
+.chat-message-content-user {
+  color: white;
+}

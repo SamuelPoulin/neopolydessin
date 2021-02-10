@@ -4,12 +4,7 @@
     <h1>Chat</h1>
   </div>
   <div id="chat-messages">
-    <div class="chat-message-peer">
-      <div class="chat-message-peer-content">Hahaha t'es tellement bon</div>
-    </div>
-    <div class="chat-message-user" *ngFor="let message of messages">
-      <div class="chat-message-user-content">{{message.content}}</div>
-    </div>
+      <chat-message *ngFor="let message of messages" [message]="message"></chat-message>
   </div>
   <div id="chat-writer">
     <button id="emoji-button" mat-icon-button>

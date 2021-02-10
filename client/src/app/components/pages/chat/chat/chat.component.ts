@@ -7,11 +7,11 @@ import { ChatMessage } from "@models/chat-message/chat-message";
   styleUrls: ["./chat.component.scss"],
 })
 export class ChatComponent {
-  messages: ChatMessage[] = [];
+  messages: ChatMessage[] = [{user: '123', content: 'Haha tu es tellement bon', timestamp: new Date()}];
 
   sendMessage() {
     this.messages.push({
-      user: "123",
+      user: "user",
       content: "What a joke you are",
       timestamp: new Date(),
     });
