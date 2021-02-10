@@ -4,5 +4,5 @@ echo "$USER"
 cd server
 ls
 ls node_modules
-npm i
+npm ci --cache ../.npm --prefer-offline
 npm run test

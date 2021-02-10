@@ -14,17 +14,15 @@ build_electron:
         - echo "Should pass"
         - ./pipeline/pass.sh
 
+cache:
+    key: node
+    when: always
+    paths:
+        - .npm/
 
 test_server:
     stage: test
     allow_failure: true
-    cache:
-        when: 'always'
-        key:
-            files:
-                - server/package-lock.json
-        paths:
-            - server/node_modules/
     needs:
         - build_server
     script:
@@ -35,13 +33,6 @@ test_server:
 test_electron:
     stage: test
     allow_failure: true
-    cache:
-        when: 'always'
-        key:
-            files:
-                - client/package-lock.json
-        paths:
-            - client/node_modules/
     needs:
         - build_electron
     script:
