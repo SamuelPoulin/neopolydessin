@@ -1,12 +1,12 @@
-import { Component, OnInit } from "@angular/core";
-import { ChatMessage } from "@models/chat-message/chat-message";
-import { SocketService } from "@services/socket-service.service";
-import { Subscription } from "rxjs";
+import { Component, OnInit } from '@angular/core';
+import { SocketService } from '@services/socket-service.service';
+import { Subscription } from 'rxjs';
+import { ChatMessage } from '../../../../../../../common/communication/chat-message';
 
 @Component({
-  selector: "app-chat",
-  templateUrl: "./chat.component.html",
-  styleUrls: ["./chat.component.scss"],
+  selector: 'app-chat',
+  templateUrl: './chat.component.html',
+  styleUrls: ['./chat.component.scss'],
 })
 export class ChatComponent implements OnInit {
   subscription: Subscription;
@@ -26,18 +26,18 @@ export class ChatComponent implements OnInit {
         this.messages.push({
           user: "foreign",
           content: (message as any).msg,
-          timestamp: new Date(),
+          timestamp: Date.now(),
         });
         this.scrollToBottom();
       });
   }
 
   sendMessage() {
-    this.socketService.sendMessage(this.inputValue);
+    this.socketService.sendMessage({user: 'user', content: this.inputValue, timestamp: Date.now()});
     this.messages.push({
       user: "user",
       content: this.inputValue,
-      timestamp: new Date(),
+      timestamp: Date.now(),
     });
     setTimeout(() => {
       this.inputValue = "";
@@ -45,8 +45,8 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  scrollToBottom() {
-    let electronContainer = document.querySelector(".container-after-titlebar");
+  scrollToBottom(): void {
+    const electronContainer = document.querySelector('.container-after-titlebar');
 
     if (electronContainer) {
       electronContainer.scrollTop = electronContainer.scrollHeight;

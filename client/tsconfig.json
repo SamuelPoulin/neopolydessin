@@ -46,6 +46,9 @@
       ],
       "@shape-tool-properties/*": [
         "src/app/models/tool-properties/creator-tool-properties-shape-tool-properties"
+      ],
+      "tslib": [
+        "node_modules/tslib"
       ]
     }
   },
