@@ -23,7 +23,7 @@ export class ChatComponent implements OnInit {
     this.subscription = this.socketService
       .receiveMessage()
       .subscribe((message: ChatMessage) => {
-        this.messages.push(message);
+        this.messages.push({user: 'foreign', content: message.content, timestamp: message.timestamp});
         this.scrollToBottom();
       });
   }
