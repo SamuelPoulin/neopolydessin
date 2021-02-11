@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
-import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { ChatMessage } from '../../../../common/communication/chat-message';
+import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 
 @Injectable({
   providedIn: 'root',

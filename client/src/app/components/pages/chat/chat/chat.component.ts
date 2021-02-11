@@ -9,7 +9,7 @@ import { ChatMessage } from '../../../../../../../common/communication/chat-mess
 export class ChatComponent {
   messages: ChatMessage[] = [{ user: '123', content: 'Haha tu es tellement bon', timestamp: Date.now() }];
 
-  sendMessage() {
+  sendMessage(): void {
     this.messages.push({
       user: 'user',
       content: 'What a joke you are',
@@ -20,8 +20,8 @@ export class ChatComponent {
     });
   }
 
-  scrollToBottom() {
-    let electronContainer = document.querySelector('.container-after-titlebar');
+  scrollToBottom(): void {
+    const electronContainer = document.querySelector('.container-after-titlebar');
 
     if (electronContainer) {
       electronContainer.scrollTop = electronContainer.scrollHeight;
