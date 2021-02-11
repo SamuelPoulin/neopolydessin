@@ -35,19 +35,19 @@ export class ChatComponent implements OnInit {
       content: this.inputValue,
       timestamp: Date.now(),
     });
-    setTimeout(() => {
-      this.inputValue = '';
-      this.scrollToBottom();
-    });
+    this.inputValue = '';
+    this.scrollToBottom();
   }
 
   scrollToBottom(): void {
-    const electronContainer = document.querySelector('.container-after-titlebar');
+    setTimeout(() => {
+      const electronContainer = document.querySelector('.container-after-titlebar');
 
-    if (electronContainer) {
-      electronContainer.scrollTop = electronContainer.scrollHeight;
-    } else {
-      window.scrollTo(0, document.body.scrollHeight);
-    }
+      if (electronContainer) {
+        electronContainer.scrollTop = electronContainer.scrollHeight;
+      } else {
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
   }
 }
