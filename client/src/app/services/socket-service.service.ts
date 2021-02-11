@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
+import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
+import { ChatMessage } from '../../../../common/communication/chat-message';
 
 @Injectable({
   providedIn: 'root',
@@ -18,19 +20,15 @@ export class SocketService {
     });
 
     this.socket = this.manager.socket('/');
-
-    // this.socket.on('PlayerConnected', (playerName: string) => {
-
-    // });
   }
 
-  receiveMessage(): Observable<string> {
-    return new Observable<string>((msgObs) => {
-      this.socket.on('msg', (content: string) => msgObs.next(content));
+  receiveMessage(): Observable<ChatMessage> {
+    return new Observable<ChatMessage>((msgObs) => {
+      this.socket.on(SocketMessages.RECEIVE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
     });
   }
 
-  sendMessage(message: string): void {
-    this.socket.emit('ChatMessage', message);
+  sendMessage(message: ChatMessage): void {
+    this.socket.emit(SocketMessages.SEND_MESSAGE, message);
   }
 }
