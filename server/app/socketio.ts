@@ -1,10 +1,10 @@
 import * as http from 'http';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
+import { ChatMessage } from '../../common/communication/chat-message';
 import { Server, Socket } from 'socket.io';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { ChatMessage } from '../../common/communication/chat-message';
 
 @injectable()
 export class SocketIo {
