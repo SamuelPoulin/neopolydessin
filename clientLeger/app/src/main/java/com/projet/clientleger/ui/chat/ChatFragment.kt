@@ -25,6 +25,7 @@ class ChatFragment : Fragment() {
     // TODO: Rename and change types of parameters
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
