@@ -4,13 +4,13 @@
     <h1>Chat</h1>
   </div>
   <div id="chat-messages">
-      <chat-message *ngFor="let message of messages" [message]="message"></chat-message>
+      <chat-message *ngFor="let message of messages" [message]="message" [ngStyle]="{'align-self': message.user === 'user' && 'flex-end'}"></chat-message>
   </div>
   <div id="chat-writer">
     <button id="emoji-button" mat-icon-button>
       <mat-icon>sentiment_satisfied_alt</mat-icon>
     </button>
-    <input type="text" id="message-textbox"/>
+    <input type="text" id="message-textbox" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" />
     <button id="send-button" mat-icon-button (click)="sendMessage()">
       <mat-icon>send</mat-icon>
     </button>

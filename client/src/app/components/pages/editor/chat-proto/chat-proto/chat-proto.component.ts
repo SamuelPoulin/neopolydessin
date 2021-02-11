@@ -30,8 +30,8 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
   }
 
   private createIoComponentConnection(): void {
-    this.ioServiceSub = this.socketService.receiveMessage().subscribe((message: string) => {
-      this.addMsgToChat('received', message);
+    this.ioServiceSub = this.socketService.receiveMessage().subscribe((message: Object) => {
+      this.addMsgToChat('received', (message as any).msg);
       this.scrollToBottom();
     });
   }

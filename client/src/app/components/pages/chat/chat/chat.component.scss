@@ -30,6 +30,11 @@
   font-size: 12px;
 }
 
+chat-message {
+  display: flex;
+  max-width: 50%;
+}
+
 #chat-logo {
   height: 35px;
   width: 35px;

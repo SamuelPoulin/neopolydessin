@@ -6,8 +6,8 @@ import { Manager, Socket } from 'socket.io-client';
   providedIn: 'root',
 })
 export class SocketService {
-  // private readonly url: string = 'http://p3-204-dev.duckdns.org/';
-  private readonly url: string = 'http://localhost:3205/';
+  private readonly url: string = 'http://p3-204-dev.duckdns.org/';
+  // private readonly url: string = 'http://localhost:3205/';
 
   socket: Socket;
   manager: Manager;
