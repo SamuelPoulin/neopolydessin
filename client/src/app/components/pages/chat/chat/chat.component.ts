@@ -11,36 +11,32 @@ import { ChatMessage } from '../../../../../../../common/communication/chat-mess
 export class ChatComponent implements OnInit {
   subscription: Subscription;
   messages: ChatMessage[] = [];
-  inputValue: string = "";
+  inputValue: string = '';
 
   constructor(private socketService: SocketService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.subscribe();
   }
 
-  subscribe() {
+  subscribe(): void {
     this.subscription = this.socketService
       .receiveMessage()
-      .subscribe((message: Object) => {
-        this.messages.push({
-          user: "foreign",
-          content: (message as any).msg,
-          timestamp: Date.now(),
-        });
+      .subscribe((message: ChatMessage) => {
+        this.messages.push(message);
         this.scrollToBottom();
       });
   }
 
-  sendMessage() {
+  sendMessage(): void {
     this.socketService.sendMessage({user: 'user', content: this.inputValue, timestamp: Date.now()});
     this.messages.push({
-      user: "user",
+      user: 'user',
       content: this.inputValue,
       timestamp: Date.now(),
     });
     setTimeout(() => {
-      this.inputValue = "";
+      this.inputValue = '';
       this.scrollToBottom();
     });
   }
