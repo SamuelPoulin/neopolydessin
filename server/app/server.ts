@@ -4,6 +4,7 @@ import { Application } from './app';
 import Types from './types';
 
 import { DEV_PORT, PROD_PORT } from './constants';
+import { SocketIo } from './socketio';
 
 @injectable()
 export class Server {
@@ -12,7 +13,10 @@ export class Server {
 
   isListening: boolean;
 
-  constructor(@inject(Types.Application) private application: Application) {
+  constructor(
+    @inject(Types.Application) private application: Application,
+    @inject(Types.Socketio) private socketio: SocketIo
+  ) {
     this.isListening = false;
   }
 
@@ -33,6 +37,7 @@ export class Server {
     this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
     this.server.on('listening', () => this.onListening());
     this.server.listen(this.port);
+    this.socketio.init(this.server);
   }
 
   close(): void {

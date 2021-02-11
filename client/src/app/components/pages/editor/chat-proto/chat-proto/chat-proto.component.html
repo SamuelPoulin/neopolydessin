@@ -1,0 +1,10 @@
+<div #scroll class="chatWindow">
+    <div class="chat">
+      <ul #list class="chatList">
+      </ul>
+    </div>
+    <div class="chatBox"> 
+      <input class="inputChat" type="text" [(ngModel)]="message">
+      <button  class="sendButton" (click)="SendMessage()"> Send </button>
+    </div>
+</div>
