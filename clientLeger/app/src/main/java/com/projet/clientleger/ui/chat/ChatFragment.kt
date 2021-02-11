@@ -1,5 +1,6 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,9 +8,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.service.SocketService
 import kotlinx.android.synthetic.main.fragment_chat.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+//import java.time.LocalDateTime
+//import java.time.format.DateTimeFormatter
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -23,12 +28,11 @@ private const val ARG_PARAM2 = "param2"
  */
 class ChatFragment : Fragment() {
     // TODO: Rename and change types of parameters
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
+        activity?.startService(Intent(activity, SocketService::class.java))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +58,7 @@ class ChatFragment : Fragment() {
         //ajoute le message à la boite de chat locale
     }
     private fun getTimestamp():String{
-        val formatter:DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         return LocalDateTime.now().format(formatter)
     }
     private fun addMessage(text:String, timestamp:String){

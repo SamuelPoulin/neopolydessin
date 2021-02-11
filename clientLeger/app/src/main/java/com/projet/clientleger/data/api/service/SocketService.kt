@@ -6,7 +6,8 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import java.net.URISyntaxException
 
-const val SOCKET_ROUTE = ""
+//"http://p3-204-dev.duckdns.org/"
+const val SOCKET_ROUTE = "192.168.50.1"
 class SocketService: Service() {
     private var mSocket: Socket? = try { IO.socket(SOCKET_ROUTE)} catch (e: URISyntaxException) { null }
 
@@ -16,6 +17,8 @@ class SocketService: Service() {
 
     override fun onCreate() {
         super.onCreate()
+        println(mSocket)
         mSocket?.connect()
+        println("socket started-----------------------------------------------------------------------------------------------")
     }
 }
