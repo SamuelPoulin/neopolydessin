@@ -2,12 +2,15 @@ import * as http from 'http';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
+import { ChatMessage } from '../../common/communication/chat-message';
+import { SocketConnection } from '../../common/socketendpoints/socket-connection';
+import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 
 @injectable()
 export class SocketIo {
 
     io: Server;
-    players: string[] = [];
+    players: Map<string, string> = new Map<string, string>();
 
     init(server: http.Server): void {
         this.io = new Server(server, {
@@ -19,24 +22,22 @@ export class SocketIo {
     }
 
     bindIoEvents(): void {
-        this.io.on('connection', (socket: Socket) => {
+        this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
             console.log(`Connected with ${socket.id} \n`);
 
-            socket.on('NewPlayer', (playerName: string) => {
-                console.log(playerName);
-                this.players[socket.id] = playerName;
-                socket.broadcast.emit('PlayerConnected', playerName); // Send to all clients except sender
+            socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string) => {
+                this.players.set(socket.id, playerName);
+                socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
             });
 
-            socket.on('ChatMessage', (messageReceived: string) => {
-                console.log(messageReceived);
-                socket.broadcast.emit('msg', { msg: messageReceived, playerName: this.players[socket.id] });
+            socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
+                socket.broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
             });
 
-            socket.on('disconnect', () => {
+            socket.on(SocketConnection.DISCONNECTION, () => {
                 console.log(`Disconnected : ${socket.id} \n`);
-                socket.broadcast.emit('PlayerDisconnected', this.players[socket.id]);
-                this.players[socket.id] = '';
+                socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
+                this.players.delete(socket.id);
             });
         });
     }

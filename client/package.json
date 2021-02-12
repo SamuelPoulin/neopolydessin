@@ -2,10 +2,10 @@
   "name": "client",
   "version": "0.0.1",
   "scripts": {
-    "start": "ng serve --open",
+    "start": "ng serve --open --watch",
     "build": "ng build --prod",
-    "start:electron": "ng build --base-href ./ && electron .",
-    "build:electron": "ng build --base-href ./ --prod && electron-builder",
+    "start:electron": "ng build --base-href \"\" && electron .",
+    "build:electron": "ng build --base-href \"\" --prod && electron-builder",
     "format": "prettier --config ../.prettierrc.yaml --write \"src/**/*\"",
     "test:ci": "ng test --no-watch --no-progress --browsers ChromeHeadlessNoSandbox",
     "test": "ng test",

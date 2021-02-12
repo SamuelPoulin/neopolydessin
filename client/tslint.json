@@ -10,6 +10,7 @@
         },
         "import-blacklist": [true, "rxjs/Rx"],
         "no-output-on-prefix": true,
+        "no-inferrable-types": false,
         "no-inputs-metadata-property": true,
         "no-outputs-metadata-property": true,
         "no-host-metadata-property": true,
