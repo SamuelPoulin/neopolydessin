@@ -19,7 +19,7 @@ export class Server {
   static get port(): number {
     let port: number;
 
-    process.env.USER === 'root' ? (port = PROD_PORT) : (port = DEV_PORT);
+    process.env.DEPLOY === 'prod' ? (port = PROD_PORT) : (port = DEV_PORT);
 
     return port;
   }

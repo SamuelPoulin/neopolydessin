@@ -7,27 +7,52 @@ stages:
     - test
     - deploy
 
+.cache: &server_cache
+  cache:
+    key:
+      files:
+        - server/package-lock.json
+    paths:
+      - server/node_modules/
+
+.cache: &electron_cache
+  cache:
+    key:
+      files:
+        - client/package-lock.json
+    paths:
+      - client/node_modules/
+
+
 build_server:
     stage: build
+    <<: *server_cache
     script:
         - echo "Build serveur"
+        - ./pipeline/build_server.sh
+    allow_failure: true     #until compile errors removed
+    artifacts:
+        when: always        #until compile errors removed
+        paths:
+            - server/node_modules/
+            - server/out/
 
 build_electron:
     stage: build
+    <<: *electron_cache
     script:
-        - echo "Should pass"
-        - ./pipeline/pass.sh
-
-cache:
-    key: node
-    when: always
-    paths:
-        - .npm/
+        - echo "Build electron"
+        - ./pipeline/build_electron.sh
+    artifacts:
+        paths:
+            - client/node_modules/
 
 test_server:
     stage: test
     allow_failure: true
     needs:
+        - build_server
+    dependencies:
         - build_server
     script:
         - echo "Test server"
@@ -39,6 +64,8 @@ test_electron:
     allow_failure: true
     needs:
         - build_electron
+    dependencies:
+        - build_electron
     script:
         - echo "Test electron"
         - ./pipeline/test_electron.sh
@@ -46,14 +73,16 @@ test_electron:
 
 deploy_dev:
     stage: deploy
-    only:
-        - develop
+    #only:
+    #    - develop
     script:
         - echo "Deploy dev"
+        - ./pipeline/deploy_dev.sh
 
 deploy_prod:
     stage: deploy
-    only:
-        - master
+    #only:
+    #    - master
     script:
         - echo "Deploy prod"
+        - ./pipeline/deploy_prod.sh
