@@ -73,16 +73,16 @@ test_electron:
 
 deploy_dev:
     stage: deploy
-    #only:
-    #    - develop
+    only:
+        - develop
     script:
         - echo "Deploy dev"
         - ./pipeline/deploy_dev.sh
 
 deploy_prod:
     stage: deploy
-    #only:
-    #    - master
+    only:
+        - master
     script:
         - echo "Deploy prod"
         - ./pipeline/deploy_prod.sh

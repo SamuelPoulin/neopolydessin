@@ -7,5 +7,4 @@ echo "$USER"
 cd client
 ls
 ls node_modules
-npm i
 npm run test
