@@ -8,15 +8,16 @@ export class SocketIdService {
         this.socketIdNameMap = new Map();
     }
 
-    public AssociateSocketIdName(socketId: string, name: string): void {
+    AssociateSocketIdName(socketId: string, name: string): void {
         this.socketIdNameMap.set(socketId, name);
     }
 
-    public DisconnectSocketIdName(socketId: string): void {
+    DisconnectSocketIdName(socketId: string): void {
         this.socketIdNameMap.delete(socketId);
     }
 
-    public GetNameOfSocketId(socketId: string): string {
+    GetNameOfSocketId(socketId: string): string {
+        // tslint:disable-next-line:no-non-null-assertion
         return this.socketIdNameMap.get(socketId)!;
     }
 }
