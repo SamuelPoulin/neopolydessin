@@ -16,7 +16,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
-import { MatSnackBarContainer, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -79,7 +79,6 @@ import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.co
     EnumPropertyInputComponent,
     IconButtonComponent,
   ],
-  entryComponents: [AbstractModalComponent, ConfirmModalComponent, MatSnackBarContainer],
   exports: [
     AbstractModalComponent,
     ReactiveFormsModule,

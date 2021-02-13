@@ -6,6 +6,5 @@ import { HomeComponent } from './home/home.component';
 @NgModule({
   imports: [SharedModule],
   declarations: [CreateDrawingModalComponent, HomeComponent],
-  entryComponents: [CreateDrawingModalComponent],
 })
 export class HomeModule {}

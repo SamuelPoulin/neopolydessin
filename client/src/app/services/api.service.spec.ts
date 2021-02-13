@@ -19,8 +19,8 @@ describe('APIService', () => {
       providers: [{ provide: HttpXhrBackend, useClass: HttpTestingController }, APIService, MatSnackBar, Overlay],
       imports: [HttpClientTestingModule, SharedModule],
     });
-    httpTestingController = TestBed.get(HttpTestingController);
-    apiService = TestBed.get(APIService);
+    httpTestingController = TestBed.inject(HttpTestingController);
+    apiService = TestBed.inject(APIService);
     notification = apiService['notification'];
   });
   afterEach(() => {

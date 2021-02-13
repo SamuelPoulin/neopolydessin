@@ -24,7 +24,7 @@ describe('ModalDialogService', () => {
   );
 
   beforeEach(() => {
-    service = TestBed.get(ModalDialogService);
+    service = TestBed.inject(ModalDialogService);
     openSpy = spyOn(service, 'open').and.callFake(
       (): MatDialogRef<any> => {
         service.openDialogs.push({} as any);

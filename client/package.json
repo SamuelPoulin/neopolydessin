@@ -97,6 +97,7 @@
     "@angular/platform-browser": "~9.1.13",
     "@angular/platform-browser-dynamic": "~9.1.13",
     "@angular/router": "~9.1.13",
+    "@types/events": "^3.0.0",
     "@types/form-data": "^2.5.0",
     "axios": "^0.21.1",
     "custom-electron-titlebar": "^3.2.6",
