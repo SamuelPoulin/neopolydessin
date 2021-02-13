@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.projet.clientleger.data.model.MessageChat
-import com.projet.clientleger.utils.ChatListener
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
@@ -23,7 +22,7 @@ class SocketService: Service() {
         IO.socket(SOCKET_ROUTE, options)
     } catch (e: URISyntaxException) { null }
 
-    private var chatListener: ChatListener? = null
+    private var chatListener: HashMap<String, ((Any?) -> Unit)?> = HashMap<String, ((Any?) -> Unit)?>()
     private val binder: IBinder = LocalBinder()
 
     inner class LocalBinder : Binder() {
@@ -31,30 +30,42 @@ class SocketService: Service() {
         fun getService(): SocketService = this@SocketService
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         return binder
     }
 
     override fun onCreate() {
         super.onCreate()
-        println("------------------------------------------------------------------------------$mSocket")
+        println("SocketCreation: $mSocket------------------------------------------------------------------------------")
         mSocket?.on("connect", Emitter.Listener { println("socket started-----------------------------------------------------------------------------------------------" + mSocket?.connected()) })
         mSocket?.on("disconnect", Emitter.Listener { println("socket stopped-----------------------------------------------------------------------------------------------" + mSocket?.connected()) })
         //mSocket?.on("ReceiveMsg", Emitter.Listener { parameter -> {println(parameter)} })
-        mSocket?.on("ReceiveMsg") { args -> run { println("$mSocket---------------------------------------------------- msg received-" + Json.decodeFromString(MessageChat.serializer(), (args[0] as JSONObject).toString()))
-            chatListener?.receiveMsg()} }
+        mSocket?.on("ReceiveMsg") { args ->
+            val msg = Json.decodeFromString(MessageChat.serializer(), (args[0] as JSONObject).toString())
+            println("$mSocket: msg received-$msg-------------------------------")
+            chatListener["receiveMsg"]?.invoke(msg) }
         mSocket?.connect()
         //println("socket started-----------------------------------------------------------------------------------------------" + mSocket?.connected())
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        println("------------------------------------------------------------------------------$mSocket --------------------- destroy")
+        mSocket?.disconnect()
+        println("SocketDestroyed: $mSocket---------------------------------------------------------------------------------------------------")
     }
 
-    fun setCallbacks(listener: ChatListener?){
-        chatListener = listener
+    override fun sendMessage(msg: MessageChat) {
+        mSocket?.emit("SendMsg", msg)
+    }
+
+    fun setCallbacks(fctName: String, fct: (Any?) -> Unit ) {
+        chatListener[fctName] = fct
         println("setCallbakcs-$chatListener------------------------------------")
+    }
+
+    fun clearCallbacks() {
+        chatListener.clear()
+        println("clearCallbakcs-$chatListener------------------------------------")
     }
 
 }

@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.model.MessageChat
 import com.projet.clientleger.utils.ChatListener
 import kotlinx.android.synthetic.main.fragment_chat.*
 import java.time.LocalDateTime
@@ -39,10 +40,8 @@ class ChatFragment : Fragment(), ChatListener {
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
-        if(savedInstanceState == null) {
-            val intent: Intent = Intent(activity, SocketService::class.java).also { intent ->
-                activity?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-            }
+        val intent: Intent = Intent(activity, SocketService::class.java).also { intent ->
+            activity?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }
 
@@ -51,7 +50,8 @@ class ChatFragment : Fragment(), ChatListener {
             val binder = service as SocketService.LocalBinder
             socketService = binder.getService()
             mBound = true
-            socketService.setCallbacks(activity?.fragmentManager?.findFragmentByTag("chat") as ChatListener?)
+            socketService.setCallbacks("receiveMsg",fct = {input: Any?->receiveMsg(input as MessageChat)})
+            socketService.setCallbacks("sendMsg",fct = {input: Any?->sendMsg(input as MessageChat)})
             println("Bound? ----------------------------------$mBound")
         }
 
@@ -98,8 +98,12 @@ class ChatFragment : Fragment(), ChatListener {
         }
     }
 
-    override fun receiveMsg() {
-        println("ChatFragment msg received ------------------------------------------------------")
+    override fun receiveMsg(msg: MessageChat) {
+        println("ChatFragment msg received: $msg ------------------------------------------------------")
+    }
+
+    override fun sendMsg(msg: MessageChat) {
+        TODO("Not yet implemented")
     }
 
     companion object {
@@ -124,7 +128,7 @@ class ChatFragment : Fragment(), ChatListener {
         super.onStop()
         if(mBound){
             activity?.unbindService(serviceConnection)
-            socketService.setCallbacks(null);
+            socketService.clearCallbacks()
             mBound = false;
         }
     }
