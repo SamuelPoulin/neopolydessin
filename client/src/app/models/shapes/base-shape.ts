@@ -3,8 +3,7 @@ import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 
 export abstract class BaseShape {
-  // tslint:disable-next-line:typedef
-  private static SHAPE_ID = 0;
+  private static SHAPE_ID: number = 0;
   static readonly CSS_NONE: string = 'none';
   static readonly SVG_NAMESPACE_URL: string = 'http://www.w3.org/2000/svg';
   static readonly TYPE_ATTRIBUTE: string = 'shape-type';
@@ -62,7 +61,7 @@ export abstract class BaseShape {
       Coordinate.add(this.origin, new Coordinate(-s, -s)),
       Coordinate.add(new Coordinate(this.end.x, this.origin.y), new Coordinate(s, -s)),
       Coordinate.add(this.end, new Coordinate(s, s)),
-      Coordinate.add(new Coordinate(this.origin.x, this.end.y), new Coordinate(-s, s))
+      Coordinate.add(new Coordinate(this.origin.x, this.end.y), new Coordinate(-s, s)),
     ];
     corners.forEach((corner, index) => {
       corners[index] = corner.rotate(this.rotation, this.center);
@@ -87,9 +86,10 @@ export abstract class BaseShape {
     this.updateProperties();
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static jsonReplacer(key: string, value: any): any {
     // for use with JSON.Stringify
+    // todo - utile?
     return key === 'svgNode' ? undefined : value;
   }
 
@@ -124,7 +124,7 @@ export abstract class BaseShape {
 
   highlight(color: Color, thickness: number): void {
     const highlightNode = (node: SVGElement) => {
-      const { strokeWidth } = node.style;
+      const { strokeWidth }: { strokeWidth: string } = node.style;
       if (!strokeWidth || +strokeWidth < thickness) {
         node.style.strokeWidth = thickness.toString();
       }

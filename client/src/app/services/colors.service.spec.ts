@@ -10,7 +10,7 @@ describe('ColorsService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   beforeEach(() => {
-    service = TestBed.get(ColorsService);
+    service = TestBed.inject(ColorsService);
     service['_colors'] = [Color.RED, Color.BLUE];
   });
 

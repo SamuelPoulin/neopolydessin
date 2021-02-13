@@ -8,8 +8,7 @@ import { defaultErrorMessages, ErrorMessages } from 'src/app/components/shared/i
   styleUrls: ['./custom-input.component.scss'],
 })
 export class CustomInputComponent implements OnInit, OnChanges {
-  // tslint:disable-next-line:typedef
-  static id = 0;
+  static ID: number = 0;
   @Input() id: string;
   @Input() autofocus: boolean;
   @Input() formGroup: FormGroup;
@@ -42,7 +41,7 @@ export class CustomInputComponent implements OnInit, OnChanges {
     this.value = '';
     this.valueChange = new EventEmitter<string>();
     this.errorMessages = defaultErrorMessages();
-    this.id = `custom-input-${CustomInputComponent.id++}`;
+    this.id = `custom-input-${CustomInputComponent.ID++}`;
     this.autofocus = true;
     this.formGroup = new FormGroup({});
     this.required = true;
