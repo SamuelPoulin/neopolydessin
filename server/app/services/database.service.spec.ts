@@ -3,7 +3,7 @@
 import { expect } from 'chai';
 import * as httpStatus from 'http-status-codes';
 
-import drawingModel from '../../models/drawing';
+import drawingModel, { Drawing } from '../../models/drawing';
 import { DatabaseService } from './database.service';
 
 import { testingContainer } from '../../test/test-utils';
@@ -97,7 +97,7 @@ describe('Database Service', () => {
 
   it('should return the old document on update', (done: Mocha.Done) => {
     databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.updateDrawing(addedDoc.documents._id, '{"name":"new name"}').then((oldDoc) => {
+      databaseService.updateDrawing(addedDoc.documents._id, ({name: 'new name'} as Drawing)).then((oldDoc) => {
         expect(oldDoc.documents.name).to.equal(addedDoc.documents.name);
         done();
       });

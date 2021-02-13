@@ -13,8 +13,6 @@ export class KeyboardListenerService extends AbstractEventListenerService<Keyboa
   }
 
   getIdentifierFromEvent(event: KeyboardEvent): string {
-    const { ctrlKey, shiftKey, type, key } = event;
-
-    return KeyboardListenerService.getIdentifier(key, ctrlKey, shiftKey, type);
+    return KeyboardListenerService.getIdentifier(event.key, event.ctrlKey, event.shiftKey, event.type);
   }
 }

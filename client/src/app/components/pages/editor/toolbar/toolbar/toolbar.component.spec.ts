@@ -25,12 +25,7 @@ describe('ToolbarComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [SharedModule, RouterTestingModule, UserGuideModule],
-      declarations: [
-        ToolbarComponent,
-        PenToolbarComponent,
-        EraserToolbarComponent,
-        GridToolbarComponent,
-      ],
+      declarations: [ToolbarComponent, PenToolbarComponent, EraserToolbarComponent, GridToolbarComponent],
     })
       .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [UserGuideModalComponent] } })
       .compileComponents();
@@ -38,7 +33,7 @@ describe('ToolbarComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ToolbarComponent);
-    router = TestBed.get(Router);
+    router = TestBed.inject(Router);
     component = fixture.componentInstance;
 
     fixture.detectChanges();
