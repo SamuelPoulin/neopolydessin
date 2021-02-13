@@ -5,7 +5,7 @@ export class SocketIdService {
     socketIdNameMap: Map<string, string>;
 
     constructor() {
-        this.socketIdNameMap = new Map();
+        this.socketIdNameMap = new Map<string, string>();
     }
 
     AssociateSocketIdName(socketId: string, name: string): void {
