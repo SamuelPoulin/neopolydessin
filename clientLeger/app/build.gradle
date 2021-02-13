@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id "kotlin-android-extensions"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.10'
 }
 
 android {
@@ -61,4 +62,5 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
     implementation 'com.android.support:multidex:1.0.3'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 }

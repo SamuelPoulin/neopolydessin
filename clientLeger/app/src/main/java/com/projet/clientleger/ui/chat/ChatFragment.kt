@@ -1,7 +1,11 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.utils.ChatListener
 import kotlinx.android.synthetic.main.fragment_chat.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,15 +31,34 @@ private const val ARG_PARAM2 = "param2"
  * Use the [chat.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ChatFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+class ChatFragment : Fragment(), ChatListener {
+    private lateinit var socketService: SocketService
+    private var mBound: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
+        println("fragCreation-----------------------------------$savedInstanceState")
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
-        activity?.startService(Intent(activity, SocketService::class.java))
+        if(savedInstanceState == null) {
+            val intent: Intent = Intent(activity, SocketService::class.java).also { intent ->
+                activity?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+            }
+        }
     }
 
+    private val serviceConnection = object:  ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as SocketService.LocalBinder
+            socketService = binder.getService()
+            mBound = true
+            socketService.setCallbacks(activity?.fragmentManager?.findFragmentByTag("chat") as ChatListener?)
+            println("Bound? ----------------------------------$mBound")
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mBound = false
+        }
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -73,6 +97,11 @@ class ChatFragment : Fragment() {
             }
         }
     }
+
+    override fun receiveMsg() {
+        println("ChatFragment msg received ------------------------------------------------------")
+    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -89,5 +118,19 @@ class ChatFragment : Fragment() {
                     arguments = Bundle().apply {
                     }
                 }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(mBound){
+            activity?.unbindService(serviceConnection)
+            socketService.setCallbacks(null);
+            mBound = false;
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        println("fragDestroy----------------------------------------------")
     }
 }
