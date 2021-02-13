@@ -2,12 +2,16 @@ import * as http from 'http';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
+import { Lobby } from '../models/lobby';
+import { SocketIdService } from './services/socket-id.service';
 
 @injectable()
 export class SocketIo {
 
     io: Server;
-    players: string[] = [];
+    lobbyList: Lobby[] =  [];
+
+    constructor(private socketIdService: SocketIdService) { }
 
     init(server: http.Server): void {
         this.io = new Server(server, {
@@ -19,24 +23,47 @@ export class SocketIo {
     }
 
     bindIoEvents(): void {
-        this.io.on('connection', (socket: Socket) => {
+        this.io.on('connection', (socket: Socket, name: string) => {
             console.log(`Connected with ${socket.id} \n`);
 
-            socket.on('NewPlayer', (playerName: string) => {
-                console.log(playerName);
-                this.players[socket.id] = playerName;
-                socket.broadcast.emit('PlayerConnected', playerName); // Send to all clients except sender
+            this.socketIdService.AssociateSocketIdName(socket.id, name);
+
+            socket.on('GetLobbies', () => {
+                this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
+            }); // Put gametype in enum
+
+            socket.on('NewPlayer', (playerName: string, lobbyId: string) => {
+                // console.log(playerName);
+
+                socket.join(lobbyId);
+
+                const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
+                if (playerLobby) {
+                    playerLobby.players.push(playerName);
+                }
+                socket.to(lobbyId).broadcast.emit('PlayerConnected', playerName); // Send to all clients except sender
             });
 
-            socket.on('ChatMessage', (messageReceived: string) => {
+            socket.on('CreateLobby', (playerName: string, type: string, sizeGame: number) => {
+                const generatedId = 'e';
+                const lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type} as Lobby;
+                this.lobbyList.push(lobby);
+                const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
+                if (playerLobby) {
+                    playerLobby.players.push(playerName);
+                }
+                socket.join(generatedId);
+            });
+
+            socket.on('ChatMessage', (messageReceived: string, timeStamp: string, playerName: string) => {
                 console.log(messageReceived);
-                socket.broadcast.emit('msg', { msg: messageReceived, playerName: this.players[socket.id] });
+                socket.broadcast.emit('msg', { msg: messageReceived, name: playerName, time: timeStamp });
             });
 
             socket.on('disconnect', () => {
                 console.log(`Disconnected : ${socket.id} \n`);
-                socket.broadcast.emit('PlayerDisconnected', this.players[socket.id]);
-                this.players[socket.id] = '';
+                this.socketIdService.DisconnectSocketIdName(socket.id);
+                socket.broadcast.emit('PlayerDisconnected', this.socketIdService.GetNameOfSocketId(socket.id));
             });
         });
     }
