@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { SocketService } from '@services/socket-service.service';
 import { Subscription } from 'rxjs';

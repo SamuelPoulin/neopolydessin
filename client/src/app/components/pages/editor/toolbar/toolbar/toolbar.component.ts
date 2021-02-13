@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { MatDrawer } from '@angular/material';
+import { MatDrawer } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
 
