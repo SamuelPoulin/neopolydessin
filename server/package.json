@@ -113,6 +113,6 @@
     "tslint": "~5.18.0",
     "tslint-eslint-rules": "5.4.0",
     "tslint-microsoft-contrib": "6.2.0",
-    "typescript": "~3.5.3"
+    "typescript": "^3.5.3"
   }
 }

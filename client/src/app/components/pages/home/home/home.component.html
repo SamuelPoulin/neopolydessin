@@ -1,20 +1,22 @@
 <div id="main-container">
-  <div id="main-container-title">
-    <h1>Polydessin</h1>
-  </div>
+  <div id="menu-container">
+    <div id="menu-container-title">
+      <h1>Polydessin</h1>
+    </div>
+    
+    <div id="menu-container-buttons">
+      <button id="btn-create" mat-raised-button (click)="openModal()">Nouveau dessin</button>
+      <button id="btn-gallery" mat-raised-button (click)="openGallery()">Galerie</button>
+      <button id="btn-guide" mat-raised-button (click)="openModal(guideModalType)">Guide utilisateur</button>
+      <button id="btn-chat" mat-raised-button (click)="openChat()">Chat</button>
 
-  <div id="main-container-buttons">
-    <button id="btn-create" mat-raised-button (click)="openModal()">Nouveau dessin</button>
-    <button id="btn-gallery" mat-raised-button (click)="openGallery()">Galerie</button>
-    <button id="btn-guide" mat-raised-button (click)="openModal(guideModalType)">Guide utilisateur</button>
-    <button id="btn-chat" mat-raised-button (click)="openChat()">Chat</button>
-
-    <button mat-raised-button *ngIf="previousDrawings; else noPreviousDrawings">
-      Continuer mon dessin
-    </button>
-    <ng-template #noPreviousDrawings>
-      <button mat-raised-button [disabled]="isDrawingNull" (click)="continueDrawing()">Continuer mon
-        dessin</button>
-    </ng-template>
+      <button mat-raised-button *ngIf="previousDrawings; else noPreviousDrawings">
+        Continuer mon dessin
+      </button>
+      <ng-template #noPreviousDrawings>
+        <button mat-raised-button [disabled]="isDrawingNull" (click)="continueDrawing()">Continuer mon
+          dessin</button>
+        </ng-template>
+      </div>
+    </div>
   </div>
-</div>
