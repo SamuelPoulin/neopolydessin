@@ -6,25 +6,14 @@
   "scripts": {
     "start": "nodemon",
     "format": "prettier --config ../.prettierrc.yaml --write \"app/**/*\"",
-    "lint": "tslint --project tsconfig.json \"./app/**/*.ts\" --format stylish",
+    "lint": "eslint --color -c .eslintrc.js --ext .ts ./app",
     "test": "mocha",
     "coverage": "nyc mocha"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
       "pre-push": "npm run lint"
     }
-  },
-  "lint-staged": {
-    "src/**/*.{ts, js, css, scss}": [
-      "prettier --tab-width 2 --print-width 140 --arrow-parens always --single-quote --trailing-comma 'all' --write",
-      "git add"
-    ],
-    "package.json": [
-      "prettier --tab-width 2 --single-quote --trailing-comma 'all' --write",
-      "git add"
-    ]
   },
   "nyc": {
     "check-coverage": true,
@@ -77,8 +66,7 @@
     "reflect-metadata": "^0.1.10",
     "request": "^2.88.2",
     "serve-favicon": "~2.5.0",
-    "socket.io": "^3.1.0",
-    "tslint-defocus": "^2.0.6"
+    "socket.io": "^3.1.0"
   },
   "devDependencies": {
     "@types/body-parser": "1.17.1",
@@ -94,9 +82,16 @@
     "@types/node-uuid": "0.0.28",
     "@types/request": "^2.48.4",
     "@types/sinon": "^7.5.1",
+    "@typescript-eslint/eslint-plugin": "^4.15.0",
+    "@typescript-eslint/parser": "^4.15.0",
     "chai": "~4.2.0",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-unicorn": "^28.0.0",
     "husky": "^4.0.10",
-    "lint-staged": "^10.0.0",
     "mocha": "^6.2.2",
     "nodemon": "^2.0.2",
     "nyc": "^14.1.1",
@@ -105,9 +100,6 @@
     "rimraf": "3.0.0",
     "sinon": "^7.5.0",
     "ts-node": "^8.6.0",
-    "tslint": "~5.18.0",
-    "tslint-eslint-rules": "5.4.0",
-    "tslint-microsoft-contrib": "6.2.0",
     "typescript": "^3.5.3"
   }
 }

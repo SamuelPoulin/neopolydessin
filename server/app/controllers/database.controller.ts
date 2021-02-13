@@ -1,7 +1,6 @@
 import { inject, injectable } from 'inversify';
-import Types from '../types';
-
 import * as express from 'express';
+import Types from '../types';
 import { DatabaseService } from '../services/database.service';
 
 @injectable()

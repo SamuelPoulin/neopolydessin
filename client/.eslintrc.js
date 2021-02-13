@@ -24,7 +24,8 @@ module.exports = {
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "tsconfigRootDir": __dirname,
+        "project": "./tsconfig.json",
         "sourceType": "module"
     },
     "plugins": [
@@ -36,7 +37,8 @@ module.exports = {
         "@typescript-eslint",
     ],
     "ignorePatterns": [
-        '*.spec.ts'
+        '*.spec.ts',
+        '.eslintrc.js'
     ],
     "rules": {
         "@angular-eslint/component-class-suffix": "error",
