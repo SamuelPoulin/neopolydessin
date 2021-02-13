@@ -1,8 +1,6 @@
 package com.projet.clientleger.data.api.service
-import android.app.Service
-import android.content.Intent
-import android.os.Binder
-import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
 import com.projet.clientleger.data.model.MessageChat
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -14,58 +12,42 @@ import java.net.URISyntaxException
 //"http://10.0.2.2:3205"
 //"http://p3-204-dev.duckdns.org/"
 const val SOCKET_ROUTE = "http://p3-204-dev.duckdns.org/"
-class SocketService: Service() {
+object SocketService{
     private var mSocket: Socket? = try {
         val options: IO.Options = IO.Options()
         options.transports = arrayOf("websocket")
         options.upgrade = false
         IO.socket(SOCKET_ROUTE, options)
     } catch (e: URISyntaxException) { null }
-
-    private var chatListener: HashMap<String, ((Any?) -> Unit)?> = HashMap<String, ((Any?) -> Unit)?>()
-    private val binder: IBinder = LocalBinder()
-
-    inner class LocalBinder : Binder() {
-        // Return this instance of MyService so clients can call public methods
-        fun getService(): SocketService = this@SocketService
-    }
-
-    override fun onBind(intent: Intent?): IBinder {
-        return binder
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        println("SocketCreation: $mSocket------------------------------------------------------------------------------")
+    init {
         mSocket?.on("connect", Emitter.Listener { println("socket started-----------------------------------------------------------------------------------------------" + mSocket?.connected()) })
         mSocket?.on("disconnect", Emitter.Listener { println("socket stopped-----------------------------------------------------------------------------------------------" + mSocket?.connected()) })
-        //mSocket?.on("ReceiveMsg", Emitter.Listener { parameter -> {println(parameter)} })
         mSocket?.on("ReceiveMsg") { args ->
             val msg = Json.decodeFromString(MessageChat.serializer(), (args[0] as JSONObject).toString())
             println("$mSocket: msg received-$msg-------------------------------")
-            chatListener["receiveMsg"]?.invoke(msg) }
+            Handler(Looper.getMainLooper()).post { chatListener["receiveMsg"]?.invoke(msg) }
+        }
+        println("SocketCreation: $mSocket------------------------------------------------------------------------------")
         mSocket?.connect()
-        //println("socket started-----------------------------------------------------------------------------------------------" + mSocket?.connected())
     }
+        private var chatListener: HashMap<String, ((Any?) -> Unit)?> = HashMap<String, ((Any?) -> Unit)?>()
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mSocket?.disconnect()
-        println("SocketDestroyed: $mSocket---------------------------------------------------------------------------------------------------")
-    }
+        fun sendMessage(msg: MessageChat) {
+            println("SocketSendMessage------------------------------------------")
+            val obj: JSONObject = JSONObject()
+            obj.put("user", msg.user)
+            obj.put("content", msg.content)
+            obj.put("timestamp", msg.timestamp)
+            mSocket?.emit("SendMsg", obj)
+        }
 
-    override fun sendMessage(msg: MessageChat) {
-        mSocket?.emit("SendMsg", msg)
-    }
+        fun setCallbacks(fctName: String, fct: (Any?) -> Unit ) {
+            chatListener[fctName] = fct
+            println("setCallbakcs-$chatListener------------------------------------")
+        }
 
-    fun setCallbacks(fctName: String, fct: (Any?) -> Unit ) {
-        chatListener[fctName] = fct
-        println("setCallbakcs-$chatListener------------------------------------")
-    }
-
-    fun clearCallbacks() {
-        chatListener.clear()
-        println("clearCallbakcs-$chatListener------------------------------------")
-    }
-
+        fun clearCallbacks() {
+            chatListener.clear()
+            println("clearCallbakcs-$chatListener------------------------------------")
+        }
 }

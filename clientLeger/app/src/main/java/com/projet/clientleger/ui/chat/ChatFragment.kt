@@ -1,11 +1,6 @@
 package com.projet.clientleger.ui.chat
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,32 +28,15 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ChatFragment : Fragment(), ChatListener {
-    private lateinit var socketService: SocketService
-    private var mBound: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         println("fragCreation-----------------------------------$savedInstanceState")
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
-        val intent: Intent = Intent(activity, SocketService::class.java).also { intent ->
-            activity?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        }
+        SocketService.setCallbacks("receiveMsg",fct = {input: Any?->receiveMsg(input as MessageChat)})
+        SocketService.setCallbacks("sendMsg",fct = {input: Any?->sendMsg(input as MessageChat)})
     }
 
-    private val serviceConnection = object:  ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as SocketService.LocalBinder
-            socketService = binder.getService()
-            mBound = true
-            socketService.setCallbacks("receiveMsg",fct = {input: Any?->receiveMsg(input as MessageChat)})
-            socketService.setCallbacks("sendMsg",fct = {input: Any?->sendMsg(input as MessageChat)})
-            println("Bound? ----------------------------------$mBound")
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            mBound = false
-        }
-    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -76,6 +54,7 @@ class ChatFragment : Fragment(), ChatListener {
         val adjustedText:String = text.replace("(?m)^[ \t]*\r?\n".toRegex(), "")
         val timestamp = getTimestamp()
         addMessage(adjustedText, timestamp)
+        sendMsg(MessageChat("guiboy", adjustedText, System.currentTimeMillis()))
         chatBox.text.clear()
 
         //envoyer le message à la db
@@ -99,11 +78,12 @@ class ChatFragment : Fragment(), ChatListener {
     }
 
     override fun receiveMsg(msg: MessageChat) {
+        addMessage(msg.content, getTimestamp())
         println("ChatFragment msg received: $msg ------------------------------------------------------")
     }
 
     override fun sendMsg(msg: MessageChat) {
-        TODO("Not yet implemented")
+        SocketService.sendMessage(msg)
     }
 
     companion object {
@@ -126,11 +106,7 @@ class ChatFragment : Fragment(), ChatListener {
 
     override fun onStop() {
         super.onStop()
-        if(mBound){
-            activity?.unbindService(serviceConnection)
-            socketService.clearCallbacks()
-            mBound = false;
-        }
+        SocketService.clearCallbacks()
     }
 
     override fun onDestroy() {
