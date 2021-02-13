@@ -27,6 +27,7 @@ function initWindow() {
       slashes: true,
     })
   );
+
   //appWindow.setMenuBarVisibility(false)
 
   // Initialize the DevTools.

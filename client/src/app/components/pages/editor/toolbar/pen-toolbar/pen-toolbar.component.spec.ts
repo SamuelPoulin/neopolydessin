@@ -27,7 +27,7 @@ describe('PenToolbarComponent', () => {
     expect(component).toBeTruthy();
   });
   it('can get toolProperties', () => {
-    const editorService: EditorService = TestBed.get(EditorService);
+    const editorService: EditorService = TestBed.inject(EditorService);
     // @ts-ignore
     expect(component.toolProperties).toEqual(editorService.tools.get(ToolType.Pen).toolProperties);
   });

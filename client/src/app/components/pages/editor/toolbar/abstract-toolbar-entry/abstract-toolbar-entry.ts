@@ -1,11 +1,12 @@
-import { Input } from '@angular/core';
+import { Input, Directive } from '@angular/core';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { EditorService } from '@services/editor.service';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { ToolProperties } from 'src/app/models/tool-properties/tool-properties';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 
-export abstract class AbstractToolbarEntry<T extends ToolProperties> {
+@Directive()
+export abstract class AbstractToolbarEntryDirective<T extends ToolProperties> {
   @Input() thicknessSliderStep: number;
 
   protected constructor(protected editorService: EditorService, protected type: ToolType) {

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { MatDrawer } from '@angular/material';
+import { MatDrawer } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
 
@@ -16,7 +16,7 @@ import { Color } from 'src/app/utils/color/color';
   styleUrls: ['./toolbar.component.scss'],
 })
 export class ToolbarComponent {
-  static readonly SLIDER_STEP: number = 0.1; // todo
+  static readonly SLIDER_STEP: number = 0.1;
 
   @Input() stepThickness: number;
 
@@ -27,19 +27,22 @@ export class ToolbarComponent {
   @Output() guideButtonClicked: EventEmitter<boolean>;
   @Output() chooseExportSaveButtonClicked: EventEmitter<boolean>;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   ToolType: typeof ToolType = ToolType;
   toolTypeKeys: string[] = Object.values(ToolType);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   SelectedColorType: typeof SelectedColorType = SelectedColorType;
   selectedColor: SelectedColorType;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   ToolbarType: typeof ToolbarType = ToolbarType;
   toolbarType: ToolbarType;
 
-  @ViewChild('drawer', { static: false })
+  @ViewChild('drawer')
   private drawer: MatDrawer;
 
-  @ViewChild('colorPicker', { static: false })
+  @ViewChild('colorPicker')
   colorPicker: ColorPickerComponent;
 
   readonly toolbarIcons: Map<ToolType | string, string>;

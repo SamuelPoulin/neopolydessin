@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AbstractColorStripComponent } from 'src/app/components/shared/color-picker/color-strip/abstract-color-strip.component';
+import { AbstractColorStripDirective } from 'src/app/components/shared/color-picker/color-strip/abstract-color-strip.component';
 import { Color } from 'src/app/utils/color/color';
 
 @Component({
@@ -7,7 +7,7 @@ import { Color } from 'src/app/utils/color/color';
   templateUrl: '../abstract-color-strip.component.html',
   styleUrls: ['../abstract-color-strip.component.scss'],
 })
-export class AlphaComponent extends AbstractColorStripComponent {
+export class AlphaComponent extends AbstractColorStripDirective {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
 
   getFillStyle(width: number, height: number): string | CanvasGradient | CanvasPattern {

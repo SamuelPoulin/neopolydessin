@@ -52,7 +52,7 @@ export class HomeComponent {
       color: this.localSaveService.drawing.color,
       id: LocalSaveService.LOCAL_DRAWING_ID,
     };
-    this.router.navigate(['/'], { skipLocationChange: true }).then(() => this.router.navigate(['edit', params]));
+    this.router.navigate(['/'], { skipLocationChange: true }).then(async () => this.router.navigate(['edit', params]));
   }
 
   get isDrawingNull(): boolean {

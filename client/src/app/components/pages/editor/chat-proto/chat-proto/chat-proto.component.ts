@@ -1,8 +1,9 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { SocketService } from '@services/socket-service.service';
 import { Subscription } from 'rxjs';
+import { ChatMessage } from '../../../../../../../../common/communication/chat-message';
 
 @Component({
   selector: 'app-chat-proto',
@@ -10,8 +11,8 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./chat-proto.component.scss'],
 })
 export class ChatProtoComponent extends AbstractModalComponent implements OnInit {
-  @ViewChild('list', { static: false }) list: ElementRef;
-  @ViewChild('scroll', { static: false }) scroll: ElementRef;
+  @ViewChild('list') list: ElementRef;
+  @ViewChild('scroll') scroll: ElementRef;
   ioServiceSub: Subscription;
   message: string;
 
@@ -23,22 +24,30 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
     this.createIoComponentConnection();
   }
 
-  SendMessage(): void {
-    this.socketService.sendMessage(this.message);
-    this.addMsgToChat('tempPlayerName', this.message);
+  sendMessage(): void {
+    const msgToSend: ChatMessage = { user: 'allo', content: this.message, timestamp: Date.now() };
+    this.socketService.sendMessage(msgToSend);
+    this.addMsgToChat(msgToSend);
     this.message = '';
   }
 
   private createIoComponentConnection(): void {
-    this.ioServiceSub = this.socketService.receiveMessage().subscribe((message: string) => {
-      this.addMsgToChat('received', message);
+    this.ioServiceSub = this.socketService.receiveMessage().subscribe((message: ChatMessage) => {
+      this.addMsgToChat(message);
       this.scrollToBottom();
     });
   }
 
-  private addMsgToChat(playerName: string, message: string): void {
+  private addMsgToChat(message: ChatMessage): void {
     const msgToAdd = this.renderer.createElement('li');
-    msgToAdd.innerHTML = playerName + ': ' + message;
+    console.log(message);
+
+    const date = new Date(message.timestamp);
+
+    console.log(`${message.user} ${date.getHours()}:${date.getMinutes()} : ${message.content}`);
+
+    msgToAdd.innerHtml = message.user + date.getHours() + ':' + date.getMinutes() + ' : ' + message.content;
+
     this.renderer.appendChild(this.list.nativeElement, msgToAdd);
     this.scrollToBottom();
   }

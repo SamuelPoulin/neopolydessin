@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { AbstractCanvasDrawer } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
+import { AbstractCanvasDrawerDirective } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
 import { defaultErrorMessages, ErrorMessages } from 'src/app/components/shared/inputs/error-messages';
 import { ColorsService } from 'src/app/services/colors.service';
 import { Color } from 'src/app/utils/color/color';
@@ -13,7 +13,7 @@ import { MathUtils } from 'src/app/utils/math/math-utils';
   templateUrl: './color-picker.component.html',
   styleUrls: ['./color-picker.component.scss'],
 })
-export class ColorPickerComponent extends AbstractCanvasDrawer implements OnInit {
+export class ColorPickerComponent extends AbstractCanvasDrawerDirective implements OnInit {
   static readonly DEFAULT_SIZE: number = 300;
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   @Input() isVertical: boolean;
@@ -62,7 +62,7 @@ export class ColorPickerComponent extends AbstractCanvasDrawer implements OnInit
   }
 
   drawIndicator(position: Coordinate): void {
-    const { x, y } = position;
+    const { x, y }: { x: number; y: number } = position;
     const color = Color.hsl(this.color.h, this.color.s, 1 / 2);
     this.renderingContext.fillStyle = color.hexString;
     this.renderingContext.strokeStyle = color.negative.hexString;

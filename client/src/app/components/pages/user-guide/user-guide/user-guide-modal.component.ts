@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatSidenav } from '@angular/material/sidenav';
 import { GuideSubject } from 'src/app/components/pages/user-guide/user-guide/guide-subject.enum';
 import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
@@ -10,7 +10,7 @@ import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal
   styleUrls: ['./user-guide-modal.component.scss'],
 })
 export class UserGuideModalComponent extends AbstractModalComponent implements OnInit {
-  @ViewChild('sidenav', { static: false })
+  @ViewChild('sidenav')
   sidenav: MatSidenav;
   subjects: typeof GuideSubject = GuideSubject;
   selectedSubject: GuideSubject;

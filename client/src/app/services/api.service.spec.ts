@@ -3,7 +3,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { HttpXhrBackend } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedModule } from '@components/shared/shared.module';
 import { Drawing } from '@models/drawing';
 import { of } from 'rxjs';
@@ -19,8 +19,8 @@ describe('APIService', () => {
       providers: [{ provide: HttpXhrBackend, useClass: HttpTestingController }, APIService, MatSnackBar, Overlay],
       imports: [HttpClientTestingModule, SharedModule],
     });
-    httpTestingController = TestBed.get(HttpTestingController);
-    apiService = TestBed.get(APIService);
+    httpTestingController = TestBed.inject(HttpTestingController);
+    apiService = TestBed.inject(APIService);
     notification = apiService['notification'];
   });
   afterEach(() => {

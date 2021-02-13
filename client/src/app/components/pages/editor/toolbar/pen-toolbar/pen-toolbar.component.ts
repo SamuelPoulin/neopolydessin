@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { EditorService } from '@services/editor.service';
-import { AbstractToolbarEntry } from 'src/app/components/pages/editor/toolbar/abstract-toolbar-entry/abstract-toolbar-entry';
+import { AbstractToolbarEntryDirective } from 'src/app/components/pages/editor/toolbar/abstract-toolbar-entry/abstract-toolbar-entry';
 import { PenToolProperties } from 'src/app/models/tool-properties/creator-tool-properties/pen-tool-properties';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 
@@ -9,7 +9,7 @@ import { ToolType } from 'src/app/models/tools/tool-type.enum';
   templateUrl: './pen-toolbar.component.html',
   styleUrls: ['../toolbar/toolbar.component.scss'],
 })
-export class PenToolbarComponent extends AbstractToolbarEntry<PenToolProperties> {
+export class PenToolbarComponent extends AbstractToolbarEntryDirective<PenToolProperties> {
   constructor(editorService: EditorService) {
     super(editorService, ToolType.Pen);
   }

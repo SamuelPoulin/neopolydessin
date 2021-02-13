@@ -22,7 +22,7 @@ export class EditorUtils {
 
   static async viewToCanvas(view: DrawingSurfaceComponent, svg: SVGElement = view.svg): Promise<CanvasRenderingContext2D> {
     const image = new Image();
-    const { width, height } = view;
+    const { width, height }: { width: number; height: number } = view;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -48,12 +48,12 @@ export class EditorUtils {
     if (!data) {
       return undefined;
     }
-    const { x, y } = Coordinate.apply(point, Math.ceil);
+    const { x, y }: { x: number; y: number } = Coordinate.apply(point, Math.ceil);
     const getColorIndices = () => {
       const dataSize = 4;
       const rIndex = y * (width * dataSize) + x * dataSize;
 
-      // tslint:disable-next-line:no-magic-numbers
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       return [rIndex, rIndex + 1, rIndex + 2, rIndex + 3];
     };
 
