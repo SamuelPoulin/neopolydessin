@@ -116,7 +116,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   setToolbarState(opened: boolean): void {
-    opened ? this.toolbar.open() : this.toolbar.close();
+    if (opened) {
+      this.toolbar.open();
+    } else {
+      this.toolbar.close();
+    }
     this.keyboardListener.listening = !(opened || this.dialog.modalIsOpened);
   }
 

@@ -6,7 +6,7 @@ import { ToolProperties } from 'src/app/models/tool-properties/tool-properties';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 
 @Directive()
-export abstract class AbstractToolbarEntry<T extends ToolProperties> {
+export abstract class AbstractToolbarEntryDirective<T extends ToolProperties> {
   @Input() thicknessSliderStep: number;
 
   protected constructor(protected editorService: EditorService, protected type: ToolType) {

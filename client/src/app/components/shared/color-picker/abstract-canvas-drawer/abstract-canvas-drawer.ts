@@ -3,14 +3,18 @@ import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 
 @Directive()
-export abstract class AbstractCanvasDrawer implements OnInit, OnChanges, AfterViewInit {
+export abstract class AbstractCanvasDrawerDirective implements OnInit, OnChanges, AfterViewInit {
   static readonly DEFAULT_INDICATOR_SIZE: number = 20;
   static readonly DEFAULT_INDICATOR_LINE_WIDTH: number = 3;
 
-  @Input('color')
+  @Input()
   set color(color: Color) {
     const shouldUpdateColor = color && this.color;
-    shouldUpdateColor ? this.updateColor(color) : (this._color = color);
+    if (shouldUpdateColor) {
+      this.updateColor(color);
+    } else {
+      this._color = color;
+    }
   }
 
   get color(): Color {
@@ -27,8 +31,8 @@ export abstract class AbstractCanvasDrawer implements OnInit, OnChanges, AfterVi
 
   constructor() {
     this._color = Color.WHITE;
-    this.indicatorSize = AbstractCanvasDrawer.DEFAULT_INDICATOR_SIZE;
-    this.indicatorLineWidth = AbstractCanvasDrawer.DEFAULT_INDICATOR_LINE_WIDTH;
+    this.indicatorSize = AbstractCanvasDrawerDirective.DEFAULT_INDICATOR_SIZE;
+    this.indicatorLineWidth = AbstractCanvasDrawerDirective.DEFAULT_INDICATOR_LINE_WIDTH;
     this.mouseIsDown = false;
   }
 

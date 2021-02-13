@@ -19,7 +19,7 @@ describe('CustomInputComponent', () => {
   }));
 
   beforeEach(() => {
-    CustomInputComponent.id = 0;
+    CustomInputComponent.ID = 0;
     fixture = TestBed.createComponent(CustomInputComponent);
     component = fixture.componentInstance;
     component.required = false;

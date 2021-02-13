@@ -1,12 +1,12 @@
-export interface ErrorMessages<t> {
-  pattern?: t;
-  required?: t;
-  maxlength?: t;
-  minlength?: t;
-  max?: t;
-  min?: t;
+export interface ErrorMessages<T> {
+  pattern?: T;
+  required?: T;
+  maxlength?: T;
+  minlength?: T;
+  max?: T;
+  min?: T;
 
-  [key: string]: t | undefined;
+  [key: string]: T | undefined;
 }
 
 export const defaultErrorMessages = (errorMessages: ErrorMessages<string> = {}): ErrorMessages<string> => {

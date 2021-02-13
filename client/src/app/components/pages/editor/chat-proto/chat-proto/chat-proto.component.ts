@@ -24,7 +24,7 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
     this.createIoComponentConnection();
   }
 
-  SendMessage(): void {
+  sendMessage(): void {
     const msgToSend: ChatMessage = { user: 'allo', content: this.message, timestamp: Date.now() };
     this.socketService.sendMessage(msgToSend);
     this.addMsgToChat(msgToSend);

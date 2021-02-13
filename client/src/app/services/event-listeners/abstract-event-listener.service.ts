@@ -30,7 +30,7 @@ export abstract class AbstractEventListenerService<T extends Event> {
     return success || false;
   }
 
-  addEvents(events: ReadonlyArray<[string, EventAction<T> | undefined]>): void {
+  addEvents(events: readonly [string, EventAction<T> | undefined][]): void {
     events.forEach((event) => {
       this.addEvent(event[0], event[1]);
     });

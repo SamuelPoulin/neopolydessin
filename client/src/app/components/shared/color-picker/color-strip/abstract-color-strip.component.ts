@@ -1,11 +1,11 @@
 import { EventEmitter, Input, Output, Directive } from '@angular/core';
-import { AbstractCanvasDrawer } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
+import { AbstractCanvasDrawerDirective } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 import { MathUtils } from 'src/app/utils/math/math-utils';
 
 @Directive()
-export abstract class AbstractColorStripComponent extends AbstractCanvasDrawer {
+export abstract class AbstractColorStripDirective extends AbstractCanvasDrawerDirective {
   static readonly DEFAULT_LENGTH: number = 300;
   static readonly DEFAULT_THICKNESS: number = 50;
   static readonly DEFAULT_INDICATOR_SIZE: number = 10;
@@ -19,9 +19,9 @@ export abstract class AbstractColorStripComponent extends AbstractCanvasDrawer {
   constructor() {
     super();
     this.isVertical = false;
-    this.length = AbstractColorStripComponent.DEFAULT_LENGTH;
-    this.thickness = AbstractColorStripComponent.DEFAULT_THICKNESS;
-    this.indicatorSize = AbstractColorStripComponent.DEFAULT_INDICATOR_SIZE;
+    this.length = AbstractColorStripDirective.DEFAULT_LENGTH;
+    this.thickness = AbstractColorStripDirective.DEFAULT_THICKNESS;
+    this.indicatorSize = AbstractColorStripDirective.DEFAULT_INDICATOR_SIZE;
     this.colorChanged = new EventEmitter<Color>();
   }
 

@@ -16,7 +16,7 @@ import { Color } from 'src/app/utils/color/color';
   styleUrls: ['./toolbar.component.scss'],
 })
 export class ToolbarComponent {
-  static readonly SLIDER_STEP: number = 0.1; // todo
+  static readonly SLIDER_STEP: number = 0.1;
 
   @Input() stepThickness: number;
 
@@ -27,12 +27,15 @@ export class ToolbarComponent {
   @Output() guideButtonClicked: EventEmitter<boolean>;
   @Output() chooseExportSaveButtonClicked: EventEmitter<boolean>;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   ToolType: typeof ToolType = ToolType;
   toolTypeKeys: string[] = Object.values(ToolType);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   SelectedColorType: typeof SelectedColorType = SelectedColorType;
   selectedColor: SelectedColorType;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   ToolbarType: typeof ToolbarType = ToolbarType;
   toolbarType: ToolbarType;
 

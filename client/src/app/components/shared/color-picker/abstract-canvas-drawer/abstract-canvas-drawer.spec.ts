@@ -1,5 +1,5 @@
 import { ElementRef, SimpleChange, SimpleChanges, Directive } from '@angular/core';
-import { AbstractCanvasDrawer } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
+import { AbstractCanvasDrawerDirective } from 'src/app/components/shared/color-picker/abstract-canvas-drawer/abstract-canvas-drawer';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 import Spy = jasmine.Spy;
@@ -7,7 +7,7 @@ import createSpyObj = jasmine.createSpyObj;
 
 describe('AbstractCanvasDrawer', () => {
   @Directive()
-  class AbstractCanvasDrawerImpl extends AbstractCanvasDrawer {
+  class AbstractCanvasDrawerImpl extends AbstractCanvasDrawerDirective {
     canvas: ElementRef<HTMLCanvasElement>;
 
     calculateColorFromMouseEvent(event: MouseEvent): Color {
@@ -31,7 +31,7 @@ describe('AbstractCanvasDrawer', () => {
     }
   }
 
-  const component: AbstractCanvasDrawer = new AbstractCanvasDrawerImpl();
+  const component: AbstractCanvasDrawerDirective = new AbstractCanvasDrawerImpl();
   let drawAllSpy: Spy;
   let updateColorSpy: Spy;
 
