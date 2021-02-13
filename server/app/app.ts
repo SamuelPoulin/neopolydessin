@@ -1,8 +1,8 @@
+import * as fs from 'fs';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import * as express from 'express';
-import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import * as logger from 'morgan';
 import { APIController } from './controllers/api.controller';
@@ -10,8 +10,9 @@ import Types from './types';
 
 @injectable()
 export class Application {
-  private readonly internalError: number = 500;
   app: express.Application;
+
+  private readonly internalError: number = 500;
 
   constructor(@inject(Types.APIController) private apiController: APIController) {
     this.app = express();
@@ -48,7 +49,7 @@ export class Application {
     // development error handler
     // will print stacktrace
     if (this.app.get('env') === 'development') {
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
         res.status(err.status || this.internalError);
         res.send({
@@ -60,7 +61,7 @@ export class Application {
 
     // production error handler
     // no stacktraces leaked to user (in production env only)
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
       res.status(err.status || this.internalError);
       res.send({

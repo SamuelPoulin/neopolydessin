@@ -29,6 +29,7 @@ interface AccessToken {
 
 @injectable()
 export class DatabaseService {
+
   private static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -44,12 +45,16 @@ export class DatabaseService {
     }
   }
 
-  private static determineStatus(err: Error, results: Account | Account[]): number {
-    return err ? httpStatus.INTERNAL_SERVER_ERROR : results ? httpStatus.OK : httpStatus.NOT_FOUND;
+  static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
+    if (results.documents) {
+      res.status(results.statusCode).json(results.documents);
+    } else {
+      res.sendStatus(results.statusCode);
+    }
   }
 
-  static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
-    results.documents ? res.status(results.statusCode).json(results.documents) : res.sendStatus(results.statusCode);
+  private static determineStatus(err: Error, results: Account | Account[]): number {
+    return err ? httpStatus.INTERNAL_SERVER_ERROR : results ? httpStatus.OK : httpStatus.NOT_FOUND;
   }
 
   // Documentation de mongodb-memory-server sur Github
@@ -71,7 +76,11 @@ export class DatabaseService {
         process.env.MONGODB_KEY,
         DatabaseService.CONNECTION_OPTIONS,
         (err: mongoose.Error) => {
-          err ? console.error(err.message) : console.log('Connected to MongoDB');
+          if (err) {
+            console.error(err.message);
+          } else {
+            console.log('Connected to MongoDB Atlas Cloud');
+          }
         },
       );
     }
