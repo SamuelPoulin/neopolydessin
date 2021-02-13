@@ -30,6 +30,7 @@
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
             ],
+            "allowedCommonJsDependencies": ["socket.io-client"],
             "scripts": []
           },
           "configurations": {
