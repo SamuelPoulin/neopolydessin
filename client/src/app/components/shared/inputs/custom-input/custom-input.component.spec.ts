@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogModule, MatFormFieldModule, MatInputModule } from '@angular/material';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CustomInputComponent } from './custom-input.component';
@@ -17,7 +19,7 @@ describe('CustomInputComponent', () => {
   }));
 
   beforeEach(() => {
-    CustomInputComponent.id = 0;
+    CustomInputComponent.ID = 0;
     fixture = TestBed.createComponent(CustomInputComponent);
     component = fixture.componentInstance;
     component.required = false;

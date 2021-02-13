@@ -28,7 +28,7 @@ describe('EraserToolbarComponent', () => {
   });
 
   it('can get toolProperties', () => {
-    const editorService: EditorService = TestBed.get(EditorService);
+    const editorService: EditorService = TestBed.inject(EditorService);
     // @ts-ignore
     expect(component.toolProperties).toEqual(editorService.tools.get(ToolType.Eraser).toolProperties);
   });

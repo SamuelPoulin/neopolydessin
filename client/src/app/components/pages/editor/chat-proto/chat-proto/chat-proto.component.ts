@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { SocketService } from '@services/socket-service.service';
 import { Subscription } from 'rxjs';
@@ -11,8 +11,8 @@ import { ChatMessage } from '../../../../../../../../common/communication/chat-m
   styleUrls: ['./chat-proto.component.scss'],
 })
 export class ChatProtoComponent extends AbstractModalComponent implements OnInit {
-  @ViewChild('list', { static: false }) list: ElementRef;
-  @ViewChild('scroll', { static: false }) scroll: ElementRef;
+  @ViewChild('list') list: ElementRef;
+  @ViewChild('scroll') scroll: ElementRef;
   ioServiceSub: Subscription;
   message: string;
 
@@ -24,7 +24,7 @@ export class ChatProtoComponent extends AbstractModalComponent implements OnInit
     this.createIoComponentConnection();
   }
 
-  SendMessage(): void {
+  sendMessage(): void {
     const msgToSend: ChatMessage = { user: 'allo', content: this.message, timestamp: Date.now() };
     this.socketService.sendMessage(msgToSend);
     this.addMsgToChat(msgToSend);

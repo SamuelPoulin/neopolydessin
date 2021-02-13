@@ -26,7 +26,7 @@ describe('EraserTool', () => {
       providers: [EditorService],
     }).compileComponents();
 
-    eraser = new EraserTool(TestBed.get(EditorService));
+    eraser = new EraserTool(TestBed.inject(EditorService));
     fixture = TestBed.createComponent(DrawingSurfaceComponent);
     drawingSurface = fixture.componentInstance;
     fixture.detectChanges();

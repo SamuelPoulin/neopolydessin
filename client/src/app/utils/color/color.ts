@@ -63,6 +63,7 @@ export class Color implements ColorComponents {
    *
    */
   private constructor(components: ColorComponents, doNotCompute: boolean = false) {
+    // eslint-disable-next-line @typescript-eslint/typedef
     const { h, s, l, r, g, b, a } = components;
     if (doNotCompute) {
       this.h = MathUtils.fitAngle(h || 0);
@@ -78,16 +79,16 @@ export class Color implements ColorComponents {
       this.l = MathUtils.fit(l);
 
       const f = (n: number) => {
-        // tslint:disable-next-line:no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         const k = (n + this.h / 30) % 12;
         const A = this.s * Math.min(this.l, 1 - this.l);
-        // tslint:disable-next-line:no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         return this.l - A * Math.max(Math.min(k - 3, 9 - k, 1), -1);
       };
       this.r = f(0);
-      // tslint:disable-next-line:no-magic-numbers
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       this.g = f(8);
-      // tslint:disable-next-line:no-magic-numbers
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       this.b = f(4);
     } else if (!(r === undefined || g === undefined || b === undefined)) {
       this.r = MathUtils.fit(r);
@@ -113,6 +114,7 @@ export class Color implements ColorComponents {
 
   /**
    * Creates a color from RGBA values
+   *
    * @param r red from 0 to 1
    * @param g green from 0 to 1
    * @param b blue from 0 to 1
@@ -126,12 +128,13 @@ export class Color implements ColorComponents {
    * Creates a color from values between 0 and 255
    */
   static rgb255(r255: number = 0, g255: number = 0, b255: number = 0, a: number = 1): Color {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return Color.rgb(r255 / 255, g255 / 255, b255 / 255, a);
   }
 
   /**
    * Creates a color form HSL values
+   *
    * @param h hue between 0 and 360
    * @param s saturation between 0 and 1
    * @param l lightness between 0 and 1
@@ -147,7 +150,7 @@ export class Color implements ColorComponents {
   static hex(hexString: string, a: number = 1): Color {
     const r = parseInt(hexString.substr(0, 2), 16);
     const g = parseInt(hexString.substr(2, 2), 16);
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     const b = parseInt(hexString.substr(4, 2), 16);
     return Color.rgb255(r, g, b, a);
   }
@@ -166,18 +169,18 @@ export class Color implements ColorComponents {
     let h: number | undefined;
     switch (M) {
       case r:
-        // tslint:disable-next-line:no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         h = ((g - b) / C) % 6;
         break;
       case g:
         h = (b - r) / C + 2;
         break;
       case b:
-        // tslint:disable-next-line:no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         h = (r - g) / C + 4;
         break;
     }
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return MathUtils.fitAngle(h ? 60 * h : 0);
   }
 
@@ -209,12 +212,13 @@ export class Color implements ColorComponents {
 
   /**
    * Get HSL string `hsl(h,s%,l%)`
+   *
    * @param h hue (0 to 360)
    * @param s saturation (0 to 1)
    * @param l lightness (0 to 1)
    */
   static getHslString(h: number, s: number, l: number): string {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return `hsl(${h}, ${s * 100}%, ${l * 100}%)`;
   }
 
@@ -222,6 +226,7 @@ export class Color implements ColorComponents {
 
   /**
    * Find the euclidean difference between this color and c2
+   *
    * @param c2 the color to compare this to
    * @return the difference value between 0 and 1
    */
@@ -231,7 +236,7 @@ export class Color implements ColorComponents {
     const b2 = Math.pow(c2.b - this.b, 2);
 
     /* divide by 3 to get a value between 0 and 1 */
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return (r2 + g2 + b2) / 3;
   }
 
@@ -261,7 +266,7 @@ export class Color implements ColorComponents {
    * Get RGB string `rgb(255,255,255)`
    */
   get rgbString(): string {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return `rgb(${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)})`;
   }
 
@@ -280,17 +285,17 @@ export class Color implements ColorComponents {
   }
 
   get r255(): number {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return Math.round(this.r * 255);
   }
 
   get g255(): number {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return Math.round(this.g * 255);
   }
 
   get b255(): number {
-    // tslint:disable-next-line:no-magic-numbers
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return Math.round(this.b * 255);
   }
 

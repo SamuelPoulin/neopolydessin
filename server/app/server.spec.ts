@@ -33,19 +33,6 @@ describe('Server', () => {
     });
   });
 
-  it('should exit the process when init with port 80 is called without higher privileges', (done: Mocha.Done) => {
-    const stub = sinon.stub(process, 'exit');
-
-    server.init(PROD_PORT);
-
-    setTimeout(() => {
-      process.env.USER === 'root' ? expect(stub.called).to.equal(false) : expect(stub.called).to.equal(true);
-
-      stub.restore();
-      done();
-    });
-  });
-
   it('should throw an error if two servers try to init on the same port', (done: Mocha.Done) => {
     const spy = sinon.spy(anotherServer, 'onError' as any);
     const stub = sinon.stub(process, 'exit');
@@ -64,7 +51,7 @@ describe('Server', () => {
   });
 
   it('should return the correct port', (done: Mocha.Done) => {
-    process.env.NODE_ENV === 'test' ? expect(Server.port).to.equal(3000) : expect(Server.port).to.equal(80);
+    process.env.NODE_ENV === 'test' ? expect(Server.port).to.equal(DEV_PORT) : expect(Server.port).to.equal(PROD_PORT);
     done();
   });
 

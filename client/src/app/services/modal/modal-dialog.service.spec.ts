@@ -2,7 +2,7 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { CreateDrawingModalComponent } from 'src/app/components/pages/home/create-drawing-modal/create-drawing-modal.component';
 import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { ConfirmModalComponent } from 'src/app/components/shared/abstract-modal/confirm-modal/confirm-modal/confirm-modal.component';
@@ -24,7 +24,7 @@ describe('ModalDialogService', () => {
   );
 
   beforeEach(() => {
-    service = TestBed.get(ModalDialogService);
+    service = TestBed.inject(ModalDialogService);
     openSpy = spyOn(service, 'open').and.callFake(
       (): MatDialogRef<any> => {
         service.openDialogs.push({} as any);

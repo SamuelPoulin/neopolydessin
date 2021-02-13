@@ -4,7 +4,10 @@ import { CustomInputComponent } from '@components/shared/inputs/custom-input/cus
 import { NumberInputComponent } from '@components/shared/inputs/number-input/number-input.component';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogModule, MatFormFieldModule, MatInputModule, MatSliderModule } from '@angular/material';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSliderModule } from '@angular/material/slider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NumericProperty } from '@tool-properties/props/numeric-property/numeric-property';
 import { NumericPropertyInputComponent } from './numeric-property-input.component';
@@ -23,11 +26,10 @@ describe('NumericPropertyInputComponent', () => {
         MatInputModule,
         FormsModule,
         ReactiveFormsModule,
-        MatSliderModule
+        MatSliderModule,
       ],
-      declarations: [NumericPropertyInputComponent, NumberInputComponent, CustomInputComponent]
-    })
-      .compileComponents();
+      declarations: [NumericPropertyInputComponent, NumberInputComponent, CustomInputComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
