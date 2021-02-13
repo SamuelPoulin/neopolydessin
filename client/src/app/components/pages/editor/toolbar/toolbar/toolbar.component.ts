@@ -36,10 +36,10 @@ export class ToolbarComponent {
   ToolbarType: typeof ToolbarType = ToolbarType;
   toolbarType: ToolbarType;
 
-  @ViewChild('drawer', { static: false })
+  @ViewChild('drawer')
   private drawer: MatDrawer;
 
-  @ViewChild('colorPicker', { static: false })
+  @ViewChild('colorPicker')
   colorPicker: ColorPickerComponent;
 
   readonly toolbarIcons: Map<ToolType | string, string>;

@@ -11,8 +11,8 @@ import { ChatMessage } from '../../../../../../../../common/communication/chat-m
   styleUrls: ['./chat-proto.component.scss'],
 })
 export class ChatProtoComponent extends AbstractModalComponent implements OnInit {
-  @ViewChild('list', { static: false }) list: ElementRef;
-  @ViewChild('scroll', { static: false }) scroll: ElementRef;
+  @ViewChild('list') list: ElementRef;
+  @ViewChild('scroll') scroll: ElementRef;
   ioServiceSub: Subscription;
   message: string;
 

@@ -1,11 +1,12 @@
 /* tslint:disable:no-magic-numbers */
-import { ElementRef } from '@angular/core';
+import { ElementRef, Directive } from '@angular/core';
 import { AbstractColorStripComponent } from 'src/app/components/shared/color-picker/color-strip/abstract-color-strip.component';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 import createSpyObj = jasmine.createSpyObj;
 
 describe('AbstractColorStripComponent', () => {
+  @Directive()
   class AbstractColorStripComponentImpl extends AbstractColorStripComponent {
     get value(): number {
       return 0;

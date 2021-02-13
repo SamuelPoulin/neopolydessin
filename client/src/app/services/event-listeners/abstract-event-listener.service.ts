@@ -1,5 +1,7 @@
+import { Injectable } from '@angular/core';
 export type EventAction<T> = (event: T) => boolean | void;
 export type EventsHandlingMap<T> = Map<string, EventAction<T>>;
+@Injectable()
 export abstract class AbstractEventListenerService<T extends Event> {
   protected readonly eventsHandlingMap: EventsHandlingMap<T>;
   defaultEventAction: EventAction<T>;

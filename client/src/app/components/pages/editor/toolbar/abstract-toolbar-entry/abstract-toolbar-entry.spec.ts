@@ -9,7 +9,9 @@ import { CreatorToolProperties } from 'src/app/models/tool-properties/creator-to
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { ColorsService } from 'src/app/services/colors.service';
 import { EditorService } from 'src/app/services/editor.service';
+import { Directive } from '@angular/core';
 
+@Directive()
 export class AbstractToolbarEntryMock extends AbstractToolbarEntry<CreatorToolProperties> {
   constructor(editorService: EditorService) {
     super(editorService, 'MockType' as ToolType);

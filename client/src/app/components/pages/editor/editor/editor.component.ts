@@ -20,10 +20,10 @@ import { EditorParams } from './editor-params';
   styleUrls: ['./editor.component.scss'],
 })
 export class EditorComponent implements OnInit, AfterViewInit {
-  @ViewChild('drawingSurface', { static: false })
+  @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
-  @ViewChild('toolbar', { static: false }) toolbar: ToolbarComponent;
+  @ViewChild('toolbar') toolbar: ToolbarComponent;
 
   private _currentToolType: ToolType;
   private keyboardListener: EditorKeyboardListener;

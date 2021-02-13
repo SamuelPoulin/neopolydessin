@@ -10,7 +10,7 @@ import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal
   styleUrls: ['./user-guide-modal.component.scss'],
 })
 export class UserGuideModalComponent extends AbstractModalComponent implements OnInit {
-  @ViewChild('sidenav', { static: false })
+  @ViewChild('sidenav')
   sidenav: MatSidenav;
   subjects: typeof GuideSubject = GuideSubject;
   selectedSubject: GuideSubject;

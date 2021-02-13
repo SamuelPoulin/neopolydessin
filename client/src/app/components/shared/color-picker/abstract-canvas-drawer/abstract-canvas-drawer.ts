@@ -1,7 +1,8 @@
-import { AfterViewInit, ElementRef, HostListener, Input, OnChanges, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
+import { AfterViewInit, ElementRef, HostListener, Input, OnChanges, OnInit, SimpleChange, SimpleChanges, Directive } from '@angular/core';
 import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 
+@Directive()
 export abstract class AbstractCanvasDrawer implements OnInit, OnChanges, AfterViewInit {
   static readonly DEFAULT_INDICATOR_SIZE: number = 20;
   static readonly DEFAULT_INDICATOR_LINE_WIDTH: number = 3;
