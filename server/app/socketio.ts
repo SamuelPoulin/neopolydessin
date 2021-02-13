@@ -16,7 +16,8 @@ export class SocketIo {
         this.io = new Server(server, {
             cors: {
                 origin: '*'
-            }
+            },
+            transports: ['websocket']
         });
         this.bindIoEvents();
     }

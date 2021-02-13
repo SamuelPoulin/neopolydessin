@@ -17,6 +17,7 @@ export class SocketService {
   constructor() {
     this.manager = new Manager(this.url, {
       reconnectionDelayMax: 10000,
+      transports: ['websocket'],
     });
 
     this.socket = this.manager.socket('/');
