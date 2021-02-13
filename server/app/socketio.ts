@@ -27,7 +27,7 @@ export class SocketIo {
             console.log(`Connected with ${socket.id} \n`);
 
             socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string) => {
-                for (let value of this.players.values()) {
+                for (const value of this.players.values()) {
                     if (value === playerName) {
                         this.io.to(socket.id).emit('usernameTaken');
                         return;
