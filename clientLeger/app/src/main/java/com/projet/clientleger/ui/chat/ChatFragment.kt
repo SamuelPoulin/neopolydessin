@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.model.MessageChat
@@ -28,11 +29,13 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ChatFragment : Fragment(), ChatListener {
+    private var messages: ArrayList<MessageChat> = ArrayList<MessageChat>()
     override fun onCreate(savedInstanceState: Bundle?) {
         println("fragCreation-----------------------------------$savedInstanceState")
         super.onCreate(savedInstanceState)
         arguments?.let {
         }
+        messages.add(MessageChat("me", "testM", 0))
         SocketService.setCallbacks("receiveMsg",fct = {input: Any?->receiveMsg(input as MessageChat)})
         SocketService.setCallbacks("sendMsg",fct = {input: Any?->sendMsg(input as MessageChat)})
     }
@@ -48,6 +51,12 @@ class ChatFragment : Fragment(), ChatListener {
         sendButton.setOnClickListener(){
             sendButton()
         }
+        val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
+        val adapter = MessagesAdapter(messages)
+        val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(activity)
+        mLinearLayoutManager.stackFromEnd = true
+        rvMessages.layoutManager = LinearLayoutManager(activity)
+        rvMessages.adapter = adapter
     }
     private fun sendButton(){
         val text:String = (chatBox.text).toString()
@@ -56,7 +65,7 @@ class ChatFragment : Fragment(), ChatListener {
         addMessage(adjustedText, timestamp)
         sendMsg(MessageChat("guiboy", adjustedText, System.currentTimeMillis()))
         chatBox.text.clear()
-
+        println("$messages---------------------------------------")
         //envoyer le message à la db
         //ajoute le message à la boite de chat locale
     }
@@ -67,13 +76,16 @@ class ChatFragment : Fragment(), ChatListener {
     private fun addMessage(text:String, timestamp:String){
         if(text.isNotBlank()){
             val formattedText:String = ("[$timestamp] $text")
-            val messageView:TextView = TextView(activity)
-            messageView.textSize = 20f
-            messageView.text = formattedText
-            messageBox.addView(messageView)
-            scrollbar.post{
-                scrollbar.fullScroll(View.FOCUS_DOWN)
-            }
+            messages.add(MessageChat("me", text, System.currentTimeMillis()))
+            rvMessages.adapter?.notifyItemInserted(messages.size-1)
+            rvMessages.scrollToPosition(messages.size-1)
+//            val messageView:TextView = TextView(activity)
+//            messageView.textSize = 20f
+//            messageView.text = formattedText
+//            messageBox.addView(messageView)
+//            scrollbar.post{
+//                scrollbar.fullScroll(View.FOCUS_DOWN)
+//            }
         }
     }
 

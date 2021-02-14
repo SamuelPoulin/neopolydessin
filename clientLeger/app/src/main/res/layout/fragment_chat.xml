@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="200dp"
     android:layout_height="match_parent"
     tools:context=".ui.chat.ChatFragment"
     android:orientation="vertical">
 
-    <ScrollView
-        android:id="@+id/scrollbar"
-        android:layout_width="fill_parent"
-        android:layout_height="690dp"
-        android:layout_weight="1"
-        android:background="#9ea0b4">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/chatSendBox"/>
+<!--    <androidx.core.widget.NestedScrollView-->
+<!--        android:id="@+id/scrollbar"-->
+<!--        android:layout_width="fill_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_weight="1">-->
 
-        <LinearLayout
-            android:id="@+id/messageBox"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+<!--        <LinearLayout-->
+<!--            android:id="@+id/messageBox"-->
+<!--            android:layout_width="fill_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical">-->
 
-            <TextView
-                android:id="@+id/chatText"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="works!"
-                android:textSize="20sp" />
-        </LinearLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/chatText"-->
+<!--                android:layout_width="fill_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="works!"-->
+<!--                android:textSize="20sp" />-->
+<!--        </LinearLayout>-->
 
-    </ScrollView>
+<!--    </androidx.core.widget.NestedScrollView>-->
 
     <LinearLayout
+        android:id="@+id/chatSendBox"
         android:layout_width="200dp"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        >
 
         <EditText
             android:id="@+id/chatBox"
@@ -50,4 +57,4 @@
             android:src="@drawable/sendmessageicon" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
