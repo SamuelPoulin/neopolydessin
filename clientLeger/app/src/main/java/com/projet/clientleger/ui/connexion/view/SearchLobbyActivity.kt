@@ -28,5 +28,17 @@ class SearchLobbyActivity : AppCompatActivity() {
         games.add(GameInfo("lobby","Jean","normal","9/10"))
         rvGames.adapter?.notifyItemInserted(games.size-1)
         rvGames.scrollToPosition(games.size-1)
+
+        games.add(GameInfo("partie","Serge","different","5/7"))
+        rvGames.adapter?.notifyItemInserted(games.size-1)
+        rvGames.scrollToPosition(games.size-1)
+
+        games.add(GameInfo("ma game","Fatoumata","GRUG","yes"))
+        rvGames.adapter?.notifyItemInserted(games.size-1)
+        rvGames.scrollToPosition(games.size-1)
+
+        println(games.size)
+
+
     }
 }

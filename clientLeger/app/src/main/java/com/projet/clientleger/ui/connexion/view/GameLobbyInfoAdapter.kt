@@ -12,6 +12,10 @@ import com.projet.clientleger.data.model.MessageChat
 
 class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
+        val lobbyNameTextView: TextView = itemView.findViewById<TextView>(R.id.lobbyName)
+        val gameOwnerTextView: TextView = itemView.findViewById<TextView>(R.id.gameOwner)
+        val gameModeTextView: TextView = itemView.findViewById<TextView>(R.id.gameMode)
+        val gameCapacityTextView: TextView = itemView.findViewById<TextView>(R.id.gameCapacity)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameLobbyInfoAdapter.ViewHolder {
@@ -23,7 +27,10 @@ class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adap
     }
 
     override fun onBindViewHolder(viewHolder: GameLobbyInfoAdapter.ViewHolder, position: Int) {
-        //viewHolder.messageTextView.text = games[position].content
+        viewHolder.lobbyNameTextView.text = games[position].lobbyName
+        viewHolder.gameOwnerTextView.text = games[position].lobbyOwner
+        viewHolder.gameModeTextView.text = games[position].gameMode
+        viewHolder.gameCapacityTextView.text = games[position].gameCapacity
 
     }
     override fun getItemCount(): Int {
