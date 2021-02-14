@@ -12,7 +12,7 @@ import Types from './types';
 export class Application {
   app: express.Application;
 
-  private readonly internalError: number = 500;
+  private readonly INTERNAL_ERROR: number = 500;
 
   constructor(@inject(Types.APIController) private apiController: APIController) {
     this.app = express();
@@ -51,7 +51,7 @@ export class Application {
     if (this.app.get('env') === 'development') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-        res.status(err.status || this.internalError);
+        res.status(err.status || this.INTERNAL_ERROR);
         res.send({
           message: err.message,
           error: err,
@@ -63,7 +63,7 @@ export class Application {
     // no stacktraces leaked to user (in production env only)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      res.status(err.status || this.internalError);
+      res.status(err.status || this.INTERNAL_ERROR);
       res.send({
         message: err.message,
         error: {},

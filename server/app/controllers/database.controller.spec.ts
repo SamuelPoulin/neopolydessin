@@ -12,7 +12,7 @@ import { DatabaseService } from '../services/database.service';
 import Types from '../types';
 import { DatabaseController } from './database.controller';
 
-import Drawing from '../../models/drawing';
+import Drawing from '../../models/account';
 
 describe('Database Controller', () => {
   let application: Application;
