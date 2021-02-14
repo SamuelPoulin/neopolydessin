@@ -29,11 +29,11 @@ export class SocketIo {
       socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string) => {
         for (const value of this.players.values()) {
           if (value === playerName) {
-            this.io.to(socket.id).emit('usernameTaken');
+            this.io.to(socket.id).emit(SocketConnection.INVALID_USERNAME);
             return;
           }
         }
-        this.io.to(socket.id).emit('usernameValid');
+        this.io.to(socket.id).emit(SocketConnection.VALID_USERNAME);
         this.players.set(socket.id, playerName);
         socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
       });
