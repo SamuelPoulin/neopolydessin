@@ -30,11 +30,12 @@
         </androidx.appcompat.widget.Toolbar>
 
         <LinearLayout
+            android:id="@+id/lobbyHeader"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/lobbyToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
 
             <TextView
                 android:id="@+id/textView"
@@ -79,5 +80,15 @@
                 android:textAlignment="center"
                 />
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lobbyHeader" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
