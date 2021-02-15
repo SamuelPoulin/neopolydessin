@@ -41,4 +41,9 @@ class SearchLobbyActivity : AppCompatActivity() {
 
 
     }
+    private fun addGameLobby(game:GameInfo){
+        games.add(game)
+        rvGames.adapter?.notifyItemInserted(games.size-1)
+        rvGames.scrollToPosition(games.size-1)
+    }
 }
