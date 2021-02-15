@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.GameInfo
+import kotlinx.android.synthetic.main.activity_search_lobby.*
 import kotlinx.android.synthetic.main.fragment_chat.*
 
 class SearchLobbyActivity : AppCompatActivity() {
@@ -24,22 +25,6 @@ class SearchLobbyActivity : AppCompatActivity() {
         val adapter = GameLobbyInfoAdapter(games)
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
-
-        games.add(GameInfo("lobby","Jean","normal","9/10"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        games.add(GameInfo("partie","Serge","different","5/7"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        games.add(GameInfo("ma game","Fatoumata","GRUG","yes"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        println(games.size)
-
-
     }
     private fun addGameLobby(game:GameInfo){
         games.add(game)
