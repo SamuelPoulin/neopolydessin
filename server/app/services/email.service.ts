@@ -6,8 +6,7 @@ import * as request from 'request';
 export class EmailService {
   async sendEmail(userEmail: string, dataUrl: string, fileName: string, extension: string): Promise<string> {
     return new Promise<string>((resolve) => {
-      let fileContent: string | Buffer;
-      fileContent = extension !== 'svg' ? Buffer.from(dataUrl, 'base64') : dataUrl;
+      const fileContent: string | Buffer = extension !== 'svg' ? Buffer.from(dataUrl, 'base64') : dataUrl;
       const options = {
         method: 'POST',
         url: '',
@@ -22,7 +21,7 @@ export class EmailService {
           }
         }
       };
-      request(options, (err: string | undefined, response: { body: string; }) => {
+      request(options, (err: string | undefined, response: { body: string }) => {
         console.log(response.body);
         resolve(response.body);
       });
