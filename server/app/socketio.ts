@@ -26,14 +26,18 @@ export class SocketIo {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
       console.log(`Connected with ${socket.id} \n`);
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string) => {
-        for (const value of this.players.values()) {
+      socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string, callback) => {
+        for (const value of this.players.values()) {
           if (value === playerName) {
-            this.io.to(socket.id).emit(SocketConnection.INVALID_USERNAME);
+            callback({
+              status: 'Invalid'
+            });
             return;
           }
         }
-        this.io.to(socket.id).emit(SocketConnection.VALID_USERNAME);
+        callback({
+          status: 'Valid'
+        });
         this.players.set(socket.id, playerName);
         socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
       });
