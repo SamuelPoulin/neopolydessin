@@ -35,21 +35,16 @@ chat-message {
   max-width: 50%;
 }
 
+system-message {
+  display: flex;
+  align-self: center;
+}
+
 #chat-logo {
   height: 35px;
   width: 35px;
 
   margin: 0px 15px 0px 25px;
-}
-
-.chat-div-1 {
-  background-color: pink;
-  height: 500px;
-}
-
-.chat-div-2 {
-  background-color: yellow;
-  height: 500px;
 }
 
 #emoji-button,
