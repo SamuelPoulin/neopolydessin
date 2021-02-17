@@ -26,28 +26,35 @@ class SearchLobbyActivity : AppCompatActivity() {
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
 
+        games.add(GameInfo("123141", "name", "Jesus", "gamemode", "capacity"))
+        rvGames.adapter?.notifyItemInserted(games.size-1)
+        rvGames.scrollToPosition(games.size-1)
+
+        games.add(GameInfo("1231311", "name", "gros gars", "gamemode", "capacity"))
+        rvGames.adapter?.notifyItemInserted(games.size-1)
+        rvGames.scrollToPosition(games.size-1)
+
         games.add(GameInfo("123", "name", "owner", "gamemode", "capacity"))
         rvGames.adapter?.notifyItemInserted(games.size-1)
         rvGames.scrollToPosition(games.size-1)
 
-    }
+        removeGameWithID("123")
 
-    override fun onBackPressed() {
-        super.onBackPressed()
+    }
+    private fun removeGameWithID(id:String){
         //algo pour trouver les items par tag (pour remove). sera plus facile lorsqu'on aura une map
         //val tag = "tag"
-        for(game in games){
-            if(game.lobbyid == "123"){
+        for((index,game) in games.withIndex()){
+            if(game.lobbyid == id){
                 println("TAG TROUVÉ")
-                try{
-                    findViewById<LinearLayout>(123).removeAllViews()
-                }
-                catch(e:ExecutionException){
-                    println("oh no")
-                }
+                games.remove(game)
+                rvGames.adapter?.notifyItemRemoved(index)
+                rvGames.adapter?.notifyItemRangeChanged(index,games.size)
+                break
             }
         }
     }
+
     private fun addGameLobby(game:GameInfo){
         games.add(game)
         rvGames.adapter?.notifyItemInserted(games.size-1)
