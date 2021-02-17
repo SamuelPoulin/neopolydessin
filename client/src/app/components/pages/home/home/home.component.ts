@@ -36,10 +36,6 @@ export class HomeComponent {
     this.dialog.openByName(ModalType.GALLERY);
   }
 
-  openChat(): void {
-    this.dialog.openByName(ModalType.CHAT);
-  }
-
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent): void {
     this.keyboardListener.handle(event);
