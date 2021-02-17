@@ -12,6 +12,7 @@ import com.projet.clientleger.data.model.MessageChat
 
 class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
+        val lobbyLinearLayout: LinearLayout = itemView.findViewById<LinearLayout>(R.id.lobbyGame)
         val lobbyNameTextView: TextView = itemView.findViewById<TextView>(R.id.lobbyName)
         val gameOwnerTextView: TextView = itemView.findViewById<TextView>(R.id.gameOwner)
         val gameModeTextView: TextView = itemView.findViewById<TextView>(R.id.gameMode)
@@ -27,6 +28,7 @@ class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adap
     }
 
     override fun onBindViewHolder(viewHolder: GameLobbyInfoAdapter.ViewHolder, position: Int) {
+        viewHolder.lobbyLinearLayout.setTag(games[position].lobbyid.toInt())
         viewHolder.lobbyNameTextView.text = games[position].lobbyName
         viewHolder.gameOwnerTextView.text = games[position].lobbyOwner
         viewHolder.gameModeTextView.text = games[position].gameMode
