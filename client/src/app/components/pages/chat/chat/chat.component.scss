@@ -57,6 +57,16 @@ system-message {
   background-color: #f8f8f8;
 }
 
+#emoji-picker-anchor {
+  position: relative;
+}
+
+#emoji-picker {
+  position: absolute;
+  top: -445px;
+  left: 50%;
+}
+
 #message-textbox {
   display: flex;
   flex-grow: 1;
