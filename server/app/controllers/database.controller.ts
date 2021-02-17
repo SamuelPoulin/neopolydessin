@@ -44,6 +44,7 @@ export class DatabaseController {
     this.router.post('/auth/register', [
       body('email').isEmail(),
       body('password').isLength({ min: 6 }),
+      // eslint-disable-next-line @typescript-eslint/typedef
       body('passwordConfirm').custom((value, { req }) => {
         if (value !== req.body.password) {
           throw new Error('Passwords do not match');

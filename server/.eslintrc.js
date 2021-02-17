@@ -18,7 +18,6 @@ module.exports = {
         "node": true
     },
     "extends": [
-        "plugin:@angular-eslint/recommended",
         "prettier",
         "prettier/@typescript-eslint"
     ],
@@ -30,8 +29,6 @@ module.exports = {
     },
     "plugins": [
         "eslint-plugin-import",
-        "@angular-eslint/eslint-plugin",
-        "eslint-plugin-jsdoc",
         "eslint-plugin-prefer-arrow",
         "eslint-plugin-unicorn",
         "@typescript-eslint",
@@ -41,16 +38,6 @@ module.exports = {
         '.eslintrc.js'
     ],
     "rules": {
-        "@angular-eslint/component-class-suffix": "error",
-        "@angular-eslint/directive-class-suffix": "error",
-        "@angular-eslint/no-host-metadata-property": "error",
-        "@angular-eslint/no-input-rename": "error",
-        "@angular-eslint/no-inputs-metadata-property": "error",
-        "@angular-eslint/no-output-on-prefix": "error",
-        "@angular-eslint/no-output-rename": "error",
-        "@angular-eslint/no-outputs-metadata-property": "error",
-        "@angular-eslint/use-lifecycle-interface": "error",
-        "@angular-eslint/use-pipe-transform-interface": "error",
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": [
             "error",
@@ -125,6 +112,12 @@ module.exports = {
 
             {
                 selector: 'classProperty',
+                modifiers: ['readonly'],
+                format: ['UPPER_CASE']
+            },
+            
+            {
+                selector: 'classProperty',
                 modifiers: ['private', 'static'],
                 format: ['UPPER_CASE']
             },
@@ -137,7 +130,7 @@ module.exports = {
 
             {
                 selector: 'default',
-                format: ['camelCase'],
+                format: ['camelCase', 'PascalCase'],
                 leadingUnderscore: 'allow',
                 trailingUnderscore: 'allow',
             },
@@ -248,9 +241,6 @@ module.exports = {
         "id-match": "error",
         "import/no-deprecated": "warn",
         "import/order": "error",
-        "jsdoc/check-alignment": "error",
-        "jsdoc/newline-after-description": "error",
-        "jsdoc/no-types": "error",
         "max-classes-per-file": [
             "error",
             1
@@ -348,7 +338,12 @@ module.exports = {
                 ]
             }
         ],
-        "unicorn/filename-case": "error",
+        "unicorn/filename-case": [
+            "error",
+            {
+                "case" : "kebabCase"
+            }
+        ],
         "use-isnan": "error",
         "valid-typeof": "off"
     }
