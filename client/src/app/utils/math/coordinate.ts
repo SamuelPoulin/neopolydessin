@@ -51,7 +51,7 @@ export class Coordinate {
 
   static minArrayXYCoord(array: Coordinate[]): Coordinate {
     let min = Coordinate.copy(array[0]);
-    (array as Coordinate[]).forEach((c) => {
+    array.forEach((c) => {
       min = this.minXYCoord(c, min);
     });
     return min;
@@ -59,7 +59,7 @@ export class Coordinate {
 
   static maxArrayXYCoord(array: Coordinate[]): Coordinate {
     let max = Coordinate.copy(array[0]);
-    (array as Coordinate[]).forEach((c) => {
+    array.forEach((c) => {
       max = this.maxXYCoord(c, max);
     });
     return max;
@@ -85,7 +85,8 @@ export class Coordinate {
     return Math.atan2(c1.y - c2.y, c1.x - c2.x);
   }
 
-  rotate(angle: number, center: Coordinate): Coordinate {    // todo - test
+  rotate(angle: number, center: Coordinate): Coordinate {
+    // todo - test
     angle = -MathUtils.toRad(angle);
     const angleToPoint = -Coordinate.angle(this, center) + angle;
     const delta = Coordinate.distance(this, center);

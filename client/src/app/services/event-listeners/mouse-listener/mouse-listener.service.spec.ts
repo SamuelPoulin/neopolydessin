@@ -12,7 +12,7 @@ describe('MouseListenerService', () => {
   );
 
   it('should be created', () => {
-    const service: MouseListenerService = TestBed.get(MouseListenerService);
+    const service: MouseListenerService = TestBed.inject(MouseListenerService);
     expect(service).toBeTruthy();
   });
 

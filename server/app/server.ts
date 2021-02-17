@@ -8,10 +8,12 @@ import { SocketIo } from './socketio';
 
 @injectable()
 export class Server {
+
+  isListening: boolean;
+
   private server: http.Server;
   private port: number;
 
-  isListening: boolean;
 
   constructor(
     @inject(Types.Application) private application: Application,
@@ -23,8 +25,11 @@ export class Server {
   static get port(): number {
     let port: number;
 
-    process.env.USER === 'root' ? (port = PROD_PORT) : (port = DEV_PORT);
-
+    if (process.env.DEPLOY === 'prod') {
+      port = PROD_PORT;
+    } else {
+      port = DEV_PORT;
+    }
     return port;
   }
 

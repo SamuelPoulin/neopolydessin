@@ -20,7 +20,7 @@ describe('ColorHistoryComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorHistoryComponent);
-    selectedColors = TestBed.get(ColorsService);
+    selectedColors = TestBed.inject(ColorsService);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

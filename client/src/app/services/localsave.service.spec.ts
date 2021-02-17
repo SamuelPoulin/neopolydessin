@@ -11,7 +11,7 @@ describe('LocalSaveService', () => {
   }));
 
   beforeEach(() => {
-    service = TestBed.get(LocalSaveService);
+    service = TestBed.inject(LocalSaveService);
   });
 
   it('should be created', () => {

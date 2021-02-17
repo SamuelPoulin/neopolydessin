@@ -20,10 +20,10 @@ import { EditorParams } from './editor-params';
   styleUrls: ['./editor.component.scss'],
 })
 export class EditorComponent implements OnInit, AfterViewInit {
-  @ViewChild('drawingSurface', { static: false })
+  @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
-  @ViewChild('toolbar', { static: false }) toolbar: ToolbarComponent;
+  @ViewChild('toolbar') toolbar: ToolbarComponent;
 
   private _currentToolType: ToolType;
   private keyboardListener: EditorKeyboardListener;
@@ -116,7 +116,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   setToolbarState(opened: boolean): void {
-    opened ? this.toolbar.open() : this.toolbar.close();
+    if (opened) {
+      this.toolbar.open();
+    } else {
+      this.toolbar.close();
+    }
     this.keyboardListener.listening = !(opened || this.dialog.modalIsOpened);
   }
 

@@ -11,7 +11,7 @@ import { Color } from 'src/app/utils/color/color';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 
 export class EraserTool extends Tool {
-  // tslint:disable-next-line:no-magic-numbers
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   static readonly DARKER_HIGHLIGHT_COLOR: Color = Color.rgb(0.8, 0, 0);
   static readonly HIGHLIGHT_COLOR: Color = Color.RED;
   private readonly eraserView: Rectangle;
@@ -70,7 +70,7 @@ export class EraserTool extends Tool {
   }
 
   selectShapes(pos: Coordinate): void {
-    const { x, y } = pos;
+    const { x, y }: { x: number; y: number } = pos;
     this.selectedIndexes = [];
     if (this.colorData) {
       for (let i = 0; i < this.size; i++) {

@@ -1,22 +1,41 @@
+import * as bcrypt from 'bcrypt';
 import * as express from 'express';
 import * as httpStatus from 'http-status-codes';
 import { injectable } from 'inversify';
-
+import * as jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
-import drawingModel, { Drawing } from '../../models/drawing';
+import { login } from '../../../common/communication/login';
+import { Register } from '../../../common/communication/register';
+import accountModel, { Account } from '../../models/account';
+import refreshModel, { Refresh } from '../../models/refresh';
 
-export interface DrawingResponse<T> {
+export interface Response<T> {
   statusCode: number;
   documents: T;
 }
 
+export interface ErrorMsg {
+  statusCode: number;
+  message: string;
+}
+
+interface AccessToken {
+  _id: string;
+  iat: number;
+  exp: number;
+}
+
 @injectable()
 export class DatabaseService {
+
   private static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   };
+
+  readonly SALT_ROUNDS: number = 10;
 
   mongoMS: MongoMemoryServer;
 
@@ -26,12 +45,16 @@ export class DatabaseService {
     }
   }
 
-  private static determineStatus(err: Error, results: Drawing | Drawing[]): number {
-    return err ? httpStatus.INTERNAL_SERVER_ERROR : results ? httpStatus.OK : httpStatus.NOT_FOUND;
+  static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
+    if (results.documents) {
+      res.status(results.statusCode).json(results.documents);
+    } else {
+      res.sendStatus(results.statusCode);
+    }
   }
 
-  static handleResults(res: express.Response, results: DrawingResponse<Drawing> | DrawingResponse<Drawing[]>): void {
-    results.documents ? res.status(results.statusCode).json(results.documents) : res.sendStatus(results.statusCode);
+  private static determineStatus(err: Error, results: Account | Account[]): number {
+    return err ? httpStatus.INTERNAL_SERVER_ERROR : results ? httpStatus.OK : httpStatus.NOT_FOUND;
   }
 
   // Documentation de mongodb-memory-server sur Github
@@ -53,7 +76,11 @@ export class DatabaseService {
         process.env.MONGODB_KEY,
         DatabaseService.CONNECTION_OPTIONS,
         (err: mongoose.Error) => {
-          err ? console.error(err.message) : console.log('Connected to MongoDB Atlas Cloud');
+          if (err) {
+            console.error(err.message);
+          } else {
+            console.log('Connected to MongoDB Atlas Cloud');
+          }
         },
       );
     }
@@ -66,92 +93,208 @@ export class DatabaseService {
     }
   }
 
-  async getAllDrawings(): Promise<DrawingResponse<Drawing[]>> {
-    return new Promise<DrawingResponse<Drawing[]>>((resolve) => {
-      drawingModel.find({}, (err: Error, docs: Drawing[]) => {
-        const status = DatabaseService.determineStatus(err, docs);
-        resolve({ statusCode: status, documents: docs });
-      });
-    });
-  }
-
-  async searchDrawings(name: string, tags: string | string[]): Promise<DrawingResponse<Drawing[]>> {
-    return new Promise<DrawingResponse<Drawing[]>>((resolve) => {
-      if (tags.length !== 0 && tags instanceof Array) {
-        const regex = [];
-        for (let i = 0; i < tags.length; ++i) {
-          regex[i] = new RegExp('^' + tags[i]);
-        }
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-            tags: { $all: regex },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      } else if (tags !== '') {
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-            tags: { $regex: '.*' + tags + '.*' },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      } else {
-        drawingModel.find(
-          {
-            name: { $regex: '.*' + name + '.*' },
-          }, (err: Error, docs: Drawing[]) => {
-            const status = DatabaseService.determineStatus(err, docs);
-            resolve({ statusCode: status, documents: docs });
-          });
-      }
-    });
-  }
-
-  async getDrawingById(id: string): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findById(id, (err: Error, doc: Drawing) => {
+  async getAccountById(id: string): Promise<Response<Account>> {
+    console.log(id);
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async addDrawing(body: Drawing): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      const drawing = {
-        name: body.name,
-        tags: body.tags,
-        data: body.data,
-        color: body.color,
-        width: body.width,
-        height: body.height,
-        previewURL: body.previewURL
-      } as Drawing;
-      const model = new drawingModel(drawing);
-      model.save((err: mongoose.Error, doc: Drawing) => {
-        const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
+  async getAccountByUsername(userName: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findOne({ username: userName }, (err: Error, doc: Account) => {
+        const status = DatabaseService.determineStatus(err, doc);
         resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async deleteDrawing(id: string): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndDelete(id, null, (err: Error, doc: Drawing) => {
-        resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+  async getAccountByEmail(mail: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve) => {
+      accountModel.findOne({ email: mail }, (err: Error, doc: Account) => {
+        const status = DatabaseService.determineStatus(err, doc);
+        resolve({ statusCode: status, documents: doc });
       });
     });
   }
 
-  async updateDrawing(id: string, body: Drawing): Promise<DrawingResponse<Drawing>> {
-    return new Promise<DrawingResponse<Drawing>>((resolve) => {
-      drawingModel.findByIdAndUpdate(id, body, null, (err: Error, doc: Drawing) => {
-        resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+  async createAccount(body: Register): Promise<Response<string>> {
+    return new Promise<Response<string>>((resolve, reject) => {
+      const account = {
+        name: body.name,
+        username: body.username,
+        email: body.email,
+        password: body.password,
+      } as Account;
+      const model = new accountModel(account);
+
+      this.getAccountByUsername(account.username).then((found) => {
+        if (found.documents !== null) {
+          reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username already taken'));
+        }
+        this.getAccountByEmail(account.email).then((foundByEmail) => {
+          if (foundByEmail.documents !== null) {
+            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Email already taken'));
+          } else {
+            bcrypt.hash(model.password, this.SALT_ROUNDS, (error, hash) => {
+              model.password = hash;
+              model.save((err: mongoose.Error, doc: Account) => {
+                const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
+                resolve({ statusCode: status, documents: 'Account successfully created' });
+              });
+            });
+          }
+        });
       });
     });
+  }
+
+  async login(loginInfo: login): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.getAccountByUsername(loginInfo.username).then((results) => {
+        const account = results.documents;
+        if (account !== null) {
+          bcrypt.compare(loginInfo.password, account.password).then((match) => {
+            if (match && process.env.JWT_KEY && process.env.JWT_REFRESH_KEY) {
+
+              // generate jwt access token
+              const jwtToken = jwt.sign(
+                { _id: account._id },
+                process.env.JWT_KEY,
+                { expiresIn: '5m' });
+
+              // generate jwt refresh token for session
+              const jwtRefreshToken = jwt.sign(
+                { _id: account._id },
+                process.env.JWT_REFRESH_KEY,
+                { expiresIn: '1d' });
+
+              refreshModel.findOneAndDelete({ accountId: account._id }, undefined, (err: Error, doc: Refresh) => {
+                if (err) {
+                  reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                }
+              });
+
+              const refresh = new refreshModel({
+                _id: new mongoose.Types.ObjectId(),
+                accountId: account._id,
+                token: jwtRefreshToken
+              });
+              refreshModel.create(refresh).then((doc: Refresh) => {
+                resolve([jwtToken, doc.token]);
+              }).catch((err: Error) => {
+                reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+              });
+            } else {
+              reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
+            }
+          });
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'Wrong username'));
+        }
+      });
+    });
+  }
+
+  async refreshToken(refreshToken: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      refreshModel.findOne({ token: refreshToken }, (err: Error, doc: Refresh) => {
+        if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
+          reject(this.rejectMessage(httpStatus.FORBIDDEN, 'Access denied'));
+        } else {
+          const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
+          const newAccesToken = jwt.sign(
+            { _id: decodedPayload._id },
+            process.env.JWT_KEY,
+            { expiresIn: '5m' }
+          );
+          resolve(newAccesToken);
+        }
+      });
+    });
+  }
+
+  async checkIfLoggedIn(id: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
+        if (err) {
+          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+        } else if (doc) {
+          resolve(true);
+        } else {
+          reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Access denied'));
+        }
+      });
+    });
+  }
+
+  async logout(refreshToken: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      refreshModel.findOneAndDelete({ token: refreshToken }, undefined, (err: Error, doc: Refresh) => {
+        if (err) {
+          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+        }
+        if (doc) {
+          resolve(true);
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'User is not logged in'));
+        }
+      });
+    });
+  }
+
+  async deleteAccount(id: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve, reject) => {
+      refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
+        this.logout(doc.token).then((successfull) => {
+          accountModel.findByIdAndDelete(id, null, (error: Error, acc: Account) => {
+            resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+          });
+        }).catch((error) => {
+          reject(error);
+        });
+      });
+    });
+  }
+
+  async updateAccount(id: string, body: Account): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve, reject) => {
+      let canUpdate = true;
+      this.getAccountById(id).then(async (found) => {
+        if (found.statusCode !== httpStatus.NOT_FOUND) {
+          if (found.documents.username !== body.username) {
+            await this.getAccountByUsername(body.username).then((foundByUsername) => {
+              console.log(foundByUsername);
+              if (foundByUsername.documents !== null) {
+                canUpdate = false;
+              }
+            });
+          }
+          if (canUpdate && found.documents.email !== body.email) {
+            await this.getAccountByEmail(body.email).then((foundByEmail) => {
+              if (foundByEmail.documents !== null) {
+                canUpdate = false;
+              }
+            });
+          }
+          if (canUpdate) {
+            accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false }, (err: Error, doc: Account) => {
+              resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
+            });
+          } else {
+            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
+          }
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, "Account doesn't exist"));
+        }
+      });
+    });
+  }
+
+  rejectMessage(errorCode: number, msg: string): ErrorMsg {
+    return { statusCode: errorCode, message: msg };
   }
 }

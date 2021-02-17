@@ -1,29 +1,74 @@
+workflow:
+    rules:
+        - when: always
+
 stages:
     - build
     - test
     - deploy
 
+.cache: &server_cache
+  cache:
+    key:
+      files:
+        - server/package-lock.json
+    paths:
+      - server/node_modules/
+
+.cache: &electron_cache
+  cache:
+    key:
+      files:
+        - client/package-lock.json
+    paths:
+      - client/node_modules/
+
+
 build_server:
     stage: build
+    <<: *server_cache
     script:
         - echo "Build serveur"
+        - ./pipeline/build_server.sh
+    allow_failure: true     #until compile errors removed
+    artifacts:
+        when: always        #until compile errors removed
+        paths:
+            - server/node_modules/
+            - server/out/
 
 build_electron:
     stage: build
+    <<: *electron_cache
     script:
         - echo "Build electron"
-
+        - ./pipeline/build_electron.sh
+    artifacts:
+        paths:
+            - client/node_modules/
 
 test_server:
     stage: test
+    allow_failure: true
+    needs:
+        - build_server
+    dependencies:
+        - build_server
     script:
-        - echo "Test electron"
+        - echo "Test server"
+        - ./pipeline/test_server.sh
     
 
 test_electron:
     stage: test
+    allow_failure: true
+    needs:
+        - build_electron
+    dependencies:
+        - build_electron
     script:
         - echo "Test electron"
+        - ./pipeline/test_electron.sh
 
 
 deploy_dev:
@@ -32,6 +77,7 @@ deploy_dev:
         - develop
     script:
         - echo "Deploy dev"
+        - ./pipeline/deploy_dev.sh
 
 deploy_prod:
     stage: deploy
@@ -39,3 +85,4 @@ deploy_prod:
         - master
     script:
         - echo "Deploy prod"
+        - ./pipeline/deploy_prod.sh

@@ -1,6 +1,6 @@
 /*tslint:disable:no-string-literal no-magic-numbers max-file-line-count*/
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -198,5 +198,4 @@ describe('EditorComponent', () => {
     expect(toolbarClosedSpy).toHaveBeenCalled();
     expect(component['keyboardListener'].listening).toEqual(true);
   });
-
 });
