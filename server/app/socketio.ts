@@ -38,12 +38,13 @@ export class SocketIo {
         callback({
           status: 'Valid'
         });
+        socket.join('Prototype');
         this.players.set(socket.id, playerName);
         socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        socket.broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
