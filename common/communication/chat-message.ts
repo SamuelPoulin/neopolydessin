@@ -1,5 +1,8 @@
-export interface ChatMessage {
-  user: string;
+export interface Message {
   content: string;
   timestamp: number;
+}
+
+export interface ChatMessage extends Message {
+  user: string;
 }

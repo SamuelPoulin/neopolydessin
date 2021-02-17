@@ -5,3 +5,12 @@ export enum SocketConnection {
     VALID_USERNAME = 'usernameValid',
     INVALID_USERNAME = 'usernameTaken',
 }
+
+export interface PlayerConnectionResult {
+    status: string;
+}
+
+export enum PlayerConnectionStatus {
+    VALID = 'Valid',
+    INVALID = 'Invalid'
+}
