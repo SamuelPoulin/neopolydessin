@@ -14,9 +14,16 @@
       </ng-container>
   </div>
   <div id="chat-writer">
-    <button id="emoji-button" mat-icon-button>
-      <mat-icon>sentiment_satisfied_alt</mat-icon>
-    </button>
+    <div id="emoji-section-container">
+      <button id="emoji-button" mat-icon-button (click)="toggleEmojiMart()">
+        <mat-icon>sentiment_satisfied_alt</mat-icon>
+      </button>
+      <ng-container *ngIf="emojiMartOpen">
+        <div id="emoji-picker-anchor">
+          <emoji-mart id="emoji-picker" (emojiClick)="addEmoji($event)"></emoji-mart>
+        </div>
+      </ng-container>
+    </div>
     <input type="text" id="message-textbox" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" />
     <button id="send-button" mat-icon-button (click)="sendMessage()">
       <mat-icon>send</mat-icon>
