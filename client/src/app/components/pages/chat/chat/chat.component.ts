@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { SocketService } from '@services/socket-service.service';
 import { UserService } from '@services/user.service';
 import { Subscription } from 'rxjs';
@@ -18,6 +19,7 @@ export class ChatComponent implements OnInit {
 
   messages: Message[] = [];
   inputValue: string = '';
+  emojiMartOpen: boolean = false;
 
   constructor(private socketService: SocketService, private router: Router, public userService: UserService, public dialog: MatDialog) {
     if (!this.userService.username) this.router.navigate(['login']);
@@ -77,5 +79,14 @@ export class ChatComponent implements OnInit {
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
+  }
+
+  toggleEmojiMart(): void {
+    this.emojiMartOpen = !this.emojiMartOpen;
+  }
+
+  addEmoji(e: EmojiEvent) {
+    this.inputValue += e.emoji.native;
+    this.toggleEmojiMart();
   }
 }
