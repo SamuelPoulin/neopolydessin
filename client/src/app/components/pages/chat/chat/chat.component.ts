@@ -5,10 +5,7 @@ import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { SocketService } from '@services/socket-service.service';
 import { UserService } from '@services/user.service';
 import { Subscription } from 'rxjs';
-import {
-  ChatMessage,
-  Message,
-} from '../../../../../../../common/communication/chat-message';
+import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
   selector: 'app-chat',
@@ -24,12 +21,7 @@ export class ChatComponent implements OnInit {
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
-  constructor(
-    private socketService: SocketService,
-    private router: Router,
-    public userService: UserService,
-    public dialog: MatDialog
-  ) {
+  constructor(private socketService: SocketService, private router: Router, public userService: UserService, public dialog: MatDialog) {
     if (!this.userService.username) this.router.navigate(['login']);
   }
 
@@ -38,26 +30,20 @@ export class ChatComponent implements OnInit {
   }
 
   subscribe(): void {
-    this.messageSubscription = this.socketService
-      .receiveMessage()
-      .subscribe((message) => {
-        this.messages.push(message);
-        this.scrollToBottom();
-      });
+    this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
 
-    this.playerConnectionSubscription = this.socketService
-      .receivePlayerConnections()
-      .subscribe((message) => {
-        this.messages.push(message);
-        this.scrollToBottom();
-      });
+    this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
 
-    this.playerDisconnectionSubscription = this.socketService
-      .receivePlayerDisconnections()
-      .subscribe((message) => {
-        this.messages.push(message);
-        this.scrollToBottom();
-      });
+    this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
   }
 
   sendMessage(): void {

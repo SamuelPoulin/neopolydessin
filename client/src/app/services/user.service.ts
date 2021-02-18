@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class UserService {
-
   private _username: string = '';
 
   get username(): string {
@@ -15,4 +14,3 @@ export class UserService {
     this._username = username;
   }
 }
-

@@ -25,7 +25,7 @@ import { AppComponent } from './app.component';
     RouterModule.forRoot(
       [
         { path: '', component: HomeComponent },
-        { path: 'login', component: LoginComponent},
+        { path: 'login', component: LoginComponent },
         { path: 'edit', component: EditorComponent },
         { path: 'chat', component: ChatComponent },
       ],

@@ -17,7 +17,7 @@ export class LoginComponent {
     private socketService: SocketService,
     private router: Router,
     private userService: UserService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
 
   login() {

@@ -16,4 +16,3 @@ export class UsernameInputComponent extends CustomInputComponent implements OnIn
     super.ngOnInit();
   }
 }
-

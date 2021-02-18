@@ -19,4 +19,3 @@ export class SystemMessageComponent {
     return format(new Date(this.message.timestamp), 'H:mm:ss');
   }
 }
-
