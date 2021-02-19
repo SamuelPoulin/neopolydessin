@@ -49,8 +49,10 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
-        this.players.delete(socket.id);
+        if (this.players.get(socket.id) !== null) {
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
+          this.players.delete(socket.id);
+        }
       });
     });
   }
