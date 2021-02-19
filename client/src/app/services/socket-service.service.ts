@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
@@ -9,14 +10,15 @@ import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from
   providedIn: 'root',
 })
 export class SocketService {
-  private readonly url: string = 'http://p3-204-dev.duckdns.org/';
-  // private readonly url: string = 'http://localhost:3205/';
+  private static API_BASE_URL: string;
 
   socket: Socket;
   manager: Manager;
 
   constructor() {
-    this.manager = new Manager(this.url, {
+    SocketService.API_BASE_URL = environment.socketUrl;
+
+    this.manager = new Manager(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
       transports: ['websocket'],
     });
