@@ -40,7 +40,7 @@ export class SocketIo {
         });
         socket.join('Prototype');
         this.players.set(socket.id, playerName);
-        socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
+        socket.to('Prototype').broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
@@ -50,7 +50,7 @@ export class SocketIo {
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
         if (this.players.get(socket.id) !== null) {
-          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
+          socket.to('Prototype').broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
           this.players.delete(socket.id);
         }
       });
