@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +21,7 @@ export class APIService {
   private static API_EMAIL_ROUTE: string;
 
   constructor(private http: HttpClient, private notification: MatSnackBar) {
-    APIService.API_BASE_URL = 'http://localhost:3000/api';
+    APIService.API_BASE_URL = environment.apiBaseUrl;
     APIService.API_EMAIL_ROUTE = '/email';
     APIService.API_DATABASE_ROUTE = '/database';
     APIService.API_DRAWINGS_ROUTE = '/drawings';

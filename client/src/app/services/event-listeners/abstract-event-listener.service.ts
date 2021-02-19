@@ -1,5 +1,7 @@
+import { Injectable } from '@angular/core';
 export type EventAction<T> = (event: T) => boolean | void;
 export type EventsHandlingMap<T> = Map<string, EventAction<T>>;
+@Injectable()
 export abstract class AbstractEventListenerService<T extends Event> {
   protected readonly eventsHandlingMap: EventsHandlingMap<T>;
   defaultEventAction: EventAction<T>;
@@ -28,7 +30,7 @@ export abstract class AbstractEventListenerService<T extends Event> {
     return success || false;
   }
 
-  addEvents(events: ReadonlyArray<[string, EventAction<T> | undefined]>): void {
+  addEvents(events: readonly [string, EventAction<T> | undefined][]): void {
     events.forEach((event) => {
       this.addEvent(event[0], event[1]);
     });

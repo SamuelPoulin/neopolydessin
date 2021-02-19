@@ -3,22 +3,20 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import {
-  MatButtonModule,
-  MatDialogModule,
-  MatFormFieldModule,
-  MatIconModule,
-  MatInputModule,
-  MatRadioModule,
-  MatSidenavModule,
-} from '@angular/material';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
-import { MatSnackBarContainer, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -38,6 +36,7 @@ import { EnumPropertyInputComponent } from './inputs/property-inputs/enum-proper
 import { NumericPropertyInputComponent } from './inputs/property-inputs/numeric-property-input/numeric-property-input.component';
 import { TagInputComponent } from './inputs/tag-input/tag-input.component';
 import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.component';
+import { UsernameInputComponent } from './inputs/username-input/username-input.component';
 
 @NgModule({
   imports: [
@@ -75,13 +74,13 @@ import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.co
     TagInputComponent,
     TagListInputComponent,
     NameInputComponent,
+    UsernameInputComponent,
     ColorHistoryComponent,
     ConfirmModalComponent,
     NumericPropertyInputComponent,
     EnumPropertyInputComponent,
     IconButtonComponent,
   ],
-  entryComponents: [AbstractModalComponent, ConfirmModalComponent, MatSnackBarContainer],
   exports: [
     AbstractModalComponent,
     ReactiveFormsModule,
@@ -104,6 +103,7 @@ import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.co
     TagInputComponent,
     TagListInputComponent,
     NameInputComponent,
+    UsernameInputComponent,
     ColorHistoryComponent,
     AlphaComponent,
     MatExpansionModule,

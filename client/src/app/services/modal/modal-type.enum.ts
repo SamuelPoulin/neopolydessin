@@ -6,4 +6,5 @@ export enum ModalType {
   EXPORT = 'export',
   CHOOSE_EXPORT_SAVE = 'choose-export-save',
   GALLERY = 'gallery',
+  CHAT = 'chat'
 }

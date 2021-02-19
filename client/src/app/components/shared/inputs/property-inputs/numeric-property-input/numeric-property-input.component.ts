@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { AbstractPropertyInput } from '@components/shared/inputs/property-inputs/abstract-property-input';
+import { AbstractPropertyInputDirective } from '@components/shared/inputs/property-inputs/abstract-property-input';
 import { NumericProperty } from '@tool-properties/props/numeric-property/numeric-property';
 
 @Component({
@@ -7,7 +7,7 @@ import { NumericProperty } from '@tool-properties/props/numeric-property/numeric
   templateUrl: './numeric-property-input.component.html',
   styleUrls: ['./numeric-property-input.component.scss'],
 })
-export class NumericPropertyInputComponent extends AbstractPropertyInput<NumericProperty> {
+export class NumericPropertyInputComponent extends AbstractPropertyInputDirective<NumericProperty> {
   static readonly SLIDER_STEP: number = 1;
   @Input() sliderStep: number;
   @Input() property: NumericProperty;

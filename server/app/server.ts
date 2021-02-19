@@ -4,23 +4,32 @@ import { Application } from './app';
 import Types from './types';
 
 import { DEV_PORT, PROD_PORT } from './constants';
+import { SocketIo } from './socketio';
 
 @injectable()
 export class Server {
-  private server: http.Server;
-  private port: number;
 
   isListening: boolean;
 
-  constructor(@inject(Types.Application) private application: Application) {
+  private server: http.Server;
+  private port: number;
+
+
+  constructor(
+    @inject(Types.Application) private application: Application,
+    @inject(Types.Socketio) private socketio: SocketIo
+  ) {
     this.isListening = false;
   }
 
   static get port(): number {
     let port: number;
 
-    process.env.USER === 'root' ? (port = PROD_PORT) : (port = DEV_PORT);
-
+    if (process.env.DEPLOY === 'prod') {
+      port = PROD_PORT;
+    } else {
+      port = DEV_PORT;
+    }
     return port;
   }
 
@@ -33,6 +42,7 @@ export class Server {
     this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
     this.server.on('listening', () => this.onListening());
     this.server.listen(this.port);
+    this.socketio.init(this.server);
   }
 
   close(): void {

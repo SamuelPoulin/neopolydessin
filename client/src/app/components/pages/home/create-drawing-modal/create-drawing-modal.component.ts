@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LocalSaveService } from '@services/localsave.service';
 import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing-surface/drawing-surface.component';
@@ -47,8 +47,11 @@ export class CreateDrawingModalComponent extends AbstractModalComponent implemen
       this.windowWidth = window.innerWidth - CreateDrawingModalComponent.MARGIN_WIDTH;
       this.windowHeight = window.innerHeight - CreateDrawingModalComponent.MARGIN_HEIGHT;
 
-      this.width = this.windowWidth.toString();
-      this.height = this.windowHeight.toString();
+      // todo - Sam plz fix
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      this.width = (this.windowWidth - 8).toString();
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      this.height = (this.windowHeight - 30 - 4).toString();
       this.changeDetectorRef.detectChanges();
     }
   }
@@ -60,7 +63,7 @@ export class CreateDrawingModalComponent extends AbstractModalComponent implemen
       color: this.colorPicker.color.hex,
       id: LocalSaveService.NEW_DRAWING_ID,
     };
-    this.router.navigate(['/'], { skipLocationChange: true }).then((a) => this.router.navigate(['edit', params]));
+    this.router.navigate(['/'], { skipLocationChange: true }).then(async (a) => this.router.navigate(['edit', params]));
     this.dialogRef.close();
   }
 }

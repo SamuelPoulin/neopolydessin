@@ -18,7 +18,7 @@ export class DrawingSurfaceComponent {
   @Output() shapeClicked: EventEmitter<BaseShape>;
   @Output() shapeRightClicked: EventEmitter<BaseShape>;
 
-  @ViewChild('svg', { static: false })
+  @ViewChild('svg')
   private _svg: ElementRef;
 
   get svg(): SVGElement {
