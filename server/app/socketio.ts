@@ -11,6 +11,7 @@ export class SocketIo {
 
   io: Server;
   players: Map<string, string> = new Map<string, string>();
+  readonly MAX_LENGHT_MSG: number = 200;
 
   init(server: http.Server): void {
     this.io = new Server(server, {
@@ -40,17 +41,20 @@ export class SocketIo {
         });
         socket.join('Prototype');
         this.players.set(socket.id, playerName);
-        socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
+        socket.to('Prototype').broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        if(sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+          socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          console.log('Message trop long (+200 caractères)');
+        }
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
         if (this.players.get(socket.id) !== null) {
-          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
+          socket.to('Prototype').broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
           this.players.delete(socket.id);
         }
       });
