@@ -147,7 +147,8 @@ class ChatFragment() : Fragment() {
     private fun addMessage(message: IMessage) {
             messages.add(message)
             activity?.runOnUiThread {
-                rvMessages.adapter?.notifyItemInserted(messages.size - 1)
+                //rvMessages.adapter?.notifyItemInserted(messages.size - 1)
+                rvMessages.adapter?.notifyDataSetChanged()
                 rvMessages.scrollToPosition(messages.size - 1)
             }
     }

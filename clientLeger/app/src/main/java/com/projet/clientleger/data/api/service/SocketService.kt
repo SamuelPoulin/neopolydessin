@@ -3,6 +3,7 @@ package com.projet.clientleger.data.api.service
 import android.app.Service
 import android.content.Intent
 import android.os.*
+import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.model.Message
 import com.projet.clientleger.data.model.MessageChat
 import io.reactivex.rxjava3.core.Observable
@@ -38,7 +39,8 @@ class SocketService : Service() {
             val options: IO.Options = IO.Options()
             options.transports = arrayOf("websocket")
             options.upgrade = false
-            socket = IO.socket(SOCKET_ROUTE, options)
+            socket = IO.socket(BuildConfig.SERVER_DEV_URL, options)
+            println(BuildConfig.SERVER_DEV_URL)
         } catch (e: URISyntaxException) {
             null
         }

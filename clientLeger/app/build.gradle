@@ -7,6 +7,10 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        Polydessin {
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -17,14 +21,20 @@ android {
         versionCode 1
         versionName "1.0"
 
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
 
     buildTypes {
         release {
+            buildConfigField "String", "SERVER_DEV_URL", "\"http://p3-204-dev.duckdns.org/\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig debug.signingConfig
+        }
+        debug{
+            buildConfigField "String", "SERVER_DEV_URL", "\"http://p3-204.duckdns.org/\""
         }
     }
     compileOptions {
