@@ -11,6 +11,7 @@ export class SocketIo {
 
   io: Server;
   players: Map<string, string> = new Map<string, string>();
+  readonly MAX_LENGHT_MSG: number = 200;
 
   init(server: http.Server): void {
     this.io = new Server(server, {
@@ -44,7 +45,9 @@ export class SocketIo {
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        if(sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+          socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        }
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
