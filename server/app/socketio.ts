@@ -47,6 +47,7 @@ export class SocketIo {
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
         if(sentMsg.content.length <= this.MAX_LENGHT_MSG) {
           socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          console.log('Message trop long (+200 caractères)');
         }
       });
 
