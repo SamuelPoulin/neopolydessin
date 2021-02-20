@@ -39,8 +39,8 @@ class SocketService : Service() {
             val options: IO.Options = IO.Options()
             options.transports = arrayOf("websocket")
             options.upgrade = false
-            socket = IO.socket(BuildConfig.SERVER_DEV_URL, options)
-            println(BuildConfig.SERVER_DEV_URL)
+            socket = IO.socket(BuildConfig.SERVER_URL, options)
+            println(BuildConfig.SERVER_URL)
         } catch (e: URISyntaxException) {
             null
         }

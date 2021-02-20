@@ -28,13 +28,13 @@ android {
 
     buildTypes {
         release {
-            buildConfigField "String", "SERVER_DEV_URL", "\"http://p3-204-dev.duckdns.org/\""
+            buildConfigField "String", "SERVER_URL", "\"http://p3-204.duckdns.org/\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig debug.signingConfig
         }
         debug{
-            buildConfigField "String", "SERVER_DEV_URL", "\"http://p3-204.duckdns.org/\""
+            buildConfigField "String", "SERVER_URL", "\"http://p3-204-dev.duckdns.org/\""
         }
     }
     compileOptions {
