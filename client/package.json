@@ -30,7 +30,7 @@
       "electron-main.js",
       "preload.js",
       "resources/icon.png",
-      "dist/client/*"
+      "dist/client/**/*"
     ]
   },
   "husky": {
