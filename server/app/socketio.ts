@@ -28,7 +28,7 @@ export class SocketIo {
       console.log(`Connected with ${socket.id} \n`);
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string, callback) => {
-        for (const value of this.players.values()) {
+        for (const value of this.players.values()) {
           if (value === playerName) {
             callback({
               status: 'Invalid'
@@ -45,7 +45,7 @@ export class SocketIo {
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        if(sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+        if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
           socket.to('Prototype').broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
           console.log('Message trop long (+200 caractères)');
         }
@@ -53,7 +53,7 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        if (this.players.get(socket.id) !== null) {
+        if (this.players.get(socket.id)) {
           socket.to('Prototype').broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.players.get(socket.id));
           this.players.delete(socket.id);
         }
