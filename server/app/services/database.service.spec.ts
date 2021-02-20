@@ -3,7 +3,7 @@
 import { expect } from 'chai';
 import * as httpStatus from 'http-status-codes';
 
-import drawingModel, { Drawing } from '../../models/drawing';
+import drawingModel from '../../models/account';
 import { DatabaseService } from './database.service';
 
 import { testingContainer } from '../../test/test-utils';
