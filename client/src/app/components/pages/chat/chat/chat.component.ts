@@ -28,7 +28,7 @@ export class ChatComponent implements OnInit {
     private router: Router,
     private snackBar: MatSnackBar,
     public userService: UserService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
   ) {
     if (!this.userService.username) this.router.navigate(['login']);
 
