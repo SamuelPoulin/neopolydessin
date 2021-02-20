@@ -41,7 +41,7 @@
     "instrument": true
   },
   "dependencies": {
-    "@types/mongoose": "^5.7.3",
+    "@types/bcrypt": "^3.0.0",
     "@types/nodemailer": "^6.4.0",
     "axios": "^0.19.2",
     "blob": "^0.1.0",
@@ -60,7 +60,7 @@
     "i": "^0.3.6",
     "inversify": "^5.0.1",
     "mongodb-memory-server": "^6.5.0",
-    "mongoose": "^5.9.3",
+    "mongoose": "^5.11.17",
     "morgan": "^1.9.1",
     "nodemailer": "^6.4.6",
     "reflect-metadata": "^0.1.10",
