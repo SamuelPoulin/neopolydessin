@@ -82,7 +82,7 @@ deploy_dev:
         - ./pipeline/deploy_dev.sh
     artifacts:
         paths:
-            - client/build/PolyDessin Setup *.exe
+            - client/build/PolyDessin_Setup_*.exe
 
 deploy_prod:
     stage: deploy
@@ -93,4 +93,4 @@ deploy_prod:
         - ./pipeline/deploy_prod.sh
     artifacts:
         paths:
-            - client/build/PolyDessin Setup *.exe
+            - client/build/PolyDessin_Setup_*.exe
