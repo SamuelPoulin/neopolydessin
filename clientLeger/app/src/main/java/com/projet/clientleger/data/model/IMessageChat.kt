@@ -1,7 +1,5 @@
 package com.projet.clientleger.data.model
 
-interface IMessageChat {
+interface IMessageChat: IMessage {
     var user: String;
-    var content: String;
-    var timestamp: Long;
 }

@@ -24,15 +24,21 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".data.api.service.SocketService" />
-
-        <activity android:name=".ui.mainmenu.view.MainmenuActivity">
+        <activity android:name=".ui.mainmenu.view.MainmenuActivity"/>
+        <activity
+            android:name=".ui.connexion.view.ConnexionActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".data.api.service.SocketService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

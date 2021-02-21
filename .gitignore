@@ -9,6 +9,7 @@ package-lock.json
 
 # Code Coverage Folder
 coverage/
+server/emailAPI.env
 
 *.iml
 /local.properties

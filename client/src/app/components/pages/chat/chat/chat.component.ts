@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { SocketService } from '@services/socket-service.service';
+import { UserService } from '@services/user.service';
 import { Subscription } from 'rxjs';
-import { ChatMessage } from '../../../../../../../common/communication/chat-message';
+import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
   selector: 'app-chat',
@@ -9,45 +13,80 @@ import { ChatMessage } from '../../../../../../../common/communication/chat-mess
   styleUrls: ['./chat.component.scss'],
 })
 export class ChatComponent implements OnInit {
-  subscription: Subscription;
-  messages: ChatMessage[] = [];
-  inputValue: string = '';
+  messageSubscription: Subscription;
+  playerConnectionSubscription: Subscription;
+  playerDisconnectionSubscription: Subscription;
 
-  constructor(private socketService: SocketService) {}
+  messages: Message[] = [];
+  inputValue: string = '';
+  emojiMartOpen: boolean = false;
+
+  constructor(private socketService: SocketService, private router: Router, public userService: UserService, public dialog: MatDialog) {
+    if (!this.userService.username) this.router.navigate(['login']);
+  }
 
   ngOnInit(): void {
     this.subscribe();
   }
 
   subscribe(): void {
-    this.subscription = this.socketService
-      .receiveMessage()
-      .subscribe((message: ChatMessage) => {
-        this.messages.push({user: 'foreign', content: message.content, timestamp: message.timestamp});
-        this.scrollToBottom();
-      });
+    this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
+
+    this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
+
+    this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
+      this.messages.push(message);
+      this.scrollToBottom();
+    });
   }
 
   sendMessage(): void {
-    this.socketService.sendMessage({user: 'user', content: this.inputValue, timestamp: Date.now()});
-    this.messages.push({
-      user: 'user',
-      content: this.inputValue,
-      timestamp: Date.now(),
-    });
-    this.inputValue = '';
-    this.scrollToBottom();
+    if (this.inputValue) {
+      this.socketService.sendMessage({
+        user: this.userService.username,
+        content: this.inputValue,
+        timestamp: Date.now(),
+      });
+      this.messages.push({
+        user: this.userService.username,
+        content: this.inputValue,
+        timestamp: Date.now(),
+      } as ChatMessage);
+      this.inputValue = '';
+      this.scrollToBottom();
+    }
   }
 
   scrollToBottom(): void {
     setTimeout(() => {
-      const electronContainer = document.querySelector('.container-after-titlebar');
-
-      if (electronContainer) {
-        electronContainer.scrollTop = electronContainer.scrollHeight;
+      if (this.electronContainer) {
+        this.electronContainer.scrollTop = this.electronContainer.scrollHeight;
       } else {
         window.scrollTo(0, document.body.scrollHeight);
       }
     });
+  }
+
+  isSystem(message: Message): message is ChatMessage {
+    return !(message as ChatMessage).user;
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
+  }
+
+  toggleEmojiMart(): void {
+    this.emojiMartOpen = !this.emojiMartOpen;
+  }
+
+  addEmoji(e: EmojiEvent) {
+    this.inputValue += e.emoji.native;
+    this.toggleEmojiMart();
   }
 }

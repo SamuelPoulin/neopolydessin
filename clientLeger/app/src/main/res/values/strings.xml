@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">ClientLeger</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="app_name">Chat</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_search_lobby">SearchLobbyActivity</string>
     <!-- Strings used for fragments for navigation -->

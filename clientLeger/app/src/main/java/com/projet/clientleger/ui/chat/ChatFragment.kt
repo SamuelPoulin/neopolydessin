@@ -1,128 +1,205 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.model.IMessage
 import com.projet.clientleger.data.model.MessageChat
-import com.projet.clientleger.utils.ChatListener
 import kotlinx.android.synthetic.main.fragment_chat.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.util.regex.Pattern
 
-//import java.time.LocalDateTime
-//import java.time.format.DateTimeFormatter
+private const val USERNAME_FORMAT_ERROR: String = "Doit contenir seulement 10 lettres ou chiffres."
+private const val USERNAME_UNICITY_ERROR: String = "Pseudonyme déjà utilisé, choisir un autre !"
+private const val MESSAGE_CONTENT_ERROR: String =
+    "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
+private const val CHOOSING_USERNAME_TITLE: String = "Choisir son pseudonyme"
+private const val CONNECT_BUTTON_TITLE: String = "Connect"
+private const val USERNAME_INPUT_HINT: String = "Nom d'utilisateur"
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class ChatFragment() : Fragment() {
+    private lateinit var connexionDialog: AlertDialog
+    private var messages: ArrayList<IMessage> = ArrayList()
+    private lateinit var username: String
 
-/**
- * A simple [Fragment] subclass.
- * Use the [chat.newInstance] factory method to
- * create an instance of this fragment.
- */
-class ChatFragment : Fragment(), ChatListener {
-    private var messages: ArrayList<MessageChat> = ArrayList<MessageChat>()
+    var socketService: SocketService? = null
+    var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as SocketService.LocalBinder
+            socketService = binder.getService()
+            isBound = true
+            setSubscriptions()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isBound = false
+        }
+    }
+
+    fun setSubscriptions() {
+        socketService?.receiveMessage()
+            ?.subscribe { message ->
+                addMessage(message)
+            }
+        socketService?.receivePlayerConnection()?.subscribe { message ->
+            message.content = "${message.content} a rejoint la discussion"
+            addMessage(message)
+        }
+        socketService?.receivePlayerDisconnection()?.subscribe { message ->
+            message.content = "${message.content} a quitté la discussion"
+            addMessage(message)
+        }
+
+        val connexionDialogBuilder = activity?.let { AlertDialog.Builder(it) }
+        val input = EditText(activity)
+        input.hint = USERNAME_INPUT_HINT
+        connexionDialogBuilder
+            ?.setTitle(CHOOSING_USERNAME_TITLE)
+            ?.setView(input)
+            ?.setPositiveButton(CONNECT_BUTTON_TITLE, null)
+
+        if (connexionDialogBuilder != null) {
+            connexionDialog = connexionDialogBuilder.create()
+            connexionDialog.setCanceledOnTouchOutside(false)
+            connexionDialog.setCancelable(false)
+            connexionDialog.show()
+            connexionDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener {
+                    username = input.text.toString()
+                    chooseUsername(username);
+                    input.text.clear()
+                }
+        }
+    }
+
+    private fun chooseUsername(username: String) {
+        if (!isUsernameValidFormat(username)) {
+            showErrorToast(USERNAME_FORMAT_ERROR)
+            return
+        }
+        socketService?.usernameConnexion(username)
+            ?.doOnError { error -> println(error) }
+            ?.subscribe { valid ->
+                if (valid) {
+                    connexionDialog.dismiss();
+                    (rvMessages.adapter as MessagesAdapter).setUsername(username)
+                } else {
+                    showErrorToast(USERNAME_UNICITY_ERROR)
+                }
+            }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         println("fragCreation-----------------------------------$savedInstanceState")
         super.onCreate(savedInstanceState)
-        arguments?.let {
-        }
-        messages.add(MessageChat("me", "testM", 0))
-        SocketService.setCallbacks("receiveMsg",fct = {input: Any?->receiveMsg(input as MessageChat)})
-        SocketService.setCallbacks("sendMsg",fct = {input: Any?->sendMsg(input as MessageChat)})
+        val intent = Intent(activity, SocketService::class.java)
+        activity?.bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
+        username = arguments?.getString("username") ?: "unknowned_user"
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sendButton.setOnClickListener(){
+        sendButton.setOnClickListener {
             sendButton()
         }
         val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
         val adapter = MessagesAdapter(messages)
-        val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(activity)
+        val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
         rvMessages.adapter = adapter
     }
-    private fun sendButton(){
-        val text:String = (chatBox.text).toString()
-        val adjustedText:String = text.replace("(?m)^[ \t]*\r?\n".toRegex(), "")
-        val timestamp = getTimestamp()
-        addMessage(adjustedText, timestamp)
-        sendMsg(MessageChat("guiboy", adjustedText, System.currentTimeMillis()))
-        chatBox.text.clear()
-        println("$messages---------------------------------------")
-        //envoyer le message à la db
-        //ajoute le message à la boite de chat locale
+
+    private fun sendButton() {
+        val text: String = (chatBox.text).toString()
+        val adjustedText: String = formatMessageContent(text)
+        if (isMessageValidFormat(adjustedText)) {
+            addMessage(MessageChat(username, adjustedText, System.currentTimeMillis()))
+            socketService?.sendMessage(
+                MessageChat(
+                    username,
+                    adjustedText,
+                    System.currentTimeMillis()
+                )
+            )
+        } else {
+            showErrorToast(MESSAGE_CONTENT_ERROR)
+        }
+        chatBox.text?.clear()
     }
-    private fun getTimestamp():String{
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        return LocalDateTime.now().format(formatter)
-    }
-    private fun addMessage(text:String, timestamp:String){
-        if(text.isNotBlank()){
-            val formattedText:String = ("[$timestamp] $text")
-            messages.add(MessageChat("me", text, System.currentTimeMillis()))
-            rvMessages.adapter?.notifyItemInserted(messages.size-1)
-            rvMessages.scrollToPosition(messages.size-1)
-//            val messageView:TextView = TextView(activity)
-//            messageView.textSize = 20f
-//            messageView.text = formattedText
-//            messageBox.addView(messageView)
-//            scrollbar.post{
-//                scrollbar.fullScroll(View.FOCUS_DOWN)
-//            }
+
+    private fun addMessage(message: IMessage) {
+        message.content = formatMessageContent(message.content)
+        messages.add(message)
+        activity?.runOnUiThread {
+            //rvMessages.adapter?.notifyItemInserted(messages.size - 1)
+            rvMessages.adapter?.notifyDataSetChanged()
+            rvMessages.scrollToPosition(messages.size - 1)
         }
     }
 
-    override fun receiveMsg(msg: MessageChat) {
-        addMessage(msg.content, getTimestamp())
-        println("ChatFragment msg received: $msg ------------------------------------------------------")
+    private fun isUsernameValidFormat(username: String): Boolean {
+        return Pattern.matches("^[A-Za-z0-9. ]+(?:[_&%$*#@!-][A-Za-z0-9. ]+)*$", username)
     }
 
-    override fun sendMsg(msg: MessageChat) {
-        SocketService.sendMessage(msg)
+    private fun isMessageValidFormat(message: String): Boolean {
+        return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment chat.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance() =
-                ChatFragment().apply {
-                    arguments = Bundle().apply {
-                    }
-                }
+    private fun formatMessageContent(messageContent: String): String {
+        var adjustedText: String = messageContent.replace("\\s+".toRegex(), " ")
+        adjustedText = adjustedText.trimStart()
+        return adjustedText
+    }
+
+    private fun showErrorToast(errorMessage: String) {
+        activity?.runOnUiThread {
+            Toast.makeText(
+                activity,
+                Html.fromHtml(
+                    "<font color='#e61515'><b>${errorMessage}</b></font>",
+                    0
+                ),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        SocketService.clearCallbacks()
+        if (isBound) {
+            activity?.unbindService(serviceConnection)
+            isBound = false
+        }
     }
 
     override fun onDestroy() {
+        if (this::connexionDialog.isInitialized)
+            connexionDialog.dismiss()
         super.onDestroy()
-        println("fragDestroy----------------------------------------------")
     }
 }
