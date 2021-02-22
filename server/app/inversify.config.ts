@@ -10,6 +10,8 @@ import { Server } from './server';
 import { DatabaseService } from './services/database.service';
 import { EmailService } from './services/email.service';
 import { SocketIo } from './socketio';
+import { FriendsController } from './controllers/friends.controller';
+import { FriendsService } from './services/friends.service';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {
   const container: Container = new Container();
@@ -21,6 +23,8 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.EmailService).to(EmailService);
   container.bind(Types.DatabaseController).to(DatabaseController);
   container.bind(Types.DatabaseService).to(DatabaseService);
+  container.bind(Types.FriendsController).to(FriendsController);
+  container.bind(Types.FriendsService).to(FriendsService);
 
   return container;
 };

@@ -45,6 +45,10 @@ export class DatabaseService {
     }
   }
 
+  static rejectMessage(errorCode: number, msg: string): ErrorMsg {
+    return { statusCode: errorCode, message: msg };
+  }
+
   static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
     if (results.documents) {
       res.status(results.statusCode).json(results.documents);
@@ -133,11 +137,11 @@ export class DatabaseService {
 
       this.getAccountByUsername(account.username).then((found) => {
         if (found.documents !== null) {
-          reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username already taken'));
+          reject(DatabaseService.rejectMessage(httpStatus.BAD_REQUEST, 'Username already taken'));
         }
         this.getAccountByEmail(account.email).then((foundByEmail) => {
           if (foundByEmail.documents !== null) {
-            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Email already taken'));
+            reject(DatabaseService.rejectMessage(httpStatus.BAD_REQUEST, 'Email already taken'));
           } else {
             bcrypt.hash(model.password, this.SALT_ROUNDS, (error, hash) => {
               model.password = hash;
@@ -174,7 +178,7 @@ export class DatabaseService {
 
               refreshModel.findOneAndDelete({ accountId: account._id }, undefined, (err: Error, doc: Refresh) => {
                 if (err) {
-                  reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                  reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
                 }
               });
 
@@ -186,14 +190,14 @@ export class DatabaseService {
               refreshModel.create(refresh).then((doc: Refresh) => {
                 resolve([jwtToken, doc.token]);
               }).catch((err: Error) => {
-                reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
               });
             } else {
-              reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
+              reject(DatabaseService.rejectMessage(httpStatus.UNAUTHORIZED, 'Wrong password'));
             }
           });
         } else {
-          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'Wrong username'));
+          reject(DatabaseService.rejectMessage(httpStatus.NOT_FOUND, 'Wrong username'));
         }
       });
     });
@@ -203,7 +207,7 @@ export class DatabaseService {
     return new Promise<string>((resolve, reject) => {
       refreshModel.findOne({ token: refreshToken }, (err: Error, doc: Refresh) => {
         if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
-          reject(this.rejectMessage(httpStatus.FORBIDDEN, 'Access denied'));
+          reject(DatabaseService.rejectMessage(httpStatus.FORBIDDEN, 'Access denied'));
         } else {
           const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
           const newAccesToken = jwt.sign(
@@ -221,11 +225,11 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
         if (err) {
-          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+          reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
         } else if (doc) {
           resolve(true);
         } else {
-          reject(this.rejectMessage(httpStatus.UNAUTHORIZED, 'Access denied'));
+          reject(DatabaseService.rejectMessage(httpStatus.UNAUTHORIZED, 'Access denied'));
         }
       });
     });
@@ -235,12 +239,12 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel.findOneAndDelete({ token: refreshToken }, undefined, (err: Error, doc: Refresh) => {
         if (err) {
-          reject(this.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+          reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
         }
         if (doc) {
           resolve(true);
         } else {
-          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'User is not logged in'));
+          reject(DatabaseService.rejectMessage(httpStatus.NOT_FOUND, 'User is not logged in'));
         }
       });
     });
@@ -285,16 +289,14 @@ export class DatabaseService {
               resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
             });
           } else {
-            reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
+            reject(DatabaseService.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
           }
         } else {
-          reject(this.rejectMessage(httpStatus.NOT_FOUND, "Account doesn't exist"));
+          reject(DatabaseService.rejectMessage(httpStatus.NOT_FOUND, "Account doesn't exist"));
         }
       });
     });
   }
 
-  rejectMessage(errorCode: number, msg: string): ErrorMsg {
-    return { statusCode: errorCode, message: msg };
-  }
+
 }
