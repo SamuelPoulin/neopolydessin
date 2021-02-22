@@ -152,7 +152,7 @@ describe('Database Controller', () => {
   it('should call getAccountById when sending a query get request to api/database/account', (done: Mocha.Done) => {
     const account = {
       _id: '1',
-      name: 'user',
+      firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
@@ -189,7 +189,7 @@ describe('Database Controller', () => {
   it('should call deleteAccount when sending a query delete request to api/database/account', (done: Mocha.Done) => {
     const account = {
       _id: '1',
-      name: 'user',
+      firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
@@ -212,7 +212,7 @@ describe('Database Controller', () => {
   it('should call update when sending a post request to api/database/account', (done: Mocha.Done) => {
     const account = {
       _id: '1',
-      name: 'user',
+      firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
