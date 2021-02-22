@@ -21,15 +21,14 @@ class RegisterRepository {
 
     fun registerAccount(registerModel: RegisterModel): LiveData<String>{
         val res = MutableLiveData<String>()
-        println(registerModel.toString())
-        apiRegisterInterface?.registerAccount(registerModel)?.enqueue(object : Callback<Any> {
+        apiRegisterInterface?.registerAccount(registerModel)?.enqueue(object : Callback<String> {
 
-            override fun onFailure(call: Call<Any>, t: Throwable) {
+            override fun onFailure(call: Call<String>, t: Throwable) {
                 TODO("Not yet implemented")
                 println("fail")
             }
 
-            override fun onResponse(call: Call<Any>, response: Response<Any>) {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
                 var bufferRes = ""
                 if(!response.isSuccessful){
                     val errors = (JSONObject(response.errorBody()!!.string()).get("errors") as JSONArray)
