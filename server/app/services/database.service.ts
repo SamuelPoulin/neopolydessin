@@ -123,7 +123,8 @@ export class DatabaseService {
   async createAccount(body: Register): Promise<Response<string>> {
     return new Promise<Response<string>>((resolve, reject) => {
       const account = {
-        name: body.name,
+        firstName: body.firstName,
+        lastName: body.lastName,
         username: body.username,
         email: body.email,
         password: body.password,

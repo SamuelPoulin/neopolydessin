@@ -14,7 +14,8 @@ describe('Database Service', () => {
   let databaseService: DatabaseService;
 
   const accountInfo: Register = {
-    name: 'name',
+    firstName: 'name',
+    lastName: 'lname',
     username: 'username',
     email: 'email@email.email',
     password: 'monkey123',
@@ -171,7 +172,7 @@ describe('Database Service', () => {
           const decodedJwt: {} = jwt.verify(tokens[0], process.env.JWT_KEY) as object;
           databaseService.deleteAccount(decodedJwt['_id']).then((response: Response<Account>) => {
             expect(response.statusCode).to.equal(httpStatus.OK);
-            expect(response.documents.name).to.equal('name');
+            expect(response.documents.firstName).to.equal('name');
             expect(response.documents.username).to.equal('username');
             expect(response.documents.email).to.equal('email@email.email');
             done();
@@ -183,7 +184,7 @@ describe('Database Service', () => {
 
   it('updateAccount should return NOT_FOUND if account doesn\'t exist', (done: Mocha.Done) => {
     databaseService.updateAccount('123456789012345678901234', {
-      name: 'newName',
+      firstName: 'newName',
       username: 'newUsername',
       email: 'newEmail@email.email'
     } as Account).catch((err: ErrorMsg) => {
@@ -199,7 +200,7 @@ describe('Database Service', () => {
         if (process.env.JWT_KEY) {
           const decodedJwt: {} = jwt.verify(tokens[0], process.env.JWT_KEY) as object;
           databaseService.updateAccount(decodedJwt['_id'], {
-            name: 'newName',
+            firstName: 'newName',
             username: 'newUsername',
             email: 'newEmail@email.email'
           } as Account).then((response: Response<Account>) => {
