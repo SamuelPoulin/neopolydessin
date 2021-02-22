@@ -31,8 +31,12 @@ export class FriendsController {
     this.router.post('/', [
       body('email').isEmail(),
     ], jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const body: FriendRequest = req.body;
-      this.friendsService.requestFriendship(req.params._id,)
+      const friendRequest: FriendRequest = req.body;
+      this.friendsService.requestFriendship(req.params._id, friendRequest.email).then((result: Friends) => {
+        res.status(OK).json(result);
+      }).catch((error: ErrorMsg) => {
+        res.status(error.statusCode).json(error.message);
+      });
     });
   }
 
