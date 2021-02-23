@@ -9,4 +9,5 @@ export default {
   DatabaseService: Symbol('DatabaseService'),
   FriendsController: Symbol('FriendsController'),
   FriendsService: Symbol('FriendsService'),
+  LoggedIn: Symbol('LoggedIn'),
 };

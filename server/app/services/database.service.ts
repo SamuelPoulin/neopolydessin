@@ -10,6 +10,7 @@ import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
 import refreshModel, { Refresh } from '../../models/refresh';
+import friendModel, { Friends } from '../../models/friends';
 
 export interface Response<T> {
   statusCode: number;
@@ -98,7 +99,6 @@ export class DatabaseService {
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
-    console.log(id);
     return new Promise<Response<Account>>((resolve) => {
       accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
@@ -146,8 +146,20 @@ export class DatabaseService {
             bcrypt.hash(model.password, this.SALT_ROUNDS, (error, hash) => {
               model.password = hash;
               model.save((err: mongoose.Error, doc: Account) => {
-                const status = err ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK;
-                resolve({ statusCode: status, documents: 'Account successfully created' });
+                if (err) {
+                  reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                } else {
+                  const friends = new friendModel({
+                    accountId: doc._id,
+                  });
+                  friends.save((friendErr: mongoose.Error, document: Friends) => {
+                    if (friendErr) {
+                      reject(DatabaseService.rejectMessage(httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong'));
+                    } else {
+                      resolve({ statusCode: httpStatus.OK, documents: 'Account successfully created' });
+                    }
+                  });
+                }
               });
             });
           }
@@ -255,7 +267,9 @@ export class DatabaseService {
       refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
         this.logout(doc.token).then((successfull) => {
           accountModel.findByIdAndDelete(id, null, (error: Error, acc: Account) => {
-            resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+            friendModel.findOneAndDelete({ accountId: id }, undefined, (friendErr: Error, friends: Friends) => {
+              resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+            });
           });
         }).catch((error) => {
           reject(error);
