@@ -2,7 +2,9 @@ import * as http from 'http';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
+import { v4 as uuidv4} from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
+import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Lobby } from '../models/lobby';
@@ -13,6 +15,7 @@ export class SocketIo {
 
   io: Server;
   lobbyList: Lobby[] =  [];
+  readonly MAX_LENGHT_MSG: number = 200;
 
   constructor(private socketIdService: SocketIdService) { }
 
@@ -61,8 +64,8 @@ export class SocketIo {
       });
 
       socket.on('CreateLobby', (playerName: string, type: string, sizeGame: number) => {
-        const generatedId = 'e';
-        const lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type} as Lobby;
+        const generatedId = uuidv4();
+        const lobby: Lobby = {lobbyId: generatedId, players: [], size: sizeGame, gameType: type};
         this.lobbyList.push(lobby);
         const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
         if (playerLobby) {
@@ -72,14 +75,33 @@ export class SocketIo {
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        const clientRooms = socket.rooms;
-        socket.to(clientRooms[Object.keys(clientRooms)[0]]).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+          const clientRooms = socket.rooms;
+          socket.to(clientRooms[Object.keys(clientRooms)[0]]).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        }
+        else {
+          console.log('Message trop long (+200 caractères)');
+        }
+      });
+
+      socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
+        if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+          const socketOfFriend = this.socketIdService.GetSocketIdOfName(sentMsg.friendName);
+          if (socketOfFriend) {
+            socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
+          }
+        }
+        else {
+          console.log('Message trop long (+200 caractères)');
+        }
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.socketIdService.GetNameOfSocketId(socket.id));
-        this.socketIdService.DisconnectSocketIdName(socket.id);
+        if (this.socketIdService.GetNameOfSocketId(socket.id)) {
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.socketIdService.GetNameOfSocketId(socket.id));
+          this.socketIdService.DisconnectSocketIdName(socket.id);
+        }
       });
     });
   }

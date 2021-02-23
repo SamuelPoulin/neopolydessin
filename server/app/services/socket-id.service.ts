@@ -20,4 +20,8 @@ export class SocketIdService {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.socketIdNameMap.get(socketId)!;
   }
+
+  GetSocketIdOfName(playerName: string): string | undefined {
+    return Object.keys(this.socketIdNameMap).find((keyValue) => this.socketIdNameMap[keyValue] === playerName);
+  }
 }
