@@ -69,13 +69,47 @@ export class FriendsService {
               });
             });
           }
-        }).catch((err) => {
+        }).catch(() => {
           reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR, 'Something went wrong'));
         });
-      }).catch((err) => {
+      }).catch(() => {
         reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR, 'Something went wrong'));
       });
     });
   }
 
+  async acceptFriendship(myId: string, friendId: string): Promise<Response<Friends>> {
+    return new Promise<Response<Friends>>((resolve, reject) => {
+      // add friend request to sender
+      friendsModel.updateOne({
+        'accountId': friendId,
+        'friends.accountId': myId
+      }, {
+        status: FriendStatus.FRIEND,
+      }).then(() => {
+        // emit notification with socket
+      });
+      // add friend request to receiver
+      friendsModel.updateOne({
+        'accountId': myId,
+        'friends.accountId': friendId
+      }, {
+        status: FriendStatus.FRIEND
+      }).then((value) => {
+        friendsModel.findOne({ accountId: myId }, (err: Error, doc: Friends) => {
+          if (err) {
+            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR, 'Something went wrong'));
+          } else {
+            resolve({ statusCode: OK, documents: doc });
+          }
+        });
+      });
+    });
+  }
+
+  async refuseFriendship(myId: string, friendId: string): Promise<Response<Friends>> {
+    return new Promise<Response<Friends>>((resolve, reject) => {
+      // delete friend request
+    });
+  }
 }
