@@ -94,7 +94,6 @@ export class DatabaseService {
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
-    console.log(id);
     return new Promise<Response<Account>>((resolve) => {
       accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
         const status = DatabaseService.determineStatus(err, doc);
@@ -124,7 +123,8 @@ export class DatabaseService {
   async createAccount(body: Register): Promise<Response<string>> {
     return new Promise<Response<string>>((resolve, reject) => {
       const account = {
-        name: body.name,
+        firstName: body.firstName,
+        lastName: body.lastName,
         username: body.username,
         email: body.email,
         password: body.password,
@@ -249,13 +249,17 @@ export class DatabaseService {
   async deleteAccount(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       refreshModel.findOne({ accountId: id }, (err: Error, doc: Refresh) => {
-        this.logout(doc.token).then((successfull) => {
-          accountModel.findByIdAndDelete(id, null, (error: Error, acc: Account) => {
-            resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+        if (doc) {
+          this.logout(doc.token).then((successfull) => {
+            accountModel.findByIdAndDelete(id, null, (error: Error, acc: Account) => {
+              resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+            });
+          }).catch((error) => {
+            reject(error);
           });
-        }).catch((error) => {
-          reject(error);
-        });
+        } else {
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'Account not found'));
+        }
       });
     });
   }
@@ -267,7 +271,6 @@ export class DatabaseService {
         if (found.statusCode !== httpStatus.NOT_FOUND) {
           if (found.documents.username !== body.username) {
             await this.getAccountByUsername(body.username).then((foundByUsername) => {
-              console.log(foundByUsername);
               if (foundByUsername.documents !== null) {
                 canUpdate = false;
               }
@@ -288,7 +291,7 @@ export class DatabaseService {
             reject(this.rejectMessage(httpStatus.BAD_REQUEST, 'Username or Email is already taken'));
           }
         } else {
-          reject(this.rejectMessage(httpStatus.NOT_FOUND, "Account doesn't exist"));
+          reject(this.rejectMessage(httpStatus.NOT_FOUND, 'Account doesn\'t exist'));
         }
       });
     });

@@ -2,14 +2,16 @@ import * as mongoose from 'mongoose';
 
 export interface Account extends mongoose.Document {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   password: string;
 }
 
 export const accountSchema = new mongoose.Schema({
-  name: String,
+  firstName: String,
+  lastName: String,
   username: {
     type: String,
     required: true,

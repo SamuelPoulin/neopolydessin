@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["mocha"],
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -15,5 +16,6 @@
     "noImplicitReturns": true,
     "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": true
-  }
+  },
+  "exclude": ["./node_modules", "**/*.spec.ts"]
 }

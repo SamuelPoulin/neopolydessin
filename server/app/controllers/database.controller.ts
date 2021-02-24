@@ -119,7 +119,8 @@ export class DatabaseController {
 
     this.router.post('/account', jwtVerify, [
       body('_id').isEmpty(),
-      body('name').optional(),
+      body('firstName').optional(),
+      body('lastName').optional(),
       body('username').optional(),
       body('email').optional(),
       body('password').isEmpty(),
