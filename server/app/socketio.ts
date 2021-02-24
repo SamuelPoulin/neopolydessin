@@ -31,10 +31,10 @@ export class SocketIo {
   }
 
   bindIoEvents(): void {
-    this.io.on(SocketConnection.CONNECTION, (socket: Socket, name: string) => {
+    this.io.on(SocketConnection.CONNECTION, (socket: Socket, accessToken: string) => {
       console.log(`Connected with ${socket.id} \n`);
 
-      this.socketIdService.AssociateSocketIdName(socket.id, name);
+      this.socketIdService.AssociateAccountIdToSocketId(accessToken, socket.id);
 
       socket.on('GetLobbies', () => {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
@@ -87,7 +87,7 @@ export class SocketIo {
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
         if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
-          const socketOfFriend = this.socketIdService.GetSocketIdOfName(sentMsg.friendName);
+          const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
             socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
           }
@@ -99,9 +99,9 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        if (this.socketIdService.GetNameOfSocketId(socket.id)) {
-          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.socketIdService.GetNameOfSocketId(socket.id));
-          this.socketIdService.DisconnectSocketIdName(socket.id);
+        if (this.socketIdService.GetAccountIdOfSocketId(socket.id)) {
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.socketIdService.GetAccountIdOfSocketId(socket.id));
+          this.socketIdService.DisconnectAccountIdSocketId(socket.id);
         }
       });
     });
