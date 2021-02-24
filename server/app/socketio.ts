@@ -8,6 +8,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Lobby } from '../models/lobby';
+import { DatabaseService } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 
@@ -18,7 +19,10 @@ export class SocketIo {
   lobbyList: Lobby[] =  [];
   readonly MAX_LENGHT_MSG: number = 200;
 
-  constructor(@inject(Types.SocketIdService) private socketIdService: SocketIdService) { }
+  constructor(
+    @inject(Types.SocketIdService) private socketIdService: SocketIdService,
+    @inject(Types.DatabaseService) private databaseService: DatabaseService
+  ) { }
 
   init(server: http.Server): void {
     this.io = new Server(server, {
@@ -40,13 +44,15 @@ export class SocketIo {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
       }); // Put gametype in enum
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (playerName: string, lobbyId: string, callback) => {
-        socket.join(lobbyId);
-        const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
-        if (playerLobby) {
-          playerLobby.players.push(playerName);
-        }
-        socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName); // Send to all clients except sender
+      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string, callback) => {
+        this.databaseService.getAccountById(accountId).then((account) => {
+          socket.join(lobbyId);
+          const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
+          if (playerLobby) {
+            playerLobby.players.push(accountId);
+          }
+          socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
+        });
 
         /* for (const value of this.players.values()) {
                 if (value === playerName) {
@@ -64,15 +70,17 @@ export class SocketIo {
               socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);*/
       });
 
-      socket.on('CreateLobby', (playerName: string, type: string, sizeGame: number) => {
-        const generatedId = uuidv4();
-        const lobby: Lobby = {lobbyId: generatedId, players: [], size: sizeGame, gameType: type};
-        this.lobbyList.push(lobby);
-        const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
-        if (playerLobby) {
-          playerLobby.players.push(playerName);
-        }
-        socket.join(generatedId);
+      socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
+        this.databaseService.getAccountById(accountId).then((account) => {
+          const generatedId = uuidv4();
+          const lobby: Lobby = {lobbyId: generatedId, players: [], size: sizeGame, gameType: type};
+          this.lobbyList.push(lobby);
+          const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
+          if (playerLobby) {
+            playerLobby.players.push(account.documents.username);
+          }
+          socket.join(generatedId);
+        });
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
@@ -99,9 +107,12 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        if (this.socketIdService.GetAccountIdOfSocketId(socket.id)) {
-          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.socketIdService.GetAccountIdOfSocketId(socket.id));
-          this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+        const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (accountIdOfSocket) {
+          this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
+            socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+            this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+          });
         }
       });
     });
