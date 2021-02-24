@@ -160,7 +160,7 @@ export class FriendsService {
   async unfriend(id: string, toUnfriendId: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
       accountModel
-        .updateOne({ _id: new ObjectId(id) }, { $pull: { friends: { friendId: toUnfriendId } } })
+        .updateOne({ _id: new ObjectId(id) }, { $pull: { friends: { friendId: toUnfriendId, status: FriendStatus.FRIEND } } })
         .exec((err: Error, doc: Account) => {
           if (err) {
             reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR, 'Something went wrong.'));
@@ -169,7 +169,7 @@ export class FriendsService {
           } else {
             console.log(doc);
             accountModel
-              .updateOne({ _id: new ObjectId(toUnfriendId) }, { $pull: { friends: { friendId: id, } } })
+              .updateOne({ _id: new ObjectId(toUnfriendId) }, { $pull: { friends: { friendId: id, status: FriendStatus.FRIEND } } })
               .exec((error: Error, document: Account) => {
                 if (error) {
                   reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR, 'Something went wrong.'));
