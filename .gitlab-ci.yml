@@ -63,7 +63,7 @@ test_server:
 
 test_electron:
     stage: test
-    allow_failure: true
+    #allow_failure: true
     needs:
         - build_electron
     dependencies:
