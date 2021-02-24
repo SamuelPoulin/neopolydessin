@@ -1,5 +1,5 @@
-/* tslint:disable:no-require-imports no-var-requires*/
 import * as chai from 'chai';
+import { describe, beforeEach } from 'mocha';
 import 'chai-http';
 chai.use(require('chai-http'));
 import * as sinon from 'sinon';

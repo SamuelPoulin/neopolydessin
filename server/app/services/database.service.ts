@@ -150,7 +150,8 @@ export class DatabaseService {
   async createAccount(body: Register): Promise<Response<Login>> {
     return new Promise<Response<Login>>((resolve, reject) => {
       const account = {
-        name: body.name,
+        firstName: body.firstName,
+        lastName: body.lastName,
         username: body.username,
         email: body.email,
         password: body.password,
@@ -327,7 +328,7 @@ export class DatabaseService {
             reject(DatabaseService.rejectMessage(BAD_REQUEST, 'Username or Email is already taken'));
           }
         } else {
-          reject(DatabaseService.rejectMessage(NOT_FOUND, "Account doesn't exist"));
+          reject(DatabaseService.rejectMessage(NOT_FOUND, 'Account doesn\'t exist'));
         }
       });
     });

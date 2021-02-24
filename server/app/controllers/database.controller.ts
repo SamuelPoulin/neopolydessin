@@ -101,23 +101,22 @@ export class DatabaseController {
         });
       });
 
-    this.router.post('/account',
-      jwtVerify,
-      [
-        body('_id').isEmpty(),
-        body('name').optional(),
-        body('username').optional(),
-        body('email').optional(),
-        body('password').isEmpty()
-      ],
-      validationCheck,
-      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
-      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
-          DatabaseService.handleResults(res, results);
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
+    this.router.post('/account', jwtVerify, [
+      body('_id').isEmpty(),
+      body('firstName').optional(),
+      body('lastName').optional(),
+      body('username').optional(),
+      body('email').optional(),
+      body('password').isEmpty(),
+    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      this.badRequestIfValidationFailed(req, res, () => {
+        this.unauthorizedIfLoggedOut(req, res, () => {
+          this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
+            DatabaseService.handleResults(res, results);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
         });
       });
-  }
+    }
 }

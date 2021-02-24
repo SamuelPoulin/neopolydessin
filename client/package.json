@@ -18,6 +18,7 @@
   "build": {
     "appId": "log3900-204.polydessin",
     "productName": "PolyDessin",
+    "artifactName": "${productName}_Setup_${version}.${ext}",
     "protocols": {
       "name": "polydessin-protocol",
       "schemes": [
