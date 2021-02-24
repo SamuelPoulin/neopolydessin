@@ -1,6 +1,8 @@
 workflow:
     rules:
-        - when: always
+        - if: '$CI_COMMIT_BRANCH == "master"'
+        - if: '$CI_COMMIT_BRANCH == "develop"'
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 stages:
     - build
@@ -30,9 +32,8 @@ build_server:
     script:
         - echo "Build serveur"
         - ./pipeline/build_server.sh
-    allow_failure: true     #until compile errors removed
     artifacts:
-        when: always        #until compile errors removed
+        expire_in: 1 day
         paths:
             - server/node_modules/
             - server/out/
@@ -44,12 +45,13 @@ build_electron:
         - echo "Build electron"
         - ./pipeline/build_electron.sh
     artifacts:
+        expire_in: 1 day
         paths:
             - client/node_modules/
 
 test_server:
     stage: test
-    allow_failure: true
+    #allow_failure: true
     needs:
         - build_server
     dependencies:
@@ -61,7 +63,7 @@ test_server:
 
 test_electron:
     stage: test
-    allow_failure: true
+    #allow_failure: true
     needs:
         - build_electron
     dependencies:
@@ -78,6 +80,9 @@ deploy_dev:
     script:
         - echo "Deploy dev"
         - ./pipeline/deploy_dev.sh
+    artifacts:
+        paths:
+            - client/build/PolyDessin_Setup_*.exe
 
 deploy_prod:
     stage: deploy
@@ -86,3 +91,6 @@ deploy_prod:
     script:
         - echo "Deploy prod"
         - ./pipeline/deploy_prod.sh
+    artifacts:
+        paths:
+            - client/build/PolyDessin_Setup_*.exe

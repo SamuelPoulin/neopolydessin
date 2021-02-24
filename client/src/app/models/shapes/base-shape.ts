@@ -120,6 +120,8 @@ export abstract class BaseShape {
     this.svgNode.style.strokeWidth = this.strokeWidth.toString();
     this.svgNode.style.strokeOpacity = this.secondaryColor.a.toString();
     this.svgNode.style.fillOpacity = this.primaryColor.a.toString();
+    this.svgNode.style.stroke = this.secondaryColor.rgbString;
+    this.svgNode.style.fill = this.primaryColor.rgbString;
   }
 
   highlight(color: Color, thickness: number): void {

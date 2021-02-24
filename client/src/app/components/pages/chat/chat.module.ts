@@ -8,6 +8,6 @@ import { SystemMessageComponent } from './system-message/system-message.componen
 @NgModule({
   imports: [SharedModule, PickerModule],
   declarations: [ChatComponent, ChatMessageComponent, SystemMessageComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ChatModule {}

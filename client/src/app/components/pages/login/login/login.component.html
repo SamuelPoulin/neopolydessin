@@ -1,6 +1,6 @@
 <div id="login-page">
   <img id="login-page-image" src="assets/icon.png" />
   <div id="login-page-title">Bienvenue sur PolyDessin</div>
-  <app-username-input [(value)]="inputValue">Nom d'utilisateur</app-username-input>
+  <app-username-input [(value)]="inputValue" (keyup.enter)="login()">Nom d'utilisateur</app-username-input>
   <button id="login-button" mat-raised-button color="primary" (click)="login()">Login</button>
 </div>
