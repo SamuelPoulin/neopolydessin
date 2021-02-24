@@ -61,7 +61,6 @@ export class DatabaseController {
     this.router.post('/auth/refresh',
       [body('refreshToken').exists()],
       validationCheck,
-      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.databaseService.refreshToken(req.body.refreshToken).then((newAccesToken) => {
           res.status(httpStatus.OK).json({ data: { accessToken: newAccesToken } });

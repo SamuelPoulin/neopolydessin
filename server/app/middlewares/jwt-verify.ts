@@ -6,9 +6,9 @@ export const jwtVerify = (req: express.Request, res: express.Response, next: exp
   try {
     const jwtToken = req.headers.authorization;
     if (jwtToken && process.env.JWT_KEY) {
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      const decodedJwt: {} = jwt.verify(jwtToken, process.env.JWT_KEY) as object;
-      req.params = decodedJwt;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decodedJwt: any = jwt.verify(jwtToken, process.env.JWT_KEY);
+      req.params._id = decodedJwt._id;
       next();
     } else {
       throw new Error('No secret key found');

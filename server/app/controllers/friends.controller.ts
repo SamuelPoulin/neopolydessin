@@ -4,11 +4,11 @@ import { body } from 'express-validator';
 import Types from '../types';
 import { jwtVerify } from '../middlewares/jwt-verify';
 import { FriendsService } from '../services/friends.service';
-import { Friends } from '../../models/friends';
 import { ErrorMsg, Response } from '../services/database.service';
 import { Decision, FriendRequest } from '../../../common/communication/friend-request';
 import { validationCheck } from '../middlewares/validation-check';
 import { LoggedIn } from '../middlewares/logged-in';
+import { FriendsList } from '../../models/account';
 
 @injectable()
 export class FriendsController {
@@ -28,7 +28,7 @@ export class FriendsController {
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.friendsService.getFriendsOfUser(req.params._id).then((result: Response<Friends>) => {
+        this.friendsService.getFriendsOfUser(req.params._id).then((result: Response<FriendsList>) => {
           res.status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
@@ -42,7 +42,7 @@ export class FriendsController {
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const friendRequest: FriendRequest = req.body;
-        this.friendsService.requestFriendship(req.params._id, friendRequest.email).then((result: Response<Friends>) => {
+        this.friendsService.requestFriendship(req.params._id, friendRequest.email).then((result: Response<FriendsList>) => {
           res.status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
@@ -59,19 +59,31 @@ export class FriendsController {
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         if (req.body.decision === Decision.ACCEPT) {
-          this.friendsService.acceptFriendship(req.params._id, req.body.idOfFriend).then((result) => {
+          this.friendsService.acceptFriendship(req.params._id, req.body.idOfFriend).then((result: Response<FriendsList>) => {
             res.status(result.statusCode).json(result.documents);
           }).catch((error: ErrorMsg) => {
             res.status(error.statusCode).json(error.message);
           });
         } else {
-          this.friendsService.refuseFriendship(req.params._id, req.body.idOfFriend).then((result) => {
-            // todo
-          }).catch((err: ErrorMsg) => {
-            // todo
+          this.friendsService.refuseFriendship(req.params._id, req.body.idOfFriend).then((result: Response<FriendsList>) => {
+            res.status(result.statusCode).json(result.documents);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
           });
         }
+      });
 
+    this.router.delete('/:id',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.log(req.params);
+        this.friendsService.unfriend(req.params._id, req.params.id).then((result: Response<FriendsList>) => {
+          res.status(result.statusCode).json(result.documents);
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
       });
   }
+
 }
