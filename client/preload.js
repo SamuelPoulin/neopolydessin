@@ -21,7 +21,7 @@ window.addEventListener("DOMContentLoaded", () => {
           click: () => {
             chatWindow = new BrowserWindow({
               icon: url.format(path.join(__dirname, "/resources/icon.png")),
-              width: 350,
+              width: 450,
               height: 750,
               frame: false,
               webPreferences: {

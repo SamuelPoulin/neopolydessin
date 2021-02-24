@@ -33,6 +33,12 @@
 chat-message {
   display: flex;
   max-width: 50%;
+  margin: 0px 25px;
+}
+
+system-message {
+  display: flex;
+  align-self: center;
 }
 
 #chat-logo {
@@ -40,16 +46,6 @@ chat-message {
   width: 35px;
 
   margin: 0px 15px 0px 25px;
-}
-
-.chat-div-1 {
-  background-color: pink;
-  height: 500px;
-}
-
-.chat-div-2 {
-  background-color: yellow;
-  height: 500px;
 }
 
 #emoji-button,
@@ -60,6 +56,16 @@ chat-message {
 
 #send-button {
   background-color: #f8f8f8;
+}
+
+#emoji-picker-anchor {
+  position: relative;
+}
+
+#emoji-picker {
+  position: absolute;
+  top: -445px;
+  left: 50%;
 }
 
 #message-textbox {
