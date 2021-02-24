@@ -21,15 +21,15 @@ export interface ErrorMsg {
   message: string | undefined;
 }
 
+export interface LoginTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
 interface AccessToken {
   _id: string;
   iat: number;
   exp: number;
-}
-
-interface Login {
-  accessToken: string;
-  refreshToken: string;
 }
 
 @injectable()
@@ -147,8 +147,8 @@ export class DatabaseService {
     });
   }
 
-  async createAccount(body: Register): Promise<Response<Login>> {
-    return new Promise<Response<Login>>((resolve, reject) => {
+  async createAccount(body: Register): Promise<Response<LoginTokens>> {
+    return new Promise<Response<LoginTokens>>((resolve, reject) => {
       const account = {
         firstName: body.firstName,
         lastName: body.lastName,
@@ -186,8 +186,8 @@ export class DatabaseService {
     });
   }
 
-  async login(loginInfo: login): Promise<Response<Login>> {
-    return new Promise<Response<Login>>((resolve, reject) => {
+  async login(loginInfo: login): Promise<Response<LoginTokens>> {
+    return new Promise<Response<LoginTokens>>((resolve, reject) => {
       this.getAccountByUsername(loginInfo.username).then((results) => {
         const account = results.documents;
         if (!account) {
@@ -232,7 +232,6 @@ export class DatabaseService {
       refreshModel
         .findOne({ token: refreshToken })
         .exec((err: Error, doc: Refresh) => {
-          console.log(doc);
           if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
             reject(DatabaseService.rejectMessage(UNAUTHORIZED));
           } else {
@@ -286,15 +285,21 @@ export class DatabaseService {
       refreshModel
         .findOne({ accountId: id })
         .exec((err: Error, doc: Refresh) => {
-          this.logout(doc.token).then((successfull) => {
-            accountModel
-              .findByIdAndDelete(id)
-              .exec((error: Error, acc: Account) => {
-                resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
-              });
-          }).catch((error) => {
-            reject(error);
-          });
+          if (err) {
+            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
+          } else if (!doc) {
+            reject(DatabaseService.rejectMessage(NOT_FOUND));
+          } else {
+            this.logout(doc.token).then((successfull) => {
+              accountModel
+                .findByIdAndDelete(id)
+                .exec((error: Error, acc: Account) => {
+                  resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
+                });
+            }).catch((error) => {
+              reject(error);
+            });
+          }
         });
     });
   }

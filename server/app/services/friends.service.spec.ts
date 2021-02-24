@@ -4,12 +4,12 @@ import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { FriendsService } from './friends.service';
 
-describe('Email Service', () => {
+describe('Friends Service', () => {
     let friendsService: FriendsService;
 
     beforeEach(async () => {
         await testingContainer().then((instance) => {
-            friendsService = instance[0].get<FriendsService>(Types.EmailService);
+            friendsService = instance[0].get<FriendsService>(Types.FriendsService);
         });
     });
 

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as httpStatus from 'http-status-codes';
 import { Response } from './database.service';
 import { describe, beforeEach } from 'mocha';
-import { DatabaseService, ErrorMsg } from './database.service';
+import { DatabaseService, ErrorMsg, LoginTokens } from './database.service';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { Register } from '../../../common/communication/register';
@@ -55,7 +55,8 @@ describe('Database Service', () => {
     databaseService.createAccount(accountInfo).then((result) => {
       expect(result.statusCode).to.equal(httpStatus.OK);
       expect(result.documents).to.not.equal(null);
-      expect(result.documents).to.equal('Account successfully created');
+      expect(result.documents.accessToken).to.not.be.null;
+      expect(result.documents.refreshToken).to.not.be.null;
       done();
     });
   });
@@ -65,7 +66,7 @@ describe('Database Service', () => {
       expect(tokens).to.be.null;
     }).catch((err: ErrorMsg) => {
       expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
-      expect(err.message).to.equal('Wrong username');
+      expect(err.message).to.equal('Not found');
       done();
     });
   });
@@ -81,7 +82,7 @@ describe('Database Service', () => {
         expect(tokens).to.be.null;
       }).catch((err: ErrorMsg) => {
         expect(err.statusCode).to.equal(httpStatus.UNAUTHORIZED);
-        expect(err.message).to.equal('Wrong password');
+        expect(err.message).to.equal('Access denied');
         done();
       });
     });
@@ -89,29 +90,27 @@ describe('Database Service', () => {
 
   it('should login successfully', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
-        expect(tokens[0]).to.not.be.null;
-        expect(tokens[1]).to.not.be.null;
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        expect(tokens.documents.accessToken).to.not.be.null;
+        expect(tokens.documents.refreshToken).to.not.be.null;
         done();
       });
     });
   });
 
-  it('should be FORBIDDEN if refresh token doesn\'t exist', (done: Mocha.Done) => {
+  it('should be UNAUTHORIZED if refresh token doesn\'t exist', (done: Mocha.Done) => {
     databaseService.refreshToken('invalidToken').catch((err: ErrorMsg) => {
-      expect(err.statusCode).to.equal(httpStatus.FORBIDDEN);
+      expect(err.statusCode).to.equal(httpStatus.UNAUTHORIZED);
       expect(err.message).to.equal('Access denied');
       done();
     });
   });
 
   it('should return a new acces token correctly when calling refreshToken', (done: Mocha.Done) => {
-    databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
-        databaseService.refreshToken(tokens[1]).then((token: string) => {
-          expect(token).to.not.be.null;
-          done();
-        });
+    databaseService.createAccount(accountInfo).then((created: Response<LoginTokens>) => {
+      databaseService.refreshToken(created.documents.refreshToken).then((token: string) => {
+        expect(token).to.not.be.null;
+        done();
       });
     });
   });
@@ -126,9 +125,9 @@ describe('Database Service', () => {
 
   it('checkIfLoggedIn should resolve to true if the user is logged in', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
         if (process.env.JWT_KEY) {
-          const decodedJwt: {} = jwt.verify(tokens[0], process.env.JWT_KEY) as object;
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.checkIfLoggedIn(decodedJwt['_id']).then((loggedIn) => {
             expect(loggedIn).to.be.true;
             done();
@@ -148,8 +147,8 @@ describe('Database Service', () => {
 
   it('should resolve to true if user logout successfull', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
-        databaseService.logout(tokens[1]).then((successfull) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        databaseService.logout(tokens.documents.refreshToken).then((successfull) => {
           expect(successfull).to.be.true;
           done();
         });
@@ -160,16 +159,16 @@ describe('Database Service', () => {
   it('should receive NOT_FOUND if account doesn\'t exist when deleting account', (done: Mocha.Done) => {
     databaseService.deleteAccount('1').catch((err: ErrorMsg) => {
       expect(err.statusCode).to.be.equal(httpStatus.NOT_FOUND);
-      expect(err.message).to.be.equal('Account not found');
+      expect(err.message).to.be.equal('Not found');
       done();
     });
   });
 
   it('should delete account correctly', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
         if (process.env.JWT_KEY) {
-          const decodedJwt: {} = jwt.verify(tokens[0], process.env.JWT_KEY) as object;
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.deleteAccount(decodedJwt['_id']).then((response: Response<Account>) => {
             expect(response.statusCode).to.equal(httpStatus.OK);
             expect(response.documents.firstName).to.equal('name');
@@ -196,9 +195,9 @@ describe('Database Service', () => {
 
   it('updateAccount should update account correctly', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: string[]) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
         if (process.env.JWT_KEY) {
-          const decodedJwt: {} = jwt.verify(tokens[0], process.env.JWT_KEY) as object;
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.updateAccount(decodedJwt['_id'], {
             firstName: 'newName',
             username: 'newUsername',

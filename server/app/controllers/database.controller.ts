@@ -72,7 +72,6 @@ export class DatabaseController {
     this.router.delete('/auth/logout',
       [body('refreshToken').exists()],
       validationCheck,
-      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.databaseService.logout(req.body.refreshToken).then((successfull) => {
           if (successfull) {
