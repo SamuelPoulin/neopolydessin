@@ -67,5 +67,4 @@ class RegisterViewModel() : ViewModel() {
                 || isInvalidPassword()
                 || isInvalidPasswordConfirm())
     }
-
 }
