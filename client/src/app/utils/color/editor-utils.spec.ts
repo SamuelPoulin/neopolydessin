@@ -2,7 +2,6 @@
 import createSpyObj = jasmine.createSpyObj;
 import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
 import { Path } from '@models/shapes/path';
-import { Rectangle } from '@models/shapes/rectangle';
 import { Color } from '@utils/color/color';
 import { EditorUtils } from '@utils/color/editor-utils';
 import { Coordinate } from '@utils/math/coordinate';
@@ -49,10 +48,7 @@ describe('EditorUtils', () => {
   });
 
   it('can create shape from existing shape', () => {
-    const types = [
-      new Path(),
-      new Rectangle(),
-    ];
+    const types = [new Path()];
     types.forEach((type) => {
       expect(EditorUtils.createShape(type).constructor.name).toEqual(type.constructor.name);
     });

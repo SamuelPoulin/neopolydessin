@@ -51,7 +51,7 @@ build_electron:
 
 test_server:
     stage: test
-    allow_failure: true
+    #allow_failure: true
     needs:
         - build_server
     dependencies:
@@ -63,7 +63,7 @@ test_server:
 
 test_electron:
     stage: test
-    allow_failure: true
+    #allow_failure: true
     needs:
         - build_electron
     dependencies:
@@ -82,7 +82,7 @@ deploy_dev:
         - ./pipeline/deploy_dev.sh
     artifacts:
         paths:
-            - client/build/PolyDessin Setup *.exe
+            - client/build/PolyDessin_Setup_*.exe
 
 deploy_prod:
     stage: deploy
@@ -93,4 +93,4 @@ deploy_prod:
         - ./pipeline/deploy_prod.sh
     artifacts:
         paths:
-            - client/build/PolyDessin Setup *.exe
+            - client/build/PolyDessin_Setup_*.exe

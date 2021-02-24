@@ -11,10 +11,12 @@ import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { ColorsService } from './colors.service';
 import { EditorService } from './editor.service';
 import { LocalSaveService } from './localsave.service';
+import { Path } from '@models/shapes/path';
 
 describe('EditorService', () => {
   let service: EditorService;
   let rectangle: Rectangle;
+  let path: Path;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,6 +29,7 @@ describe('EditorService', () => {
     service = new EditorService(new ColorsService(), new LocalSaveService());
     BaseShape['SHAPE_ID'] = 0;
     rectangle = new Rectangle();
+    path = new Path();
     const viewSpy = createSpyObj('view', ['addShape', 'removeShape']);
     viewSpy.width = 10;
     viewSpy.height = 10;
@@ -39,8 +42,8 @@ describe('EditorService', () => {
     service.view = viewSpy;
 
     service['shapesBuffer'] = [rectangle, rectangle];
-    // @ts-ignore
-    service['shapes'] = [line];
+    service.shapes.length = 0;
+    service.shapes.push(path);
   });
 
   it('should be created', () => {
@@ -58,17 +61,18 @@ describe('EditorService', () => {
 
   it('can export drawing', () => {
     service.shapes.length = 0;
+    service.shapes.push(path);
     service.shapes.push(rectangle);
     const result = JSON.parse(service.exportDrawing());
     expect(result.length).toEqual(2);
     expect(result[0].svgNode).toBeFalsy();
-    expect(result[0].type).toEqual('Line');
+    expect(result[0].type).toEqual('Path');
     expect(result[1].type).toEqual('Rectangle');
   });
 
   it('can import drawing', () => {
     service.shapes.length = 0;
-    service.shapes.push(rectangle);
+    service.shapes.push(path);
     const api = createSpyObj('api', {
       getDrawingById: () => {
         return;
@@ -88,7 +92,7 @@ describe('EditorService', () => {
     service.applyShapesBuffer();
 
     expect(service['shapesBuffer']).toEqual([]);
-    expect(service.shapes).toEqual([rectangle, rectangle]);
+    expect(service.shapes).toEqual([path, rectangle, rectangle]);
     expect(clearShapesBufferSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -136,14 +140,14 @@ describe('EditorService', () => {
   });
 
   it('updates view on addShapeToBuffer', () => {
-    const ellipse = new Rectangle();
+    const path2 = new Path();
     service.view.svg.contains = () => false;
 
-    service.addShapeToBuffer(ellipse);
+    service.addShapeToBuffer(path2);
 
-    expect(service['shapes']).toEqual([rectangle]);
-    expect(service['shapesBuffer']).toEqual([rectangle, rectangle, ellipse]);
-    expect(service.view.addShape).toHaveBeenCalledWith(ellipse);
+    expect(service['shapes']).toEqual([path]);
+    expect(service['shapesBuffer']).toEqual([rectangle, rectangle, path2]);
+    expect(service.view.addShape).toHaveBeenCalledWith(path2);
   });
   it('adds shape to buffer if view is undefined', () => {
     const ellipse = new Rectangle();
@@ -161,9 +165,9 @@ describe('EditorService', () => {
   });
 
   it('can remove shape', () => {
-    service.removeShape(rectangle);
+    service.removeShape(path);
     expect(service.shapes.length).toEqual(0);
-    expect(service.view.removeShape).toHaveBeenCalledWith(rectangle);
+    expect(service.view.removeShape).toHaveBeenCalledWith(path);
   });
 
   it('does not remove shape if it is not in the list', () => {
@@ -191,5 +195,4 @@ describe('EditorService', () => {
 
     expect(() => service.findShapeById(5)).toThrow(ShapeError.idCollision());
   });
-
 });

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["mocha"],
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",

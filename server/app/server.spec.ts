@@ -7,7 +7,7 @@ import { Server } from './server';
 import { testingContainer } from '../test/test-utils';
 import Types from './types';
 
-import { DEV_PORT, PROD_PORT } from './constants';
+import { DEV_PORT, PROD_PORT, TEST_PORT } from './constants';
 
 describe('Server', () => {
   let server: Server;
@@ -20,10 +20,10 @@ describe('Server', () => {
     });
   });
 
-  it('should init correctly on the development port', (done: Mocha.Done) => {
+  it('should init correctly on the test port', (done: Mocha.Done) => {
     const spy = sinon.spy(server, 'onListening' as any);
 
-    server.init(DEV_PORT);
+    server.init(TEST_PORT);
 
     setTimeout(() => {
       expect(spy.called).to.equal(true);
@@ -37,8 +37,8 @@ describe('Server', () => {
     const spy = sinon.spy(anotherServer, 'onError' as any);
     const stub = sinon.stub(process, 'exit');
 
-    server.init(DEV_PORT);
-    anotherServer.init(DEV_PORT);
+    server.init(TEST_PORT);
+    anotherServer.init(TEST_PORT);
 
     setTimeout(() => {
       expect(spy.called).to.equal(true);
