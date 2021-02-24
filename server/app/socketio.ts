@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4} from 'uuid';
@@ -9,6 +9,7 @@ import { SocketConnection } from '../../common/socketendpoints/socket-connection
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Lobby } from '../models/lobby';
 import { SocketIdService } from './services/socket-id.service';
+import Types from './types';
 
 @injectable()
 export class SocketIo {
@@ -17,7 +18,7 @@ export class SocketIo {
   lobbyList: Lobby[] =  [];
   readonly MAX_LENGHT_MSG: number = 200;
 
-  constructor(private socketIdService: SocketIdService) { }
+  constructor(@inject(Types.SocketIdService) private socketIdService: SocketIdService) { }
 
   init(server: http.Server): void {
     this.io = new Server(server, {
