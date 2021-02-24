@@ -2,7 +2,6 @@ package com.projet.clientleger.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.projet.clientleger.data.api.ApiClient
 import com.projet.clientleger.data.api.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponseModel
@@ -11,18 +10,13 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class RegisterRepository {
-
-    private var apiRegisterInterface: ApiRegisterInterface?=null
-
-    init {
-        apiRegisterInterface = ApiClient.getApiClient().create(ApiRegisterInterface::class.java)
-    }
+class RegisterRepository @Inject constructor(private val apiRegisterInterface: ApiRegisterInterface){
 
     fun registerAccount(registerModel: RegisterModel): LiveData<RegisterResponseModel>{
         val res = MutableLiveData<RegisterResponseModel>()
-        apiRegisterInterface?.registerAccount(registerModel)?.enqueue(object : Callback<String> {
+        apiRegisterInterface.registerAccount(registerModel).enqueue(object : Callback<String> {
 
             override fun onFailure(call: Call<String>, t: Throwable) {
                 println("fail")
@@ -44,8 +38,7 @@ class RegisterRepository {
                         println(bufferRes)
                     }
                     res.value = RegisterResponseModel(false, bufferRes.trim())
-                }
-                else{
+                } else{
                     res.value = RegisterResponseModel(true,response.body()!!)
                 }
             }

@@ -8,18 +8,19 @@ import androidx.lifecycle.ViewModelProvider
 import com.projet.clientleger.R
 import com.projet.clientleger.databinding.ActivityAccountCreationBinding
 import com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_account_creation.*
 
+@AndroidEntryPoint
 class AccountCreation : AppCompatActivity() {
     private lateinit var vm: RegisterViewModel
     private lateinit var binding: ActivityAccountCreationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        vm  = ViewModelProvider(this).get(RegisterViewModel::class.java)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_creation)
         binding.lifecycleOwner = this
-        vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
         setupInputsObservable()
         btn_submit.setOnClickListener {
             vm.registerAccount()

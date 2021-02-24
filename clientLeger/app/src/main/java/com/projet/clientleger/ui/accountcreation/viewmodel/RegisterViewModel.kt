@@ -7,9 +7,11 @@ import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponseModel
 import com.projet.clientleger.data.repository.RegisterRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class RegisterViewModel() : ViewModel() {
-    private var registerRepository: RegisterRepository? = null
+@HiltViewModel
+class RegisterViewModel  @Inject constructor(private val registerRepository: RegisterRepository): ViewModel() {
     var registerAccountLiveData: LiveData<RegisterResponseModel>? = null
 
     val registerFistNameLiveData: MutableLiveData<String> = MutableLiveData("")
@@ -19,15 +21,11 @@ class RegisterViewModel() : ViewModel() {
     val registerPasswordLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerPasswordConfirmLiveData: MutableLiveData<String> = MutableLiveData("")
 
-    init {
-        registerRepository = RegisterRepository()
-    }
-
     fun registerAccount() {
         val name = "${registerFistNameLiveData.value?.trim()} ${registerLastNameLiveData.value?.trim()}"
         val register = RegisterModel(name, registerUsernameLiveData.value?.trim(),
                 registerEmailLiveData.value?.trim(), registerPasswordLiveData.value?.trim(), registerPasswordConfirmLiveData.value?.trim())
-        registerAccountLiveData = registerRepository?.registerAccount(register)
+        registerAccountLiveData = registerRepository.registerAccount(register)
     }
 
     fun isInvalidEmail(): Boolean {

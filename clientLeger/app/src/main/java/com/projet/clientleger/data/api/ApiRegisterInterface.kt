@@ -7,5 +7,5 @@ import retrofit2.http.POST
 const val authPath: String = "api/database/auth/"
 interface ApiRegisterInterface {
     @POST(authPath+"register")
-    fun registerAccount(@Body registerModel: RegisterModel):Call<String>
+    fun registerAccount(@Body registerModel: RegisterModel): Call<String>
 }
