@@ -37,8 +37,8 @@ export class DatabaseController {
       ],
       validationCheck,
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.createAccount(req.body).then((results) => {
-          res.status(results.statusCode).json(results.documents);
+        this.databaseService.createAccount(req.body).then((result) => {
+          res.header('authorization', result.documents.accessToken).status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
@@ -51,8 +51,8 @@ export class DatabaseController {
       ],
       validationCheck,
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.login(req.body).then((tokens: string[]) => {
-          res.header('authorization', tokens[0]).json({ data: { accessToken: tokens[0], refreshToken: tokens[1] } });
+        this.databaseService.login(req.body).then((result) => {
+          res.header('authorization', result.documents.accessToken).status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });

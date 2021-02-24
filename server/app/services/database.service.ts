@@ -27,6 +27,11 @@ interface AccessToken {
   exp: number;
 }
 
+interface Login {
+  accessToken: string;
+  refreshToken: string;
+}
+
 @injectable()
 export class DatabaseService {
 
@@ -142,8 +147,8 @@ export class DatabaseService {
     });
   }
 
-  async createAccount(body: Register): Promise<Response<string>> {
-    return new Promise<Response<string>>((resolve, reject) => {
+  async createAccount(body: Register): Promise<Response<Login>> {
+    return new Promise<Response<Login>>((resolve, reject) => {
       const account = {
         name: body.name,
         username: body.username,
@@ -166,7 +171,11 @@ export class DatabaseService {
                 if (err) {
                   reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
                 } else {
-                  resolve({ statusCode: OK, documents: 'Account successfully created' });
+                  this.login({ username: body.username, password: body.password }).then((tokens) => {
+                    resolve(tokens);
+                  }).catch((failedLogin: ErrorMsg) => {
+                    reject(failedLogin);
+                  });
                 }
               });
             });
@@ -176,8 +185,8 @@ export class DatabaseService {
     });
   }
 
-  async login(loginInfo: login): Promise<string[]> {
-    return new Promise<string[]>((resolve, reject) => {
+  async login(loginInfo: login): Promise<Response<Login>> {
+    return new Promise<Response<Login>>((resolve, reject) => {
       this.getAccountByUsername(loginInfo.username).then((results) => {
         const account = results.documents;
         if (!account) {
@@ -206,7 +215,7 @@ export class DatabaseService {
                 token: jwtRefreshToken
               });
               refreshModel.create(refresh).then((doc: Refresh) => {
-                resolve([jwtToken, doc.token]);
+                resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
               }).catch((err: Error) => {
                 reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
               });
