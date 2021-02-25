@@ -10,4 +10,4 @@ pm2 reload dev_server
 
 #client
 cd ../client
-npm run build:electron -- --win
+npx electron-builder --win
