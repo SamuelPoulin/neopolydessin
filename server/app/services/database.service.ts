@@ -159,17 +159,17 @@ export class DatabaseService {
 
       this.getAccountByUsername(account.username)
         .then(async (found: Response<Account>) => {
-          throw new Error(BAD_REQUEST.toString());
+          throw Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw Error();
+          if (err.statusCode !== NOT_FOUND) throw err;
           return this.getAccountByEmail(account.email);
         })
         .then(async (found: Response<Account>) => {
           throw Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw Error();
+          if (err.statusCode !== NOT_FOUND) throw err;
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
@@ -293,14 +293,14 @@ export class DatabaseService {
           throw new Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw Error();
+          if (err.statusCode !== NOT_FOUND) throw err;
           return this.getAccountByEmail(body.email);
         })
         .then((account: Response<Account>) => {
           throw new Error(BAD_REQUEST.toString());
         })
         .catch((err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw Error();
+          if (err.statusCode !== NOT_FOUND) throw err;
           return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false });
         })
         .then((doc: Account) => {

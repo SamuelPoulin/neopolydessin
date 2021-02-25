@@ -61,6 +61,19 @@ describe('Database Service', () => {
     });
   });
 
+  it('should return BAD_REQUEST if an account already exists', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((result) => {
+      return databaseService.createAccount(accountInfo);
+    })
+      .then((response: Response<LoginTokens>) => {
+        expect(response.statusCode).not.to.equal(httpStatus.OK);
+      })
+      .catch((err: ErrorMsg) => {
+        expect(err.statusCode).to.equal(httpStatus.BAD_REQUEST);
+        done();
+      })
+  });
+
   it('should receive NOT_FOUND if user doesn\'t exist when logging in', (done: Mocha.Done) => {
     databaseService.login(loginInfo).then((tokens) => {
       expect(tokens).to.be.null;
