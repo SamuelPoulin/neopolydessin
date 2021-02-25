@@ -1,18 +1,17 @@
 package com.projet.clientleger.ui.accountcreation.viewmodel
 
 import android.util.Patterns
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.api.model.RegisterModel
-import com.projet.clientleger.data.api.model.RegisterResponseModel
+import com.projet.clientleger.data.api.model.RegisterResponse
 import com.projet.clientleger.data.repository.RegisterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel  @Inject constructor(private val registerRepository: RegisterRepository): ViewModel() {
-    var registerAccountLiveData: LiveData<RegisterResponseModel>? = null
+class RegisterViewModel @Inject constructor(private val registerRepository: RegisterRepository) :
+    ViewModel() {
     val registerFistNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerLastNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerUsernameLiveData: MutableLiveData<String> = MutableLiveData("")
@@ -20,19 +19,27 @@ class RegisterViewModel  @Inject constructor(private val registerRepository: Reg
     val registerPasswordLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerPasswordConfirmLiveData: MutableLiveData<String> = MutableLiveData("")
 
-    fun registerAccount() {
-        val name = "${registerFistNameLiveData.value?.trim()} ${registerLastNameLiveData.value?.trim()}"
-        val register = RegisterModel(name, registerUsernameLiveData.value?.trim(),
-                registerEmailLiveData.value?.trim(), registerPasswordLiveData.value?.trim(), registerPasswordConfirmLiveData.value?.trim())
-        registerAccountLiveData = registerRepository.registerAccount(register)
+    suspend fun registerAccount(): RegisterResponse {
+        val name =
+            "${registerFistNameLiveData.value?.trim()} ${registerLastNameLiveData.value?.trim()}"
+        val register = RegisterModel(
+            name,
+            registerUsernameLiveData.value?.trim(),
+            registerEmailLiveData.value?.trim(),
+            registerPasswordLiveData.value?.trim(),
+            registerPasswordConfirmLiveData.value?.trim()
+        )
+        return registerRepository.registerAccount(register)
     }
 
     fun isInvalidEmail(): Boolean {
-        return registerEmailLiveData.value!!.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(registerEmailLiveData.value!!).matches()
+        return registerEmailLiveData.value!!.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(
+            registerEmailLiveData.value!!
+        ).matches()
     }
 
 
-    fun isDifferentPasswords(): Boolean{
+    fun isDifferentPasswords(): Boolean {
         return !registerPasswordLiveData.value.equals(registerPasswordConfirmLiveData.value)
     }
 
@@ -40,7 +47,7 @@ class RegisterViewModel  @Inject constructor(private val registerRepository: Reg
         return !registerPasswordLiveData.value!!.contains(".*\\d.*".toRegex())
     }
 
-    fun passwordIsMinLength(): Boolean{
+    fun passwordIsMinLength(): Boolean {
         return registerPasswordLiveData.value!!.length < 8
     }
 

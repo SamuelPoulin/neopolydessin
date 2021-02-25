@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.databinding.ActivityAccountCreationBinding
 import com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_account_creation.*
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AccountCreation : AppCompatActivity() {
@@ -27,16 +29,17 @@ class AccountCreation : AppCompatActivity() {
         btn_submit.setOnClickListener {
             binding.btnSubmit.text = ""
             binding.loadingBar.visibility = View.VISIBLE
-            vm.registerAccount()
-            vm.registerAccountLiveData?.observe(this, {
-                showToast(it.message)
-                if (it.isSuccessful) {
-                    vm.clearForm()
-                } else
-                    vm.clearPasswords()
+            lifecycleScope.launch {
+                val res = vm.registerAccount()
                 loadingBar.visibility = View.GONE
+                if (res.isSucessful)
+                    vm.clearForm()
+                else {
+                    vm.clearPasswords()
+                    showToast(res.message)
+                }
                 binding.btnSubmit.text = getString(R.string.register_btn)
-            })
+            }
         }
         binding.viewmodel = vm
     }
