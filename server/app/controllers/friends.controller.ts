@@ -77,7 +77,6 @@ export class FriendsController {
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        console.log(req.params);
         this.friendsService.unfriend(req.params._id, req.params.id).then((result: Response<FriendsList>) => {
           res.status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {

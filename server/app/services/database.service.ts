@@ -162,14 +162,14 @@ export class DatabaseService {
           throw new Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw new Error();
+          if (err.statusCode !== NOT_FOUND) throw Error();
           return this.getAccountByEmail(account.email);
         })
         .then(async (found: Response<Account>) => {
           throw Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw new Error();
+          if (err.statusCode !== NOT_FOUND) throw Error();
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
@@ -293,14 +293,14 @@ export class DatabaseService {
           throw new Error(BAD_REQUEST.toString());
         })
         .catch(async (err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw new Error();
+          if (err.statusCode !== NOT_FOUND) throw Error();
           return this.getAccountByEmail(body.email);
         })
         .then((account: Response<Account>) => {
           throw new Error(BAD_REQUEST.toString());
         })
         .catch((err: ErrorMsg) => {
-          if (err.statusCode !== NOT_FOUND) throw new Error();
+          if (err.statusCode !== NOT_FOUND) throw Error();
           return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false });
         })
         .then((doc: Account) => {
