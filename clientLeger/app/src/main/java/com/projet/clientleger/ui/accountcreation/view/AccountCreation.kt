@@ -1,16 +1,21 @@
 package com.projet.clientleger.ui.accountcreation.view
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.databinding.ActivityAccountCreationBinding
 import com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel
+import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_account_creation.*
 import kotlinx.coroutines.launch
@@ -21,6 +26,9 @@ class AccountCreation : AppCompatActivity() {
     private lateinit var binding: ActivityAccountCreationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_creation)
         binding.loadingBar.visibility = View.GONE
@@ -32,8 +40,14 @@ class AccountCreation : AppCompatActivity() {
             lifecycleScope.launch {
                 val res = vm.registerAccount()
                 loadingBar.visibility = View.GONE
-                if (res.isSucessful)
+                if (res.isSucessful) {
                     vm.clearForm()
+                    getSharedPreferences(getString(R.string.user_creds), Context.MODE_PRIVATE).edit {
+                        putString("accessToken", res.accessToken)
+                        putString("refreshToken", res.refreshToken)
+                        apply()
+                    }
+                }
                 else {
                     vm.clearPasswords()
                     showToast(res.message)
@@ -42,6 +56,16 @@ class AccountCreation : AppCompatActivity() {
             }
         }
         binding.viewmodel = vm
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when(item.itemId){
+//            android.R.id.
+//        }
+//        return super.onOptionsItemSelected(item)
+        this.finish()
+        startActivity(Intent(this, ConnexionActivity::class.java))
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showToast(msg: String) {

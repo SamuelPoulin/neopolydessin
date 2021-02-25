@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(private val registerRepository: RegisterRepository) :
-    ViewModel() {
+        ViewModel() {
     val registerFistNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerLastNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerUsernameLiveData: MutableLiveData<String> = MutableLiveData("")
@@ -20,21 +20,20 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
     val registerPasswordConfirmLiveData: MutableLiveData<String> = MutableLiveData("")
 
     suspend fun registerAccount(): RegisterResponse {
-        val name =
-            "${registerFistNameLiveData.value?.trim()} ${registerLastNameLiveData.value?.trim()}"
         val register = RegisterModel(
-            name,
-            registerUsernameLiveData.value?.trim(),
-            registerEmailLiveData.value?.trim(),
-            registerPasswordLiveData.value?.trim(),
-            registerPasswordConfirmLiveData.value?.trim()
+                registerFistNameLiveData.value?.trim(),
+                registerLastNameLiveData.value?.trim(),
+                registerUsernameLiveData.value?.trim(),
+                registerEmailLiveData.value?.trim(),
+                registerPasswordLiveData.value?.trim(),
+                registerPasswordConfirmLiveData.value?.trim()
         )
         return registerRepository.registerAccount(register)
     }
 
     fun isInvalidEmail(): Boolean {
         return registerEmailLiveData.value!!.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(
-            registerEmailLiveData.value!!
+                registerEmailLiveData.value!!
         ).matches()
     }
 

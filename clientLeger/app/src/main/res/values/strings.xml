@@ -12,4 +12,5 @@
     <string name="register_email">Adresse courielle</string>
     <string name="register_psw">Mot de passe</string>
     <string name="register_psw_confirm">Confimation de mot de passe</string>
+    <string name="user_creds">userCredentials</string>
 </resources>
