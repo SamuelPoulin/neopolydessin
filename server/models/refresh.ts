@@ -1,7 +1,8 @@
+import { ObjectId } from 'mongodb';
 import * as mongoose from 'mongoose';
 
 export interface Refresh extends mongoose.Document {
-  _id: string;
+  _id: ObjectId;
   accountId: string;
   token: string;
 }
