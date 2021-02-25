@@ -1,8 +1,5 @@
-import * as chai from 'chai';
 import * as jwt from 'jsonwebtoken';
 import { describe } from 'mocha';
-import 'chai-http';
-chai.use(require('chai-http'));
 import { jwtVerify } from './jwt-verify';
 import { Request, Response, NextFunction } from 'express'
 import { FORBIDDEN } from 'http-status-codes';
