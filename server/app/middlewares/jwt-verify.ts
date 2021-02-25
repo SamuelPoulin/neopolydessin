@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as httpStatus from 'http-status-codes';
 import * as jwt from 'jsonwebtoken';
 
-interface AccessToken {
+export interface AccessToken {
   _id: string;
   iat: number;
   exp: number;

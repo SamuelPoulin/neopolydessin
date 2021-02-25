@@ -11,27 +11,33 @@ export class FriendsService {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
       accountModel.findOne({ _id: id })
         .populate('friends.friendId', 'username')
-        .exec((err: Error, doc) => {
-          if (err) {
-            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-          } else {
-            if (doc) {
-              const response: FriendsList = {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                friends: doc.friends.map((friend: any) => {
-                  return {
-                    friendId: friend.friendId ? friend.friendId._id : null,
-                    username: friend.friendId ? friend.friendId.username : null,
-                    status: friend.status,
-                    received: friend.received,
-                  };
-                })
-              };
-              resolve({ statusCode: OK, documents: response });
-            }
-          }
+        .exec((err: Error, doc: Account) => {
+          this.handleMongoExecution<Account>(err, doc, () => {
+            const response: FriendsList = {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              friends: doc.friends.map((friend: any) => {
+                return {
+                  friendId: friend.friendId ? friend.friendId._id : null,
+                  username: friend.friendId ? friend.friendId.username : null,
+                  status: friend.status,
+                  received: friend.received,
+                };
+              }),
+            };
+            resolve({ statusCode: OK, documents: response });
+          });
         });
     });
+  }
+
+  handleMongoExecution<T>(err: Error, doc: T, func: () => void): void {
+    if (err) {
+      Promise.reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
+    } else if (!doc) {
+      Promise.reject(DatabaseService.rejectMessage(NOT_FOUND));
+    } else {
+      func();
+    }
   }
 
   async requestFriendship(id: string, email: string): Promise<Response<FriendsList>> {

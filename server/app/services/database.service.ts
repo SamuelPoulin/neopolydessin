@@ -1,5 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import * as express from 'express';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
 import * as jwt from 'jsonwebtoken';
@@ -10,6 +9,7 @@ import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
 import refreshModel, { Refresh } from '../../models/refresh';
+import { AccessToken } from '../middlewares/jwt-verify';
 
 export interface Response<T> {
   statusCode: number;
@@ -24,12 +24,6 @@ export interface ErrorMsg {
 export interface LoginTokens {
   accessToken: string;
   refreshToken: string;
-}
-
-interface AccessToken {
-  _id: string;
-  iat: number;
-  exp: number;
 }
 
 @injectable()
@@ -50,14 +44,19 @@ export class DatabaseService {
     }
   }
 
+  static rejectErrorMessage(err: Error | ErrorMsg): ErrorMsg {
+    if (err instanceof Error) {
+      return DatabaseService.rejectMessage(Number(err.message ? err.message : INTERNAL_SERVER_ERROR));
+    } else {
+      return err;
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static rejectMessage(errorCode: number, msg?: string): ErrorMsg {
     let rejectionMsg: string | undefined = msg;
     if (!rejectionMsg) {
       switch (errorCode) {
-        case INTERNAL_SERVER_ERROR:
-          rejectionMsg = 'Something went wrong';
-          break;
         case UNAUTHORIZED:
           rejectionMsg = 'Access denied';
           break;
@@ -67,21 +66,12 @@ export class DatabaseService {
         case BAD_REQUEST:
           rejectionMsg = 'Bad request';
           break;
+        case INTERNAL_SERVER_ERROR:
+          rejectionMsg = 'Something went wrong';
+          break;
       }
     }
     return { statusCode: errorCode, message: rejectionMsg };
-  }
-
-  static handleResults(res: express.Response, results: Response<Account> | Response<Account[]>): void {
-    if (results.documents) {
-      res.status(results.statusCode).json(results.documents);
-    } else {
-      res.sendStatus(results.statusCode);
-    }
-  }
-
-  private static determineStatus(err: Error, results: Account | Account[]): number {
-    return err ? INTERNAL_SERVER_ERROR : results ? OK : NOT_FOUND;
   }
 
   // Documentation de mongodb-memory-server sur Github
@@ -99,17 +89,13 @@ export class DatabaseService {
 
   connectDB(): void {
     if (process.env.MONGODB_KEY) {
-      mongoose.connect(
-        process.env.MONGODB_KEY,
-        DatabaseService.CONNECTION_OPTIONS,
-        (err: mongoose.Error) => {
-          if (err) {
-            console.error(err.message);
-          } else {
-            console.log('Connected to MongoDB Atlas Cloud');
-          }
-        },
-      );
+      mongoose.connect(process.env.MONGODB_KEY, DatabaseService.CONNECTION_OPTIONS)
+        .then(() => {
+          console.log('Connected to MongoDB');
+        })
+        .catch((err: mongoose.Error) => {
+          console.error(err.message);
+        });
     }
   }
 
@@ -121,29 +107,42 @@ export class DatabaseService {
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve) => {
-      accountModel.findById(new ObjectId(id), (err: Error, doc: Account) => {
-        const status = DatabaseService.determineStatus(err, doc);
-        resolve({ statusCode: status, documents: doc });
-      });
+    return new Promise<Response<Account>>((resolve, reject) => {
+      accountModel.findById(new ObjectId(id))
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
     });
   }
 
+
   async getAccountByUsername(userName: string): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve) => {
-      accountModel.findOne({ username: userName }, (err: Error, doc: Account) => {
-        const status = DatabaseService.determineStatus(err, doc);
-        resolve({ statusCode: status, documents: doc });
-      });
+    return new Promise<Response<Account>>((resolve, reject) => {
+      accountModel.findOne({ username: userName })
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
     });
   }
 
   async getAccountByEmail(mail: string): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve) => {
-      accountModel.findOne({ email: mail }, (err: Error, doc: Account) => {
-        const status = DatabaseService.determineStatus(err, doc);
-        resolve({ statusCode: status, documents: doc });
-      });
+    return new Promise<Response<Account>>((resolve, reject) => {
+      accountModel.findOne({ email: mail })
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
     });
   }
 
@@ -158,72 +157,68 @@ export class DatabaseService {
       } as Account;
       const model = new accountModel(account);
 
-      this.getAccountByUsername(account.username).then((found) => {
-        if (found.documents !== null) {
-          reject(DatabaseService.rejectMessage(BAD_REQUEST, 'Username already taken'));
-        }
-        this.getAccountByEmail(account.email).then((foundByEmail) => {
-          if (foundByEmail.documents !== null) {
-            reject(DatabaseService.rejectMessage(BAD_REQUEST, 'Email already taken'));
-          } else {
-            bcrypt.hash(model.password, this.SALT_ROUNDS, (error, hash) => {
-              model.password = hash;
-              model.save((err: mongoose.Error) => {
-                if (err) {
-                  reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-                } else {
-                  this.login({ username: body.username, password: body.password }).then((tokens) => {
-                    resolve(tokens);
-                  }).catch((failedLogin: ErrorMsg) => {
-                    reject(failedLogin);
-                  });
-                }
-              });
-            });
-          }
+      this.getAccountByUsername(account.username)
+        .then(async (found: Response<Account>) => {
+          throw new Error(BAD_REQUEST.toString());
+        })
+        .catch(async (err: ErrorMsg) => {
+          if (err.statusCode !== NOT_FOUND) throw new Error();
+          return this.getAccountByEmail(account.email);
+        })
+        .then(async (found: Response<Account>) => {
+          throw Error(BAD_REQUEST.toString());
+        })
+        .catch(async (err: ErrorMsg) => {
+          if (err.statusCode !== NOT_FOUND) throw new Error();
+          return bcrypt.hash(model.password, this.SALT_ROUNDS);
+        })
+        .then(async (hash) => {
+          model.password = hash;
+          return model.save();
+        })
+        .then(async (acc: Account) => {
+          return this.login({ username: body.username, password: body.password });
+        })
+        .then((tokens: Response<LoginTokens>) => {
+          resolve(tokens);
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
         });
-      });
     });
   }
 
   async login(loginInfo: login): Promise<Response<LoginTokens>> {
     return new Promise<Response<LoginTokens>>((resolve, reject) => {
-      this.getAccountByUsername(loginInfo.username).then((results) => {
-        const account = results.documents;
-        if (!account) {
-          reject(DatabaseService.rejectMessage(NOT_FOUND));
-        } else {
-          bcrypt.compare(loginInfo.password, account.password).then((match) => {
-            if (!match || !process.env.JWT_KEY || !process.env.JWT_REFRESH_KEY) {
-              reject(DatabaseService.rejectMessage(UNAUTHORIZED));
-            } else {
-              // generate jwt access token
-              const jwtToken = jwt.sign({ _id: account._id }, process.env.JWT_KEY, { expiresIn: '5m' });
-              // generate jwt refresh token for session
-              const jwtRefreshToken = jwt.sign({ _id: account._id }, process.env.JWT_REFRESH_KEY, { expiresIn: '1d' });
+      let account: Account;
+      let jwtToken: string;
+      let jwtRefreshToken: string;
 
-              refreshModel
-                .findOneAndDelete({ accountId: account._id.toHexString() })
-                .exec((err: Error, doc: Refresh) => {
-                  if (err) {
-                    reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-                  }
-                });
-
-              const refresh = new refreshModel({
-                _id: new mongoose.Types.ObjectId(),
-                accountId: account._id,
-                token: jwtRefreshToken
-              });
-              refreshModel.create(refresh).then((doc: Refresh) => {
-                resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
-              }).catch((err: Error) => {
-                reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-              });
-            }
+      this.getAccountByUsername(loginInfo.username)
+        .then(async (results: Response<Account>) => {
+          account = results.documents;
+          return bcrypt.compare(loginInfo.password, account.password);
+        })
+        .then((match) => {
+          if (!match || !process.env.JWT_KEY || !process.env.JWT_REFRESH_KEY) throw Error(UNAUTHORIZED.toString());
+          jwtToken = jwt.sign({ _id: account._id }, process.env.JWT_KEY, { expiresIn: '5m' });
+          jwtRefreshToken = jwt.sign({ _id: account._id }, process.env.JWT_REFRESH_KEY, { expiresIn: '1d' });
+          return refreshModel.findOneAndDelete({ accountId: account._id.toHexString() });
+        })
+        .then(async () => {
+          const refresh = new refreshModel({
+            _id: new mongoose.Types.ObjectId(),
+            accountId: account._id,
+            token: jwtRefreshToken
           });
-        }
-      });
+          return refreshModel.create(refresh);
+        })
+        .then((doc: Refresh) => {
+          resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
+        })
+        .catch((err: Error | ErrorMsg) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
     });
   }
 
@@ -231,18 +226,14 @@ export class DatabaseService {
     return new Promise<string>((resolve, reject) => {
       refreshModel
         .findOne({ token: refreshToken })
-        .exec((err: Error, doc: Refresh) => {
-          if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) {
-            reject(DatabaseService.rejectMessage(UNAUTHORIZED));
-          } else {
-            const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
-            const newAccesToken = jwt.sign(
-              { _id: decodedPayload._id },
-              process.env.JWT_KEY,
-              { expiresIn: '5m' }
-            );
-            resolve(newAccesToken);
-          }
+        .then((doc: Refresh) => {
+          if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) throw Error();
+          const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
+          const newAccesToken = jwt.sign({ _id: decodedPayload._id }, process.env.JWT_KEY, { expiresIn: '5m' });
+          resolve(newAccesToken);
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectMessage(UNAUTHORIZED));
         });
     });
   }
@@ -251,14 +242,12 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel
         .findOne({ accountId: id })
-        .exec((err: Error, doc: Refresh) => {
-          if (err) {
-            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-          } else if (!doc) {
-            reject(DatabaseService.rejectMessage(UNAUTHORIZED));
-          } else {
-            resolve(true);
-          }
+        .then((doc: Refresh) => {
+          if (!doc) throw Error(UNAUTHORIZED.toString());
+          resolve(true);
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
         });
     });
   }
@@ -267,15 +256,12 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel
         .findOneAndDelete({ token: refreshToken })
-        .exec((err: Error, doc: Refresh) => {
-          if (err) {
-            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-          }
-          if (!doc) {
-            reject(DatabaseService.rejectMessage(NOT_FOUND, 'User is not logged in'));
-          } else {
-            resolve(true);
-          }
+        .then((doc: Refresh) => {
+          if (!doc) throw Error(NOT_FOUND.toString());
+          resolve(true);
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
         });
     });
   }
@@ -284,60 +270,46 @@ export class DatabaseService {
     return new Promise<Response<Account>>((resolve, reject) => {
       refreshModel
         .findOne({ accountId: id })
-        .exec((err: Error, doc: Refresh) => {
-          if (err) {
-            reject(DatabaseService.rejectMessage(INTERNAL_SERVER_ERROR));
-          } else if (!doc) {
-            reject(DatabaseService.rejectMessage(NOT_FOUND));
-          } else {
-            this.logout(doc.token).then((successfull) => {
-              accountModel
-                .findByIdAndDelete(id)
-                .exec((error: Error, acc: Account) => {
-                  resolve({ statusCode: DatabaseService.determineStatus(err, acc), documents: acc });
-                });
-            }).catch((error) => {
-              reject(error);
-            });
-          }
+        .then(async (doc: Refresh) => {
+          if (!doc) throw Error(NOT_FOUND.toString());
+          return this.logout(doc.token);
+        })
+        .then((successfull: boolean) => {
+          return accountModel.findByIdAndDelete(id);
+        })
+        .then((account: Account) => {
+          resolve({ statusCode: OK, documents: account });
+        })
+        .catch((err: Error | ErrorMsg) => {
+          reject(DatabaseService.rejectErrorMessage(err));
         });
     });
   }
 
   async updateAccount(id: string, body: Account): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
-      let canUpdate = true;
-      this.getAccountById(id).then(async (found) => {
-        if (found.statusCode !== NOT_FOUND) {
-          if (found.documents.username !== body.username) {
-            await this.getAccountByUsername(body.username).then((foundByUsername) => {
-              if (foundByUsername.documents !== null) {
-                canUpdate = false;
-              }
-            });
-          }
-          if (canUpdate && found.documents.email !== body.email) {
-            await this.getAccountByEmail(body.email).then((foundByEmail) => {
-              if (foundByEmail.documents !== null) {
-                canUpdate = false;
-              }
-            });
-          }
-          if (canUpdate) {
-            accountModel
-              .findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false })
-              .exec((err: Error, doc: Account) => {
-                resolve({ statusCode: DatabaseService.determineStatus(err, doc), documents: doc });
-              });
-          } else {
-            reject(DatabaseService.rejectMessage(BAD_REQUEST, 'Username or Email is already taken'));
-          }
-        } else {
-          reject(DatabaseService.rejectMessage(NOT_FOUND, 'Account doesn\'t exist'));
-        }
-      });
+      this.getAccountByUsername(body.username)
+        .then((account: Response<Account>) => {
+          throw new Error(BAD_REQUEST.toString());
+        })
+        .catch(async (err: ErrorMsg) => {
+          if (err.statusCode !== NOT_FOUND) throw new Error();
+          return this.getAccountByEmail(body.email);
+        })
+        .then((account: Response<Account>) => {
+          throw new Error(BAD_REQUEST.toString());
+        })
+        .catch((err: ErrorMsg) => {
+          if (err.statusCode !== NOT_FOUND) throw new Error();
+          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false });
+        })
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error | ErrorMsg) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
     });
   }
-
-
 }

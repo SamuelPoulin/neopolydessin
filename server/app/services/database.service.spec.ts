@@ -140,7 +140,7 @@ describe('Database Service', () => {
   it('should receive NOT_FOUND if user is not logged in when logging out', (done: Mocha.Done) => {
     databaseService.logout('someToken').catch((err: ErrorMsg) => {
       expect(err.statusCode).to.be.equal(httpStatus.NOT_FOUND);
-      expect(err.message).to.be.equal('User is not logged in');
+      expect(err.message).to.be.equal('Not found');
       done();
     });
   });
@@ -188,7 +188,7 @@ describe('Database Service', () => {
       email: 'newEmail@email.email'
     } as Account).catch((err: ErrorMsg) => {
       expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
-      expect(err.message).to.equal('Account doesn\'t exist');
+      expect(err.message).to.equal('Not found');
       done();
     });
   });

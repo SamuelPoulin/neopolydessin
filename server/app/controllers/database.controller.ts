@@ -73,31 +73,36 @@ export class DatabaseController {
       [body('refreshToken').exists()],
       validationCheck,
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.logout(req.body.refreshToken).then((successfull) => {
-          if (successfull) {
+        this.databaseService.logout(req.body.refreshToken)
+          .then((successfull) => {
             res.status(httpStatus.OK).json({ success: 'User logged out' });
-          }
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
-        });
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
       });
 
     this.router.get('/account',
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.getAccountById(req.params._id).then((results) => {
-          DatabaseService.handleResults(res, results);
-        });
+        this.databaseService.getAccountById(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
       });
 
     this.router.delete('/account',
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.deleteAccount(req.params._id).then((results) => {
-          DatabaseService.handleResults(res, results);
-        });
+        this.databaseService.deleteAccount(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
       });
 
     this.router.post('/account', jwtVerify, [
@@ -110,11 +115,12 @@ export class DatabaseController {
       validationCheck,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
-        DatabaseService.handleResults(res, results);
-      }).catch((error: ErrorMsg) => {
-        res.status(error.statusCode).json(error.message);
-      });
+      this.databaseService.updateAccount(req.params._id, req.body)
+        .then((results) => {
+          res.status(results.statusCode).json(results.documents);
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
     });
   }
 }
