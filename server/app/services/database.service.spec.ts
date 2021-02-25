@@ -123,14 +123,15 @@ describe('Database Service', () => {
     })
   });
 
-  it('checkIfLoggedIn should resolve to true if the user is logged in', (done: Mocha.Done) => {
+  it('checkIfLoggedIn should resolve if the user is logged in', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
       databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
         if (process.env.JWT_KEY) {
           const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
-          databaseService.checkIfLoggedIn(decodedJwt['_id']).then((loggedIn) => {
-            expect(loggedIn).to.be.true;
+          databaseService.checkIfLoggedIn(decodedJwt['_id']).then(() => {
             done();
+          }).catch((err: ErrorMsg) => {
+            done('This should ressolve');
           });
         }
       });

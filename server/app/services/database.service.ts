@@ -238,13 +238,13 @@ export class DatabaseService {
     });
   }
 
-  async checkIfLoggedIn(id: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+  async checkIfLoggedIn(id: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       refreshModel
         .findOne({ accountId: id })
         .then((doc: Refresh) => {
           if (!doc) throw Error(UNAUTHORIZED.toString());
-          resolve(true);
+          resolve();
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));

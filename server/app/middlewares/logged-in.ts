@@ -15,10 +15,8 @@ export class LoggedIn {
   checkLoggedIn(this: LoggedIn, req: express.Request, res: express.Response, next: express.NextFunction) {
     const accountId = req.params._id;
     if (accountId) {
-      this.databaseService.checkIfLoggedIn(accountId).then((isLoggedIn) => {
-        if (isLoggedIn) {
-          next();
-        }
+      this.databaseService.checkIfLoggedIn(accountId).then(() => {
+        next();
       }).catch((error: ErrorMsg) => {
         res.status(error.statusCode).json(error.message);
       });
