@@ -7,4 +7,5 @@ export default {
   EmailService: Symbol('EmailService'),
   DatabaseController: Symbol('DatabaseController'),
   DatabaseService: Symbol('DatabaseService'),
+  SocketIdService: Symbol('SocketIdService')
 };
