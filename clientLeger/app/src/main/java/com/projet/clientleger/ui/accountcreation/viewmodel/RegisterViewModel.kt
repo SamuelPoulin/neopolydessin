@@ -13,7 +13,6 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel  @Inject constructor(private val registerRepository: RegisterRepository): ViewModel() {
     var registerAccountLiveData: LiveData<RegisterResponseModel>? = null
-
     val registerFistNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerLastNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerUsernameLiveData: MutableLiveData<String> = MutableLiveData("")
@@ -32,12 +31,17 @@ class RegisterViewModel  @Inject constructor(private val registerRepository: Reg
         return registerEmailLiveData.value!!.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(registerEmailLiveData.value!!).matches()
     }
 
-    fun isInvalidPassword(): Boolean {
-        return registerPasswordLiveData.value!!.isNotEmpty() && registerPasswordLiveData.value!!.length < 6
+
+    fun isDifferentPasswords(): Boolean{
+        return !registerPasswordLiveData.value.equals(registerPasswordConfirmLiveData.value)
     }
 
-    fun isInvalidPasswordConfirm(): Boolean {
-        return registerPasswordConfirmLiveData.value!!.isNotEmpty() && registerPasswordConfirmLiveData.value!!.length < 6
+    fun passwordContainsNoDigit(): Boolean {
+        return !registerPasswordLiveData.value!!.contains(".*\\d.*".toRegex())
+    }
+
+    fun passwordIsMinLength(): Boolean{
+        return registerPasswordLiveData.value!!.length < 8
     }
 
     fun clearForm() {
@@ -62,7 +66,8 @@ class RegisterViewModel  @Inject constructor(private val registerRepository: Reg
                 || registerPasswordLiveData.value!!.isEmpty()
                 || registerPasswordConfirmLiveData.value!!.isEmpty())
                 && !(isInvalidEmail()
-                || isInvalidPassword()
-                || isInvalidPasswordConfirm())
+                || passwordContainsNoDigit()
+                || passwordIsMinLength()
+                || isDifferentPasswords())
     }
 }

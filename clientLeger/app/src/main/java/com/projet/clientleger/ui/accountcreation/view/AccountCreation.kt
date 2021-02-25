@@ -1,8 +1,10 @@
 package com.projet.clientleger.ui.accountcreation.view
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.projet.clientleger.R
@@ -17,12 +19,14 @@ class AccountCreation : AppCompatActivity() {
     private lateinit var binding: ActivityAccountCreationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm  = ViewModelProvider(this).get(RegisterViewModel::class.java)
-
+        vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_creation)
+        binding.loadingBar.visibility = View.GONE
         binding.lifecycleOwner = this
         setupInputsObservable()
         btn_submit.setOnClickListener {
+            binding.btnSubmit.text = ""
+            binding.loadingBar.visibility = View.VISIBLE
             vm.registerAccount()
             vm.registerAccountLiveData?.observe(this, {
                 showToast(it.message)
@@ -30,6 +34,8 @@ class AccountCreation : AppCompatActivity() {
                     vm.clearForm()
                 } else
                     vm.clearPasswords()
+                loadingBar.visibility = View.GONE
+                binding.btnSubmit.text = getString(R.string.register_btn)
             })
         }
         binding.viewmodel = vm
@@ -39,7 +45,7 @@ class AccountCreation : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    private fun setupInputsObservable(){
+    private fun setupInputsObservable() {
         vm.registerFistNameLiveData.observe(this, {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
         })
@@ -58,17 +64,103 @@ class AccountCreation : AppCompatActivity() {
         })
         vm.registerPasswordLiveData.observe(this, {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
-            if (vm.isInvalidPassword())
-                binding.password.error = "Password must be at least 6 characters"
-            else
-                binding.password.error = null
+            passwordNoDigitCheck()
+            isDifferentPasswordsCheck()
+            passwordMinLengthCheck()
         })
         vm.registerPasswordConfirmLiveData.observe(this, {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
-            if (vm.isInvalidPasswordConfirm())
-                binding.passwordConfirm.error = "Password must be at least 6 characters"
-            else
-                binding.passwordConfirm.error = null
+            isDifferentPasswordsCheck()
         })
+    }
+
+    private fun passwordMinLengthCheck() {
+        if (vm.passwordIsMinLength()) {
+            binding.passwordMinLengthError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_error
+                )
+            )
+            binding.passwordMinLengthError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_close_24,
+                0,
+                0,
+                0
+            )
+        } else {
+            binding.passwordMinLengthError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_valid
+                )
+            )
+            binding.passwordMinLengthError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_done_24,
+                0,
+                0,
+                0
+            )
+        }
+    }
+
+    private fun isDifferentPasswordsCheck() {
+        if (vm.isDifferentPasswords()) {
+            binding.differentPasswordError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_error
+                )
+            )
+            binding.differentPasswordError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_close_24,
+                0,
+                0,
+                0
+            )
+        } else {
+            binding.differentPasswordError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_valid
+                )
+            )
+            binding.differentPasswordError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_done_24,
+                0,
+                0,
+                0
+            )
+        }
+    }
+
+    private fun passwordNoDigitCheck() {
+        if (vm.passwordContainsNoDigit()) {
+            binding.passwordNoDigitError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_error
+                )
+            )
+            binding.passwordNoDigitError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_close_24,
+                0,
+                0,
+                0
+            )
+        } else {
+            binding.passwordNoDigitError.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.register_valid
+                )
+            )
+            binding.passwordNoDigitError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_baseline_done_24,
+                0,
+                0,
+                0
+            )
+        }
     }
 }
