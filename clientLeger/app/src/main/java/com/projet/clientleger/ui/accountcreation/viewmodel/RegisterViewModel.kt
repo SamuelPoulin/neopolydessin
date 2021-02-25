@@ -46,7 +46,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
         return !registerPasswordLiveData.value!!.contains(".*\\d.*".toRegex())
     }
 
-    fun passwordIsMinLength(): Boolean {
+    fun passwordNotMinLength(): Boolean {
         return registerPasswordLiveData.value!!.length < 8
     }
 
@@ -73,7 +73,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
                 || registerPasswordConfirmLiveData.value!!.isEmpty())
                 && !(isInvalidEmail()
                 || passwordContainsNoDigit()
-                || passwordIsMinLength()
+                || passwordNotMinLength()
                 || isDifferentPasswords())
     }
 }

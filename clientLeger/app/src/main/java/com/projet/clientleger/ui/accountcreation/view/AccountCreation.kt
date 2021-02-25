@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -31,38 +32,52 @@ class AccountCreation : AppCompatActivity() {
 
         vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_creation)
-        binding.loadingBar.visibility = View.GONE
         binding.lifecycleOwner = this
+        loadingBtn(false)
         setupInputsObservable()
         btn_submit.setOnClickListener {
-            binding.btnSubmit.text = ""
-            binding.loadingBar.visibility = View.VISIBLE
-            lifecycleScope.launch {
-                val res = vm.registerAccount()
-                loadingBar.visibility = View.GONE
-                if (res.isSucessful) {
-                    vm.clearForm()
-                    getSharedPreferences(getString(R.string.user_creds), Context.MODE_PRIVATE).edit {
-                        putString("accessToken", res.accessToken)
-                        putString("refreshToken", res.refreshToken)
-                        apply()
-                    }
-                }
-                else {
-                    vm.clearPasswords()
-                    showToast(res.message)
-                }
-                binding.btnSubmit.text = getString(R.string.register_btn)
-            }
+            registerAccount()
         }
         binding.viewmodel = vm
     }
 
+    private fun registerAccount() {
+        loadingBtn(true)
+        lifecycleScope.launch {
+            val res = vm.registerAccount()
+            if (res.isSucessful) {
+                vm.clearForm()
+                setUserTokens(res.accessToken, res.refreshToken)
+            } else {
+                vm.clearPasswords()
+                showToast(res.message)
+            }
+            loadingBtn(false)
+        }
+    }
+
+    private fun loadingBtn(isLoading: Boolean) {
+        if (isLoading) {
+            binding.btnSubmit.text = ""
+            binding.loadingBar.visibility = View.VISIBLE
+        } else {
+            binding.loadingBar.visibility = View.GONE
+            binding.btnSubmit.text = getString(R.string.register_btn)
+        }
+    }
+
+    private fun setUserTokens(accessToken: String, refreshToken: String) {
+        getSharedPreferences(
+            getString(R.string.user_creds),
+            Context.MODE_PRIVATE
+        ).edit {
+            putString("accessToken", accessToken)
+            putString("refreshToken", refreshToken)
+            apply()
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when(item.itemId){
-//            android.R.id.
-//        }
-//        return super.onOptionsItemSelected(item)
         this.finish()
         startActivity(Intent(this, ConnexionActivity::class.java))
         return super.onOptionsItemSelected(item)
@@ -102,92 +117,69 @@ class AccountCreation : AppCompatActivity() {
     }
 
     private fun passwordMinLengthCheck() {
-        if (vm.passwordIsMinLength()) {
-            binding.passwordMinLengthError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_error
-                )
-            )
-            binding.passwordMinLengthError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_close_24,
-                0,
-                0,
-                0
-            )
+        if (vm.passwordNotMinLength()) {
+            setTextColorError(binding.passwordMinLengthError)
+            setTextIconError(binding.passwordMinLengthError)
         } else {
-            binding.passwordMinLengthError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_valid
-                )
-            )
-            binding.passwordMinLengthError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_done_24,
-                0,
-                0,
-                0
-            )
+            setTextColorValid(binding.passwordMinLengthError)
+            setTextIconValid(binding.passwordMinLengthError)
         }
     }
 
     private fun isDifferentPasswordsCheck() {
         if (vm.isDifferentPasswords()) {
-            binding.differentPasswordError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_error
-                )
-            )
-            binding.differentPasswordError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_close_24,
-                0,
-                0,
-                0
-            )
+            setTextColorError(binding.differentPasswordError)
+            setTextIconError(binding.differentPasswordError)
         } else {
-            binding.differentPasswordError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_valid
-                )
-            )
-            binding.differentPasswordError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_done_24,
-                0,
-                0,
-                0
-            )
+            setTextColorValid(binding.differentPasswordError)
+            setTextIconValid(binding.differentPasswordError)
         }
     }
 
     private fun passwordNoDigitCheck() {
         if (vm.passwordContainsNoDigit()) {
-            binding.passwordNoDigitError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_error
-                )
-            )
-            binding.passwordNoDigitError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_close_24,
-                0,
-                0,
-                0
-            )
+            setTextColorError(binding.passwordNoDigitError)
+            setTextIconError(binding.passwordNoDigitError)
         } else {
-            binding.passwordNoDigitError.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.register_valid
-                )
-            )
-            binding.passwordNoDigitError.setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_baseline_done_24,
-                0,
-                0,
-                0
-            )
+            setTextColorValid(binding.passwordNoDigitError)
+            setTextIconValid(binding.passwordNoDigitError)
         }
     }
+
+    private fun setTextColorError(textView: TextView) {
+        textView.setTextColor(
+            ContextCompat.getColor(
+                this,
+                R.color.register_error
+            )
+        )
+    }
+
+    private fun setTextColorValid(textView: TextView) {
+        textView.setTextColor(
+            ContextCompat.getColor(
+                this,
+                R.color.register_valid
+            )
+        )
+    }
+
+    private fun setTextIconError(textView: TextView) {
+        textView.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.ic_baseline_close_24,
+            0,
+            0,
+            0
+        )
+    }
+
+    private fun setTextIconValid(textView: TextView) {
+        textView.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.ic_baseline_done_24,
+            0,
+            0,
+            0
+        )
+    }
+
 }
