@@ -1,11 +1,17 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { ObjectId } from 'mongodb';
 import accountModel, { Account, FriendsList, FriendStatus } from '../../models/account';
+import Types from '../types';
+import { SocketIo } from '../socketio';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
 @injectable()
 export class FriendsService {
+
+  constructor(
+    @inject(Types.Socketio) private socketIo: SocketIo,
+  ) { }
 
   async getFriendsOfUser(id: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
@@ -34,19 +40,23 @@ export class FriendsService {
 
   async requestFriendship(id: string, email: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
+      let friendId: string;
       // Add friend request to others account
       accountModel.updateOne(
         { '_id': { $ne: new ObjectId(id) }, email, 'friends.friendId': { $ne: id } },
         { $push: { friends: { friendId: id, status: FriendStatus.PENDING, received: true } } })
-        .then((doc: Account) => {
+        .then(async (doc: Account) => {
           if (!doc) throw Error(BAD_REQUEST.toString());
-          const friendsId: string = doc._id.toHexString();
-          // TODO notify other user with socketio
+          friendId = doc._id.toHexString();
+          return this.getFriendsOfUser(friendId);
+        })
+        .then((friendList: Response<FriendsList>) => {
+          this.socketIo.sendFriendListTo(friendId, friendList);
 
           // Add friend request to this account
           return accountModel.updateOne(
-            { '_id': new ObjectId(id), 'friends.friendId': { $ne: friendsId } },
-            { $push: { friends: { friendId: friendsId, status: FriendStatus.PENDING, received: false } } }
+            { '_id': new ObjectId(id), 'friends.friendId': { $ne: friendId } },
+            { $push: { friends: { friendId, status: FriendStatus.PENDING, received: false } } }
           );
         })
         .then(async (doc) => {
@@ -75,6 +85,7 @@ export class FriendsService {
       )
         .then((doc) => {
           if (doc.nModified === 0) throw Error(BAD_REQUEST.toString());
+          // update friend for others account
           return accountModel.updateOne(
             {
               '_id': new ObjectId(friendId),
@@ -86,6 +97,10 @@ export class FriendsService {
           );
         })
         .then(async (doc: Account) => {
+          return this.getFriendsOfUser(friendId);
+        })
+        .then(async (friendList: Response<FriendsList>) => {
+          this.socketIo.sendFriendListTo(friendId, friendList);
           return this.getFriendsOfUser(myId);
         })
         .then((updatedList: Response<FriendsList>) => {
@@ -110,8 +125,10 @@ export class FriendsService {
             { $pull: { friends: { friendId: myId, status: FriendStatus.PENDING, received: false } } });
         })
         .then(async (doc) => {
-          // TODO notify other user with socketio
-
+          return this.getFriendsOfUser(friendId);
+        })
+        .then(async (friendList: Response<FriendsList>) => {
+          this.socketIo.sendFriendListTo(friendId, friendList);
           return this.getFriendsOfUser(myId);
         })
         .then((updateList: Response<FriendsList>) => {
@@ -137,6 +154,10 @@ export class FriendsService {
           if (!doc) throw Error(NOT_FOUND.toString());
           // TODO notify update with socketio to friendId.
 
+          return this.getFriendsOfUser(toUnfriendId);
+        })
+        .then(async (friendList: Response<FriendsList>) => {
+          this.socketIo.sendFriendListTo(toUnfriendId, friendList);
           return this.getFriendsOfUser(id);
         })
         .then((updatedList: Response<FriendsList>) => {

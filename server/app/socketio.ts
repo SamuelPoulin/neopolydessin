@@ -2,21 +2,21 @@ import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket } from 'socket.io';
-import { v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { FriendsList } from '../models/account';
 import { Lobby } from '../models/lobby';
-import { DatabaseService } from './services/database.service';
+import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
-
 @injectable()
 export class SocketIo {
 
   io: Server;
-  lobbyList: Lobby[] =  [];
+  lobbyList: Lobby[] = [];
   readonly MAX_LENGTH_MSG: number = 200;
 
   constructor(
@@ -77,7 +77,7 @@ export class SocketIo {
       socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
         this.databaseService.getAccountById(accountId).then((account) => {
           const generatedId = uuidv4();
-          const lobby: Lobby = {lobbyId: generatedId, players: [], size: sizeGame, gameType: type};
+          const lobby: Lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type };
           this.lobbyList.push(lobby);
           const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
           if (playerLobby) {
@@ -100,7 +100,7 @@ export class SocketIo {
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
-          if (socketOfFriend) {
+          if (socketOfFriend) {
             socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
           }
         }
@@ -120,5 +120,10 @@ export class SocketIo {
         }
       });
     });
+  }
+
+  sendFriendListTo(accountId: string, friends: Response<FriendsList>): void {
+    const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
+    this.io.to(socketId).emit('updateFriendList', friends);
   }
 }
