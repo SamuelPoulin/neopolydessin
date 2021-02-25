@@ -9,6 +9,7 @@ import { SocketConnection } from '../../common/socketendpoints/socket-connection
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/account';
 import { Lobby } from '../models/lobby';
+import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
@@ -122,8 +123,8 @@ export class SocketIo {
     });
   }
 
-  sendFriendListTo(accountId: string, friends: Response<FriendsList>): void {
+  sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
     const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
-    this.io.to(socketId).emit('updateFriendList', friends);
+    this.io.to(socketId).emit(endpoint, friends);
   }
 }

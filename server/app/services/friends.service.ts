@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import accountModel, { Account, FriendsList, FriendStatus } from '../../models/account';
 import Types from '../types';
 import { SocketIo } from '../socketio';
+import { SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
 @injectable()
@@ -51,7 +52,7 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then((friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_RECEIVED, friendId, friendList);
 
           // Add friend request to this account
           return accountModel.updateOne(
@@ -100,7 +101,7 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, friendId, friendList);
           return this.getFriendsOfUser(myId);
         })
         .then((updatedList: Response<FriendsList>) => {
@@ -128,7 +129,7 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_REFUSED, friendId, friendList);
           return this.getFriendsOfUser(myId);
         })
         .then((updateList: Response<FriendsList>) => {
@@ -157,7 +158,7 @@ export class FriendsService {
           return this.getFriendsOfUser(toUnfriendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(toUnfriendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.UPDATE, toUnfriendId, friendList);
           return this.getFriendsOfUser(id);
         })
         .then((updatedList: Response<FriendsList>) => {
