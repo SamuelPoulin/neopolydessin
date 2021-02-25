@@ -63,7 +63,7 @@ export class DatabaseController {
       validationCheck,
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.databaseService.refreshToken(req.body.refreshToken).then((newAccesToken) => {
-          res.status(httpStatus.OK).json({ data: { accessToken: newAccesToken } });
+          res.status(httpStatus.OK).json({ accessToken: newAccesToken });
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
