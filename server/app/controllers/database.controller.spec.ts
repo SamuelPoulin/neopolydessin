@@ -13,18 +13,20 @@ import * as jwtVerify from '../middlewares/jwt-verify';
 import * as express from 'express';
 import { expect } from 'chai';
 import { BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
+import { ObjectId } from 'mongodb';
 
 describe('Database Controller', () => {
   let databaseController: DatabaseController;
   let jwtVerifyStub: any;
+  let checkLoggedInStub: any;
   let application: Application;
 
   before(() => {
+    // bypass custom middlewares
     jwtVerifyStub = sinon.stub(jwtVerify, 'jwtVerify');
-
     jwtVerifyStub.callsFake(
       (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        req.params = { _id: '1' }
+        req.params._id = '1';
         return next();
       });
   });
@@ -35,9 +37,15 @@ describe('Database Controller', () => {
 
   beforeEach(async () => {
     await testingContainer().then((instance) => {
+      checkLoggedInStub = instance[1].stub(DatabaseService.prototype, 'checkIfLoggedIn')
+      checkLoggedInStub.resolves(true);
       application = instance[0].get<Application>(Types.Application);
       databaseController = instance[0].get<DatabaseController>(Types.DatabaseController);
     });
+  });
+
+  afterEach(() => {
+    checkLoggedInStub.restore();
   });
 
   it('should instanciate correctly', (done: Mocha.Done) => {
@@ -46,7 +54,11 @@ describe('Database Controller', () => {
   });
 
   it('should call createAccount when accessing api/database/auth/register', (done: Mocha.Done) => {
-    const stub = sinon.stub(DatabaseService.prototype, 'createAccount').resolves({ statusCode: 200, documents: '' });
+    const stub = sinon.stub(DatabaseService.prototype, 'createAccount').resolves(
+      {
+        statusCode: 200,
+        documents: { accessToken: 'accesToken', refreshToken: 'refreshToken' }
+      });
     chai
       .request(application.app)
       .post('/api/database/auth/register')
@@ -66,7 +78,11 @@ describe('Database Controller', () => {
   });
 
   it('should call login when accessing api/database/auth/login', (done: Mocha.Done) => {
-    const stub = sinon.stub(DatabaseService.prototype, 'login').resolves(['accesToken', 'refreshToken']);
+    const stub = sinon.stub(DatabaseService.prototype, 'login').resolves(
+      {
+        statusCode: 200,
+        documents: { accessToken: 'accesToken', refreshToken: 'refreshToken' }
+      });
     chai
       .request(application.app)
       .post('/api/database/auth/login')
@@ -151,14 +167,13 @@ describe('Database Controller', () => {
 
   it('should call getAccountById when sending a query get request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: '1',
+      _id: new ObjectId('123456789012345678901234'),
       firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
     } as Account
 
-    const loginStub = sinon.stub(DatabaseService.prototype, 'checkIfLoggedIn').resolves(true);
     const stub = sinon.stub(DatabaseService.prototype, 'getAccountById').resolves({ statusCode: 200, documents: account });
     chai
       .request(application.app)
@@ -167,13 +182,12 @@ describe('Database Controller', () => {
       .then(() => {
         chai.expect(stub.called).to.equal(true);
         stub.restore();
-        loginStub.restore();
         done();
       });
   });
 
   it('should be unauthorized when sending a query get request to api/database/account if user isn\'t logged in', (done: Mocha.Done) => {
-    const loginStub = sinon.stub(DatabaseService.prototype, 'checkIfLoggedIn').rejects({ statusCode: UNAUTHORIZED, message: 'Access denied' });
+    checkLoggedInStub.rejects({ statusCode: UNAUTHORIZED, message: 'Access denied' });
     chai
       .request(application.app)
       .get('/api/database/account')
@@ -181,21 +195,19 @@ describe('Database Controller', () => {
       .end((err, res) => {
         expect(err).to.be.null;
         expect(res).to.have.status(UNAUTHORIZED);
-        loginStub.restore();
         done();
       });
   });
 
   it('should call deleteAccount when sending a query delete request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: '1',
+      _id: new ObjectId(),
       firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
     } as Account
 
-    const loginStub = sinon.stub(DatabaseService.prototype, 'checkIfLoggedIn').resolves(true);
     const stub = sinon.stub(DatabaseService.prototype, 'deleteAccount').resolves({ statusCode: 200, documents: account });
     chai
       .request(application.app)
@@ -204,21 +216,19 @@ describe('Database Controller', () => {
       .then(() => {
         chai.expect(stub.called).to.equal(true);
         stub.restore();
-        loginStub.restore();
         done();
       });
   });
 
   it('should call update when sending a post request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: '1',
+      _id: new ObjectId(),
       firstName: 'user',
       username: 'username',
       email: 'email@email.email',
       password: 'admin123'
     } as Account
 
-    const loginStub = sinon.stub(DatabaseService.prototype, 'checkIfLoggedIn').resolves(true);
     const stub = sinon.stub(DatabaseService.prototype, 'updateAccount').resolves({ statusCode: 200, documents: account });
     chai
       .request(application.app)
@@ -227,14 +237,13 @@ describe('Database Controller', () => {
       .then(() => {
         chai.expect(stub.called).to.equal(true);
         stub.restore();
-        loginStub.restore();
         done();
       });
   });
 
   it('should be bad request if trying to update password or account id when sending a post request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: '12356',
+      _id: new ObjectId(),
       password: 'admin123'
     } as Account
 

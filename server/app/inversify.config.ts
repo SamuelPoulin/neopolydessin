@@ -10,6 +10,9 @@ import { Server } from './server';
 import { DatabaseService } from './services/database.service';
 import { EmailService } from './services/email.service';
 import { SocketIo } from './socketio';
+import { FriendsController } from './controllers/friends.controller';
+import { FriendsService } from './services/friends.service';
+import { LoggedIn } from './middlewares/logged-in';
 import { SocketIdService } from './services/socket-id.service';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {
@@ -21,7 +24,10 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.APIController).to(APIController);
   container.bind(Types.EmailService).to(EmailService);
   container.bind(Types.DatabaseController).to(DatabaseController);
-  container.bind(Types.DatabaseService).to(DatabaseService);
+  container.bind(Types.DatabaseService).to(DatabaseService).inSingletonScope();
+  container.bind(Types.FriendsController).to(FriendsController);
+  container.bind(Types.FriendsService).to(FriendsService);
+  container.bind(Types.LoggedIn).to(LoggedIn);
   container.bind(Types.SocketIdService).to(SocketIdService);
 
   return container;

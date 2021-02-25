@@ -7,5 +7,8 @@ export default {
   EmailService: Symbol('EmailService'),
   DatabaseController: Symbol('DatabaseController'),
   DatabaseService: Symbol('DatabaseService'),
+  FriendsController: Symbol('FriendsController'),
+  FriendsService: Symbol('FriendsService'),
+  LoggedIn: Symbol('LoggedIn'),
   SocketIdService: Symbol('SocketIdService')
 };
