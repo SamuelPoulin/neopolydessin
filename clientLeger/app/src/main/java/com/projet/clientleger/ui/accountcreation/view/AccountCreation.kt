@@ -59,10 +59,6 @@ class AccountCreation : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when(item.itemId){
-//            android.R.id.
-//        }
-//        return super.onOptionsItemSelected(item)
         this.finish()
         startActivity(Intent(this, ConnexionActivity::class.java))
         return super.onOptionsItemSelected(item)
