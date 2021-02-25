@@ -17,7 +17,7 @@ export class SocketIo {
 
   io: Server;
   lobbyList: Lobby[] =  [];
-  readonly MAX_LENGHT_MSG: number = 200;
+  readonly MAX_LENGTH_MSG: number = 200;
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
@@ -32,6 +32,10 @@ export class SocketIo {
       transports: ['websocket']
     });
     this.bindIoEvents();
+  }
+
+  validateMessageLength(msg: ChatMessage): boolean {
+    return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
   bindIoEvents(): void {
@@ -84,24 +88,24 @@ export class SocketIo {
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+        if (this.validateMessageLength(sentMsg)) {
           const clientRooms = socket.rooms;
           socket.to(clientRooms[Object.keys(clientRooms)[0]]).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
         }
         else {
-          console.log('Message trop long (+200 caractères)');
+          console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
         }
       });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
-        if (sentMsg.content.length <= this.MAX_LENGHT_MSG) {
+        if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
             socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
           }
         }
         else {
-          console.log('Message trop long (+200 caractères)');
+          console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
         }
       });
 
