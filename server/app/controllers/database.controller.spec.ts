@@ -44,10 +44,6 @@ describe('Database Controller', () => {
     });
   });
 
-  afterEach(() => {
-    checkLoggedInStub.restore();
-  });
-
   it('should instanciate correctly', (done: Mocha.Done) => {
     chai.expect(databaseController).to.be.instanceOf(DatabaseController);
     done();
