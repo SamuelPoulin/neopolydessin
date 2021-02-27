@@ -10,22 +10,22 @@ import { login } from '../../../common/communication/login';
 import * as jwt from 'jsonwebtoken';
 import { Account } from '../../models/account';
 
+export const accountInfo: Register = {
+  firstName: 'name',
+  lastName: 'lname',
+  username: 'username',
+  email: 'email@email.email',
+  password: 'monkey123',
+  passwordConfirm: 'monkey123'
+}
+
+export const loginInfo: login = {
+  username: 'username',
+  password: 'monkey123',
+};
+
 describe('Database Service', () => {
   let databaseService: DatabaseService;
-
-  const accountInfo: Register = {
-    firstName: 'name',
-    lastName: 'lname',
-    username: 'username',
-    email: 'email@email.email',
-    password: 'monkey123',
-    passwordConfirm: 'monkey123'
-  }
-
-  const loginInfo: login = {
-    username: 'username',
-    password: 'monkey123',
-  };
 
   const env = Object.assign({}, process.env);
 
