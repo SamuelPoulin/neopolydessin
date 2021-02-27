@@ -43,9 +43,10 @@ export class FriendsService {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
       let friendId: string;
       // Add friend request to others account
-      accountModel.updateOne(
+      accountModel.findOneAndUpdate(
         { '_id': { $ne: new ObjectId(id) }, email, 'friends.friendId': { $ne: id } },
-        { $push: { friends: { friendId: id, status: FriendStatus.PENDING, received: true } } })
+        { $push: { friends: { friendId: id, status: FriendStatus.PENDING, received: true } } },
+        { useFindAndModify: false })
         .then(async (doc: Account) => {
           if (!doc) throw Error(BAD_REQUEST.toString());
           friendId = doc._id.toHexString();
@@ -53,7 +54,6 @@ export class FriendsService {
         })
         .then((friendList: Response<FriendsList>) => {
           this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_RECEIVED, friendId, friendList);
-
           // Add friend request to this account
           return accountModel.updateOne(
             { '_id': new ObjectId(id), 'friends.friendId': { $ne: friendId } },
@@ -151,10 +151,7 @@ export class FriendsService {
             { $pull: { friends: { friendId: id, status: FriendStatus.FRIEND } } });
         })
         .then(async (doc: Account) => {
-          console.log(doc);
           if (!doc) throw Error(NOT_FOUND.toString());
-          // TODO notify update with socketio to friendId.
-
           return this.getFriendsOfUser(toUnfriendId);
         })
         .then(async (friendList: Response<FriendsList>) => {

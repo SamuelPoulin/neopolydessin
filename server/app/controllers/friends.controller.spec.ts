@@ -1,6 +1,7 @@
 import Types from '../types';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
+import 'chai-http';
 import { describe } from 'mocha';
 chai.use(require('chai-http'));
 import { testingContainer } from '../../test/test-utils';
