@@ -10,22 +10,22 @@ import { login } from '../../../common/communication/login';
 import * as jwt from 'jsonwebtoken';
 import { Account } from '../../models/account';
 
+export const accountInfo: Register = {
+  firstName: 'name',
+  lastName: 'lname',
+  username: 'username',
+  email: 'email@email.email',
+  password: 'monkey123',
+  passwordConfirm: 'monkey123'
+}
+
+export const loginInfo: login = {
+  username: 'username',
+  password: 'monkey123',
+};
+
 describe('Database Service', () => {
   let databaseService: DatabaseService;
-
-  const accountInfo: Register = {
-    firstName: 'name',
-    lastName: 'lname',
-    username: 'username',
-    email: 'email@email.email',
-    password: 'monkey123',
-    passwordConfirm: 'monkey123'
-  }
-
-  const loginInfo: login = {
-    username: 'username',
-    password: 'monkey123',
-  };
 
   const env = Object.assign({}, process.env);
 
@@ -59,6 +59,19 @@ describe('Database Service', () => {
       expect(result.documents.refreshToken).to.not.be.null;
       done();
     });
+  });
+
+  it('should return BAD_REQUEST if an account already exists', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((result) => {
+      return databaseService.createAccount(accountInfo);
+    })
+      .then((response: Response<LoginTokens>) => {
+        expect(response.statusCode).not.to.equal(httpStatus.OK);
+      })
+      .catch((err: ErrorMsg) => {
+        expect(err.statusCode).to.equal(httpStatus.BAD_REQUEST);
+        done();
+      })
   });
 
   it('should receive NOT_FOUND if user doesn\'t exist when logging in', (done: Mocha.Done) => {

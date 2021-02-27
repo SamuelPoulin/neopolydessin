@@ -12,7 +12,7 @@ export class LoggedIn {
   ) { }
 
 
-  checkLoggedIn(this: LoggedIn, req: express.Request, res: express.Response, next: express.NextFunction) {
+  async checkLoggedIn(req: express.Request, res: express.Response, next: express.NextFunction) {
     const accountId = req.params._id;
     if (accountId) {
       this.databaseService.checkIfLoggedIn(accountId).then(() => {

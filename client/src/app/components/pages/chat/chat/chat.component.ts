@@ -60,12 +60,12 @@ export class ChatComponent implements OnInit {
     if (this.inputValue.replace(/ /g, '')) {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
         this.socketService.sendMessage({
-          user: this.userService.username,
+          senderAccountId: this.userService.username,
           content: this.inputValue,
           timestamp: Date.now(),
         });
         this.messages.push({
-          user: this.userService.username,
+          senderAccountId: this.userService.username,
           content: this.inputValue,
           timestamp: Date.now(),
         } as ChatMessage);
@@ -90,7 +90,7 @@ export class ChatComponent implements OnInit {
   }
 
   isSystem(message: Message): message is ChatMessage {
-    return !(message as ChatMessage).user;
+    return !(message as ChatMessage).senderAccountId;
   }
 
   get electronContainer(): Element | null {

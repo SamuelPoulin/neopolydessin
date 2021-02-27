@@ -73,7 +73,6 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
                 || registerPasswordConfirmLiveData.value!!.isEmpty())
                 && !(isInvalidEmail()
                 || passwordContainsNoDigit()
-                || passwordIsNotMinLength()
-                || isDifferentPasswords())
+                || passwordIsNotMinLength())
     }
 }
