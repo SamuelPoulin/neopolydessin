@@ -98,7 +98,7 @@ class AccountCreation : AppCompatActivity() {
     }
 
     private fun passwordMinLengthCheck() {
-        if (vm.passwordIsMinLength()) {
+        if (vm.passwordIsNotMinLength()) {
             binding.passwordMinLengthError.setTextColor(
                 ContextCompat.getColor(
                     this,

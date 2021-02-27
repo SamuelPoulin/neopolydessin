@@ -32,7 +32,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
     }
 
     fun isInvalidEmail(): Boolean {
-        return registerEmailLiveData.value!!.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(
+        return registerEmailLiveData.value!!.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(
                 registerEmailLiveData.value!!
         ).matches()
     }
@@ -46,7 +46,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
         return !registerPasswordLiveData.value!!.contains(".*\\d.*".toRegex())
     }
 
-    fun passwordIsMinLength(): Boolean {
+    fun passwordIsNotMinLength(): Boolean {
         return registerPasswordLiveData.value!!.length < 8
     }
 
@@ -73,7 +73,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
                 || registerPasswordConfirmLiveData.value!!.isEmpty())
                 && !(isInvalidEmail()
                 || passwordContainsNoDigit()
-                || passwordIsMinLength()
+                || passwordIsNotMinLength()
                 || isDifferentPasswords())
     }
 }
