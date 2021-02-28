@@ -1,15 +1,39 @@
+import { ObjectId } from 'mongodb';
 import * as mongoose from 'mongoose';
 
+export enum FriendStatus {
+  PENDING = 'pending',
+  FRIEND = 'friend'
+}
+
+export interface Friend {
+  friendId: string;
+  status: FriendStatus;
+  received: boolean;
+}
+
+export interface FriendsList {
+  friends: {
+    friendId: string;
+    username: string;
+    status: FriendStatus;
+    received: boolean;
+  }[];
+}
+
 export interface Account extends mongoose.Document {
-  _id: string;
-  name: string;
+  _id: ObjectId;
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   password: string;
+  friends: [Friend];
 }
 
 export const accountSchema = new mongoose.Schema({
-  name: String,
+  firstName: String,
+  lastName: String,
   username: {
     type: String,
     required: true,
@@ -28,7 +52,17 @@ export const accountSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  logins: [Date]
+  logins: [Date],
+  friends: [
+    {
+      friendId: String,
+      status: {
+        type: String,
+        enum: [FriendStatus.PENDING, FriendStatus.FRIEND],
+        default: FriendStatus.PENDING
+      },
+      received: Boolean,
+    }],
 });
 
 const accountModel = mongoose.model<Account>('Account', accountSchema);

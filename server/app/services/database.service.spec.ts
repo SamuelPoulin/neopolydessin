@@ -1,24 +1,41 @@
-/* tslint:disable:no-any no-magic-numbers */
-/* tslint:disable:no-any no-string-literal */
 import { expect } from 'chai';
 import * as httpStatus from 'http-status-codes';
-
-import drawingModel from '../../models/account';
-import { DatabaseService } from './database.service';
-
+import { Response } from './database.service';
+import { describe, beforeEach } from 'mocha';
+import { DatabaseService, ErrorMsg, LoginTokens } from './database.service';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
+import { Register } from '../../../common/communication/register';
+import { login } from '../../../common/communication/login';
+import * as jwt from 'jsonwebtoken';
+import { Account } from '../../models/account';
+
+export const accountInfo: Register = {
+  firstName: 'name',
+  lastName: 'lname',
+  username: 'username',
+  email: 'email@email.email',
+  password: 'monkey123',
+  passwordConfirm: 'monkey123'
+}
+
+export const loginInfo: login = {
+  username: 'username',
+  password: 'monkey123',
+};
 
 describe('Database Service', () => {
   let databaseService: DatabaseService;
-  const testingDrawing = new drawingModel({
-    name: 'test',
-    tags: ['tag1', 'tag2', 'tag3'],
-    data: 'random data',
-    color: '',
-    width: 0,
-    height: 0,
-    previewURL: 'www',
+
+  const env = Object.assign({}, process.env);
+
+  before(() => {
+    process.env.JWT_KEY = 'this is a super secret secret!!!';
+    process.env.JWT_REFRESH_KEY = 'this is another super secret secret!!!';
+  });
+
+  after(() => {
+    process.env = env;
   });
 
   beforeEach(async () => {
@@ -34,117 +51,181 @@ describe('Database Service', () => {
     done();
   });
 
-  it('should add a drawing correctly', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((result) => {
+  it('should create an account correctly', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((result) => {
       expect(result.statusCode).to.equal(httpStatus.OK);
       expect(result.documents).to.not.equal(null);
-      expect(result.documents.name).to.equal('test');
+      expect(result.documents.accessToken).to.not.be.null;
+      expect(result.documents.refreshToken).to.not.be.null;
       done();
     });
   });
 
-  it('should get all drawings', (done: Mocha.Done) => {
-    databaseService.getAllDrawings().then((result) => {
-      expect(result.statusCode).to.equal(httpStatus.OK);
+  it('should return BAD_REQUEST if an account already exists', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((result) => {
+      return databaseService.createAccount(accountInfo);
+    })
+      .then((response: Response<LoginTokens>) => {
+        expect(response.statusCode).not.to.equal(httpStatus.OK);
+      })
+      .catch((err: ErrorMsg) => {
+        expect(err.statusCode).to.equal(httpStatus.BAD_REQUEST);
+        done();
+      })
+  });
+
+  it('should receive NOT_FOUND if user doesn\'t exist when logging in', (done: Mocha.Done) => {
+    databaseService.login(loginInfo).then((tokens) => {
+      expect(tokens).to.be.null;
+    }).catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
+      expect(err.message).to.equal('Not found');
       done();
     });
   });
 
-  it('should get one drawing after adding it', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then(() => {
-      databaseService.getAllDrawings().then((result) => {
-        expect(result.statusCode).to.equal(httpStatus.OK);
-        expect(result.documents.length).to.equal(1);
+
+  it('should receive UNAUTHORIZED if password doesn\'t match when logging in', (done: Mocha.Done) => {
+    const wrongLogin: login = {
+      username: 'username',
+      password: 'wrongPassword',
+    };
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(wrongLogin).then((tokens) => {
+        expect(tokens).to.be.null;
+      }).catch((err: ErrorMsg) => {
+        expect(err.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+        expect(err.message).to.equal('Access denied');
         done();
       });
     });
   });
 
-  it('should report error on incorrect ID format', (done: Mocha.Done) => {
-    databaseService.getDrawingById('randomid').then((result) => {
-      expect(result.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
-      done();
-    });
-  });
-
-  it('should report not found on correct ID format', (done: Mocha.Done) => {
-    databaseService.getDrawingById('5e78f886b368e63343f98f8b').then((result) => {
-      expect(result.statusCode).to.equal(httpStatus.NOT_FOUND);
-      done();
-    });
-  });
-
-  it('should find a drawing that was added earlier', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.getDrawingById(addedDoc.documents._id).then((foundDoc) => {
-        expect(addedDoc.documents.name).to.equal(foundDoc.documents.name);
+  it('should login successfully', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        expect(tokens.documents.accessToken).to.not.be.null;
+        expect(tokens.documents.refreshToken).to.not.be.null;
         done();
       });
     });
   });
 
-  it('should find and delete a drawing that was added earlier', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.deleteDrawing(addedDoc.documents._id).then((deletedDoc) => {
-        expect(addedDoc.documents.name).to.equal(deletedDoc.documents.name);
-        databaseService.getDrawingById(deletedDoc.documents._id).then((foundDoc) => {
-          expect(foundDoc.documents).to.equal(null);
+  it('should be UNAUTHORIZED if refresh token doesn\'t exist', (done: Mocha.Done) => {
+    databaseService.refreshToken('invalidToken').catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+      expect(err.message).to.equal('Access denied');
+      done();
+    });
+  });
+
+  it('should return a new acces token correctly when calling refreshToken', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created: Response<LoginTokens>) => {
+      databaseService.refreshToken(created.documents.refreshToken).then((token: string) => {
+        expect(token).to.not.be.null;
+        done();
+      });
+    });
+  });
+
+  it('checkIfLoggedIn should return UNAUTHORIZED if the user is not logged in', (done: Mocha.Done) => {
+    databaseService.checkIfLoggedIn('1').catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+      expect(err.message).to.equal('Access denied');
+      done();
+    })
+  });
+
+  it('checkIfLoggedIn should resolve if the user is logged in', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        if (process.env.JWT_KEY) {
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
+          databaseService.checkIfLoggedIn(decodedJwt['_id']).then(() => {
+            done();
+          }).catch((err: ErrorMsg) => {
+            done('This should ressolve');
+          });
+        }
+      });
+    });
+  });
+
+  it('should receive NOT_FOUND if user is not logged in when logging out', (done: Mocha.Done) => {
+    databaseService.logout('someToken').catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.be.equal(httpStatus.NOT_FOUND);
+      expect(err.message).to.be.equal('Not found');
+      done();
+    });
+  });
+
+  it('should resolve to true if user logout successfull', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        databaseService.logout(tokens.documents.refreshToken).then((successfull) => {
+          expect(successfull).to.be.true;
           done();
         });
       });
     });
   });
 
-  it('should return the old document on update', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.updateDrawing(addedDoc.documents._id, ({name: 'new name'} as Drawing)).then((oldDoc) => {
-        expect(oldDoc.documents.name).to.equal(addedDoc.documents.name);
-        done();
+  it('should receive NOT_FOUND if account doesn\'t exist when deleting account', (done: Mocha.Done) => {
+    databaseService.deleteAccount('1').catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.be.equal(httpStatus.NOT_FOUND);
+      expect(err.message).to.be.equal('Not found');
+      done();
+    });
+  });
+
+  it('should delete account correctly', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        if (process.env.JWT_KEY) {
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
+          databaseService.deleteAccount(decodedJwt['_id']).then((response: Response<Account>) => {
+            expect(response.statusCode).to.equal(httpStatus.OK);
+            expect(response.documents.firstName).to.equal('name');
+            expect(response.documents.username).to.equal('username');
+            expect(response.documents.email).to.equal('email@email.email');
+            done();
+          });
+        }
       });
     });
   });
 
-  it('should return a document when searching by name', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.searchDrawings('test', '').then((foundDoc) => {
-        expect(foundDoc.documents[0].name).to.equal(addedDoc.documents.name);
-        done();
-      });
+  it('updateAccount should return NOT_FOUND if account doesn\'t exist', (done: Mocha.Done) => {
+    databaseService.updateAccount('123456789012345678901234', {
+      firstName: 'newName',
+      username: 'newUsername',
+      email: 'newEmail@email.email'
+    } as Account).catch((err: ErrorMsg) => {
+      expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
+      expect(err.message).to.equal('Not found');
+      done();
     });
   });
 
-  it('should return a document when searching by one tag', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.searchDrawings('', 'tag1').then((foundDoc) => {
-        expect(foundDoc.documents[0].name).to.equal(addedDoc.documents.name);
-        done();
-      });
-    });
-  });
-
-  it('should return a document when searching by one incomplete tag', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.searchDrawings('', 'tag').then((foundDoc) => {
-        expect(foundDoc.documents[0].name).to.equal(addedDoc.documents.name);
-        done();
-      });
-    });
-  });
-
-  it('should return a document when searching by incomplete tag array', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.searchDrawings('', ['tag', 'tag']).then((foundDoc) => {
-        expect(foundDoc.documents[0].name).to.equal(addedDoc.documents.name);
-        done();
-      });
-    });
-  });
-
-  it('should return a document when searching by tag array', (done: Mocha.Done) => {
-    databaseService.addDrawing(testingDrawing).then((addedDoc) => {
-      databaseService.searchDrawings('', ['tag1', 'tag2']).then((foundDoc) => {
-        expect(foundDoc.documents[0].name).to.equal(addedDoc.documents.name);
-        done();
+  it('updateAccount should update account correctly', (done: Mocha.Done) => {
+    databaseService.createAccount(accountInfo).then((created) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+        if (process.env.JWT_KEY) {
+          const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
+          databaseService.updateAccount(decodedJwt['_id'], {
+            firstName: 'newName',
+            username: 'newUsername',
+            email: 'newEmail@email.email'
+          } as Account).then((response: Response<Account>) => {
+            expect(response.statusCode).to.equal(httpStatus.OK)
+            expect(response.documents.username).to.equal('username');
+            databaseService.getAccountById(decodedJwt['_id']).then((account: Response<Account>) => {
+              expect(account.statusCode).to.equal(httpStatus.OK);
+              expect(account.documents.username).to.equal('newUsername');
+              done();
+            });
+          });
+        }
       });
     });
   });
@@ -153,3 +234,4 @@ describe('Database Service', () => {
     await databaseService.disconnectDB();
   });
 });
+
