@@ -1,4 +1,4 @@
-package com.projet.clientleger.ui.accountcreation.viewmodel
+package com.projet.clientleger.ui.register.viewmodel
 
 import android.util.Patterns
 import androidx.lifecycle.MutableLiveData

@@ -1,4 +1,4 @@
-package com.projet.clientleger.ui.accountcreation.view
+package com.projet.clientleger.ui.register.view
 
 import android.content.Context
 import android.content.Intent
@@ -14,24 +14,24 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
-import com.projet.clientleger.databinding.ActivityAccountCreationBinding
-import com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel
+import com.projet.clientleger.databinding.ActivityRegisterBinding
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
+import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_account_creation.*
+import kotlinx.android.synthetic.main.activity_register.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AccountCreation : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
     private lateinit var vm: RegisterViewModel
-    private lateinit var binding: ActivityAccountCreationBinding
+    private lateinit var binding: ActivityRegisterBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_account_creation)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_register)
         binding.lifecycleOwner = this
         loadingBtn(false)
         setupInputsObservable()

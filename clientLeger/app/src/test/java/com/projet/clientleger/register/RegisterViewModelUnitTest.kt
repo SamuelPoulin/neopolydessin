@@ -1,10 +1,11 @@
-package com.projet.clientleger
+package com.projet.clientleger.register
 
 import com.projet.clientleger.data.repository.RegisterRepository
-import com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel
+import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,7 +25,8 @@ class RegisterViewModelUnitTest {
 
     @Inject
     lateinit var registerRepository: RegisterRepository
-    lateinit var registerViewmodel: RegisterViewModel
+
+    private lateinit var registerViewmodel: RegisterViewModel
 
     @Before fun setUp(){
         hiltRule.inject()
@@ -32,6 +34,10 @@ class RegisterViewModelUnitTest {
     }
 
 
+    @Test
+    fun registerAccount(){
+        runBlocking { assert(registerViewmodel.registerAccount().isSucessful)}
+    }
 
     @Test
     fun isInvalidEmail_isInvalidEmpty(){

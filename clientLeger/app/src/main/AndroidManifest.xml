@@ -13,7 +13,7 @@
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true"
         android:name=".PolydessinApplication">
-        <activity android:name=".ui.accountcreation.view.AccountCreation">
+        <activity android:name=".ui.register.view.RegisterActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
