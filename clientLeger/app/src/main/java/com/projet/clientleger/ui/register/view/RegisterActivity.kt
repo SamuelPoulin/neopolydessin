@@ -88,32 +88,32 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun setupInputsObservable() {
-        vm.registerFistNameLiveData.observe(this, {
+        vm.registerFistNameLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
-        })
-        vm.registerLastNameLiveData.observe(this, {
+        }
+        vm.registerLastNameLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
-        })
-        vm.registerUsernameLiveData.observe(this, {
+        }
+        vm.registerUsernameLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
-        })
-        vm.registerEmailLiveData.observe(this, {
+        }
+        vm.registerEmailLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
             if (vm.isInvalidEmail())
                 binding.email.error = "Email must respect email pattern"
             else
                 binding.email.error = null
-        })
-        vm.registerPasswordLiveData.observe(this, {
+        }
+        vm.registerPasswordLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
             passwordNoDigitCheck()
             isDifferentPasswordsCheck()
             passwordMinLengthCheck()
-        })
-        vm.registerPasswordConfirmLiveData.observe(this, {
+        }
+        vm.registerPasswordConfirmLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
             isDifferentPasswordsCheck()
-        })
+        }
     }
 
     private fun passwordMinLengthCheck() {
