@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
@@ -18,24 +19,23 @@ import com.projet.clientleger.databinding.ActivityRegisterBinding
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_register.*
+
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
-    private lateinit var vm: RegisterViewModel
-    private lateinit var binding: ActivityRegisterBinding
+    val vm: RegisterViewModel by viewModels()
+    lateinit var binding: ActivityRegisterBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        vm = ViewModelProvider(this).get(RegisterViewModel::class.java)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_register)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true) //ViewModelProvider(this).get(RegisterViewModel::class.java)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         binding.lifecycleOwner = this
         loadingBtn(false)
         setupInputsObservable()
-        btn_submit.setOnClickListener {
+        binding.btnSubmit.setOnClickListener {
             registerAccount()
         }
         binding.viewmodel = vm
@@ -56,7 +56,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadingBtn(isLoading: Boolean) {
+    fun loadingBtn(isLoading: Boolean) {
         if (isLoading) {
             binding.btnSubmit.text = ""
             binding.loadingBar.visibility = View.VISIBLE
@@ -66,7 +66,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun setUserTokens(accessToken: String, refreshToken: String) {
+    fun setUserTokens(accessToken: String, refreshToken: String) {
         getSharedPreferences(
             getString(R.string.user_creds),
             Context.MODE_PRIVATE
@@ -83,11 +83,11 @@ class RegisterActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun showToast(msg: String) {
+    fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    private fun setupInputsObservable() {
+    fun setupInputsObservable() {
         vm.registerFistNameLiveData.observe(this) {
             binding.btnSubmit.isEnabled = vm.isValidFilled()
         }
