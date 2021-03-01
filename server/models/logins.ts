@@ -1,27 +1,46 @@
 import { Timestamp } from 'mongodb';
-import * as mongoose from 'mongoose';
+import { Document, Schema, Model, model, Query } from 'mongoose';
 
 export interface Login {
   start: Timestamp;
-  end: Timestamp;
+  end: Timestamp | undefined;
 }
 
-export interface Logins extends mongoose.Document {
+export interface Logins extends Document {
   accountId: string;
   logins: [Login];
 }
 
-export const loginSchema = new mongoose.Schema({
+interface LoginsModel extends Model<Logins> {
+  findByAccountId: (id: string) => Query<Logins | null, Logins>;
+  findByAccountIdAndDelete: (id: string) => Query<Logins | null, Logins>;
+}
+
+export const loginSchema = new Schema<Logins, LoginsModel>({
   accountId: {
     type: String,
     required: true,
     unique: true
   },
   logins: [{
-    start: Timestamp,
-    end: Timestamp,
+    start: {
+      type: String,
+      timestamp: true
+    },
+    end: {
+      type: String,
+      timestamp: true
+    },
   }]
 });
 
-const loginsModel = mongoose.model<Logins>('Logins', loginSchema);
+loginSchema.statics.findByAccountId = (accountId: string) => {
+  return loginsModel.findOne({ accountId });
+};
+
+loginSchema.statics.findByAccountIdAndDelete = (accountId: string) => {
+  return loginsModel.findOneAndDelete({ accountId });
+};
+
+const loginsModel: LoginsModel = model<Logins, LoginsModel>('Logins', loginSchema);
 export default loginsModel;

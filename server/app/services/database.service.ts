@@ -7,6 +7,7 @@ import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
+import loginsModel, { Logins } from '../../models/logins';
 import refreshModel, { Refresh } from '../../models/refresh';
 import * as jwtUtils from '../utils/jwt-util';
 
@@ -176,6 +177,12 @@ export class DatabaseService {
           return model.save();
         })
         .then(async (acc: Account) => {
+          const logins = new loginsModel({
+            accountId: acc._id, logins: []
+          });
+          return logins.save();
+        })
+        .then(async (logins: Logins) => {
           return this.login({ username: body.username, password: body.password });
         })
         .then((tokens: Response<LoginTokens>) => {
@@ -274,6 +281,9 @@ export class DatabaseService {
           return this.logout(doc.token);
         })
         .then((successfull: boolean) => {
+          return loginsModel.findByAccountIdAndDelete(id);
+        })
+        .then((logins: Logins) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
