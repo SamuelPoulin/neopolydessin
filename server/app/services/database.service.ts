@@ -1,7 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
-import * as jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
@@ -9,7 +8,7 @@ import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
 import refreshModel, { Refresh } from '../../models/refresh';
-import { AccessToken } from '../middlewares/jwt-verify';
+import * as jwtUtils from '../utils/jwt-util';
 
 export interface Response<T> {
   statusCode: number;
@@ -201,8 +200,8 @@ export class DatabaseService {
         })
         .then((match) => {
           if (!match || !process.env.JWT_KEY || !process.env.JWT_REFRESH_KEY) throw Error(UNAUTHORIZED.toString());
-          jwtToken = jwt.sign({ _id: account._id }, process.env.JWT_KEY, { expiresIn: '5m' });
-          jwtRefreshToken = jwt.sign({ _id: account._id }, process.env.JWT_REFRESH_KEY, { expiresIn: '1d' });
+          jwtToken = jwtUtils.encodeAccessToken({ _id: account._id });
+          jwtRefreshToken = jwtUtils.encodeRefreshToken({ _id: account._id });
           return refreshModel.findOneAndDelete({ accountId: account._id.toHexString() });
         })
         .then(async () => {
@@ -227,9 +226,9 @@ export class DatabaseService {
       refreshModel
         .findOne({ token: refreshToken })
         .then((doc: Refresh) => {
-          if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) throw Error();
-          const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
-          const newAccesToken = jwt.sign({ _id: decodedPayload._id }, process.env.JWT_KEY, { expiresIn: '5m' });
+          if (!doc) throw Error();
+          const decodedPayload = jwtUtils.decodeRefreshToken(doc.token);
+          const newAccesToken = jwtUtils.encodeAccessToken({ _id: decodedPayload });
           resolve(newAccesToken);
         })
         .catch((err: Error) => {

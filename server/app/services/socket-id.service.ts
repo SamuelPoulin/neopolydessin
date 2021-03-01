@@ -1,12 +1,6 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { injectable } from 'inversify';
-import * as jwt from 'jsonwebtoken';
 
-interface AccessToken {
-  _id: string;
-  iat: number;
-  exp: number;
-}
+import { injectable } from 'inversify';
+import * as jwtUtils from '../utils/jwt-util';
 
 @injectable()
 export class SocketIdService {
@@ -17,10 +11,8 @@ export class SocketIdService {
   }
 
   AssociateAccountIdToSocketId(accessToken: string, socketId: string): void {
-    if (process.env.JWT_REFRESH_KEY) {
-      const decodedPayload: AccessToken = jwt.verify(accessToken, process.env.JWT_REFRESH_KEY) as AccessToken;
-      this.accountIdsocketIdMap.set(decodedPayload._id, socketId);
-    }
+    const decodedPayload = jwtUtils.decodeAccessToken(accessToken);
+    this.accountIdsocketIdMap.set(decodedPayload, socketId);
   }
 
   DisconnectAccountIdSocketId(socketId: string): void {
@@ -30,8 +22,8 @@ export class SocketIdService {
     }
   }
 
-  GetSocketIdOfAccountId(accountId: string): string {
-    return this.accountIdsocketIdMap.get(accountId)!;
+  GetSocketIdOfAccountId(accountId: string): string | undefined {
+    return this.accountIdsocketIdMap.get(accountId);
   }
 
   GetAccountIdOfSocketId(socketId: string): string | undefined {

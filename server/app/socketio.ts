@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-import { Server, Socket } from 'socket.io';
+import { Server, Socket, ServerOptions } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
@@ -13,12 +13,19 @@ import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
+
 @injectable()
 export class SocketIo {
 
   io: Server;
   lobbyList: Lobby[] = [];
   readonly MAX_LENGTH_MSG: number = 200;
+  readonly SERVER_OPTS: Partial<ServerOptions> = {
+    cors: {
+      origin: '*'
+    },
+    transports: ['websocket']
+  };
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
@@ -26,17 +33,19 @@ export class SocketIo {
   ) { }
 
   init(server: http.Server): void {
-    this.io = new Server(server, {
-      cors: {
-        origin: '*'
-      },
-      transports: ['websocket']
-    });
+    this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
   }
 
   validateMessageLength(msg: ChatMessage): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
+  }
+
+  sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
+    const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
+    if (socketId) {
+      this.io.to(socketId).emit(endpoint, friends);
+    }
   }
 
   bindIoEvents(): void {
@@ -58,21 +67,6 @@ export class SocketIo {
           }
           socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
         });
-
-        /* for (const value of this.players.values()) {
-                if (value === playerName) {
-                  callback({
-                    status: 'Invalid'
-                  });
-                  return;
-                }
-              }
-              callback({
-                status: 'Valid'
-              });
-              socket.join('Prototype');
-              this.players.set(socket.id, playerName);
-              socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);*/
       });
 
       socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
@@ -121,10 +115,5 @@ export class SocketIo {
         }
       });
     });
-  }
-
-  sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
-    const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
-    this.io.to(socketId).emit(endpoint, friends);
   }
 }
