@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { Document, Schema, Model, model, Query } from 'mongoose';
 
 export interface Login {
@@ -6,6 +7,7 @@ export interface Login {
 }
 
 export interface Logins extends Document {
+  _id: ObjectId;
   accountId: string;
   logins: [Login];
 }

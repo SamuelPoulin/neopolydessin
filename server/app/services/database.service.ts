@@ -109,6 +109,7 @@ export class DatabaseService {
   async getAccountById(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
+        .populate('logins')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
@@ -156,7 +157,7 @@ export class DatabaseService {
         password: body.password,
       } as Account;
       const model = new accountModel(account);
-
+      let loginsModelId: string;
       this.getAccountByUsername(account.username)
         .then(async (found: Response<Account>) => {
           throw Error(BAD_REQUEST.toString());
@@ -170,19 +171,21 @@ export class DatabaseService {
         })
         .catch(async (err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
-          return bcrypt.hash(model.password, this.SALT_ROUNDS);
-        })
-        .then(async (hash) => {
-          model.password = hash;
-          return model.save();
-        })
-        .then(async (acc: Account) => {
           const logins = new loginsModel({
-            accountId: acc._id, logins: []
+            accountId: model._id, logins: []
           });
           return logins.save();
         })
         .then(async (logins: Logins) => {
+          loginsModelId = logins._id.toHexString();
+          return bcrypt.hash(model.password, this.SALT_ROUNDS);
+        })
+        .then(async (hash) => {
+          model.password = hash;
+          model.logins = loginsModelId;
+          return model.save();
+        })
+        .then(async (acc: Account) => {
           return this.login({ username: body.username, password: body.password });
         })
         .then((tokens: Response<LoginTokens>) => {
@@ -323,14 +326,22 @@ export class DatabaseService {
   }
 
   addLogin(accountId: string) {
-    loginsModel.addLogin(accountId).then((logins) => {
-      console.log(logins);
-    });
+    loginsModel.addLogin(accountId)
+      .then((logins) => {
+        console.log(logins);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   addLogout(accountId: string) {
-    loginsModel.addLogout(accountId).then((logins) => {
-      console.log(logins);
-    });
+    loginsModel.addLogout(accountId)
+      .then((logins) => {
+        console.log(logins);
+      })
+      .catch((err) => {
+        console.log(err);
+      });;
   }
 }
