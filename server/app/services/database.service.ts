@@ -109,7 +109,7 @@ export class DatabaseService {
   async getAccountById(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
-        .populate('logins')
+        .populate('logins', 'logins')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });

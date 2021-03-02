@@ -5,15 +5,15 @@ import { SocketIo } from './socketio';
 import { Server } from './server';
 import { Manager, Socket } from 'socket.io-client'
 import Types from './types';
-import { DatabaseService, LoginTokens, Response } from './services/database.service';
-import { SinonStub } from 'sinon';
+import { DatabaseService, LoginTokens, Response, } from './services/database.service';
+import { Account } from '../models/account';
 import { TEST_PORT } from './constants';
 import { accountInfo } from './services/database.service.spec';
+import { SocketConnection } from '../../common/socketendpoints/socket-connection';
+import * as jwtUtils from './utils/jwt-util';
+import { Login } from '../models/logins';
 
-describe.only('Socketio', () => {
-
-    let addLoginStub: SinonStub;
-    let addLogoutStub: SinonStub;
+describe('Socketio', () => {
 
     let databaseService: DatabaseService;
     let server: Server;
@@ -34,32 +34,24 @@ describe.only('Socketio', () => {
 
     beforeEach(async () => {
         await testingContainer().then((instance) => {
-            addLoginStub = instance[1].stub(DatabaseService.prototype, 'addLogin');
-            addLogoutStub = instance[1].stub(DatabaseService.prototype, 'addLogout');
             databaseService = instance[0].get<DatabaseService>(Types.DatabaseService);
             server = instance[0].get<Server>(Types.Server);
             socketIo = instance[0].get<SocketIo>(Types.Socketio);
-
-            server.init(TEST_PORT);
 
             manager = new Manager(`http://localhost:${TEST_PORT}`, {
                 reconnectionDelayMax: 10000,
                 transports: ['websocket'],
             });
+            server.init(TEST_PORT);
 
         });
 
         await databaseService.connectMS();
-
     });
 
     afterEach(async () => {
-        if (client) {
-            client.close();
-        }
-        if (server && server.isListening) {
-            server.close();
-        }
+        manager._close();
+        server.close();
         await databaseService.disconnectDB();
     })
 
@@ -69,6 +61,21 @@ describe.only('Socketio', () => {
     });
 
     it('client socket connection should call addLogin and disconnection should call addLogout', (done: Mocha.Done) => {
+        let accountId: string;
+        socketIo.io.once(SocketConnection.CONNECTION, (socket: Socket) => {
+
+            client.close();
+
+            socket.once(SocketConnection.DISCONNECTION, () => {
+                databaseService.getAccountById(accountId)
+                    .then((account: Response<Account>) => {
+                        const login: Login = (account.documents.logins as any).logins[0];
+                        expect(login.end && login.start < login.end).to.be.true;
+                        done();
+                    });
+            })
+        })
+
         databaseService.createAccount(accountInfo)
             .then((tokens: Response<LoginTokens>) => {
                 client = manager.socket('/', {
@@ -76,12 +83,7 @@ describe.only('Socketio', () => {
                         token: tokens.documents.accessToken,
                     }
                 });
-                client.disconnect();
-                setTimeout(() => {
-                    expect(addLoginStub.calledOnce).to.be.true;
-                    expect(addLogoutStub.calledOnce).to.be.true;
-                    done();
-                })
+                accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken)
             })
     })
 });
