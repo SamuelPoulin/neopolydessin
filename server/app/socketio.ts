@@ -10,6 +10,7 @@ import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/account';
 import { Lobby } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import loginsModel from '../models/logins';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -53,7 +54,7 @@ export class SocketIo {
     try {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
-      this.databaseService.addLogin(accountId);
+      loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
     } catch (err) {
       console.log(err.message);
     }
@@ -66,7 +67,7 @@ export class SocketIo {
         socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
         this.socketIdService.DisconnectAccountIdSocketId(socket.id);
       });
-      this.databaseService.addLogout(accountIdOfSocket);
+      loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
     }
   }
 

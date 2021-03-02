@@ -324,18 +324,4 @@ export class DatabaseService {
         });
     });
   }
-
-  addLogin(accountId: string) {
-    loginsModel.addLogin(accountId)
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  addLogout(accountId: string) {
-    loginsModel.addLogout(accountId)
-      .catch((err) => {
-        console.log(err);
-      });;
-  }
 }
