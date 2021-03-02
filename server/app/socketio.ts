@@ -10,6 +10,7 @@ import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/account';
 import { Lobby } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
@@ -48,11 +49,32 @@ export class SocketIo {
     }
   }
 
+  onConnect(socket: Socket, accessToken: string) {
+    try {
+      const accountId = jwtUtils.decodeAccessToken(accessToken);
+      this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
+      this.databaseService.addLogin(accountId);
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+
+  onDisconnect(socket: Socket) {
+    const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+    if (accountIdOfSocket) {
+      this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
+        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+        this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+      });
+      this.databaseService.addLogout(accountIdOfSocket);
+    }
+  }
+
   bindIoEvents(): void {
-    this.io.on(SocketConnection.CONNECTION, (socket: Socket, accessToken: string) => {
+    this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
       console.log(`Connected with ${socket.id} \n`);
 
-      this.socketIdService.AssociateAccountIdToSocketId(accessToken, socket.id);
+      this.onConnect(socket, socket.handshake.auth.token);
 
       socket.on('GetLobbies', () => {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
@@ -106,13 +128,7 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        if (accountIdOfSocket) {
-          this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
-            socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
-            this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-          });
-        }
+        this.onDisconnect(socket);
       });
     });
   }

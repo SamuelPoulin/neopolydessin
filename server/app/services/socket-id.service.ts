@@ -1,6 +1,5 @@
 
 import { injectable } from 'inversify';
-import * as jwtUtils from '../utils/jwt-util';
 
 @injectable()
 export class SocketIdService {
@@ -10,13 +9,12 @@ export class SocketIdService {
     this.accountIdsocketIdMap = new Map<string, string>();
   }
 
-  AssociateAccountIdToSocketId(accessToken: string, socketId: string): void {
-    const decodedPayload = jwtUtils.decodeAccessToken(accessToken);
-    this.accountIdsocketIdMap.set(decodedPayload, socketId);
+  AssociateAccountIdToSocketId(accountId: string, socketId: string): void {
+    this.accountIdsocketIdMap.set(accountId, socketId);
   }
 
   DisconnectAccountIdSocketId(socketId: string): void {
-    const accountId = Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
+    const accountId = this.GetAccountIdOfSocketId(socketId);
     if (accountId) {
       this.accountIdsocketIdMap.delete(accountId);
     }
@@ -27,6 +25,6 @@ export class SocketIdService {
   }
 
   GetAccountIdOfSocketId(socketId: string): string | undefined {
-    return Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
+    return Array.from(this.accountIdsocketIdMap.keys()).find((keyValue) => this.accountIdsocketIdMap.get(keyValue) === socketId);
   }
 }

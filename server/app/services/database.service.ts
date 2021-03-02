@@ -206,7 +206,7 @@ export class DatabaseService {
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
-          if (!match || !process.env.JWT_KEY || !process.env.JWT_REFRESH_KEY) throw Error(UNAUTHORIZED.toString());
+          if (!match) throw Error(UNAUTHORIZED.toString());
           jwtToken = jwtUtils.encodeAccessToken({ _id: account._id });
           jwtRefreshToken = jwtUtils.encodeRefreshToken({ _id: account._id });
           return refreshModel.findOneAndDelete({ accountId: account._id.toHexString() });
@@ -319,6 +319,18 @@ export class DatabaseService {
         .catch((err: Error | ErrorMsg) => {
           reject(DatabaseService.rejectErrorMessage(err));
         });
+    });
+  }
+
+  addLogin(accountId: string) {
+    loginsModel.addLogin(accountId).then((logins) => {
+      console.log(logins);
+    });
+  }
+
+  addLogout(accountId: string) {
+    loginsModel.addLogout(accountId).then((logins) => {
+      console.log(logins);
     });
   }
 }

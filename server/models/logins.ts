@@ -1,9 +1,8 @@
-import { Timestamp } from 'mongodb';
 import { Document, Schema, Model, model, Query } from 'mongoose';
 
 export interface Login {
-  start: Timestamp;
-  end: Timestamp | undefined;
+  start: Date;
+  end?: Date;
 }
 
 export interface Logins extends Document {
@@ -14,6 +13,8 @@ export interface Logins extends Document {
 interface LoginsModel extends Model<Logins> {
   findByAccountId: (id: string) => Query<Logins | null, Logins>;
   findByAccountIdAndDelete: (id: string) => Query<Logins | null, Logins>;
+  addLogin: (id: string) => Query<Logins | null, Logins>;
+  addLogout: (id: string) => Query<Logins | null, Logins>;
 }
 
 export const loginSchema = new Schema<Logins, LoginsModel>({
@@ -24,13 +25,10 @@ export const loginSchema = new Schema<Logins, LoginsModel>({
   },
   logins: [{
     start: {
-      type: String,
-      timestamp: true
+      type: Date,
+      required: true,
     },
-    end: {
-      type: String,
-      timestamp: true
-    },
+    end: Date
   }]
 });
 
@@ -40,6 +38,31 @@ loginSchema.statics.findByAccountId = (accountId: string) => {
 
 loginSchema.statics.findByAccountIdAndDelete = (accountId: string) => {
   return loginsModel.findOneAndDelete({ accountId });
+};
+
+loginSchema.statics.addLogin = (accountId: string) => {
+  return loginsModel.updateOne(
+    { accountId },
+    {
+      $push: {
+        logins: {
+          $each: [{ start: new Date() }],
+          $position: 0
+        }
+      }
+    }
+  );
+};
+
+loginSchema.statics.addLogout = (accountId: string) => {
+  return loginsModel.updateOne(
+    { accountId },
+    {
+      $set: {
+        'logins.0.end': new Date(),
+      }
+    }
+  );
 };
 
 const loginsModel: LoginsModel = model<Logins, LoginsModel>('Logins', loginSchema);
