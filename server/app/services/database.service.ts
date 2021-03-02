@@ -327,9 +327,6 @@ export class DatabaseService {
 
   addLogin(accountId: string) {
     loginsModel.addLogin(accountId)
-      .then((logins) => {
-        console.log(logins);
-      })
       .catch((err) => {
         console.log(err);
       });
@@ -337,9 +334,6 @@ export class DatabaseService {
 
   addLogout(accountId: string) {
     loginsModel.addLogout(accountId)
-      .then((logins) => {
-        console.log(logins);
-      })
       .catch((err) => {
         console.log(err);
       });;
