@@ -6,9 +6,9 @@ import com.projet.clientleger.data.api.model.RegisterResponse
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
-class RegisterRepository @Inject constructor(private val apiRegisterInterface: ApiRegisterInterface) {
+open class RegisterRepository @Inject constructor(private val apiRegisterInterface: ApiRegisterInterface) {
 
-    suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse {
+    open suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse {
         val res = apiRegisterInterface.registerAccount(registerModel)
         return when (res.code()) {
 

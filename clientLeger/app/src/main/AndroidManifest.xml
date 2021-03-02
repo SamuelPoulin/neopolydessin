@@ -17,28 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true">
-        <uses-library
-            android:name="com.google.android.wearable"
-            android:required="true" />
 
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
-        <meta-data
-            android:name="com.google.android.wearable.standalone"
-            android:value="true" />
-
-        <activity
-            android:name=".ui.accountmanagement.view.AccountManagementActivity"
-            android:label="@string/title_activity_account_management">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".ui.accountcreation.view.AccountCreation">
+        <activity android:name=".ui.register.view.RegisterActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

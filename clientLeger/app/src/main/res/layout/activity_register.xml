@@ -6,13 +6,13 @@
 
         <variable
             name="viewmodel"
-            type="com.projet.clientleger.ui.accountcreation.viewmodel.RegisterViewModel" />
+            type="com.projet.clientleger.ui.register.viewmodel.RegisterViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.accountcreation.view.AccountCreation">
+        tools:context=".ui.register.view.RegisterActivity">
 
         <LinearLayout
             android:id="@+id/registerInfo"
