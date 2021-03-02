@@ -13,4 +13,10 @@
     <string name="register_psw">Mot de passe</string>
     <string name="register_psw_confirm">Confimation de mot de passe</string>
     <string name="user_creds">userCredentials</string>
+    <string name="title_activity_account_management">AccountManagementActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>
