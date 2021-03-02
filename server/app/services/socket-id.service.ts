@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { injectable } from 'inversify';
-import * as jwt from 'jsonwebtoken';
-
-interface AccessToken {
-  _id: string;
-  iat: number;
-  exp: number;
-}
 
 @injectable()
 export class SocketIdService {
@@ -16,18 +9,24 @@ export class SocketIdService {
     this.accountIdsocketIdMap = new Map<string, string>();
   }
 
-  AssociateAccountIdToSocketId(accessToken: string, socketId: string): void {
-    if (process.env.JWT_REFRESH_KEY) {
-      const decodedPayload: AccessToken = jwt.verify(accessToken, process.env.JWT_REFRESH_KEY) as AccessToken;
-      this.accountIdsocketIdMap.set(decodedPayload._id, socketId);
-    }
+  AssociateAccountIdToSocketId(accountId: string, socketId: string): void {
+    this.accountIdsocketIdMap.set(accountId, socketId);
   }
 
   DisconnectAccountIdSocketId(socketId: string): void {
-    const accountId = Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
-    if (accountId) {
-      this.accountIdsocketIdMap.delete(accountId);
+    // eslint-disable-next-line max-len
+    // const accountId = Object.getOwnPropertyNames(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
+
+    for (const [key, value] of this.accountIdsocketIdMap.entries()) {
+      if (value === socketId) {
+        this.accountIdsocketIdMap.delete(key);
+      }
     }
+
+    /* if (accountId) {
+      this.accountIdsocketIdMap.delete(accountId);
+      console.log(this.accountIdsocketIdMap.get('accountId2'));
+    }*/
   }
 
   GetSocketIdOfAccountId(accountId: string): string {
@@ -35,6 +34,13 @@ export class SocketIdService {
   }
 
   GetAccountIdOfSocketId(socketId: string): string | undefined {
-    return Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
+    // return Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
+
+    for (const [key, value] of this.accountIdsocketIdMap.entries()) {
+      if (value === socketId) {
+        return key;
+      }
+    }
+    return undefined;
   }
 }
