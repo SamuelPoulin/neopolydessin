@@ -41,7 +41,7 @@ class RegisterActivity : AppCompatActivity() {
         binding.viewmodel = vm
     }
 
-    private fun registerAccount() {
+    fun registerAccount() {
         loadingBtn(true)
         lifecycleScope.launch {
             val res = vm.registerAccount()
@@ -116,7 +116,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun passwordMinLengthCheck() {
+    fun passwordMinLengthCheck() {
         if (vm.passwordIsNotMinLength()) {
             setTextColorError(binding.passwordMinLengthError)
             setTextIconError(binding.passwordMinLengthError)
@@ -126,7 +126,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun isDifferentPasswordsCheck() {
+    fun isDifferentPasswordsCheck() {
         if (vm.isDifferentPasswords()) {
             setTextColorError(binding.differentPasswordError)
             setTextIconError(binding.differentPasswordError)
@@ -136,7 +136,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun passwordNoDigitCheck() {
+    fun passwordNoDigitCheck() {
         if (vm.passwordContainsNoDigit()) {
             setTextColorError(binding.passwordNoDigitError)
             setTextIconError(binding.passwordNoDigitError)
@@ -146,7 +146,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun setTextColorError(textView: TextView) {
+    fun setTextColorError(textView: TextView) {
         textView.setTextColor(
             ContextCompat.getColor(
                 this,
@@ -155,7 +155,7 @@ class RegisterActivity : AppCompatActivity() {
         )
     }
 
-    private fun setTextColorValid(textView: TextView) {
+    fun setTextColorValid(textView: TextView) {
         textView.setTextColor(
             ContextCompat.getColor(
                 this,
@@ -164,7 +164,7 @@ class RegisterActivity : AppCompatActivity() {
         )
     }
 
-    private fun setTextIconError(textView: TextView) {
+    fun setTextIconError(textView: TextView) {
         textView.setCompoundDrawablesWithIntrinsicBounds(
             R.drawable.ic_baseline_close_24,
             0,
@@ -173,7 +173,7 @@ class RegisterActivity : AppCompatActivity() {
         )
     }
 
-    private fun setTextIconValid(textView: TextView) {
+    fun setTextIconValid(textView: TextView) {
         textView.setCompoundDrawablesWithIntrinsicBounds(
             R.drawable.ic_baseline_done_24,
             0,
