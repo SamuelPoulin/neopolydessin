@@ -17,6 +17,7 @@ export const testingContainer: () => Promise<[Container, sinon.SinonSandbox]> = 
 afterEach(() => {
   if (sandbox) {
     sandbox.reset();
+    sandbox.restore();
     sandbox = undefined;
   }
 
