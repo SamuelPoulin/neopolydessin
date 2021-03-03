@@ -1,8 +1,7 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
-import types from '../app/types';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from './commands/Path';
 
@@ -28,15 +27,15 @@ const gameSizeMap = new Map<GameType, number>([
 
 @injectable()
 export class Lobby {
-
-  @inject(types.DrawingCommands) private drawingCommands: DrawingCommands;
-
   lobbyId: string;
   size: number;
   players: { accountId: string; socket: Socket }[];
   gameType: GameType;
 
+  private drawingCommands: DrawingCommands;
+
   constructor() {
+    this.drawingCommands = new DrawingCommands();
     console.log(this.drawingCommands);
     this.lobbyId = uuidv4();
     this.players = [];

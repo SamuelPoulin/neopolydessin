@@ -115,27 +115,37 @@ describe.only('Socketio', () => {
                 accountId2 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
 
 
+                socketIo.io.on(SocketConnection.PLAYER_CONNECTION, () => {
+                    console.log('connected bbyyy');
+                })
+
                 client.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    console.log(coord);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 })
                 client.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
+                    console.log(coords);
                     expect(coords).to.deep.equal([
                         { x: 1, y: 1 },
                         { x: 2, y: 2 }
                     ]);
-                    console.log(coords);
                 })
 
                 client2.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    console.log(coord);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 });
                 client2.on(SocketDrawing.START_PATH_BC, (coords: Coord[]) => {
+                    console.log(coords);
                     expect(coords).to.deep.equal([
                         { x: 1, y: 1 },
                         { x: 2, y: 2 }
                     ]);
-                    console.log(coords);
                 });
+                client2.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                    console.log('end path bc');
+                    done();
+                })
 
                 client.emit('CreateLobby', accountId)
 
@@ -149,6 +159,7 @@ describe.only('Socketio', () => {
                     { x: 1, y: 1 },
                     { x: 2, y: 2 }
                 ]);
+                client.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
             })
     })
 });
