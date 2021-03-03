@@ -1,8 +1,6 @@
 import { NOT_IMPLEMENTED } from 'http-status-codes';
 import { Command } from './command';
 import { Path } from './Path';
-
-// on va utiliser des paths avec Canvas.
 export class DrawCommand extends Command {
 
   path: Path;

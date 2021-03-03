@@ -20,4 +20,10 @@ export class Path {
     }
   }
 
+  addCoords(points: Coord[]) {
+    points.forEach((point) => {
+      this.addCoord(point);
+    });
+  }
+
 }

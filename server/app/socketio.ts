@@ -2,7 +2,6 @@ import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
@@ -81,28 +80,20 @@ export class SocketIo {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
       }); // Put gametype in enum
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string, callback) => {
-        this.databaseService.getAccountById(accountId).then((account) => {
-          socket.join(lobbyId);
-          const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
-          if (playerLobby) {
-            playerLobby.players.push(accountId);
-          }
-          socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
-        });
+      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
+        const lobbyToJoin = this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
+        if (lobbyToJoin) {
+          lobbyToJoin.addPlayer(accountId, socket);
+          this.databaseService.getAccountById(accountId).then((account) => {
+            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
+          });
+        }
       });
 
       socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
-        this.databaseService.getAccountById(accountId).then((account) => {
-          const generatedId = uuidv4();
-          const lobby: Lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type };
-          this.lobbyList.push(lobby);
-          const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
-          if (playerLobby) {
-            playerLobby.players.push(account.documents.username);
-          }
-          socket.join(generatedId);
-        });
+        const lobby: Lobby = new Lobby();
+        lobby.addPlayer(accountId, socket);
+        this.lobbyList.push(lobby);
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
