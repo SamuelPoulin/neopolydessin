@@ -66,6 +66,7 @@ export class SocketIo {
       this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
         socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
         this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+        this.socketIdService.DisconnectSocketFromLobby(socket.id);
       });
       loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
     }
@@ -77,13 +78,14 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', () => {
+      socket.on(SocketMessages.GET_ALL_LOBBIES, () => {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
       }); // Put gametype in enum
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string, callback) => {
         this.databaseService.getAccountById(accountId).then((account) => {
           socket.join(lobbyId);
+          this.socketIdService.AssociateSocketToLobby(socket.id, lobbyId);
           const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
           if (playerLobby) {
             playerLobby.players.push(accountId);
@@ -92,23 +94,26 @@ export class SocketIo {
         });
       });
 
-      socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
+      socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, type: string, sizeGame: number) => {
         this.databaseService.getAccountById(accountId).then((account) => {
           const generatedId = uuidv4();
-          const lobby: Lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type };
+          const lobby: Lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type};
           this.lobbyList.push(lobby);
           const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
           if (playerLobby) {
-            playerLobby.players.push(account.documents.username);
+            playerLobby.players.push(accountId);
           }
           socket.join(generatedId);
+          this.socketIdService.AssociateSocketToLobby(socket.id, generatedId);
         });
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
         if (this.validateMessageLength(sentMsg)) {
-          const clientRooms = socket.rooms;
-          socket.to(clientRooms[Object.keys(clientRooms)[0]]).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
+          if(currentLobby){
+            socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          }
         }
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
@@ -125,6 +130,17 @@ export class SocketIo {
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
         }
+      });
+
+      socket.on(SocketMessages.START_GAME_SERVER, (callback) => {
+        const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
+        if (currentLobby) {
+          this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
+        }
+      });
+
+      socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
+        console.log(word);
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
