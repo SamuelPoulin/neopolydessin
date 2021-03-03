@@ -49,7 +49,7 @@
                     android:text="@string/email_header_title"
                     android:textColor="@color/black" />
                 <EditText
-                    android:id="@+id/connexionUsername"
+                    android:id="@+id/connectionUsername"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -70,7 +70,7 @@
                     android:text="@string/password_header_title"
                     android:textColor="@color/black" />
                 <EditText
-                    android:id="@+id/connexionPassword"
+                    android:id="@+id/connectionPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -80,7 +80,7 @@
             </LinearLayout>
 
         <Button
-            android:id="@+id/connexionButton"
+            android:id="@+id/connectBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -97,7 +97,7 @@
                 android:layout_marginTop="10dp"
                 >
                 <Button
-                    android:id="@+id/forgottenPasswordButton"
+                    android:id="@+id/forgottenPasswordBtn"
                     android:layout_width="0dp"
                     android:layout_weight="0.15"
                     android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
                     android:minHeight="0dp"/>
 
                 <Button
-                    android:id="@+id/createAccountButton"
+                    android:id="@+id/createAccountBtn"
                     android:layout_width="0dp"
                     android:layout_weight="0.1"
                     android:layout_height="wrap_content"
