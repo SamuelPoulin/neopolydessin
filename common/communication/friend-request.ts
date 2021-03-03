@@ -1,5 +1,5 @@
 export interface FriendRequest {
-    email: string
+    username: string
 }
 
 export interface FriendResponse {
