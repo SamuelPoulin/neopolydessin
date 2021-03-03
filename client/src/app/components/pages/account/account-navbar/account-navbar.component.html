@@ -1,0 +1,40 @@
+<div id="navbar-container">
+  <div id="navbar-top-buttons" class="navbar-section">
+    <button class="navbar-button" mat-button [routerLink]="''">
+      <mat-icon class="navbar-button-icon">arrow_back_ios</mat-icon>
+      Retour
+    </button>
+  </div>
+  <div id="navbar-avatar">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" [style.fill]="avatarColor" />
+      <text x="50%" y="65%" text-anchor="middle" fill="#fff" font-size="48px">
+        {{avatarLetter}}
+      </text>
+    </svg>
+  </div>
+  <div id="navbar-user">
+    <div id="navbar-user-name">Samuel Poulin</div>
+    <div id="navbar-user-username">@samuelpoulin</div>
+  </div>
+  <div id="navbar-middle-buttons" class="navbar-section">
+    <button class="navbar-button" mat-button [routerLink]="'./'">
+      <mat-icon class="navbar-button-icon">leaderboard</mat-icon>
+      Tableau de bord
+    </button>
+    <button class="navbar-button" mat-button [routerLink]="'profile'">
+      <mat-icon class="navbar-button-icon">perm_identity</mat-icon>
+      Profil utilisateur
+    </button>
+    <button class="navbar-button" mat-button [routerLink]="'settings'">
+      <mat-icon class="navbar-button-icon">tune</mat-icon>
+      Paramètres de compte
+    </button>
+  </div>
+  <div class="navbar-section">
+    <button id="logout-button" class="navbar-button logout" mat-button [routerLink]="''">
+      <mat-icon id="logout-icon" class="navbar-button-icon" style="transform: rotate(180deg)">logout</mat-icon>
+      Déconnexion
+    </button>
+  </div>
+</div>
