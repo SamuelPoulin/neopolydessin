@@ -14,6 +14,7 @@ import { FriendsController } from './controllers/friends.controller';
 import { FriendsService } from './services/friends.service';
 import { LoggedIn } from './middlewares/logged-in';
 import { SocketIdService } from './services/socket-id.service';
+import { DrawingCommands } from './services/drawing-commands.service';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {
   const container: Container = new Container();
@@ -29,6 +30,7 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.FriendsService).to(FriendsService);
   container.bind(Types.LoggedIn).to(LoggedIn);
   container.bind(Types.SocketIdService).to(SocketIdService);
+  container.bind(Types.DrawingCommands).to(DrawingCommands);
 
   return container;
 };

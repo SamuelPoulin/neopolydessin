@@ -7,7 +7,7 @@ import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
-import { Account, FriendsList, FriendStatus } from '../../models/account';
+import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';

@@ -6,12 +6,12 @@ import { Server } from './server';
 import { Manager, Socket } from 'socket.io-client'
 import Types from './types';
 import { DatabaseService, LoginTokens, Response, } from './services/database.service';
-import { Account } from '../models/account';
+import { Account } from '../models/schemas/account';
 import { TEST_PORT } from './constants';
 import { accountInfo } from './services/database.service.spec';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import * as jwtUtils from './utils/jwt-util';
-import { Login } from '../models/logins';
+import { Login } from '../models/schemas/logins';
 
 describe('Socketio', () => {
 

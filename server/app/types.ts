@@ -10,5 +10,6 @@ export default {
   FriendsController: Symbol('FriendsController'),
   FriendsService: Symbol('FriendsService'),
   LoggedIn: Symbol('LoggedIn'),
-  SocketIdService: Symbol('SocketIdService')
+  SocketIdService: Symbol('SocketIdService'),
+  DrawingCommands: Symbol('DrawingCommands'),
 };
