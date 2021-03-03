@@ -20,7 +20,7 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
 
   container.bind(Types.Server).to(Server);
   container.bind(Types.Application).to(Application);
-  container.bind(Types.Socketio).to(SocketIo);
+  container.bind(Types.Socketio).to(SocketIo).inSingletonScope();
   container.bind(Types.APIController).to(APIController);
   container.bind(Types.EmailService).to(EmailService);
   container.bind(Types.DatabaseController).to(DatabaseController);

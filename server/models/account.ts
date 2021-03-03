@@ -29,6 +29,7 @@ export interface Account extends mongoose.Document {
   email: string;
   password: string;
   friends: [Friend];
+  logins: string;
 }
 
 export const accountSchema = new mongoose.Schema({
@@ -52,7 +53,9 @@ export const accountSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  logins: [Date],
+  logins: {
+    type: ObjectId, ref: 'Logins'
+  },
   friends: [
     {
       friendId: String,
