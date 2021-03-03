@@ -17,16 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true">
-
-        <activity android:name=".ui.register.view.RegisterActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
-            android:name=".ui.connexion.view.ConnexionActivity"
+            android:name=".ui.accountmanagement.view.AccountManagementActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
