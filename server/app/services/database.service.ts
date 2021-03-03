@@ -1,15 +1,15 @@
 import * as bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
-import * as jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/account';
+import loginsModel, { Logins } from '../../models/logins';
 import refreshModel, { Refresh } from '../../models/refresh';
-import { AccessToken } from '../middlewares/jwt-verify';
+import * as jwtUtils from '../utils/jwt-util';
 
 export interface Response<T> {
   statusCode: number;
@@ -109,6 +109,7 @@ export class DatabaseService {
   async getAccountById(id: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
+        .populate('logins', 'logins')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
@@ -156,7 +157,7 @@ export class DatabaseService {
         password: body.password,
       } as Account;
       const model = new accountModel(account);
-
+      let loginsModelId: string;
       this.getAccountByUsername(account.username)
         .then(async (found: Response<Account>) => {
           throw Error(BAD_REQUEST.toString());
@@ -170,10 +171,18 @@ export class DatabaseService {
         })
         .catch(async (err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
+          const logins = new loginsModel({
+            accountId: model._id, logins: []
+          });
+          return logins.save();
+        })
+        .then(async (logins: Logins) => {
+          loginsModelId = logins._id.toHexString();
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
           model.password = hash;
+          model.logins = loginsModelId;
           return model.save();
         })
         .then(async (acc: Account) => {
@@ -200,9 +209,9 @@ export class DatabaseService {
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
-          if (!match || !process.env.JWT_KEY || !process.env.JWT_REFRESH_KEY) throw Error(UNAUTHORIZED.toString());
-          jwtToken = jwt.sign({ _id: account._id }, process.env.JWT_KEY, { expiresIn: '5m' });
-          jwtRefreshToken = jwt.sign({ _id: account._id }, process.env.JWT_REFRESH_KEY, { expiresIn: '1d' });
+          if (!match) throw Error(UNAUTHORIZED.toString());
+          jwtToken = jwtUtils.encodeAccessToken({ _id: account._id });
+          jwtRefreshToken = jwtUtils.encodeRefreshToken({ _id: account._id });
           return refreshModel.findOneAndDelete({ accountId: account._id.toHexString() });
         })
         .then(async () => {
@@ -227,9 +236,9 @@ export class DatabaseService {
       refreshModel
         .findOne({ token: refreshToken })
         .then((doc: Refresh) => {
-          if (!doc || !process.env.JWT_REFRESH_KEY || !process.env.JWT_KEY) throw Error();
-          const decodedPayload: AccessToken = jwt.verify(doc.token, process.env.JWT_REFRESH_KEY) as AccessToken;
-          const newAccesToken = jwt.sign({ _id: decodedPayload._id }, process.env.JWT_KEY, { expiresIn: '5m' });
+          if (!doc) throw Error();
+          const decodedPayload = jwtUtils.decodeRefreshToken(doc.token);
+          const newAccesToken = jwtUtils.encodeAccessToken({ _id: decodedPayload });
           resolve(newAccesToken);
         })
         .catch((err: Error) => {
@@ -275,6 +284,9 @@ export class DatabaseService {
           return this.logout(doc.token);
         })
         .then((successfull: boolean) => {
+          return loginsModel.findByAccountIdAndDelete(id);
+        })
+        .then((logins: Logins) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { injectable } from 'inversify';
 
 @injectable()
@@ -14,13 +13,9 @@ export class SocketIdService {
   }
 
   DisconnectAccountIdSocketId(socketId: string): void {
-    // eslint-disable-next-line max-len
-    // const accountId = Object.getOwnPropertyNames(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
-
-    for (const [key, value] of this.accountIdsocketIdMap.entries()) {
-      if (value === socketId) {
-        this.accountIdsocketIdMap.delete(key);
-      }
+    const accountId = this.GetAccountIdOfSocketId(socketId);
+    if (accountId) {
+      this.accountIdsocketIdMap.delete(accountId);
     }
 
     /* if (accountId) {
@@ -29,18 +24,11 @@ export class SocketIdService {
     }*/
   }
 
-  GetSocketIdOfAccountId(accountId: string): string {
-    return this.accountIdsocketIdMap.get(accountId)!;
+  GetSocketIdOfAccountId(accountId: string): string | undefined {
+    return this.accountIdsocketIdMap.get(accountId);
   }
 
   GetAccountIdOfSocketId(socketId: string): string | undefined {
-    // return Object.keys(this.accountIdsocketIdMap).find((keyValue) => this.accountIdsocketIdMap[keyValue] === socketId);
-
-    for (const [key, value] of this.accountIdsocketIdMap.entries()) {
-      if (value === socketId) {
-        return key;
-      }
-    }
-    return undefined;
+    return Array.from(this.accountIdsocketIdMap.keys()).find((keyValue) => this.accountIdsocketIdMap.get(keyValue) === socketId);
   }
 }

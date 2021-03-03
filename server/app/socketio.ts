@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-import { Server, Socket } from 'socket.io';
+import { Server, Socket, ServerOptions } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
@@ -10,15 +10,24 @@ import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/account';
 import { Lobby } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import loginsModel from '../models/logins';
+import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
+
 @injectable()
 export class SocketIo {
 
   io: Server;
   lobbyList: Lobby[] = [];
   readonly MAX_LENGTH_MSG: number = 200;
+  readonly SERVER_OPTS: Partial<ServerOptions> = {
+    cors: {
+      origin: '*'
+    },
+    transports: ['websocket']
+  };
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
@@ -26,12 +35,7 @@ export class SocketIo {
   ) { }
 
   init(server: http.Server): void {
-    this.io = new Server(server, {
-      cors: {
-        origin: '*'
-      },
-      transports: ['websocket']
-    });
+    this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
   }
 
@@ -39,11 +43,39 @@ export class SocketIo {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
+  sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
+    const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
+    if (socketId) {
+      this.io.to(socketId).emit(endpoint, friends);
+    }
+  }
+
+  onConnect(socket: Socket, accessToken: string) {
+    try {
+      const accountId = jwtUtils.decodeAccessToken(accessToken);
+      this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
+      loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+
+  onDisconnect(socket: Socket) {
+    const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+    if (accountIdOfSocket) {
+      this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
+        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+        this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+      });
+      loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
+    }
+  }
+
   bindIoEvents(): void {
-    this.io.on(SocketConnection.CONNECTION, (socket: Socket, accessToken: string) => {
+    this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
       console.log(`Connected with ${socket.id} \n`);
 
-      this.socketIdService.AssociateAccountIdToSocketId(accessToken, socket.id);
+      this.onConnect(socket, socket.handshake.auth.token);
 
       socket.on('GetLobbies', () => {
         this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
@@ -58,21 +90,6 @@ export class SocketIo {
           }
           socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
         });
-
-        /* for (const value of this.players.values()) {
-                if (value === playerName) {
-                  callback({
-                    status: 'Invalid'
-                  });
-                  return;
-                }
-              }
-              callback({
-                status: 'Valid'
-              });
-              socket.join('Prototype');
-              this.players.set(socket.id, playerName);
-              socket.broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerName);*/
       });
 
       socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
@@ -112,19 +129,8 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
-        const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        if (accountIdOfSocket) {
-          this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
-            socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
-            this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-          });
-        }
+        this.onDisconnect(socket);
       });
     });
-  }
-
-  sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
-    const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
-    this.io.to(socketId).emit(endpoint, friends);
   }
 }

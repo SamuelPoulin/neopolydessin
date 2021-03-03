@@ -7,11 +7,11 @@ import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
-import { AccessToken } from '../middlewares/jwt-verify';
 import { Account, FriendsList, FriendStatus } from '../../models/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';
+import { AccessToken } from '../utils/jwt-util';
 
 describe('Friends Service', () => {
 
