@@ -28,7 +28,7 @@ describe('friends controller', () => {
         documents: {
             friends: [
                 {
-                    friendId: '1',
+                    friendId: '123456789012345678901234',
                     username: 'itsYaBoi',
                     status: FriendStatus.FRIEND,
                     received: true

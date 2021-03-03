@@ -1,27 +1,25 @@
 import { ObjectId } from 'mongodb';
-import * as mongoose from 'mongoose';
+import { Document, Model, model, Query, Schema } from 'mongoose';
 
 export enum FriendStatus {
   PENDING = 'pending',
   FRIEND = 'friend'
 }
 
-export interface Friend {
+interface PopulatedFriend extends Friend {
+  username: string;
+}
+
+interface Friend {
   friendId: string;
   status: FriendStatus;
   received: boolean;
 }
 
 export interface FriendsList {
-  friends: {
-    friendId: string;
-    username: string;
-    status: FriendStatus;
-    received: boolean;
-  }[];
+  friends: PopulatedFriend[];
 }
-
-export interface Account extends mongoose.Document {
+export interface Account extends Document {
   _id: ObjectId;
   firstName: string;
   lastName: string;
@@ -31,7 +29,21 @@ export interface Account extends mongoose.Document {
   friends: [Friend];
 }
 
-export const accountSchema = new mongoose.Schema({
+export interface UpdateOneQueryResult {
+  ok: number;
+  n: number;
+  nModified: number;
+}
+interface AccountModel extends Model<Account> {
+  addFriendRequestToAccountWithEmail: (senderId: string, receiverEmail: string) => Query<Account | null, Account>;
+  addFriendrequestToSenderWithId: (senderId: string, receiverId: string) => Query<Account | null, Account>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  acceptFriendship: (id: string, otherId: string, receivedOffer: boolean) => Query<UpdateOneQueryResult, Account>;
+  refuseFriendship: (id: string, otherId: string, receivedOffer: boolean) => Query<UpdateOneQueryResult, Account>;
+  unfriend: (id: ObjectId, otherId: ObjectId) => Query<UpdateOneQueryResult, Account>;
+}
+
+export const accountSchema = new Schema<Account, AccountModel>({
   firstName: String,
   lastName: String,
   username: {
@@ -65,5 +77,101 @@ export const accountSchema = new mongoose.Schema({
     }],
 });
 
-const accountModel = mongoose.model<Account>('Account', accountSchema);
+accountSchema.statics.addFriendRequestToAccountWithEmail = (senderId: string, receiverEmail: string) => {
+  return accountModel.findOneAndUpdate(
+    {
+      '_id': { $ne: senderId },
+      'email': receiverEmail,
+      'friends.friendId': { $ne: senderId }
+    },
+    {
+      $push:
+      {
+        friends:
+        {
+          friendId: senderId,
+          status: FriendStatus.PENDING,
+          received: true
+        }
+      }
+    },
+    {
+      useFindAndModify: false
+    }
+  );
+};
+
+accountSchema.statics.addFriendrequestToSenderWithId = (senderId: string, receiverId: string) => {
+  return accountModel.findOneAndUpdate(
+    {
+      '_id': senderId,
+      'friends.friendId': { $ne: receiverId }
+    },
+    {
+      $push: {
+        friends: {
+          friendId: receiverId,
+          status: FriendStatus.PENDING,
+          received: false
+        }
+      }
+    },
+    {
+      useFindAndModify: false
+    }
+  );
+};
+
+accountSchema.statics.acceptFriendship = (id: string, otherId: string, receivedOffer: boolean) => {
+  return accountModel.updateOne(
+    {
+      '_id': id,
+      'friends.friendId': otherId,
+      'friends.status': FriendStatus.PENDING,
+      'friends.received': receivedOffer
+    },
+    {
+      $set:
+      {
+        'friends.$.status':
+          FriendStatus.FRIEND
+      }
+    }
+  );
+};
+
+accountSchema.statics.refuseFriendship = (id: string, otherId: string, receivedOffer: boolean) => {
+  return accountModel.updateOne(
+    {
+      _id: id
+    },
+    {
+      $pull: {
+        friends: {
+          friendId: otherId,
+          status: FriendStatus.PENDING,
+          received: receivedOffer
+        }
+      }
+    }
+  );
+};
+
+accountSchema.statics.unfriend = (id: string, otherId: string) => {
+  return accountModel.updateOne(
+    {
+      _id: id
+    },
+    {
+      $pull: {
+        friends: {
+          friendId: otherId,
+          status: FriendStatus.FRIEND
+        }
+      }
+    }
+  );
+};
+
+const accountModel = model<Account, AccountModel>('Account', accountSchema);
 export default accountModel;

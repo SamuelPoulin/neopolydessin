@@ -361,7 +361,7 @@ describe('Friends Service', () => {
             })
     });
 
-    it('unfriend should resolve to NOT_FOUND if friend isn\'nt there', (done: Mocha.Done) => {
+    it('unfriend should resolve to NOT_FOUND if friend isn\'t there', (done: Mocha.Done) => {
         let myId: string;
         databaseService.createAccount(accountInfo)
             .then((tokens: Response<LoginTokens>) => {
