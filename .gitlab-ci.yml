@@ -38,12 +38,31 @@ build_server:
             - server/node_modules/
             - server/out/
 
-build_electron:
+build_electron_dev:
     stage: build
     <<: *electron_cache
+    except:
+        - master
     script:
         - echo "Build electron"
-        - ./pipeline/build_electron.sh
+        - cd client
+        - npm i
+        - npm run build
+    artifacts:
+        expire_in: 1 day
+        paths:
+            - client/node_modules/
+
+build_electron_prod:
+    stage: build
+    <<: *electron_cache
+    only:
+        - master
+    script:
+        - echo "Build electron"
+        - cd client
+        - npm i
+        - npm run build:prod
     artifacts:
         expire_in: 1 day
         paths:
@@ -51,7 +70,6 @@ build_electron:
 
 test_server:
     stage: test
-    #allow_failure: true
     needs:
         - build_server
     dependencies:
@@ -61,17 +79,29 @@ test_server:
         - ./pipeline/test_server.sh
     
 
-test_electron:
+test_electron_dev:
     stage: test
-    #allow_failure: true
+    except:
+        - master
     needs:
-        - build_electron
+        - build_electron_dev
     dependencies:
-        - build_electron
+        - build_electron_dev
     script:
         - echo "Test electron"
         - ./pipeline/test_electron.sh
 
+test_electron_prod:
+    stage: test
+    only:
+        - master
+    needs:
+        - build_electron_prod
+    dependencies:
+        - build_electron_prod
+    script:
+        - echo "Test electron"
+        - ./pipeline/test_electron.sh
 
 deploy_dev:
     stage: deploy
