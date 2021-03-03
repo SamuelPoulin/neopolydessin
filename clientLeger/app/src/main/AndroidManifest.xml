@@ -13,13 +13,6 @@
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true"
         android:name=".PolydessinApplication">
-        <activity android:name=".ui.register.view.RegisterActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ui.connexion.view.ConnexionActivity"
             android:screenOrientation="landscape">
@@ -29,6 +22,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.register.view.RegisterActivity"
+            android:screenOrientation="landscape"/>
 
         <service
             android:name=".data.api.service.SocketService"
