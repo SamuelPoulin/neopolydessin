@@ -39,13 +39,12 @@ export class FriendsService {
     });
   }
 
-  async requestFriendship(id: string, email: string): Promise<Response<FriendsList>> {
+  async requestFriendship(id: string, username: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
       let friendId: string;
-      accountModel.addFriendRequestToAccountWithEmail(id, email)
+      accountModel.addFriendRequestToAccountWithUsername(id, username)
         .then(async (doc: Account) => {
           if (!doc) throw Error(BAD_REQUEST.toString());
-          // console.log(doc);
           friendId = doc._id.toHexString();
           return this.getFriendsOfUser(friendId);
         })

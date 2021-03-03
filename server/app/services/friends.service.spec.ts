@@ -95,7 +95,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);
@@ -129,7 +129,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .catch((err: ErrorMsg) => {
                 expect(err.statusCode).to.equal(BAD_REQUEST);
@@ -149,13 +149,13 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);
             })
             .then((friendList: Response<FriendsList>) => {
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .catch((err: ErrorMsg) => {
                 expect(err.statusCode).to.equal(BAD_REQUEST);
@@ -175,7 +175,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
@@ -236,7 +236,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(myId, otherId);
@@ -260,7 +260,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
@@ -318,7 +318,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.refuseFriendship(myId, otherId);
@@ -341,7 +341,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);

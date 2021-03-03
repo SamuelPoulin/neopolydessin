@@ -35,9 +35,8 @@ export interface UpdateOneQueryResult {
   nModified: number;
 }
 interface AccountModel extends Model<Account> {
-  addFriendRequestToAccountWithEmail: (senderId: string, receiverEmail: string) => Query<Account | null, Account>;
+  addFriendRequestToAccountWithUsername: (senderId: string, username: string) => Query<Account | null, Account>;
   addFriendrequestToSenderWithId: (senderId: string, receiverId: string) => Query<Account | null, Account>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   acceptFriendship: (id: string, otherId: string, receivedOffer: boolean) => Query<UpdateOneQueryResult, Account>;
   refuseFriendship: (id: string, otherId: string, receivedOffer: boolean) => Query<UpdateOneQueryResult, Account>;
   unfriend: (id: ObjectId, otherId: ObjectId) => Query<UpdateOneQueryResult, Account>;
@@ -77,11 +76,11 @@ export const accountSchema = new Schema<Account, AccountModel>({
     }],
 });
 
-accountSchema.statics.addFriendRequestToAccountWithEmail = (senderId: string, receiverEmail: string) => {
+accountSchema.statics.addFriendRequestToAccountWithUsername = (senderId: string, username: string) => {
   return accountModel.findOneAndUpdate(
     {
       '_id': { $ne: senderId },
-      'email': receiverEmail,
+      username,
       'friends.friendId': { $ne: senderId }
     },
     {
