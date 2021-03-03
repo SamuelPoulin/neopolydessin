@@ -13,4 +13,10 @@
     <string name="register_psw">Mot de passe</string>
     <string name="register_psw_confirm">Confimation de mot de passe</string>
     <string name="user_creds">userCredentials</string>
+    <string name="welcome_message">Bienvenue sur PolyDessin</string>
+    <string name="email_header_title"> Email</string>
+    <string name="password_header_title"> Mot de passe</string>
+    <string name="connect_button_header">Se connecter</string>
+    <string name="forgotten_password_header">"J'ai oublié mon mot de passe"</string>
+    <string name="create_acccount_header">Créer un compte</string>
 </resources>

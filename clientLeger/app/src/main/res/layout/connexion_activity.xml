@@ -7,62 +7,120 @@
     tools:context=".ui.connexion.view.ConnexionActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_percent="0.25"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.6"
         android:orientation="vertical"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        >/
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center"
-            android:weightSum="1"
-            >/
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_gravity="center"
             android:background="@drawable/login_screen_logo"
-            ></ImageView>
+            />
         <TextView
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Bienvenue sur PolyDessin"
+            android:text="@string/welcome_message"
             android:textColor="@color/black"
-            android:textSize="24dp"
+            android:textSize="25sp"
             android:textAlignment="center"
             android:layout_marginTop="10dp"
             android:textStyle="bold"
-            ></TextView>
-        <EditText
-            android:id="@+id/connexionUsername"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="Nom d'utilisateur ou adresse courrielle"
-            android:inputType="text"
-            ></EditText>
+            />
 
-        <EditText
-            android:id="@+id/connexionUserMdp"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:hint="Mot de passe"
-            android:inputType="textPassword"
-            android:layout_gravity="center"></EditText>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_button"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email_header_title"
+                    android:textColor="@color/black" />
+                <EditText
+                    android:id="@+id/connexionUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:inputType="text"
+                    android:textSize="15sp">
+                </EditText>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_button"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/password_header_title"
+                    android:textColor="@color/black" />
+                <EditText
+                    android:id="@+id/connexionPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:inputType="textPassword"
+                    android:textSize="15sp">
+                </EditText>
+            </LinearLayout>
 
         <Button
             android:id="@+id/connexionButton"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connexion"
-            android:layout_gravity="center"></Button>
-        >
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_button"
+            android:text="@string/connect_button_header"
+            android:textSize="15sp"
+            android:textAllCaps="false"
+            android:minHeight="0dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                >
+                <Button
+                    android:id="@+id/forgottenPasswordButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.15"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:text="@string/forgotten_password_header"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textSize="10sp"
+                    android:minHeight="0dp"/>
+
+                <Button
+                    android:id="@+id/createAccountButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.1"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:text="@string/create_acccount_header"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textSize="10sp"
+                    android:minHeight="0dp"
+                     />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

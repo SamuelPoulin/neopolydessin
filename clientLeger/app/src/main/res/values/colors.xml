@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="register_error">#FF0000</color>
     <color name="register_valid">#00FF66</color>
+    <color name ="light_grey">#E8E8E8</color>
 </resources>
