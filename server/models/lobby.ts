@@ -1,10 +1,16 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
 import types from '../app/types';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from './commands/Path';
+
+export interface LobbyInfo {
+  lobbyId: string;
+  playerIds: string[];
+  gameType: GameType;
+}
 
 export enum GameType {
   CLASSIC = 'classic',
@@ -20,6 +26,7 @@ const gameSizeMap = new Map<GameType, number>([
   [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
 ]);
 
+@injectable()
 export class Lobby {
 
   @inject(types.DrawingCommands) private drawingCommands: DrawingCommands;
@@ -30,9 +37,18 @@ export class Lobby {
   gameType: GameType;
 
   constructor() {
+    console.log(this.drawingCommands);
     this.lobbyId = uuidv4();
     this.players = [];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
+  }
+
+  toLobbyInfo(): LobbyInfo {
+    return {
+      lobbyId: this.lobbyId,
+      playerIds: this.players.map((player) => { return player.accountId; }),
+      gameType: this.gameType,
+    };
   }
 
   addPlayer(accountId: string, socket: Socket) {
@@ -55,7 +71,7 @@ export class Lobby {
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord) => {
       this.drawingCommands.startPath(startPoint)
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.START_PATH, startPoint);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.START_PATH_BC, startPoint);
         })
         .catch(() => {
           console.log(`failed to start path for ${this.lobbyId}`);
@@ -65,7 +81,7 @@ export class Lobby {
     socket.on(SocketDrawing.UPDATE_PATH, (updatePoints: Coord[]) => {
       this.drawingCommands.updatePath(updatePoints)
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UPDATE_PATH, updatePoints);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UPDATE_PATH_BC, updatePoints);
         })
         .catch(() => {
           console.log(`failed to update path for ${this.lobbyId}`);
@@ -76,7 +92,7 @@ export class Lobby {
     socket.on(SocketDrawing.END_PATH, (endPoint: Coord) => {
       this.drawingCommands.endPath(endPoint)
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.END_PATH, endPoint);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.END_PATH_BC, endPoint);
         })
         .catch(() => {
           console.log(`failed to end path for ${this.lobbyId}`);
@@ -87,7 +103,7 @@ export class Lobby {
     socket.on(SocketDrawing.ERASE, () => {
       this.drawingCommands.erase()
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.ERASE);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.ERASE_BC);
         })
         .catch(() => {
           console.log(`failed to erase for ${this.lobbyId}`);
@@ -98,7 +114,7 @@ export class Lobby {
     socket.on(SocketDrawing.UNDO, () => {
       this.drawingCommands.undo()
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UNDO);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UNDO_BC);
         })
         .catch(() => {
           console.log(`failed to undo for ${this.lobbyId}`);
@@ -109,7 +125,7 @@ export class Lobby {
     socket.on(SocketDrawing.REDO, () => {
       this.drawingCommands.redo()
         .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.REDO);
+          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.REDO_BC);
         })
         .catch(() => {
           console.log(`failed to redo for ${this.lobbyId}`);

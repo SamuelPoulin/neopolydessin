@@ -13,16 +13,16 @@ import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';
 import { AccessToken } from '../utils/jwt-util';
 
-describe('Friends Service', () => {
+export const otherAccountInfo: Register = {
+    firstName: 'name',
+    lastName: 'lname',
+    username: 'username1',
+    email: 'email1@email.email',
+    password: 'monkey123',
+    passwordConfirm: 'monkey123'
+}
 
-    const otherAccountInfo: Register = {
-        firstName: 'name',
-        lastName: 'lname',
-        username: 'username1',
-        email: 'email1@email.email',
-        password: 'monkey123',
-        passwordConfirm: 'monkey123'
-    }
+describe('Friends Service', () => {
 
     let databaseService: DatabaseService;
     let friendsService: FriendsService;

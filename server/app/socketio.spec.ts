@@ -12,8 +12,12 @@ import { accountInfo } from './services/database.service.spec';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
+import { otherAccountInfo } from './services/friends.service.spec';
+import { LobbyInfo } from '../models/lobby';
+import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
+import { Coord } from '../models/commands/Path';
 
-describe('Socketio', () => {
+describe.only('Socketio', () => {
 
     let databaseService: DatabaseService;
     let server: Server;
@@ -84,6 +88,67 @@ describe('Socketio', () => {
                     }
                 });
                 accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken)
+            })
+    })
+
+    it('client should be able to join lobby', (done: Mocha.Done) => {
+        let client2: Socket;
+        let accountId: string;
+        let accountId2: string;
+        databaseService
+            .createAccount(accountInfo)
+            .then((tokens: Response<LoginTokens>) => {
+                client = manager.socket('/', {
+                    auth: {
+                        token: tokens.documents.accessToken,
+                    }
+                });
+                accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
+                return databaseService.createAccount(otherAccountInfo)
+            })
+            .then((tokens: Response<LoginTokens>) => {
+                client2 = manager.socket('/', {
+                    auth: {
+                        token: tokens.documents.accessToken,
+                    }
+                });
+                accountId2 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
+
+
+                client.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                })
+                client.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
+                    expect(coords).to.deep.equal([
+                        { x: 1, y: 1 },
+                        { x: 2, y: 2 }
+                    ]);
+                    console.log(coords);
+                })
+
+                client2.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                });
+                client2.on(SocketDrawing.START_PATH_BC, (coords: Coord[]) => {
+                    expect(coords).to.deep.equal([
+                        { x: 1, y: 1 },
+                        { x: 2, y: 2 }
+                    ]);
+                    console.log(coords);
+                });
+
+                client.emit('CreateLobby', accountId)
+
+                client2.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                    console.log(lobbies);
+                    client2.emit(SocketConnection.PLAYER_CONNECTION, accountId2, lobbies[0].lobbyId);
+                });
+
+                client.emit(SocketDrawing.START_PATH, { x: 0, y: 0 })
+                client.emit(SocketDrawing.UPDATE_PATH, [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 2 }
+                ]);
             })
     })
 });

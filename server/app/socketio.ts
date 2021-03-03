@@ -7,7 +7,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Lobby } from '../models/lobby';
+import { Lobby, LobbyInfo } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import * as jwtUtils from './utils/jwt-util';
@@ -76,8 +76,10 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', () => {
-        this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
+      socket.on('GetLobbies', (callback: (lobbies: LobbyInfo[]) => void) => {
+        callback(this.lobbyList.map((lobby) => {
+          return lobby.toLobbyInfo();
+        }));
       }); // Put gametype in enum
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
@@ -90,7 +92,7 @@ export class SocketIo {
         }
       });
 
-      socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
+      socket.on('CreateLobby', (accountId: string) => {
         const lobby: Lobby = new Lobby();
         lobby.addPlayer(accountId, socket);
         this.lobbyList.push(lobby);
