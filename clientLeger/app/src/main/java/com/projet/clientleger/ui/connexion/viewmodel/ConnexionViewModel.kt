@@ -7,6 +7,7 @@ import com.projet.clientleger.data.repository.ConnectionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+@HiltViewModel
 class ConnexionViewModel @Inject constructor(private val connectionRepository: ConnectionRepository):ViewModel() {
 
     suspend fun connectAccount(username:String, password:String):RegisterResponse{

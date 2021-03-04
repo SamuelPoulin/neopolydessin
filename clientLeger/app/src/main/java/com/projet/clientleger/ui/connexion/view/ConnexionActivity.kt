@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
@@ -13,15 +15,17 @@ import com.projet.clientleger.data.repository.ConnectionRepository
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.ui.register.view.RegisterActivity
 import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.android.synthetic.main.connexion_activity.*
 import kotlinx.android.synthetic.main.fragment_chat.*
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ConnexionActivity : AppCompatActivity() {
-    private lateinit var vm: ConnexionViewModel
+    private val vm: ConnexionViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm = ViewModelProvider(this).get(ConnexionViewModel::class.java)
         setContentView(R.layout.connexion_activity)
         setupButtons()
     }
