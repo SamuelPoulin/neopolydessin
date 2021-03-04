@@ -13,12 +13,15 @@ import io.socket.client.Socket
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.net.URISyntaxException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 //"http://10.0.2.2:3205"
 //"http://p3-204-dev.duckdns.org/"
 const val SOCKET_ROUTE = "http://p3-204-dev.duckdns.org/"
 
-class SocketService : Service() {
+@Singleton
+class SocketService @Inject constructor(): Service() {
 
     lateinit var socket: Socket;
     private val binder = LocalBinder()
@@ -40,12 +43,16 @@ class SocketService : Service() {
             options.transports = arrayOf("websocket")
             options.upgrade = false
             socket = IO.socket(BuildConfig.SERVER_URL, options)
-            println(BuildConfig.SERVER_URL)
         } catch (e: URISyntaxException) {
             null
         }
         socket.connect()
-        println("socket connected!!!!!!")
+    }
+
+    fun connect(accessToken: String){
+        val obj: JSONObject = JSONObject()
+        obj.put("accessToken", accessToken)
+        socket.emit("connection", obj)
     }
 
     fun receiveMessage(): Observable<MessageChat> {

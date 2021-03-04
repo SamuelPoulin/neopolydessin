@@ -20,8 +20,10 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.model.IMessage
 import com.projet.clientleger.data.model.MessageChat
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_chat.*
 import java.util.regex.Pattern
+import javax.inject.Inject
 
 private const val USERNAME_FORMAT_ERROR: String = "Doit contenir seulement 10 lettres ou chiffres."
 private const val USERNAME_UNICITY_ERROR: String = "Pseudonyme déjà utilisé, choisir un autre !"
@@ -31,8 +33,8 @@ private const val CHOOSING_USERNAME_TITLE: String = "Choisir son pseudonyme"
 private const val CONNECT_BUTTON_TITLE: String = "Connect"
 private const val USERNAME_INPUT_HINT: String = "Nom d'utilisateur"
 
-class ChatFragment() : Fragment() {
-    private lateinit var connexionDialog: AlertDialog
+@AndroidEntryPoint
+class ChatFragment @Inject constructor() : Fragment() {
     private var messages: ArrayList<IMessage> = ArrayList()
     private lateinit var username: String
 
@@ -66,44 +68,8 @@ class ChatFragment() : Fragment() {
             addMessage(message)
         }
 
-        val connexionDialogBuilder = activity?.let { AlertDialog.Builder(it) }
-        val input = EditText(activity)
-        input.hint = USERNAME_INPUT_HINT
-        connexionDialogBuilder
-            ?.setTitle(CHOOSING_USERNAME_TITLE)
-            ?.setView(input)
-            ?.setPositiveButton(CONNECT_BUTTON_TITLE, null)
-
-        if (connexionDialogBuilder != null) {
-            connexionDialog = connexionDialogBuilder.create()
-            connexionDialog.setCanceledOnTouchOutside(false)
-            connexionDialog.setCancelable(false)
-            connexionDialog.show()
-            connexionDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener {
-                    username = input.text.toString()
-                    chooseUsername(username);
-                    input.text.clear()
-                }
-        }
     }
 
-    private fun chooseUsername(username: String) {
-        if (!isUsernameValidFormat(username)) {
-            showErrorToast(USERNAME_FORMAT_ERROR)
-            return
-        }
-        socketService?.usernameConnexion(username)
-            ?.doOnError { error -> println(error) }
-            ?.subscribe { valid ->
-                if (valid) {
-                    connexionDialog.dismiss();
-                    (rvMessages.adapter as MessagesAdapter).setUsername(username)
-                } else {
-                    showErrorToast(USERNAME_UNICITY_ERROR)
-                }
-            }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,11 +160,5 @@ class ChatFragment() : Fragment() {
             activity?.unbindService(serviceConnection)
             isBound = false
         }
-    }
-
-    override fun onDestroy() {
-        if (this::connexionDialog.isInitialized)
-            connexionDialog.dismiss()
-        super.onDestroy()
     }
 }

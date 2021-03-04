@@ -18,7 +18,7 @@
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".ui.accountmanagement.view.AccountManagementActivity"
+            android:name=".ui.mainmenu.view.MainmenuActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
