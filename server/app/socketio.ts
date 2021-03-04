@@ -7,7 +7,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Lobby, LobbyInfo } from '../models/lobby';
+import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import * as jwtUtils from './utils/jwt-util';
@@ -80,12 +80,13 @@ export class SocketIo {
         callback(this.lobbyList.map((lobby) => {
           return lobby.toLobbyInfo();
         }));
-      }); // Put gametype in enum
+      });
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
         const lobbyToJoin = this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
         if (lobbyToJoin) {
-          lobbyToJoin.addPlayer(accountId, socket);
+          // player status is to be changed.
+          lobbyToJoin.addPlayer(accountId, PlayerStatus.GUESSER, socket);
           this.databaseService.getAccountById(accountId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
@@ -93,8 +94,9 @@ export class SocketIo {
       });
 
       socket.on('CreateLobby', (accountId: string) => {
-        const lobby: Lobby = new Lobby();
-        lobby.addPlayer(accountId, socket);
+        const lobby: Lobby = new Lobby(this.io);
+        // player status is to be changed.
+        lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
         this.lobbyList.push(lobby);
       });
 

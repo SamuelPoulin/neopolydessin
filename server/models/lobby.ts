@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
@@ -17,6 +17,12 @@ export enum GameType {
   SPRINT_COOP = 'sprintCoop'
 }
 
+export enum PlayerStatus {
+  DRAWER = 'active',
+  GUESSER = 'guesser',
+  PASSIVE = 'passive'
+}
+
 const DEFAULT_TEAM_SIZE = 4;
 
 const gameSizeMap = new Map<GameType, number>([
@@ -27,16 +33,25 @@ const gameSizeMap = new Map<GameType, number>([
 
 @injectable()
 export class Lobby {
-  lobbyId: string;
-  size: number;
-  players: { accountId: string; socket: Socket }[];
-  gameType: GameType;
 
+  lobbyId: string;
+
+  private size: number;
+
+  private players: {
+    accountId: string;
+    playerStatus: PlayerStatus;
+    socket: Socket;
+  }[];
+
+  private gameType: GameType;
+
+  private io: Server;
   private drawingCommands: DrawingCommands;
 
-  constructor() {
+  constructor(io: Server) {
+    this.io = io;
     this.drawingCommands = new DrawingCommands();
-    console.log(this.drawingCommands);
     this.lobbyId = uuidv4();
     this.players = [];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
@@ -50,86 +65,105 @@ export class Lobby {
     };
   }
 
-  addPlayer(accountId: string, socket: Socket) {
-    if (!this.players.includes({ accountId, socket })) {
-      this.players.push({ accountId, socket });
+  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
+    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
+      this.players.push({ accountId, playerStatus, socket });
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
     }
   }
 
   removePlayer(accountId: string, socket: Socket) {
-    const index = this.players.indexOf({ accountId, socket });
+    const index = this.players.findIndex((player) => player.accountId === accountId);
     if (index > -1) {
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
     }
   }
 
+  isActivePlayer(socket: Socket): boolean {
+    const playerInfo = this.players.find((player) => player.socket === socket);
+    if (playerInfo) {
+      return playerInfo.playerStatus === PlayerStatus.DRAWER;
+    } else {
+      return false;
+    }
+  }
+
   bindLobbyEndPoints(socket: Socket) {
+
+    // bind other lobby relevant endpoints here <----- StartGame and such
+
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord) => {
-      this.drawingCommands.startPath(startPoint)
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.START_PATH_BC, startPoint);
-        })
-        .catch(() => {
-          console.log(`failed to start path for ${this.lobbyId}`);
-        });
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.startPath(startPoint)
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint);
+          })
+          .catch(() => {
+            console.log(`failed to start path for ${this.lobbyId}`);
+          });
+      }
     });
 
     socket.on(SocketDrawing.UPDATE_PATH, (updatePoints: Coord[]) => {
-      this.drawingCommands.updatePath(updatePoints)
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UPDATE_PATH_BC, updatePoints);
-        })
-        .catch(() => {
-          console.log(`failed to update path for ${this.lobbyId}`);
-        });
-
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.updatePath(updatePoints)
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, updatePoints);
+          })
+          .catch(() => {
+            console.log(`failed to update path for ${this.lobbyId}`);
+          });
+      }
     });
 
     socket.on(SocketDrawing.END_PATH, (endPoint: Coord) => {
-      this.drawingCommands.endPath(endPoint)
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.END_PATH_BC, endPoint);
-        })
-        .catch(() => {
-          console.log(`failed to end path for ${this.lobbyId}`);
-        });
-
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.endPath(endPoint)
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.END_PATH_BC, endPoint);
+          })
+          .catch(() => {
+            console.log(`failed to end path for ${this.lobbyId}`);
+          });
+      }
     });
 
     socket.on(SocketDrawing.ERASE, () => {
-      this.drawingCommands.erase()
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.ERASE_BC);
-        })
-        .catch(() => {
-          console.log(`failed to erase for ${this.lobbyId}`);
-        });
-
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.erase()
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_BC);
+          })
+          .catch(() => {
+            console.log(`failed to erase for ${this.lobbyId}`);
+          });
+      }
     });
 
     socket.on(SocketDrawing.UNDO, () => {
-      this.drawingCommands.undo()
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.UNDO_BC);
-        })
-        .catch(() => {
-          console.log(`failed to undo for ${this.lobbyId}`);
-        });
-
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.undo()
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.UNDO_BC);
+          })
+          .catch(() => {
+            console.log(`failed to undo for ${this.lobbyId}`);
+          });
+      }
     });
 
     socket.on(SocketDrawing.REDO, () => {
-      this.drawingCommands.redo()
-        .then(() => {
-          socket.to(this.lobbyId).broadcast.emit(SocketDrawing.REDO_BC);
-        })
-        .catch(() => {
-          console.log(`failed to redo for ${this.lobbyId}`);
-        });
-
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.redo()
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.REDO_BC);
+          })
+          .catch(() => {
+            console.log(`failed to redo for ${this.lobbyId}`);
+          });
+      }
     });
 
   }
