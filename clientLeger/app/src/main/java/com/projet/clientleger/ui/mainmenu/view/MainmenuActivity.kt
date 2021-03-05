@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.util.DisplayMetrics
+import android.view.Menu
 import android.view.View
 import android.view.WindowManager
 import android.widget.ArrayAdapter
@@ -17,6 +18,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.commit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
@@ -57,14 +60,18 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
+        setSupportActionBar(binding.toolbar)
+
         startService(Intent(this, SocketService::class.java))
         val intent = Intent(this, SocketService::class.java)
         bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
-        chat = ChatFragment()
 
-        fragmentManager.beginTransaction()
-            .replace(R.id.chat_root, chat, "chat")
-            .commit()
+
+        chat = ChatFragment()
+        fragmentManager.commit {
+            replace(R.id.chat_root, chat, "chat")
+            addToBackStack(null)
+        }
     }
 
     override fun onBackPressed() {
@@ -72,16 +79,15 @@ class MainmenuActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    fun showGameDialog(isCreating: Boolean){
+    fun showGameDialog(isCreating: Boolean) {
         val visibility: Int
         val action: String
         val title: String
-        if(isCreating){
+        if (isCreating) {
             visibility = View.VISIBLE
             action = resources.getString(R.string.create)
             title = resources.getString(R.string.createGame)
-        }
-        else{
+        } else {
             visibility = View.GONE
             action = resources.getString(R.string.join)
             title = resources.getString(R.string.joinGame)
@@ -105,6 +111,7 @@ class MainmenuActivity : AppCompatActivity() {
         adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
         dialogView.findViewById<Spinner>(R.id.difficultySpinner).adapter = adapterDifficulty
     }
+
     override fun onStop() {
         super.onStop()
         if (isBound) {
@@ -113,7 +120,12 @@ class MainmenuActivity : AppCompatActivity() {
         }
     }
 
-    fun connectUser(){
+    fun connectUser() {
 
     }
+
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.friendslist_menu, menu)
+//        return true
+//    }
 }
