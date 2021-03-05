@@ -1,6 +1,7 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.api.ApiInterfaceBuilder
+import com.projet.clientleger.data.api.ApiMainmenuInterface
 import com.projet.clientleger.data.api.ApiRegisterInterface
 import dagger.Module
 import dagger.Provides
@@ -15,4 +16,8 @@ object ApiInterfacesModule {
     @Provides
     @Singleton
     fun providesApiRegisterInterface(apiInterfaceBuilder: ApiInterfaceBuilder): ApiRegisterInterface = apiInterfaceBuilder.buildInterface(ApiRegisterInterface::class.java)
+
+    @Provides
+    @Singleton
+    fun providesApiMainmenuInterface(apiInterfaceBuilder: ApiInterfaceBuilder): ApiMainmenuInterface = apiInterfaceBuilder.buildInterface(ApiMainmenuInterface::class.java)
 }

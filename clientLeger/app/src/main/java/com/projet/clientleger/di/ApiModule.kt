@@ -3,6 +3,7 @@ package com.projet.clientleger.di
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.projet.clientleger.BuildConfig
+import com.projet.clientleger.data.api.service.SocketService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,4 +42,8 @@ object ApiModule {
         .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
+
+    @Provides
+    @Singleton
+    fun provideSocketService(): SocketService = SocketService()
 }
