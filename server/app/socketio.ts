@@ -2,15 +2,14 @@ import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { FriendsList } from '../models/account';
-import { Lobby } from '../models/lobby';
+import { FriendsList } from '../models/schemas/account';
+import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
-import loginsModel from '../models/logins';
+import loginsModel from '../models/schemas/logins';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -63,9 +62,16 @@ export class SocketIo {
   onDisconnect(socket: Socket) {
     const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
     if (accountIdOfSocket) {
+      socket.rooms.forEach((room) => {
+        const lobby = this.findLobby(room);
+        if (lobby) {
+          lobby.removePlayer(accountIdOfSocket, socket);
+        }
+      });
       this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
         socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
         this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+        this.socketIdService.DisconnectSocketFromLobby(socket.id);
       });
       loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
     }
@@ -77,38 +83,36 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', () => {
-        this.io.to(socket.id).emit('SendLobbies', this.lobbyList);
-      }); // Put gametype in enum
-
-      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string, callback) => {
-        this.databaseService.getAccountById(accountId).then((account) => {
-          socket.join(lobbyId);
-          const playerLobby = this.lobbyList.find((e) => e.lobbyId === lobbyId);
-          if (playerLobby) {
-            playerLobby.players.push(accountId);
-          }
-          socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
-        });
+      socket.on('GetLobbies', (callback: (lobbies: LobbyInfo[]) => void) => {
+        callback(this.lobbyList.map((lobby) => {
+          return lobby.toLobbyInfo();
+        }));
       });
 
-      socket.on('CreateLobby', (accountId: string, type: string, sizeGame: number) => {
-        this.databaseService.getAccountById(accountId).then((account) => {
-          const generatedId = uuidv4();
-          const lobby: Lobby = { lobbyId: generatedId, players: [], size: sizeGame, gameType: type };
-          this.lobbyList.push(lobby);
-          const playerLobby = this.lobbyList.find((e) => e.lobbyId === generatedId);
-          if (playerLobby) {
-            playerLobby.players.push(account.documents.username);
-          }
-          socket.join(generatedId);
-        });
+      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
+        const lobbyToJoin = this.findLobby(lobbyId);
+        if (lobbyToJoin) {
+          // player status is to be changed.
+          lobbyToJoin.addPlayer(accountId, PlayerStatus.GUESSER, socket);
+          this.databaseService.getAccountById(accountId).then((account) => {
+            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
+          });
+        }
+      });
+
+      socket.on('CreateLobby', (accountId: string) => {
+        const lobby: Lobby = new Lobby(this.io);
+        // player status is to be changed.
+        lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
+        this.lobbyList.push(lobby);
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
         if (this.validateMessageLength(sentMsg)) {
-          const clientRooms = socket.rooms;
-          socket.to(clientRooms[Object.keys(clientRooms)[0]]).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
+          if(currentLobby){
+            socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+          }
         }
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
@@ -127,10 +131,25 @@ export class SocketIo {
         }
       });
 
+      socket.on(SocketMessages.START_GAME_SERVER, (callback) => {
+        const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
+        if (currentLobby) {
+          this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
+        }
+      });
+
+      socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
+        console.log(word);
+      });
+
       socket.on(SocketConnection.DISCONNECTION, () => {
         console.log(`Disconnected : ${socket.id} \n`);
         this.onDisconnect(socket);
       });
     });
+  }
+
+  private findLobby(lobbyId: string): Lobby | undefined {
+    return this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
   }
 }

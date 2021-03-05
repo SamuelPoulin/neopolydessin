@@ -8,7 +8,7 @@ import { Application } from '../app';
 import { DatabaseService } from '../services/database.service';
 import Types from '../types';
 import { DatabaseController } from './database.controller';
-import { Account } from '../../models/account';
+import { Account } from '../../models/schemas/account';
 import * as jwtVerify from '../middlewares/jwt-verify';
 import * as express from 'express';
 import { expect } from 'chai';
