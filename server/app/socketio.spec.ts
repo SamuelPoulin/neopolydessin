@@ -17,6 +17,16 @@ import { LobbyInfo } from '../models/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { Register } from '../../common/communication/register';
+
+export const accountInfo3: Register = {
+    firstName: 'a',
+    lastName: 'b',
+    username: 'c',
+    email: 'a@b.c',
+    password: 'abcabc',
+    passwordConfirm: 'abcabc',
+}
 
 describe('Socketio', () => {
 
@@ -27,6 +37,11 @@ describe('Socketio', () => {
     let client: Socket[] = [];
 
     const env = Object.assign({}, process.env);
+    const TEST_URL: string = `http://localhost:${TEST_PORT}`;
+    const MANAGER_OPTS = {
+        reconnectionDelayMax: 10000,
+        transports: ['websocket'],
+    }
 
     before(() => {
         process.env.JWT_KEY = 'this is a super secret secret!!!';
@@ -43,21 +58,10 @@ describe('Socketio', () => {
             server = instance[0].get<Server>(Types.Server);
             socketIo = instance[0].get<SocketIo>(Types.Socketio);
 
-            manager[0] = new Manager(`http://localhost:${TEST_PORT}`, {
-                reconnectionDelayMax: 10000,
-                transports: ['websocket'],
-                multiplex: false,
-            });
-
-            manager[1] = new Manager(`http://localhost:${TEST_PORT}`, {
-                reconnectionDelayMax: 10000,
-                transports: ['websocket'],
-            });
-
+            manager[0] = new Manager(TEST_URL, MANAGER_OPTS);
+            manager[1] = new Manager(TEST_URL, MANAGER_OPTS);
             server.init(TEST_PORT);
-
         });
-
         await databaseService.connectMS();
     });
 
@@ -177,4 +181,85 @@ describe('Socketio', () => {
 
             })
     })
+
+    it('multiple lobbies should work correctly', (done: Mocha.Done) => {
+        // server side endpoints
+        socketIo.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
+            socket.on(SocketConnection.DISCONNECTION, () => {
+                if (socketIo.io.sockets.sockets.size == 0) {
+                    setTimeout(() => { done(); }, 500);
+                }
+            })
+        });
+
+        // client side endpoints
+        let accountId: string;
+        let accountId2: string;
+        let accountId3: string;
+        databaseService
+            .createAccount(accountInfo)
+            .then((tokens: Response<LoginTokens>) => {
+                client[0] = manager[0].socket('/', {
+                    auth: {
+                        token: tokens.documents.accessToken,
+                    }
+                });
+                accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
+
+                client[0].on('connect', () => {
+                    client[0].emit('CreateLobby', accountId)
+                })
+
+                client[0].on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                    client[0].emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                client[0].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    client[0].close();
+                })
+
+                return databaseService.createAccount(otherAccountInfo)
+            })
+            .then((tokens: Response<LoginTokens>) => {
+                client[1] = manager[1].socket('/', {
+                    auth: {
+                        token: tokens.documents.accessToken,
+                    }
+                });
+                accountId2 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
+
+                client[1].on('connect', () => {
+                    client[1].emit('CreateLobby', accountId2)
+                    client[1].emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                client[1].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    client[1].close();
+                })
+
+                return databaseService.createAccount(accountInfo3);
+            })
+            .then((tokens: Response<LoginTokens>) => {
+                manager[2] = new Manager(TEST_URL, MANAGER_OPTS);
+                client[2] = manager[2].socket('/', {
+                    auth: {
+                        token: tokens.documents.accessToken,
+                    }
+                });
+                accountId3 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
+
+                client[2].on('connect', () => {
+                    client[2].emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                        client[2].emit(SocketConnection.PLAYER_CONNECTION, accountId3, lobbies[0].lobbyId);
+                    });
+                });
+
+                client[2].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    client[2].close();
+                })
+            });
+    });
 });
