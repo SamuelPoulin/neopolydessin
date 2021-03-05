@@ -14,6 +14,7 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun connectUser(){
         viewModelScope.launch {
             val res = mainmenuRepository.login()
+            println(res.accessToken)
             accessToken = res.accessToken
             refreshToken = res.refreshToken
             mainmenuRepository.connectSocket(accessToken)

@@ -1,6 +1,7 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.api.ApiMainmenuInterface
+import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.repository.MainmenuRepository
 import dagger.Module
 import dagger.Provides
@@ -14,5 +15,5 @@ object ViewModelMainmenuModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(apiMainmenuInterface: ApiMainmenuInterface) = MainmenuRepository(apiMainmenuInterface)
+    fun provideRepo(apiMainmenuInterface: ApiMainmenuInterface, socketService: SocketService) = MainmenuRepository(socketService, apiMainmenuInterface)
 }

@@ -17,42 +17,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 //"http://10.0.2.2:3205"
-//"http://p3-204-dev.duckdns.org/"
-const val SOCKET_ROUTE = "http://p3-204-dev.duckdns.org/"
 
 @Singleton
-class SocketService @Inject constructor(): Service() {
+class SocketService @Inject constructor() {
 
     lateinit var socket: Socket;
-    private val binder = LocalBinder()
 
-    inner class LocalBinder : Binder() {
-        fun getService(): SocketService {
-            return this@SocketService;
-        }
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return binder;
-    }
-
-    override fun onCreate() {
-        super.onCreate()
+    fun connect(accessToken: String) {
         try {
             val options: IO.Options = IO.Options()
+            options.auth = mapOf("token" to accessToken)
             options.transports = arrayOf("websocket")
             options.upgrade = false
-            socket = IO.socket(BuildConfig.SERVER_URL, options)
+            //BuildConfig.SERVER_URL
+            socket = IO.socket("http://10.0.2.2:3205", options)
         } catch (e: URISyntaxException) {
             null
         }
         socket.connect()
-    }
-
-    fun connect(accessToken: String){
-        val obj: JSONObject = JSONObject()
-        obj.put("accessToken", accessToken)
-        socket.emit("connection", obj)
     }
 
     fun receiveMessage(): Observable<MessageChat> {
@@ -76,7 +58,7 @@ class SocketService @Inject constructor(): Service() {
         return receiveFromSocket("PlayerConnected") { received ->
             val user: String = try {
                 received[0].toString()
-            }catch(e: Exception){
+            } catch (e: Exception) {
                 "utilisteur inconnu"
             }
             Message(user, System.currentTimeMillis())
@@ -87,7 +69,7 @@ class SocketService @Inject constructor(): Service() {
         return receiveFromSocket("PlayerDisconnected") { received ->
             val user: String = try {
                 received[0].toString()
-            }catch(e: Exception){
+            } catch (e: Exception) {
                 "utilisteur inconnu"
             }
             Message(user, System.currentTimeMillis())
@@ -118,10 +100,5 @@ class SocketService @Inject constructor(): Service() {
 
         }
 
-    }
-
-    override fun onDestroy() {
-        socket.disconnect()
-        super.onDestroy()
     }
 }

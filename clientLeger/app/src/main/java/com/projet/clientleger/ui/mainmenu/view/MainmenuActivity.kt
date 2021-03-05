@@ -13,6 +13,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -21,6 +22,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import javax.inject.Inject
@@ -28,27 +30,14 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
+
     val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
 
+    val vm: MainMenuViewModel by viewModels()
 
     @Inject
     lateinit var chat: ChatFragment
-
-    var socketService: SocketService? = null
-    var isBound = false
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as SocketService.LocalBinder
-            socketService = binder.getService()
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +46,9 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
-        startService(Intent(this, SocketService::class.java))
-        val intent = Intent(this, SocketService::class.java)
-        bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
-        chat = ChatFragment()
+        vm.connectUser()
 
+        chat = ChatFragment()
         fragmentManager.beginTransaction()
             .replace(R.id.chat_root, chat, "chat")
             .commit()
@@ -104,16 +91,5 @@ class MainmenuActivity : AppCompatActivity() {
         val adapterDifficulty = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
         adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
         dialogView.findViewById<Spinner>(R.id.difficultySpinner).adapter = adapterDifficulty
-    }
-    override fun onStop() {
-        super.onStop()
-        if (isBound) {
-            unbindService(serviceConnection)
-            isBound = false
-        }
-    }
-
-    fun connectUser(){
-
     }
 }

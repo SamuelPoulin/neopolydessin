@@ -38,21 +38,8 @@ class ChatFragment @Inject constructor() : Fragment() {
     private var messages: ArrayList<IMessage> = ArrayList()
     private lateinit var username: String
 
-    var socketService: SocketService? = null
-    var isBound = false
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as SocketService.LocalBinder
-            socketService = binder.getService()
-            isBound = true
-            setSubscriptions()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
-        }
-    }
+    @Inject
+    lateinit var socketService: SocketService
 
     fun setSubscriptions() {
         socketService?.receiveMessage()
@@ -73,8 +60,6 @@ class ChatFragment @Inject constructor() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intent = Intent(activity, SocketService::class.java)
-        activity?.bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
         username = arguments?.getString("username") ?: "unknowned_user"
     }
 
@@ -151,14 +136,6 @@ class ChatFragment @Inject constructor() : Fragment() {
                 ),
                 Toast.LENGTH_SHORT
             ).show()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (isBound) {
-            activity?.unbindService(serviceConnection)
-            isBound = false
         }
     }
 }
