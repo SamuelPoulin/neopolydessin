@@ -62,6 +62,12 @@ export class SocketIo {
   onDisconnect(socket: Socket) {
     const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
     if (accountIdOfSocket) {
+      socket.rooms.forEach((room) => {
+        const lobby = this.findLobby(room);
+        if (lobby) {
+          lobby.removePlayer(accountIdOfSocket, socket);
+        }
+      });
       this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
         socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
         this.socketIdService.DisconnectAccountIdSocketId(socket.id);
@@ -83,7 +89,7 @@ export class SocketIo {
       });
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
-        const lobbyToJoin = this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
+        const lobbyToJoin = this.findLobby(lobbyId);
         if (lobbyToJoin) {
           // player status is to be changed.
           lobbyToJoin.addPlayer(accountId, PlayerStatus.GUESSER, socket);
@@ -127,5 +133,9 @@ export class SocketIo {
         this.onDisconnect(socket);
       });
     });
+  }
+
+  private findLobby(lobbyId: string): Lobby | undefined {
+    return this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
   }
 }
