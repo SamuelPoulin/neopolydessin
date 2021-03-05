@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
-import { Coord } from './commands/Path';
+import { Coord } from './commands/path';
 
 export interface LobbyInfo {
   lobbyId: string;
