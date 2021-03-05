@@ -8,7 +8,7 @@ import Types from '../types';
 import { Register } from '../../../common/communication/register';
 import { login } from '../../../common/communication/login';
 import * as jwt from 'jsonwebtoken';
-import { Account } from '../../models/account';
+import { Account } from '../../models/schemas/account';
 
 export const accountInfo: Register = {
   firstName: 'name',
