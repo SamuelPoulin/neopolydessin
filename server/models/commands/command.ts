@@ -1,6 +1,1 @@
-export abstract class Command {
-
-  abstract do(): void;
-  abstract undo(): void;
-
-}
+export abstract class Command { }

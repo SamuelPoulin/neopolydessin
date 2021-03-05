@@ -8,8 +8,14 @@ export enum SocketDrawing {
     END_PATH = 'endPath',
     END_PATH_BC = 'endPathBroadcast',
 
-    ERASE = 'erase',
-    ERASE_BC = 'eraseBroadcast',
+    START_ERASE = 'startErase',
+    START_ERASE_BC = 'startEraseBroadcast',
+
+    UPDATE_ERASE = 'updateErase',
+    UPDATE_ERASE_BC = 'updateEraseBroadcast',
+
+    END_ERASE = 'endErase',
+    END_ERASE_BC = 'endEraseBroadcast',
 
     UNDO = 'undo',
     UNDO_BC = 'undoBroadcast',

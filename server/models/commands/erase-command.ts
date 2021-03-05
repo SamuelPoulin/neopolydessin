@@ -1,12 +1,12 @@
 import { Command } from './command';
 import { Path } from './Path';
-export class DrawCommand extends Command {
+export class EraseCommand extends Command {
 
-  path: Path;
+  eraserPath: Path;
 
   constructor(path: Path) {
     super();
-    this.path = path;
+    this.eraserPath = path;
   }
 
 }

@@ -3,6 +3,7 @@ import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
+import { BrushInfo } from '../../common/communication/brush-info';
 import { Coord } from './commands/Path';
 
 export interface LobbyInfo {
@@ -94,9 +95,9 @@ export class Lobby {
 
     // bind other lobby relevant endpoints here <----- StartGame and such
 
-    socket.on(SocketDrawing.START_PATH, (startPoint: Coord) => {
+    socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.startPath(startPoint)
+        this.drawingCommands.startPath(startPoint, brushInfo)
           .then(() => {
             this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint);
           })
@@ -130,11 +131,35 @@ export class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.ERASE, () => {
+    socket.on(SocketDrawing.START_ERASE, (startPoint: Coord) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.erase()
+        this.drawingCommands.startErase(startPoint)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_BC);
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_ERASE_BC, startPoint);
+          })
+          .catch(() => {
+            console.log(`failed to erase for ${this.lobbyId}`);
+          });
+      }
+    });
+
+    socket.on(SocketDrawing.UPDATE_ERASE, (coords: Coord[]) => {
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.updateErase(coords)
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_ERASE_BC, coords);
+          })
+          .catch(() => {
+            console.log(`failed to erase for ${this.lobbyId}`);
+          });
+      }
+    });
+
+    socket.on(SocketDrawing.END_ERASE, (endPoint: Coord) => {
+      if (this.isActivePlayer(socket)) {
+        this.drawingCommands.endErase(endPoint)
+          .then(() => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.END_ERASE_BC, endPoint);
           })
           .catch(() => {
             console.log(`failed to erase for ${this.lobbyId}`);
@@ -172,7 +197,9 @@ export class Lobby {
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
-    socket.removeAllListeners(SocketDrawing.ERASE);
+    socket.removeAllListeners(SocketDrawing.START_ERASE);
+    socket.removeAllListeners(SocketDrawing.UPDATE_ERASE);
+    socket.removeAllListeners(SocketDrawing.END_ERASE);
     socket.removeAllListeners(SocketDrawing.UNDO);
     socket.removeAllListeners(SocketDrawing.REDO);
   }

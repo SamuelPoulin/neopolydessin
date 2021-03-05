@@ -1,7 +1,9 @@
 import { injectable } from 'inversify';
 import { Command } from '../../models/commands/command';
+import { DrawCommand } from '../../models/commands/draw-command';
+import { EraseCommand } from '../../models/commands/erase-command';
 import { Coord, Path } from '../../models/commands/Path';
-
+import { BrushInfo } from '../../../common/communication/brush-info';
 @injectable()
 export class DrawingCommands {
 
@@ -11,7 +13,7 @@ export class DrawingCommands {
 
   undoneCommands: Command[];
 
-  async startPath(startPoint: Coord): Promise<void> {
+  async startPath(startPoint: Coord, brush: BrushInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (!this.currentPath) {
         this.currentPath = new Path(startPoint);
@@ -37,29 +39,58 @@ export class DrawingCommands {
     return new Promise<void>((resolve, reject) => {
       if (this.currentPath) {
         this.currentPath.addCoord(endPoint);
+        this.do(new DrawCommand(this.currentPath));
+        this.currentPath = undefined;
         resolve();
+      } else {
+        reject();
       }
-      reject();
     });
   }
 
-  async erase(): Promise<void> {
+  async startErase(startPoint: Coord): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      console.error('Erase not implemented');
-      reject();
+      if (!this.currentPath) {
+        this.currentPath = new Path(startPoint);
+        resolve();
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async updateErase(updatePoints: Coord[]): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.currentPath) {
+        this.currentPath.addCoords(updatePoints);
+        resolve();
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async endErase(endPoint: Coord): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.currentPath) {
+        this.currentPath.addCoord(endPoint);
+        this.do(new EraseCommand(this.currentPath));
+        this.currentPath = undefined;
+        resolve();
+      } else {
+        reject();
+      }
     });
   }
 
   do(todo: Command): void {
     this.doneCommands.push(todo);
-    todo.do();
   }
 
   async undo(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const commandToUndo = this.doneCommands.pop();
       if (commandToUndo) {
-        commandToUndo.undo();
         this.undoneCommands.push(commandToUndo);
         resolve();
       }
@@ -73,7 +104,6 @@ export class DrawingCommands {
     return new Promise<void>((resolve, reject) => {
       const commandToRedo = this.undoneCommands.pop();
       if (commandToRedo) {
-        commandToRedo.do();
         this.doneCommands.push(commandToRedo);
         resolve();
       } else {
