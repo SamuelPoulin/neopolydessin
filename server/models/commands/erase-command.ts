@@ -1,5 +1,5 @@
 import { Command } from './command';
-import { Path } from './Path';
+import { Path } from './path';
 export class EraseCommand extends Command {
 
   eraserPath: Path;

@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { Command } from '../../models/commands/command';
 import { DrawCommand } from '../../models/commands/draw-command';
 import { EraseCommand } from '../../models/commands/erase-command';
-import { Coord, Path } from '../../models/commands/Path';
+import { Coord, Path } from '../../models/commands/path';
 import { BrushInfo } from '../../../common/communication/brush-info';
 @injectable()
 export class DrawingCommands {
