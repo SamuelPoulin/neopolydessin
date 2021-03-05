@@ -5,7 +5,7 @@ import { EraseCommand } from '../../models/commands/erase-command';
 import { Coord, Path } from '../../models/commands/path';
 import { BrushInfo } from '../../../common/communication/brush-info';
 @injectable()
-export class DrawingCommands {
+export class DrawingCommandsService {
 
   currentPath: Path | undefined;
 
@@ -21,7 +21,7 @@ export class DrawingCommands {
   async startPath(startPoint: Coord, brush: BrushInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (!this.currentPath) {
-        this.currentPath = new Path(startPoint);
+        this.currentPath = new Path(startPoint, brush);
         resolve();
       } else {
         reject();
