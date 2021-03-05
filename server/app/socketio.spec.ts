@@ -15,7 +15,7 @@ import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
 import { LobbyInfo } from '../models/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
-import { Coord } from '../models/commands/Path';
+import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 
 describe('Socketio', () => {
