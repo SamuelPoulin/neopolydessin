@@ -36,13 +36,13 @@ export class FriendsController {
       });
 
     this.router.post('/',
-      [body('email').isEmail(),],
+      [body('username').isString(),],
       validationCheck,
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const friendRequest: FriendRequest = req.body;
-        this.friendsService.requestFriendship(req.params._id, friendRequest.email).then((result: Response<FriendsList>) => {
+        this.friendsService.requestFriendship(req.params._id, friendRequest.username).then((result: Response<FriendsList>) => {
           res.status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);

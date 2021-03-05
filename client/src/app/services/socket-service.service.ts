@@ -23,7 +23,11 @@ export class SocketService {
       transports: ['websocket'],
     });
 
-    this.socket = this.manager.socket('/');
+    this.socket = this.manager.socket('/', {
+      auth: {
+        token: 'some token', // access token here.
+      },
+    });
   }
 
   receiveMessage(): Observable<ChatMessage> {
