@@ -18,7 +18,7 @@ import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/Path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 
-describe.only('Socketio', () => {
+describe('Socketio', () => {
 
     let databaseService: DatabaseService;
     let server: Server;

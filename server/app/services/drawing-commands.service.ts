@@ -13,6 +13,11 @@ export class DrawingCommands {
 
   undoneCommands: Command[];
 
+  constructor() {
+    this.doneCommands = [];
+    this.undoneCommands = [];
+  }
+
   async startPath(startPoint: Coord, brush: BrushInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (!this.currentPath) {

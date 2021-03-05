@@ -138,7 +138,7 @@ export class Lobby {
             this.io.in(this.lobbyId).emit(SocketDrawing.START_ERASE_BC, startPoint);
           })
           .catch(() => {
-            console.log(`failed to erase for ${this.lobbyId}`);
+            console.log(`failed to start erase for ${this.lobbyId}`);
           });
       }
     });
@@ -150,7 +150,7 @@ export class Lobby {
             this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_ERASE_BC, coords);
           })
           .catch(() => {
-            console.log(`failed to erase for ${this.lobbyId}`);
+            console.log(`failed to update erase for ${this.lobbyId}`);
           });
       }
     });
@@ -162,7 +162,7 @@ export class Lobby {
             this.io.in(this.lobbyId).emit(SocketDrawing.END_ERASE_BC, endPoint);
           })
           .catch(() => {
-            console.log(`failed to erase for ${this.lobbyId}`);
+            console.log(`failed to end erase for ${this.lobbyId}`);
           });
       }
     });
