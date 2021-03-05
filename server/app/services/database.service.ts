@@ -6,9 +6,9 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
-import accountModel, { Account } from '../../models/account';
-import loginsModel, { Logins } from '../../models/logins';
-import refreshModel, { Refresh } from '../../models/refresh';
+import accountModel, { Account } from '../../models/schemas/account';
+import loginsModel, { Logins } from '../../models/schemas/logins';
+import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
 
 export interface Response<T> {

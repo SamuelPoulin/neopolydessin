@@ -7,22 +7,22 @@ import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
-import { Account, FriendsList, FriendStatus } from '../../models/account';
+import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';
 import { AccessToken } from '../utils/jwt-util';
 
-describe('Friends Service', () => {
+export const otherAccountInfo: Register = {
+    firstName: 'name',
+    lastName: 'lname',
+    username: 'username1',
+    email: 'email1@email.email',
+    password: 'monkey123',
+    passwordConfirm: 'monkey123'
+}
 
-    const otherAccountInfo: Register = {
-        firstName: 'name',
-        lastName: 'lname',
-        username: 'username1',
-        email: 'email1@email.email',
-        password: 'monkey123',
-        passwordConfirm: 'monkey123'
-    }
+describe('Friends Service', () => {
 
     let databaseService: DatabaseService;
     let friendsService: FriendsService;
