@@ -10,6 +10,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ConnexionViewModel @Inject constructor(private val connectionRepository: ConnectionRepository):ViewModel() {
 
+    fun connectSocket(accessToken: String){
+        connectionRepository.connectSocket(accessToken)
+    }
     suspend fun connectAccount(username:String, password:String):RegisterResponse{
         val model = ConnectionModel(
                 username,

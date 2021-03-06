@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
@@ -11,8 +12,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.RegisterDataResponse
 import com.projet.clientleger.data.repository.ConnectionRepository
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
 import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,22 +50,23 @@ class ConnexionActivity : AppCompatActivity() {
         println(connectionUsername.text)
         println(connectionPassword.text)
 
+        connectBtn.isEnabled = false
         lifecycleScope.launch {
             val res = vm.connectAccount(connectionUsername.text.toString(),connectionPassword.text.toString())
             if (res.isSucessful) {
                 connectionUsername.text.clear()
                 connectionPassword.text.clear()
                 setUserTokens(res.accessToken, res.refreshToken)
+                vm.connectSocket(res.accessToken)
+                goToMainMenu()
             } else {
-                //showToast(res.message)
-                println("NE FONCTIONNE PAS")
+                showToast(res.message)
             }
         }
-
-        //send infos to server
-        //await answer
-        //if infos good, connect
-        //else flag error message
+        connectBtn.isEnabled = true
+    }
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
     private fun setUserTokens(accessToken: String, refreshToken: String) {
         getSharedPreferences(
@@ -75,12 +79,14 @@ class ConnexionActivity : AppCompatActivity() {
         }
     }
     private fun forgottenPasswordBtn(){
-        println("mot de passe oublié appuyé")
-
+        //TODO: bouton de récupération de mot de passe non-implémenté
     }
     private fun createAccountBtn(){
-        println("créer un compte appuyé")
         val intent = Intent(this, RegisterActivity::class.java)
+        startActivity(intent)
+    }
+    private fun goToMainMenu(){
+        val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }
 }

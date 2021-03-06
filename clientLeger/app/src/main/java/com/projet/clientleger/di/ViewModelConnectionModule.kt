@@ -1,6 +1,7 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.api.ApiConnectionInterface
+import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.repository.ConnectionRepository
 import dagger.Module
 import dagger.Provides
@@ -15,5 +16,5 @@ object ViewModelConnectionModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(apiConnectionInterface)
+    fun provideRepo(socketService: SocketService,apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(socketService,apiConnectionInterface)
 }
