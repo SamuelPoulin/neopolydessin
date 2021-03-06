@@ -1,24 +1,16 @@
 import * as express from 'express';
 import * as httpStatus from 'http-status-codes';
-import * as jwt from 'jsonwebtoken';
-
-export interface AccessToken {
-  _id: string;
-  iat: number;
-  exp: number;
-}
+import * as jwtUtils from '../utils/jwt-util';
 
 export const jwtVerify = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   try {
     const jwtToken = req.headers.authorization;
-    if (jwtToken && process.env.JWT_KEY) {
-      const decodedJwt: AccessToken = jwt.verify(jwtToken, process.env.JWT_KEY) as AccessToken;
-      req.params._id = decodedJwt._id;
+    if (jwtToken) {
+      req.params._id = jwtUtils.decodeAccessToken(jwtToken);
       next();
     } else {
-      throw new Error('No secret key found');
+      throw new Error();
     }
-
   } catch (error) {
     res.status(httpStatus.FORBIDDEN).json({ error: 'invalid access token' });
   }

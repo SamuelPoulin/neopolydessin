@@ -10,7 +10,7 @@ import { DatabaseService, Response } from '../services/database.service';
 import { FriendsController } from './friends.controller';
 import { FriendsService } from '../services/friends.service';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
-import { FriendsList, FriendStatus } from '../../models/account';
+import { FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Application } from '../app';
 import { expect } from 'chai';
 import * as express from 'express';
@@ -28,7 +28,7 @@ describe('friends controller', () => {
         documents: {
             friends: [
                 {
-                    friendId: '1',
+                    friendId: '123456789012345678901234',
                     username: 'itsYaBoi',
                     status: FriendStatus.FRIEND,
                     received: true
@@ -102,7 +102,7 @@ describe('friends controller', () => {
             .post('/api/database/friends')
             .set('content-type', 'application/json')
             .send({
-                email: 'email@email.email'
+                username: 'username'
             })
             .end((err, res) => {
                 expect(err).to.be.null;
@@ -121,7 +121,7 @@ describe('friends controller', () => {
             .post('/api/database/friends')
             .set('content-type', 'application/json')
             .send({
-                email: 'email@email.email'
+                username: 'username'
             })
             .end((err, res) => {
                 expect(err).to.be.null;
@@ -132,14 +132,14 @@ describe('friends controller', () => {
             });
     });
 
-    it('should return BAD_REQUEST if email is not supplied when POST on api/database/friends', (done: Mocha.Done) => {
+    it('should return BAD_REQUEST if username is not supplied when POST on api/database/friends', (done: Mocha.Done) => {
         const stub = sinon.stub(FriendsService.prototype, 'requestFriendship').resolves(friendList);
         chai
             .request(application.app)
             .post('/api/database/friends')
             .set('content-type', 'application/json')
             .send({
-                email: 'emailemail.email'
+
             })
             .end((err, res) => {
                 expect(err).to.be.null;

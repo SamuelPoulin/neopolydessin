@@ -7,9 +7,12 @@ import com.projet.clientleger.data.repository.RegisterRepository
 import javax.inject.Inject
 
 class FakeRegisterRepository @Inject constructor(apiRegisterInterface: ApiRegisterInterface) : RegisterRepository(
-    apiRegisterInterface
+        apiRegisterInterface
 ) {
-    override suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse{
-        return RegisterResponse(true, "", "", "")
+    override suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse {
+        return if (registerModel.username == "invalid") {
+            RegisterResponse(false, "", "", "")
+        } else
+            RegisterResponse(true, "", "access", "refresh")
     }
 }

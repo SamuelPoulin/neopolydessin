@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId "com.projet.clientleger"
-        minSdkVersion 26
+        minSdkVersion 28
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -52,6 +52,9 @@ android {
     testOptions{
         unitTests{
             includeAndroidResources = true
+        }
+        hilt{
+            enableTransformForLocalTests = true
         }
     }
 }
@@ -96,6 +99,7 @@ dependencies {
     testImplementation  'org.mockito:mockito-core:2.19.0'
     testImplementation 'org.robolectric:robolectric:4.4'
     testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation 'androidx.test.ext:junit-ktx:1.1.2'
 
     //hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
@@ -111,4 +115,6 @@ dependencies {
     testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
     testAnnotationProcessor "com.google.dagger:hilt-android-compiler:$hilt_version"
 
+    // Robolectric
+    testImplementation 'org.robolectric:robolectric:4.4'
 }
