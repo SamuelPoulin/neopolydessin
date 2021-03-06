@@ -10,7 +10,7 @@ import { DatabaseService, Response } from '../services/database.service';
 import { FriendsController } from './friends.controller';
 import { FriendsService } from '../services/friends.service';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
-import { FriendsList, FriendStatus } from '../../models/account';
+import { FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Application } from '../app';
 import { expect } from 'chai';
 import * as express from 'express';

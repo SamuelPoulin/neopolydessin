@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { ObjectId } from 'mongodb';
-import accountModel, { Account, FriendsList, UpdateOneQueryResult } from '../../models/account';
+import accountModel, { Account, FriendsList, UpdateOneQueryResult } from '../../models/schemas/account';
 import Types from '../types';
 import { SocketIo } from '../socketio';
 import { SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';

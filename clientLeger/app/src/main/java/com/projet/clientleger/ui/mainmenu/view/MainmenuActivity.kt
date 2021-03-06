@@ -14,6 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -24,6 +25,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import javax.inject.Inject
@@ -31,27 +33,14 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
+
     val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
 
+    val vm: MainMenuViewModel by viewModels()
 
     @Inject
     lateinit var chat: ChatFragment
-
-    var socketService: SocketService? = null
-    var isBound = false
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as SocketService.LocalBinder
-            socketService = binder.getService()
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,18 +49,12 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
-        setSupportActionBar(binding.toolbar)
-
-        startService(Intent(this, SocketService::class.java))
-        val intent = Intent(this, SocketService::class.java)
-        bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
-
+        vm.connectUser()
 
         chat = ChatFragment()
-        fragmentManager.commit {
-            replace(R.id.chat_root, chat, "chat")
-            addToBackStack(null)
-        }
+        fragmentManager.beginTransaction()
+            .replace(R.id.chat_root, chat, "chat")
+            .commit()
     }
 
     override fun onBackPressed() {
@@ -111,21 +94,4 @@ class MainmenuActivity : AppCompatActivity() {
         adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
         dialogView.findViewById<Spinner>(R.id.difficultySpinner).adapter = adapterDifficulty
     }
-
-    override fun onStop() {
-        super.onStop()
-        if (isBound) {
-            unbindService(serviceConnection)
-            isBound = false
-        }
-    }
-
-    fun connectUser() {
-
-    }
-
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.friendslist_menu, menu)
-//        return true
-//    }
 }
