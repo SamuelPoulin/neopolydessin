@@ -7,9 +7,12 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
+import { GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
+import { LobbySolo } from '../models/lobby-solo';
+import { LobbyClassique } from '../models/lobby-classique';
+import { LobbyCoop } from '../models/lobby-coop';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -83,7 +86,7 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', (callback: (lobbies: LobbyInfo[]) => void) => {
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
         callback(this.lobbyList.map((lobby) => {
           return lobby.toLobbyInfo();
         }));
@@ -100,23 +103,25 @@ export class SocketIo {
         }
       });
 
-      socket.on('CreateLobby', (accountId: string) => {
-        const lobby: Lobby = new Lobby(this.io);
+      socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, gametype: GameType) => {
+        let lobby;
+        switch(gametype) {
+          case GameType.CLASSIC: {
+            lobby = new LobbyClassique(this.io);
+            break;
+          }
+          case GameType.SPRINT_SOLO: {
+            lobby = new LobbySolo(this.io);
+            break;
+          }
+          case GameType.SPRINT_COOP: {
+            lobby = new LobbyCoop(this.io);
+            break;
+          }
+        }
         // player status is to be changed.
         lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
         this.lobbyList.push(lobby);
-      });
-
-      socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        if (this.validateMessageLength(sentMsg)) {
-          const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-          if(currentLobby){
-            socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
-          }
-        }
-        else {
-          console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-        }
       });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
@@ -136,10 +141,6 @@ export class SocketIo {
         if (currentLobby) {
           this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
         }
-      });
-
-      socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
-        console.log(word);
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
