@@ -10,6 +10,7 @@ import { FriendsList } from '../models/schemas/account';
 import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
+import messagesHistoryModel from '../models/schemas/messages-history';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -110,7 +111,7 @@ export class SocketIo {
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
         if (this.validateMessageLength(sentMsg)) {
           const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-          if(currentLobby){
+          if (currentLobby) {
             socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
           }
         }
@@ -123,7 +124,12 @@ export class SocketIo {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
-            socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
+            messagesHistoryModel.addMessageToHistory(sentMsg).then((result) => {
+              if (result.nModified === 0) throw new Error('couldn\'t update history');
+              socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
+            }).catch((err) => {
+              console.log(err);
+            });
           }
         }
         else {

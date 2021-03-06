@@ -5,6 +5,7 @@ import accountModel, { Account, FriendsList, UpdateOneQueryResult } from '../../
 import Types from '../types';
 import { SocketIo } from '../socketio';
 import { SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
+import messagesHistoryModel, { MessageHistory } from '../../models/schemas/messages-history';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
 @injectable()
@@ -13,6 +14,21 @@ export class FriendsService {
   constructor(
     @inject(Types.Socketio) private socketIo: SocketIo,
   ) { }
+
+  async getMessageHistory(id: string, otherId: string, page: number, limit: number): Promise<Response<MessageHistory>> {
+    return new Promise<Response<MessageHistory>>((resolve, reject) => {
+      messagesHistoryModel
+        .findHistory(id, otherId, page, limit)
+        .then((messages: MessageHistory | null) => {
+          if (!messages) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: messages });
+        })
+        .catch((err) => {
+          console.log(err.message);
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
 
   async getFriendsOfUser(id: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
