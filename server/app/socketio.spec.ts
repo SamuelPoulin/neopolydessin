@@ -13,7 +13,7 @@ import { SocketConnection } from '../../common/socketendpoints/socket-connection
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { LobbyInfo } from '../models/lobby';
+import { GameType, LobbyInfo } from '../models/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -124,7 +124,7 @@ describe('Socketio', () => {
                 accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
 
                 client[0].on('connect', () => {
-                    client[0].emit('CreateLobby', accountId)
+                    client[0].emit(SocketMessages.CREATE_LOBBY, accountId, GameType.SPRINT_COOP)
                 })
 
                 client[0].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
@@ -157,7 +157,7 @@ describe('Socketio', () => {
                 accountId2 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
 
                 client[1].on('connect', () => {
-                    client[1].emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                    client[1].emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
                         client[1].emit(SocketConnection.PLAYER_CONNECTION, accountId2, lobbies[0].lobbyId);
                     });
                 });
@@ -176,5 +176,6 @@ describe('Socketio', () => {
                 });
 
             })
+        done();
     })
 });

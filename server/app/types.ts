@@ -11,4 +11,5 @@ export default {
   FriendsService: Symbol('FriendsService'),
   LoggedIn: Symbol('LoggedIn'),
   SocketIdService: Symbol('SocketIdService'),
+  DrawingCommands: Symbol('DrawingCommands'),
 };

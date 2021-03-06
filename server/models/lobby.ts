@@ -67,7 +67,7 @@ export abstract class Lobby {
     this.drawingCommands = new DrawingCommands();
     this.lobbyId = uuidv4();
     this.players = [];
-    this.teams = [{teamNumber: 1, currentScore: 0, playersInTeam: []}];
+    this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
   }
 
@@ -81,7 +81,7 @@ export abstract class Lobby {
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
     if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
-      this.players.push({ accountId, playerStatus, socket , teamNumber: 1});
+      this.players.push({ accountId, playerStatus, socket , teamNumber: 0});
       this.teams[0].playersInTeam.push({ accountId, playerStatus, socket , teamNumber: 0});
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
@@ -91,11 +91,11 @@ export abstract class Lobby {
   removePlayer(accountId: string, socket: Socket) {
     const index = this.players.findIndex((player) => player.accountId === accountId);
     if (index > -1) {
-      this.players.splice(index, 1);
       const teamIndex = this.teams[this.players[index].teamNumber].playersInTeam.findIndex(((player) => player.accountId === accountId));
       if (teamIndex > -1) {
         this.teams[this.players[index].teamNumber].playersInTeam.splice(teamIndex, 1);
       }
+      this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
     }
   }
