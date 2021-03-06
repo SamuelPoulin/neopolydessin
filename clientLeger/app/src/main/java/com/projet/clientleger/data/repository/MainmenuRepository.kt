@@ -10,7 +10,7 @@ import javax.inject.Inject
 class MainmenuRepository @Inject constructor(private val socketService: SocketService, private val apiMainmenuInterface: ApiMainmenuInterface) {
 
     suspend fun login(): RegisterDataResponse{
-        return apiMainmenuInterface.login(ConnectionModel("s", "ssssss")).body()!!
+        return apiMainmenuInterface.login(ConnectionModel("guiboy", "testtest1")).body()!!
     }
 
     fun connectSocket(accessToken: String){

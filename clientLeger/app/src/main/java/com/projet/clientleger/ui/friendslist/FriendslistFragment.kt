@@ -20,24 +20,44 @@ class FriendslistFragment @Inject constructor(): Fragment() {
     val vm: FriendslistViewModel by viewModels()
 
     private var friends: ArrayList<Friend> = ArrayList()
-    private lateinit var binding: FriendslistFragmentBinding
+    private var binding: FriendslistFragmentBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.friendslist_fragment, container, false)
+    ): View {
+        binding = FriendslistFragmentBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
+        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
 
-        binding = FriendslistFragmentBinding.bind(view)
-        binding.rvFriends.layoutManager = LinearLayoutManager(activity)
-        binding.rvFriends.adapter = FriendsAdapter(friends)
+        binding?.rvFriends?.layoutManager = LinearLayoutManager(activity)
+        binding?.rvFriends?.adapter = FriendsAdapter(friends)
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
 }

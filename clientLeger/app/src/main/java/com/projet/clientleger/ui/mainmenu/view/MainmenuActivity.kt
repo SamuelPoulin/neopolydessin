@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.ArrayAdapter
@@ -25,6 +26,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -39,8 +41,9 @@ class MainmenuActivity : AppCompatActivity() {
 
     val vm: MainMenuViewModel by viewModels()
 
-    @Inject
     lateinit var chat: ChatFragment
+
+    lateinit var friendslist: FriendslistFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,18 +51,27 @@ class MainmenuActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.activity = this
-
         vm.connectUser()
 
-        chat = ChatFragment()
-        fragmentManager.beginTransaction()
-            .replace(R.id.chat_root, chat, "chat")
-            .commit()
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when(item.itemId){
+                R.id.friendslistBtn -> toggleFriendslist()
+            }
+            true
+        }
     }
 
     override fun onBackPressed() {
-        stopService(Intent(this, SocketService::class.java))
         super.onBackPressed()
+    }
+
+    fun toggleFriendslist(){
+        binding.friendslistContainer.visibility =
+        when(binding.friendslistContainer.visibility){
+            View.VISIBLE -> View.GONE
+            View.GONE -> View.VISIBLE
+            else -> View.GONE
+        }
     }
 
     fun showGameDialog(isCreating: Boolean) {

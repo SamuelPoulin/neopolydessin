@@ -26,11 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".data.api.service.SocketService"
-            android:enabled="true"
-            android:exported="false" />
     </application>
 
 </manifest>

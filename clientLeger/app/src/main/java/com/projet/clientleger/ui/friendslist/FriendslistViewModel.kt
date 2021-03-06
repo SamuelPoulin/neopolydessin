@@ -9,5 +9,4 @@ import javax.inject.Inject
 @HiltViewModel
 class FriendslistViewModel @Inject constructor() : ViewModel() {
     val friendsLiveData: MutableLiveData<ArrayList<Friend>> = MutableLiveData()
-
 }
