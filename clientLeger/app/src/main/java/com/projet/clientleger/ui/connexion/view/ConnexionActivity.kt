@@ -3,67 +3,59 @@ package com.projet.clientleger.ui.connexion.view
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.RegisterDataResponse
-import com.projet.clientleger.data.repository.ConnectionRepository
+import com.projet.clientleger.databinding.ConnexionActivityBinding
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
-import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
-import kotlinx.android.synthetic.main.connexion_activity.*
-import kotlinx.android.synthetic.main.fragment_chat.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ConnexionActivity : AppCompatActivity() {
     private val vm: ConnexionViewModel by viewModels()
+    lateinit var binding: ConnexionActivityBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.connexion_activity)
+        binding = ConnexionActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.lifecycleOwner = this
         setupButtons()
     }
 
 
     private fun setupButtons(){
-        connectBtn.setOnClickListener {
+        binding.connectBtn.setOnClickListener {
             connectBtn()
         }
-        forgottenPasswordBtn.setOnClickListener{
+        binding.forgottenPasswordBtn.setOnClickListener{
             forgottenPasswordBtn()
         }
-        createAccountBtn.setOnClickListener {
+        binding.createAccountBtn.setOnClickListener {
             createAccountBtn()
         }
     }
 
     private fun connectBtn(){
-        println(connectionUsername.text)
-        println(connectionPassword.text)
-
-        connectBtn.isEnabled = false
+        binding.connectBtn.isEnabled = false
         lifecycleScope.launch {
-            val res = vm.connectAccount(connectionUsername.text.toString(),connectionPassword.text.toString())
+            val res = vm.connectAccount(binding.connectionUsername.text.toString(),binding.connectionPassword.text.toString())
+            binding.connectionPassword.text.clear()
             if (res.isSucessful) {
-                connectionUsername.text.clear()
-                connectionPassword.text.clear()
+                binding.connectionUsername.text.clear()
                 setUserTokens(res.accessToken, res.refreshToken)
                 vm.connectSocket(res.accessToken)
                 goToMainMenu()
             } else {
                 showToast(res.message)
             }
+            binding.connectBtn.isEnabled = true
         }
-        connectBtn.isEnabled = true
     }
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
