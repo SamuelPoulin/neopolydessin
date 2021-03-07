@@ -18,6 +18,7 @@ import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -41,37 +42,37 @@ class MainmenuActivity : AppCompatActivity() {
 
     val vm: MainMenuViewModel by viewModels()
 
-    lateinit var chat: ChatFragment
-
-    lateinit var friendslist: FriendslistFragment
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainmenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.activity = this
-        vm.connectUser()
 
         binding.toolbar.setOnMenuItemClickListener { item ->
-            when(item.itemId){
+            when (item.itemId) {
                 R.id.friendslistBtn -> toggleFriendslist()
             }
             true
         }
+
+        vm.connectSocket(getSharedPreferences(
+                getString(R.string.user_creds),
+                Context.MODE_PRIVATE
+        ).getString("accessToken", "")!!)
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
     }
 
-    fun toggleFriendslist(){
+    fun toggleFriendslist() {
         binding.friendslistContainer.visibility =
-        when(binding.friendslistContainer.visibility){
-            View.VISIBLE -> View.GONE
-            View.GONE -> View.VISIBLE
-            else -> View.GONE
-        }
+                when (binding.friendslistContainer.visibility) {
+                    View.VISIBLE -> View.GONE
+                    View.GONE -> View.VISIBLE
+                    else -> View.GONE
+                }
     }
 
     fun showGameDialog(isCreating: Boolean) {

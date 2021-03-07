@@ -49,7 +49,6 @@ class ConnexionActivity : AppCompatActivity() {
             if (res.isSucessful) {
                 binding.connectionUsername.text.clear()
                 setUserTokens(res.accessToken, res.refreshToken)
-                vm.connectSocket(res.accessToken)
                 goToMainMenu()
             } else {
                 showToast(res.message)

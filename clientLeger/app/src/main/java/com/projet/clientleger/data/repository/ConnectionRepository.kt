@@ -12,10 +12,6 @@ import javax.net.ssl.HttpsURLConnection
 
 open class ConnectionRepository @Inject constructor(private val socketService: SocketService,private val apiConnectionInterface: ApiConnectionInterface){
 
-    fun connectSocket(accessToken: String){
-        socketService.connect(accessToken)
-    }
-
     open suspend fun connectAccount(connectionModel: ConnectionModel): RegisterResponse{
         val res = apiConnectionInterface.login(connectionModel)
         return when (res.code()){

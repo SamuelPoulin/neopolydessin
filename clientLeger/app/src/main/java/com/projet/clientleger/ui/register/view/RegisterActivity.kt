@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.databinding.ActivityRegisterBinding
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,12 +49,17 @@ class RegisterActivity : AppCompatActivity() {
             if (res.isSucessful) {
                 vm.clearForm()
                 setUserTokens(res.accessToken, res.refreshToken)
+                gotoMainmenu()
             } else {
                 vm.clearPasswords()
                 showToast(res.message)
             }
             loadingBtn(false)
         }
+    }
+
+    private fun gotoMainmenu(){
+        startActivity(Intent(this, MainmenuActivity::class.java))
     }
 
     fun loadingBtn(isLoading: Boolean) {
