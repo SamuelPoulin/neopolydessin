@@ -4,11 +4,12 @@
 
   padding-top: 10px;
   width: 100%;
-  max-width: 500px;
+  max-width: 250px;
 
   & > * {
     display: flex;
-    margin-right: 10px;
-    flex: 1;
+    flex-direction: column;
+
+    width: 100%;
   }
 }
