@@ -2,7 +2,6 @@ import * as bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
@@ -29,14 +28,12 @@ export interface LoginTokens {
 @injectable()
 export class DatabaseService {
 
-  private static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
+  static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   };
 
   readonly SALT_ROUNDS: number = 10;
-
-  mongoMS: MongoMemoryServer;
 
   constructor() {
     if (process.env.NODE_ENV !== 'test') {
@@ -74,19 +71,6 @@ export class DatabaseService {
     return { statusCode: errorCode, message: rejectionMsg };
   }
 
-  // Documentation de mongodb-memory-server sur Github
-  // https://github.com/nodkz/mongodb-memory-server
-  async connectMS(): Promise<void> {
-    this.mongoMS = new MongoMemoryServer();
-    return this.mongoMS.getUri().then((mongoUri) => {
-      mongoose.connect(mongoUri, DatabaseService.CONNECTION_OPTIONS);
-
-      mongoose.connection.once('open', () => {
-        console.log(`MongoDB successfully connected local instance ${mongoUri}`);
-      });
-    });
-  }
-
   connectDB(): void {
     if (process.env.MONGODB_KEY) {
       mongoose.connect(process.env.MONGODB_KEY, DatabaseService.CONNECTION_OPTIONS)
@@ -101,9 +85,6 @@ export class DatabaseService {
 
   async disconnectDB(): Promise<void> {
     await mongoose.disconnect();
-    if (this.mongoMS) {
-      await this.mongoMS.stop();
-    }
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
