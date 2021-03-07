@@ -14,6 +14,7 @@ import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
+import { Observable } from './utils/observable';
 
 @injectable()
 export class SocketIo {
@@ -28,6 +29,8 @@ export class SocketIo {
     transports: ['websocket']
   };
 
+  clientSuccessfullyDisconnected: Observable<Socket> = new Observable();
+
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
     @inject(Types.DatabaseService) private databaseService: DatabaseService
@@ -36,6 +39,9 @@ export class SocketIo {
   init(server: http.Server): void {
     this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
+    this.clientSuccessfullyDisconnected.subscribe((socket) => {
+      console.log(`Disconnected : ${socket.id} \n`);
+    });
   }
 
   validateMessageLength(msg: ChatMessage): boolean {
@@ -56,6 +62,7 @@ export class SocketIo {
       loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
     } catch (err) {
       console.log(err.message);
+      socket.disconnect();
     }
   }
 
@@ -72,7 +79,11 @@ export class SocketIo {
         socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
         this.socketIdService.DisconnectAccountIdSocketId(socket.id);
       });
-      loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
+      loginsModel.addLogout(accountIdOfSocket)
+        .then(() => {
+          this.clientSuccessfullyDisconnected.notify(socket);
+        })
+        .catch((err) => console.log(err));
     }
   }
 
@@ -129,7 +140,6 @@ export class SocketIo {
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
-        console.log(`Disconnected : ${socket.id} \n`);
         this.onDisconnect(socket);
       });
     });
