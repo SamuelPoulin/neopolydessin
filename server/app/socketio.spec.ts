@@ -7,7 +7,7 @@ import { Manager, Socket } from 'socket.io-client'
 import Types from './types';
 import { DatabaseService, LoginTokens, Response, } from './services/database.service';
 import { connectMS, disconnectMS } from './services/database.service.spec';
-import { Account } from '../models/schemas/account';
+import { Account, FriendsList, FriendStatus } from '../models/schemas/account';
 import { TEST_PORT } from './constants';
 import { accountInfo } from './services/database.service.spec';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
@@ -21,6 +21,10 @@ import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
 import * as sinon from 'sinon';
+import { PrivateMessage } from '../../common/communication/private-message';
+import { FriendsService } from './services/friends.service';
+import { OK } from 'http-status-codes';
+import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 
 export const accountInfo3: Register = {
     firstName: 'a',
@@ -35,6 +39,7 @@ describe('Socketio', () => {
 
     let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
+    let friendService: FriendsService;
     let server: Server;
     let socketIo: SocketIo;
     let managers: Manager[];
@@ -61,6 +66,7 @@ describe('Socketio', () => {
     beforeEach(async () => {
         await testingContainer().then((instance) => {
             databaseService = instance[0].get<DatabaseService>(Types.DatabaseService);
+            friendService = instance[0].get<FriendsService>(Types.FriendsService);
             server = instance[0].get<Server>(Types.Server);
             socketIo = instance[0].get<SocketIo>(Types.Socketio);
 
@@ -227,6 +233,96 @@ describe('Socketio', () => {
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     testClient.socket.close();
                 })
+            });
+    });
+
+    it('friendship notifications should work correctly', (done: Mocha.Done) => {
+        testDoneWhenAllClientsAreDisconnected(done);
+        let accountId2: string;
+        createClient(accountInfo)
+            .then((testClient) => {
+                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
+                    expect(friendList.documents.friends[0].status).to.equal(FriendStatus.PENDING);
+                    expect(friendList.documents.friends[0].received).to.be.true;
+                    friendService.acceptFriendship(testClient.accountId, accountId2)
+                        .then((friendList) => {
+                            expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
+                            expect(friendList.documents.friends[0].received).to.be.true;
+                            testClient.socket.close();
+                        });
+                })
+                return createClient(otherAccountInfo);
+            })
+            .then((testClient) => {
+                accountId2 = testClient.accountId;
+
+                testClient.socket.on('connect', () => {
+                    friendService.requestFriendship(accountId2, 'username');
+                })
+
+                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
+                    expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
+                    expect(friendList.documents.friends[0].received).to.be.false;
+                    testClient.socket.close();
+                })
+            });
+    });
+
+    it('private messages should work correctly', (done: Mocha.Done) => {
+        testDoneWhenAllClientsAreDisconnected(done);
+        let accountId: string;
+        let accountId2: string;
+        createClient(accountInfo)
+            .then((testClient) => {
+                accountId = testClient.accountId;
+
+                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
+                    friendService.acceptFriendship(testClient.accountId, accountId2);
+                });
+
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    expect(msg.content).to.equal('bonjourhi');
+                    expect(msg.receiverAccountId).to.equal(testClient.accountId);
+                    expect(msg.senderAccountId).to.equal(accountId2);
+                    const otherMsg: PrivateMessage = {
+                        receiverAccountId: accountId2,
+                        senderAccountId: accountId,
+                        content: 'eyo what up',
+                        timestamp: Date.now(),
+                    }
+                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
+                    testClient.socket.close();
+                })
+                return createClient(otherAccountInfo);
+            })
+            .then((testClient) => {
+                accountId2 = testClient.accountId;
+
+                testClient.socket.on('connect', () => {
+                    friendService.requestFriendship(accountId2, 'username');
+                });
+
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    expect(msg.content).to.equal('eyo what up');
+                    expect(msg.receiverAccountId).to.equal(testClient.accountId);
+                    expect(msg.senderAccountId).to.equal(accountId);
+                    friendService.getMessageHistory(accountId, accountId2, 1, 5)
+                        .then((history) => {
+                            expect(history.statusCode).to.equal(OK);
+                            expect(history.documents.messages).to.be.lengthOf(2);
+                            testClient.socket.close();
+                        })
+                });
+
+                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
+                    const msg: PrivateMessage = {
+                        receiverAccountId: accountId,
+                        senderAccountId: testClient.accountId,
+                        content: 'bonjourhi',
+                        timestamp: Date.now(),
+                    }
+                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
+                });
             });
     });
 });

@@ -40,7 +40,7 @@ export class SocketIo {
   init(server: http.Server): void {
     this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
-    this.clientSuccessfullyDisconnected.subscribe((socket) => {
+    this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
     });
   }
