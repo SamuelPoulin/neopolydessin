@@ -1,21 +1,39 @@
-<div id="main-container">
+<div id="home-container">
   <div id="menu-container">
-    <div id="menu-container-title">
-      <h1>Polydessin</h1>
-    </div>
-    
-    <div id="menu-container-buttons">
-      <button id="btn-create" mat-raised-button (click)="openModal()">Nouveau dessin</button>
-      <button id="btn-gallery" mat-raised-button (click)="openGallery()">Galerie</button>
-      <button id="btn-guide" mat-raised-button (click)="openModal(guideModalType)">Guide utilisateur</button>
-
-      <button mat-raised-button *ngIf="previousDrawings; else noPreviousDrawings">
-        Continuer mon dessin
-      </button>
-      <ng-template #noPreviousDrawings>
-        <button mat-raised-button [disabled]="isDrawingNull" (click)="continueDrawing()">Continuer mon
-          dessin</button>
-        </ng-template>
+    <div id="menu-container-account">
+      <div id="account-container">
+        <div id="account-image">S</div>
+        <div id="account-username">samuelpoulin</div>
       </div>
+      <button mat-flat-button id="dashboard-button" class="home-button" [routerLink]="'account'">
+        <mat-icon class="home-icon">manage_accounts</mat-icon>
+        Tableau de bord
+      </button>
+    </div>
+    <div id="menu-container-title">
+      <img src="assets/icon.png">
+      <div>PolyDessin</div>
+    </div>
+    <div id="menu-container-buttons">
+      <button mat-flat-button class="home-button home-main-button" [routerLink]="'edit'">
+        <mat-icon class="home-icon">palette</mat-icon>
+        Créer une partie privée
+      </button>
+      <button mat-flat-button class="home-button home-main-button">
+        <mat-icon class="home-icon">group</mat-icon>
+        Rejoindre une partie
+      </button>
+      <button mat-flat-button class="home-button home-main-button">
+        <mat-icon class="home-icon">format_list_bulleted</mat-icon>
+        Liste des parties
+      </button>
+      <button mat-flat-button class="home-button home-main-button">
+        <mat-icon class="home-icon">insert_photo</mat-icon>
+        Mot-image
+      </button>
+      <button mat-flat-button class="home-button home-main-button">
+        <mat-icon class="home-icon">help</mat-icon>
+        Guide utilisateur
+      </button>
     </div>
   </div>
