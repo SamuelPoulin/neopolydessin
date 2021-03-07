@@ -5,6 +5,8 @@
 
   width: 100vw;
   height: calc(100vh - 30px);
+
+  background-color: white;
 }
 
 #menu-container {
@@ -84,10 +86,10 @@
   color: #2F2F2F;
   box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.05);
 
-  transition: translate 0.1s;
+  transition: transform 0.1s;
 
   &:hover {
-    translate: 0px -2px;
+    transform: translateY(-2px);
   }
 }
 
