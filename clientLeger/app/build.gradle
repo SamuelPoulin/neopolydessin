@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId "com.projet.clientleger"
-        minSdkVersion 26
+        minSdkVersion 28
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
