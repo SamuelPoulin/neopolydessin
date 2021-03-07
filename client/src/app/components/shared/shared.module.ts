@@ -32,12 +32,13 @@ import { ColorHistoryComponent } from './color-picker/color-history/color-histor
 import { ColorPickerComponent } from './color-picker/color-picker.component';
 import { EmailInputComponent } from './inputs/email-input/email-input.component';
 import { IconButtonComponent } from './inputs/icon-button/icon-button.component';
-import { NameInputComponent } from './inputs/name-input/name-input.component';
+import { DrawingNameInputComponent } from './inputs/drawing-name-input/drawing-name-input.component';
 import { EnumPropertyInputComponent } from './inputs/property-inputs/enum-property-input/enum-property-input.component';
 import { NumericPropertyInputComponent } from './inputs/property-inputs/numeric-property-input/numeric-property-input.component';
 import { TagInputComponent } from './inputs/tag-input/tag-input.component';
 import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.component';
 import { UsernameInputComponent } from './inputs/username-input/username-input.component';
+import { NameInputComponent } from './inputs/name-input/name-input.component';
 
 @NgModule({
   imports: [
@@ -75,8 +76,9 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     HexInputComponent,
     TagInputComponent,
     TagListInputComponent,
-    NameInputComponent,
+    DrawingNameInputComponent,
     UsernameInputComponent,
+    NameInputComponent,
     ColorHistoryComponent,
     ConfirmModalComponent,
     NumericPropertyInputComponent,
@@ -104,8 +106,9 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     HexInputComponent,
     TagInputComponent,
     TagListInputComponent,
-    NameInputComponent,
+    DrawingNameInputComponent,
     UsernameInputComponent,
+    NameInputComponent,
     ColorHistoryComponent,
     AlphaComponent,
     MatExpansionModule,
