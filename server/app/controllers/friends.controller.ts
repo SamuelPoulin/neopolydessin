@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { inject, injectable } from 'inversify';
-import { body } from 'express-validator';
+import { body, query } from 'express-validator';
 import Types from '../types';
 import { jwtVerify } from '../middlewares/jwt-verify';
 import { FriendsService } from '../services/friends.service';
@@ -23,6 +23,25 @@ export class FriendsController {
 
   private configureRouter(): void {
     this.router = express.Router();
+
+    this.router.get('/history',
+      [
+        query('page').isInt(),
+        query('limit').isInt(),
+        query('otherId').isLength({ min: 12, max: 24 })
+
+      ],
+      validationCheck,
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.friendsService.getMessageHistory(req.params._id, req.query.otherId as string, Number(req.query.page), Number(req.query.limit))
+          .then((result) => {
+            res.status(result.statusCode).json(result.documents);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
+      });
 
     this.router.get('/',
       jwtVerify,

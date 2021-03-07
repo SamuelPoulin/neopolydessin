@@ -12,6 +12,12 @@
     <string name="register_psw">Mot de passe</string>
     <string name="register_psw_confirm">Confimation de mot de passe</string>
     <string name="user_creds">userCredentials</string>
+    <string name="welcome_message">Bienvenue sur PolyDessin</string>
+    <string name="email_header_title"> Username</string>
+    <string name="password_header_title"> Mot de passe</string>
+    <string name="connect_button_header">Se connecter</string>
+    <string name="forgotten_password_header">"J'ai oublié mon mot de passe"</string>
+    <string name="create_acccount_header">Créer un compte</string>
     <string name="title_activity_account_management">AccountManagementActivity</string>
     <string name="dashboard">Tableau de bord</string>
     <string name="userProfile">Profil utilisateur</string>
@@ -31,4 +37,5 @@
     <string name="join">Rejoindre</string>
     <string name="difficulty">Difficulté</string>
     <string name="gamemode">Mode de jeu</string>
+    <string name="invalid_username_password">"Nom d'utilisateur ou Mot de passe invalide, veuillez réessayer"</string>
 </resources>
