@@ -13,39 +13,27 @@ import io.socket.client.Socket
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.net.URISyntaxException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 //"http://10.0.2.2:3205"
-//"http://p3-204-dev.duckdns.org/"
-const val SOCKET_ROUTE = "http://p3-204-dev.duckdns.org/"
 
-class SocketService : Service() {
+@Singleton
+class SocketService @Inject constructor() {
 
     lateinit var socket: Socket;
-    private val binder = LocalBinder()
 
-    inner class LocalBinder : Binder() {
-        fun getService(): SocketService {
-            return this@SocketService;
-        }
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return binder;
-    }
-
-    override fun onCreate() {
-        super.onCreate()
+    fun connect(accessToken: String) {
         try {
             val options: IO.Options = IO.Options()
+            options.auth = mapOf("token" to accessToken)
             options.transports = arrayOf("websocket")
             options.upgrade = false
             socket = IO.socket(BuildConfig.SERVER_URL, options)
-            println(BuildConfig.SERVER_URL)
         } catch (e: URISyntaxException) {
             null
         }
         socket.connect()
-        println("socket connected!!!!!!")
     }
 
     fun receiveMessage(): Observable<MessageChat> {
@@ -69,7 +57,7 @@ class SocketService : Service() {
         return receiveFromSocket("PlayerConnected") { received ->
             val user: String = try {
                 received[0].toString()
-            }catch(e: Exception){
+            } catch (e: Exception) {
                 "utilisteur inconnu"
             }
             Message(user, System.currentTimeMillis())
@@ -80,7 +68,7 @@ class SocketService : Service() {
         return receiveFromSocket("PlayerDisconnected") { received ->
             val user: String = try {
                 received[0].toString()
-            }catch(e: Exception){
+            } catch (e: Exception) {
                 "utilisteur inconnu"
             }
             Message(user, System.currentTimeMillis())
@@ -111,10 +99,5 @@ class SocketService : Service() {
 
         }
 
-    }
-
-    override fun onDestroy() {
-        socket.disconnect()
-        super.onDestroy()
     }
 }

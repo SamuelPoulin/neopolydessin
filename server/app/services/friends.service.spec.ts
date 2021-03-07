@@ -7,22 +7,22 @@ import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
-import { AccessToken } from '../middlewares/jwt-verify';
-import { Account, FriendsList, FriendStatus } from '../../models/account';
+import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';
+import { AccessToken } from '../utils/jwt-util';
+
+export const otherAccountInfo: Register = {
+    firstName: 'name',
+    lastName: 'lname',
+    username: 'username1',
+    email: 'email1@email.email',
+    password: 'monkey123',
+    passwordConfirm: 'monkey123'
+}
 
 describe('Friends Service', () => {
-
-    const otherAccountInfo: Register = {
-        firstName: 'name',
-        lastName: 'lname',
-        username: 'username1',
-        email: 'email1@email.email',
-        password: 'monkey123',
-        passwordConfirm: 'monkey123'
-    }
 
     let databaseService: DatabaseService;
     let friendsService: FriendsService;
@@ -95,7 +95,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);
@@ -129,7 +129,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .catch((err: ErrorMsg) => {
                 expect(err.statusCode).to.equal(BAD_REQUEST);
@@ -149,13 +149,13 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);
             })
             .then((friendList: Response<FriendsList>) => {
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .catch((err: ErrorMsg) => {
                 expect(err.statusCode).to.equal(BAD_REQUEST);
@@ -175,7 +175,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
@@ -236,7 +236,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(myId, otherId);
@@ -260,7 +260,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
@@ -318,7 +318,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.refuseFriendship(myId, otherId);
@@ -341,7 +341,7 @@ describe('Friends Service', () => {
             .then((tokens: Response<LoginTokens>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
-                return friendsService.requestFriendship(myId, 'email1@email.email');
+                return friendsService.requestFriendship(myId, 'username1');
             })
             .then((friendList: Response<FriendsList>) => {
                 return friendsService.acceptFriendship(otherId, myId);
@@ -361,7 +361,7 @@ describe('Friends Service', () => {
             })
     });
 
-    it('unfriend should resolve to NOT_FOUND if friend isn\'nt there', (done: Mocha.Done) => {
+    it('unfriend should resolve to NOT_FOUND if friend isn\'t there', (done: Mocha.Done) => {
         let myId: string;
         databaseService.createAccount(accountInfo)
             .then((tokens: Response<LoginTokens>) => {
