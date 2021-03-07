@@ -1,0 +1,17 @@
+.account-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 25px;
+}
+
+.account-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2F2F2F;
+}
+
+.account-section-content {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}

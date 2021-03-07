@@ -1,16 +1,49 @@
-#dashboard-container {
-  overflow-y: auto;
-  padding: 50px 50px 25px 50px;
+#dashboard-wl-chart {
+  width: 100%;
+  margin: 10px 10px 0px 0px;
+  border-radius: 5px;
+  background-color: #FBFBFB;
 }
 
-.dashboard-section {
+.dashboard-statistic-container {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 25px;
+  align-items: center;
+  justify-content: space-between;
+  
+  margin: 10px 10px 0px 0px;
+  flex-grow: 1;
+  height: 85px;
+  
+  border-radius: 5px;
+  background-color: #FBFBFB;
 }
 
-.account-section-title {
+.dashboard-statistic-title {
+  display: flex;
+  word-break: break-word;
   font-size: 24px;
-  font-weight: 700;
-  color: #2F2F2F;
+  padding-left: 25px;
+}
+
+.dashboard-statistic-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  padding: 0px 12px;
+}
+
+@media only screen and (max-width: 715px) {
+  .dashboard-statistic-container {
+    height: 65px;
+  }
+
+  .dashboard-statistic-title {
+    font-size: 18px;
+  }
+  
+  .dashboard-statistic-value {
+    font-size: 26px;
+    min-width: 75px;
+  }
 }

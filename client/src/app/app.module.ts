@@ -44,10 +44,10 @@ import { AppComponent } from './app.component';
           ],
         },
       ],
-      { useHash: true,enableTracing: true}
+      { useHash: true },
     ),
   ],
   declarations: [AppComponent],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
