@@ -16,21 +16,28 @@ export type ChartOptions = {
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+  // TODO: Remove dummy data
+  private static MAX_RANDOM: number = 20; // eslint-disable-line
+  private static LENGTH_RANDOM: number = 7; // eslint-disable-line
+
   @ViewChild('chart') chart: ChartComponent;
   chartOptions: Partial<ChartOptions>;
 
   constructor() {
+    const data1 = Array.from({ length: DashboardComponent.LENGTH_RANDOM }, () => Math.floor(Math.random() * DashboardComponent.MAX_RANDOM));
+    const data2 = Array.from({ length: DashboardComponent.LENGTH_RANDOM }, () => Math.floor(Math.random() * DashboardComponent.MAX_RANDOM));
+
     this.chartOptions = {
       series: [
         {
           name: 'Victoires',
           color: '#00a550',
-          data: [7, 5, 4, 6, 8, 15, 1],
+          data: data1,
         },
         {
           name: 'Défaites',
           color: '#e83946',
-          data: [9, 4, 16, 3, 6, 3, 7],
+          data: data2,
         },
       ],
       chart: {
