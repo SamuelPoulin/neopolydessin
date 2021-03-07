@@ -8,11 +8,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 class MainmenuRepository @Inject constructor(private val socketService: SocketService, private val apiMainmenuInterface: ApiMainmenuInterface) {
-
-    suspend fun login(): RegisterDataResponse{
-        return apiMainmenuInterface.login(ConnectionModel("s", "ssssss")).body()!!
-    }
-
     fun connectSocket(accessToken: String){
         socketService.connect(accessToken)
     }
