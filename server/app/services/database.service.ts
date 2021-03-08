@@ -272,7 +272,6 @@ export class DatabaseService {
           return messagesHistoryModel.removeHistoryOfAccount(id);
         })
         .then((result) => {
-          console.log(result);
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
