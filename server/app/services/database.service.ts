@@ -7,6 +7,7 @@ import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/schemas/account';
 import loginsModel, { Logins } from '../../models/schemas/logins';
+import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
 
@@ -268,6 +269,10 @@ export class DatabaseService {
           return loginsModel.findByAccountIdAndDelete(id);
         })
         .then((logins: Logins) => {
+          return messagesHistoryModel.removeHistoryOfAccount(id);
+        })
+        .then((result) => {
+          console.log(result);
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {

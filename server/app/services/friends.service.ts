@@ -24,7 +24,6 @@ export class FriendsService {
           resolve({ statusCode: OK, documents: messages });
         })
         .catch((err) => {
-          console.log(err.message);
           reject(DatabaseService.rejectErrorMessage(err));
         });
     });
@@ -150,6 +149,9 @@ export class FriendsService {
         })
         .then(async (doc) => {
           if (doc.nModified === 0) throw Error(NOT_FOUND.toString());
+          return messagesHistoryModel.removeHistory(myId, toUnfriendId);
+        })
+        .then(async (doc) => {
           return this.getFriendsOfUser(toUnfriendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
