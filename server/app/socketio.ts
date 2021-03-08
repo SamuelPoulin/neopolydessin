@@ -12,7 +12,7 @@ import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-
 import loginsModel from '../models/schemas/logins';
 import messagesHistoryModel from '../models/schemas/messages-history';
 import * as jwtUtils from './utils/jwt-util';
-import { DatabaseService, Response } from './services/database.service';
+import { DatabaseService, ErrorMsg, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 import { Observable } from './utils/observable';
@@ -76,16 +76,20 @@ export class SocketIo {
           lobby.removePlayer(accountIdOfSocket, socket);
         }
       });
-      this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
-        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
-        this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-        this.socketIdService.DisconnectSocketFromLobby(socket.id);
-      });
-      loginsModel.addLogout(accountIdOfSocket)
-        .then(() => {
-          this.clientSuccessfullyDisconnected.notify(socket);
+      this.databaseService.getAccountById(accountIdOfSocket)
+        .then((account) => {
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+          this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+          this.socketIdService.DisconnectSocketFromLobby(socket.id);
+          loginsModel.addLogout(accountIdOfSocket)
+            .then(() => {
+              this.clientSuccessfullyDisconnected.notify(socket);
+            })
+            .catch((err) => console.log(err));
         })
-        .catch((err) => console.log(err));
+        .catch((err: ErrorMsg) => {
+          console.log(`status : ${err.statusCode} ${err.message}`);
+        });
     }
   }
 

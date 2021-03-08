@@ -20,7 +20,6 @@ import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
-import * as sinon from 'sinon';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { FriendsService } from './services/friends.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
@@ -35,7 +34,7 @@ export const accountInfo3: Register = {
     passwordConfirm: 'abcabc',
 }
 
-describe('Socketio', () => {
+describe.only('Socketio', () => {
 
     let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
@@ -45,7 +44,6 @@ describe('Socketio', () => {
     let managers: Manager[];
     let clients: Socket[];
     let nbDisconnectedClients: number;
-    let addLogoutStub: sinon.SinonStub<any, any>;
 
     const env = Object.assign({}, process.env);
     const TEST_URL: string = `http://localhost:${TEST_PORT}`;
@@ -79,9 +77,6 @@ describe('Socketio', () => {
     });
 
     afterEach(async () => {
-        if (addLogoutStub) {
-            addLogoutStub.restore();
-        }
         socketIo.io.removeAllListeners();
         managers.forEach((manager) => { manager._close(); });
         clients.forEach((client) => {
@@ -90,7 +85,7 @@ describe('Socketio', () => {
             }
         })
         server.close();
-        await disconnectMS(mongoMemoryServer);
+        await disconnectMS(mongoMemoryServer)
     })
 
     interface TestClient {
@@ -113,6 +108,7 @@ describe('Socketio', () => {
     const testDoneWhenAllClientsAreDisconnected = (done: Mocha.Done) => {
         socketIo.clientSuccessfullyDisconnected.subscribe(() => {
             nbDisconnectedClients++;
+            console.log(nbDisconnectedClients);
             if (nbDisconnectedClients === clients.length) {
                 done();
             }
@@ -374,21 +370,10 @@ describe('Socketio', () => {
             });
     });
 
-    it('private message history should be deleted when deleting account', (done: Mocha.Done) => {
-        testDoneWhenAllClientsAreDisconnected(done);
+    it.only('private message history should be deleted when deleting account', (done: Mocha.Done) => {
         let accountId: string;
         let accountId2: string;
         let accountId3: string;
-
-        const expectMessageHistoryToBeOfLength = (testClient: TestClient, msg: PrivateMessage, length: number) => {
-            expect(msg.content).to.equal('bonjourhi');
-            expect(msg.receiverAccountId).to.equal(testClient.accountId);
-            expect(msg.senderAccountId).to.equal(accountId3);
-            friendService.getMessageHistory(testClient.accountId, accountId3, 1, 5)
-                .then((history) => {
-                    expect(history.documents.messages).to.be.length(length);
-                });
-        }
 
         createClient(accountInfo)
             .then((testClient) => {
@@ -399,7 +384,6 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
-                    expectMessageHistoryToBeOfLength(testClient, msg, 1);
                     testClient.socket.close();
                 })
                 return createClient(otherAccountInfo);
@@ -412,7 +396,6 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
-                    expectMessageHistoryToBeOfLength(testClient, msg, 1);
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId3,
                         senderAccountId: testClient.accountId,
@@ -431,6 +414,23 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     friendService.requestFriendship(accountId3, 'username')
                     friendService.requestFriendship(accountId3, 'username1');
+                });
+
+                let nbCall = 0;
+                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
+                    nbCall++;
+                    if (nbCall === 2) {
+                        const msg = (receiverAccountId: string) => {
+                            return {
+                                receiverAccountId: receiverAccountId,
+                                senderAccountId: testClient.accountId,
+                                content: 'bonjourhi',
+                                timestamp: Date.now(),
+                            }
+                        };
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId))
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId2));
+                    }
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
@@ -455,24 +455,8 @@ describe('Socketio', () => {
                         .catch((err: ErrorMsg) => {
                             expect(err.statusCode).to.be.equal(NOT_FOUND);
                             testClient.socket.close();
+                            done();
                         });
-                });
-
-                let nbCall = 0;
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
-                    nbCall++;
-                    if (nbCall === 2) {
-                        const msg = (receiverAccountId: string) => {
-                            return {
-                                receiverAccountId: receiverAccountId,
-                                senderAccountId: testClient.accountId,
-                                content: 'bonjourhi',
-                                timestamp: Date.now(),
-                            }
-                        };
-                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId))
-                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId2));
-                    }
                 });
             });
     });
