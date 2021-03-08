@@ -210,9 +210,4 @@ class RegisterActivityTest {
             assertEquals(activity.binding.passwordMinLengthError.compoundDrawables[0].constantState, activity.resources.getDrawable(R.drawable.ic_baseline_done_24).constantState)
         }
     }
-
-    @Test
-    fun test(){
-        assert(false)
-    }
 }

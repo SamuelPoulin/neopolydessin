@@ -6,6 +6,7 @@ import { Server } from './server';
 import { Manager, Socket } from 'socket.io-client'
 import Types from './types';
 import { DatabaseService, LoginTokens, Response, } from './services/database.service';
+import { connectMS, disconnectMS } from './services/database.service.spec';
 import { Account } from '../models/schemas/account';
 import { TEST_PORT } from './constants';
 import { accountInfo } from './services/database.service.spec';
@@ -17,16 +18,36 @@ import { GameType, LobbyInfo } from '../models/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { Register } from '../../common/communication/register';
+import MongoMemoryServer from 'mongodb-memory-server-core';
+import * as sinon from 'sinon';
+
+export const accountInfo3: Register = {
+    firstName: 'a',
+    lastName: 'b',
+    username: 'c',
+    email: 'a@b.c',
+    password: 'abcabc',
+    passwordConfirm: 'abcabc',
+}
 
 describe('Socketio', () => {
 
+    let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
     let server: Server;
     let socketIo: SocketIo;
-    let manager: Manager[] = [];
-    let client: Socket[] = [];
+    let managers: Manager[];
+    let clients: Socket[];
+    let nbDisconnectedClients: number;
+    let addLogoutStub: sinon.SinonStub<any, any>;
 
     const env = Object.assign({}, process.env);
+    const TEST_URL: string = `http://localhost:${TEST_PORT}`;
+    const MANAGER_OPTS = {
+        reconnectionDelayMax: 10000,
+        transports: ['websocket'],
+    }
 
     before(() => {
         process.env.JWT_KEY = 'this is a super secret secret!!!';
@@ -43,42 +64,58 @@ describe('Socketio', () => {
             server = instance[0].get<Server>(Types.Server);
             socketIo = instance[0].get<SocketIo>(Types.Socketio);
 
-            manager[0] = new Manager(`http://localhost:${TEST_PORT}`, {
-                reconnectionDelayMax: 10000,
-                transports: ['websocket'],
-                multiplex: false,
-            });
-
-            manager[1] = new Manager(`http://localhost:${TEST_PORT}`, {
-                reconnectionDelayMax: 10000,
-                transports: ['websocket'],
-            });
-
+            nbDisconnectedClients = 0;
+            managers = [];
+            clients = [];
             server.init(TEST_PORT);
-
         });
-
-        await databaseService.connectMS();
+        mongoMemoryServer = await connectMS();
     });
 
     afterEach(async () => {
+        if (addLogoutStub) {
+            addLogoutStub.restore();
+        }
         socketIo.io.removeAllListeners();
-        manager.forEach((manager) => { manager._close(); });
+        managers.forEach((manager) => { manager._close(); });
+        clients.forEach((client) => {
+            if (client.connected) {
+                client.close();
+            }
+        })
         server.close();
-        await databaseService.disconnectDB();
+        await disconnectMS(mongoMemoryServer);
     })
 
-    it('should instantiate correctly', (done: Mocha.Done) => {
-        expect(socketIo).to.be.instanceOf(SocketIo);
-        done();
-    });
+    interface TestClient {
+        accountId: string;
+        socket: Socket,
+    }
+
+    const createClient = async (accountInfo: Register): Promise<TestClient> => {
+        const manager = new Manager(TEST_URL, MANAGER_OPTS);
+        managers.push(manager);
+        const tokens: Response<LoginTokens> = await databaseService.createAccount(accountInfo)
+        const socket = manager.socket('/', {
+            auth: { token: tokens.documents.accessToken, }
+        });
+        clients.push(socket);
+        const accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken)
+        return { accountId, socket };
+    }
+
+    const testDoneWhenAllClientsAreDisconnected = (done: Mocha.Done) => {
+        socketIo.clientSuccessfullyDisconnected.subscribe(() => {
+            nbDisconnectedClients++;
+            if (nbDisconnectedClients === clients.length) {
+                done();
+            }
+        })
+    }
 
     it('client socket connection should call addLogin and disconnection should call addLogout', (done: Mocha.Done) => {
         let accountId: string;
         socketIo.io.once(SocketConnection.CONNECTION, (socket: Socket) => {
-
-            client[0].close();
-
             socket.once(SocketConnection.DISCONNECTION, () => {
                 databaseService.getAccountById(accountId)
                     .then((account: Response<Account>) => {
@@ -89,93 +126,108 @@ describe('Socketio', () => {
             })
         })
 
-        databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
-                client[0] = manager[0].socket('/', {
-                    auth: {
-                        token: tokens.documents.accessToken,
-                    }
-                });
-                accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken)
+        createClient(accountInfo).then((testClient) => {
+            accountId = testClient.accountId;
+            testClient.socket.on('connect', () => {
+                testClient.socket.close();
             })
+        });
     })
 
     it('clients should be able to receive path information', (done: Mocha.Done) => {
-        // server side endpoints
-        socketIo.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
-            socket.on(SocketConnection.DISCONNECTION, () => {
-                if (socketIo.io.sockets.sockets.size == 0) {
-                    setTimeout(() => { done(); }, 500);
-                }
-            })
-        });
-
-        // client side endpoints
-        let accountId: string;
-        let accountId2: string;
-        databaseService
-            .createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
-                client[0] = manager[0].socket('/', {
-                    auth: {
-                        token: tokens.documents.accessToken,
-                    }
-                });
-                accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
-
-                client[0].on('connect', () => {
-                    client[0].emit(SocketMessages.CREATE_LOBBY, accountId, GameType.SPRINT_COOP, true)
+        testDoneWhenAllClientsAreDisconnected(done);
+        createClient(accountInfo)
+            .then((testClient) => {
+                testClient.socket.on('connect', () => {
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, testClient.accountId, GameType.SPRINT_COOP, true);
                 })
 
-                client[0].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 });
 
-                client[0].on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
+                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
                     expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                 });
 
-                client[0].on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    client[0].close();
+                    testClient.socket.close();
                 });
 
-                client[0].on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
-                    client[0].emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                    client[0].emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                    client[0].emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                    testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
+                    testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
                 })
 
-                return databaseService.createAccount(otherAccountInfo)
+                return createClient(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
-                client[1] = manager[1].socket('/', {
-                    auth: {
-                        token: tokens.documents.accessToken,
-                    }
-                });
-                accountId2 = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
-
-                client[1].on('connect', () => {
-                    client[1].emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
-                        client[1].emit(SocketConnection.PLAYER_CONNECTION, accountId2, lobbies[0].lobbyId);
+            .then((testClient) => {
+                testClient.socket.on('connect', () => {
+                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                        testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, testClient.accountId, lobbies[0].lobbyId);
                     });
                 });
 
-                client[1].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 });
 
-                client[1].on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
+                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
                     expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                 });
 
-                client[1].on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    client[1].close();
+                    testClient.socket.close();
                 });
-
             })
         done();
     })
+
+    it('multiple lobbies should work correctly', (done: Mocha.Done) => {
+        testDoneWhenAllClientsAreDisconnected(done);
+        createClient(accountInfo)
+            .then((testClient) => {
+                testClient.socket.on('connect', () => {
+                    testClient.socket.emit('CreateLobby', testClient.accountId);
+                })
+
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    testClient.socket.close();
+                })
+                return createClient(otherAccountInfo);
+            })
+            .then((testClient) => {
+                testClient.socket.on('connect', () => {
+                    testClient.socket.emit('CreateLobby', testClient.accountId);
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    testClient.socket.close();
+                })
+
+                return createClient(accountInfo3);
+            })
+            .then((testClient) => {
+                testClient.socket.on('connect', () => {
+                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                        testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, testClient.accountId, lobbies[0].lobbyId);
+                    });
+                });
+
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                    expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    testClient.socket.close();
+                })
+            });
+    });
 });
