@@ -34,7 +34,7 @@ export const accountInfo3: Register = {
     passwordConfirm: 'abcabc',
 }
 
-describe.only('Socketio', () => {
+describe('Socketio', () => {
 
     let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
@@ -108,7 +108,6 @@ describe.only('Socketio', () => {
     const testDoneWhenAllClientsAreDisconnected = (done: Mocha.Done) => {
         socketIo.clientSuccessfullyDisconnected.subscribe(() => {
             nbDisconnectedClients++;
-            console.log(nbDisconnectedClients);
             if (nbDisconnectedClients === clients.length) {
                 done();
             }
@@ -117,15 +116,13 @@ describe.only('Socketio', () => {
 
     it('client socket connection should call addLogin and disconnection should call addLogout', (done: Mocha.Done) => {
         let accountId: string;
-        socketIo.io.once(SocketConnection.CONNECTION, (socket: Socket) => {
-            socket.once(SocketConnection.DISCONNECTION, () => {
-                databaseService.getAccountById(accountId)
-                    .then((account: Response<Account>) => {
-                        const login: Login = (account.documents.logins as any).logins[0];
-                        expect(login.end && login.start < login.end).to.be.true;
-                        done();
-                    });
-            })
+        socketIo.clientSuccessfullyDisconnected.subscribe(() => {
+            databaseService.getAccountById(accountId)
+                .then((account: Response<Account>) => {
+                    const login: Login = (account.documents.logins as any).logins[0];
+                    expect(login.end && login.start < login.end).to.be.true;
+                    done();
+                });
         })
 
         createClient(accountInfo).then((testClient) => {
@@ -370,7 +367,7 @@ describe.only('Socketio', () => {
             });
     });
 
-    it.only('private message history should be deleted when deleting account', (done: Mocha.Done) => {
+    it('private message history should be deleted when deleting account', (done: Mocha.Done) => {
         let accountId: string;
         let accountId2: string;
         let accountId3: string;
