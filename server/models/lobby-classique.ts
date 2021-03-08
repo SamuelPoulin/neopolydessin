@@ -1,13 +1,15 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
+import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { SocketIdService } from '../app/services/socket-id.service';
 import { Lobby, PlayerStatus } from './lobby';
 
 
 @injectable()
 export class LobbyClassique extends Lobby {
 
-  constructor(io: Server) {
-    super(io);
+  constructor(socketIdService: SocketIdService, io: Server, accountId: string, privateGame: boolean) {
+    super(socketIdService, io, accountId, privateGame);
     this.teams = [{teamNumber: 1, currentScore: 0, playersInTeam: []}, {teamNumber: 2, currentScore: 0, playersInTeam: []}];
   }
 
@@ -23,6 +25,7 @@ export class LobbyClassique extends Lobby {
       }
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
+      this.bindLobbyClassiqueEndPoints(socket);
     }
   }
 
@@ -36,5 +39,21 @@ export class LobbyClassique extends Lobby {
       this.players[index].teamNumber = teamNumber;
       this.teams[teamNumber].playersInTeam.push(this.players[index]);
     }
+  }
+
+  bindLobbyClassiqueEndPoints(socket: Socket) {
+    socket.on(SocketMessages.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
+      const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
+      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+        if (word === this.wordToGuess) {
+          this.teams[guesserValues.teamNumber].currentScore++;
+          callback(true);
+        }
+        else {
+          callback(false);
+        }
+      }
+    });
   }
 }

@@ -124,7 +124,7 @@ describe('Socketio', () => {
                 accountId = jwtUtils.decodeAccessToken(tokens.documents.accessToken);
 
                 client[0].on('connect', () => {
-                    client[0].emit(SocketMessages.CREATE_LOBBY, accountId, GameType.SPRINT_COOP)
+                    client[0].emit(SocketMessages.CREATE_LOBBY, accountId, GameType.SPRINT_COOP, true)
                 })
 
                 client[0].on(SocketDrawing.START_PATH_BC, (coord: Coord) => {

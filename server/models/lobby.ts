@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommands } from '../app/services/drawing-commands.service';
@@ -6,6 +6,8 @@ import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { ChatMessage } from '../../common/communication/chat-message';
+import { SocketIdService } from '../app/services/socket-id.service';
+import Types from '../app/types';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
@@ -57,18 +59,26 @@ export abstract class Lobby {
 
   protected players: Player [];
 
+  protected wordToGuess: string;
+  protected ownerAccountId: string;
   protected gameType: GameType;
 
+  protected privateGame: boolean;
   protected io: Server;
   protected drawingCommands: DrawingCommands;
 
-  constructor(io: Server) {
+  constructor(@inject(Types.SocketIdService) protected socketIdService: SocketIdService,
+    io: Server, accountId: string, privacySetting: boolean) {
     this.io = io;
+    this.wordToGuess = '';
+    this.ownerAccountId = accountId;
+    this.privateGame = privacySetting;
     this.drawingCommands = new DrawingCommands();
     this.lobbyId = uuidv4();
     this.players = [];
     this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
+    this.socketIdService = new SocketIdService();
   }
 
   toLobbyInfo(): LobbyInfo {
@@ -106,6 +116,13 @@ export abstract class Lobby {
       return playerInfo.playerStatus === PlayerStatus.DRAWER;
     } else {
       return false;
+    }
+  }
+
+  setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
+    const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
+    if (senderAccountId === this.ownerAccountId) {
+      this.privateGame = newPrivacySetting;
     }
   }
 
@@ -209,8 +226,9 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
-      console.log(word);
+    socket.on(SocketMessages.SET_GAME_PRIVACY, (privacySetting: boolean) => {
+      this.setPrivacySetting(socket.id, privacySetting);
+      this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateGame);
     });
 
     socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
@@ -233,6 +251,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.END_ERASE);
     socket.removeAllListeners(SocketDrawing.UNDO);
     socket.removeAllListeners(SocketDrawing.REDO);
+    socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketMessages.PLAYER_GUESS);
   }

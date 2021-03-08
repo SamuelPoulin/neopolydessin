@@ -103,19 +103,19 @@ export class SocketIo {
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, gametype: GameType) => {
+      socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, gametype: GameType, privacySetting: boolean) => {
         let lobby;
         switch(gametype) {
           case GameType.CLASSIC: {
-            lobby = new LobbyClassique(this.io);
+            lobby = new LobbyClassique(this.socketIdService, this.io, accountId, privacySetting);
             break;
           }
           case GameType.SPRINT_SOLO: {
-            lobby = new LobbySolo(this.io);
+            lobby = new LobbySolo(this.socketIdService, this.io, accountId, privacySetting);
             break;
           }
           case GameType.SPRINT_COOP: {
-            lobby = new LobbyCoop(this.io);
+            lobby = new LobbyCoop(this.socketIdService, this.io, accountId, privacySetting);
             break;
           }
         }

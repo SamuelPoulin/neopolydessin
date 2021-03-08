@@ -29,7 +29,7 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.FriendsController).to(FriendsController);
   container.bind(Types.FriendsService).to(FriendsService);
   container.bind(Types.LoggedIn).to(LoggedIn);
-  container.bind(Types.SocketIdService).to(SocketIdService);
+  container.bind(Types.SocketIdService).to(SocketIdService).inSingletonScope();
   container.bind(Types.DrawingCommands).to(DrawingCommands);
 
   return container;
