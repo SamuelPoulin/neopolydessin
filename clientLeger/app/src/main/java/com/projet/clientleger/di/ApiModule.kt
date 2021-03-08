@@ -1,12 +1,17 @@
 package com.projet.clientleger.di
 
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.projet.clientleger.BuildConfig
+import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.TokenInterceptor
+import com.projet.clientleger.data.api.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.service.SocketService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -21,16 +26,17 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideGson(): Gson = GsonBuilder()
-    .setLenient()
-    .create()
+        .setLenient()
+        .create()
 
     @Provides
     @Singleton
-    fun provideOkHttp(): OkHttpClient =
+    fun provideOkHttp(tokenInterceptor: TokenInterceptor): OkHttpClient =
         OkHttpClient.Builder()
-        .readTimeout(100, TimeUnit.SECONDS)
-        .connectTimeout(100, TimeUnit.SECONDS)
-        .build()
+            .addInterceptor(tokenInterceptor)
+            .readTimeout(100, TimeUnit.SECONDS)
+            .connectTimeout(100, TimeUnit.SECONDS)
+            .build()
 
     @Provides
     @Singleton
@@ -45,5 +51,13 @@ object ApiModule {
 
     @Provides
     @Singleton
+    fun provideTokenInterceptor(): TokenInterceptor = TokenInterceptor()
+
+    @Provides
+    @Singleton
     fun provideSocketService(): SocketService = SocketService()
+
+    @Provides
+    @Singleton
+    fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
 }
