@@ -16,12 +16,16 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KSuspendFunction1
 
+private const val ACCESS_TOKEN = "accessToken"
+private const val REFRESH_TOKEN = "refreshToken"
 @Singleton
 class SessionManager @Inject constructor(
     context: Context,
     private val tokenInterceptor: TokenInterceptor,
     private val apiSessionManagerInterface: ApiSessionManagerInterface
 ) {
+
+
     private var userPrefs: SharedPreferences =
         context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
 
@@ -29,8 +33,8 @@ class SessionManager @Inject constructor(
 
     fun saveCreds(accessToken: String, refreshToken: String) {
         userPrefs.edit {
-            putString("accessToken", accessToken)
-            putString("refreshToken", refreshToken)
+            putString(ACCESS_TOKEN, accessToken)
+            putString(REFRESH_TOKEN, refreshToken)
             apply()
         }
         tokenInterceptor.setAccessToken(accessToken)
@@ -38,18 +42,18 @@ class SessionManager @Inject constructor(
 
     fun updateAccessToken(accessToken: String){
         userPrefs.edit {
-            putString("accessToken", accessToken)
+            putString(ACCESS_TOKEN, accessToken)
             apply()
         }
         tokenInterceptor.setAccessToken(accessToken)
     }
 
     fun getAccessToken(): String {
-        return userPrefs.getString("accessToken", "")!!
+        return userPrefs.getString(ACCESS_TOKEN, "")!!
     }
 
     fun getRefreshToken(): String {
-        return userPrefs.getString("refreshToken", "")!!
+        return userPrefs.getString(REFRESH_TOKEN, "")!!
     }
 
     suspend fun refreshAccessToken(): AccessTokenResponse {
