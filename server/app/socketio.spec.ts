@@ -374,7 +374,7 @@ describe('Socketio', () => {
             });
     });
 
-    it.only('private message history should be deleted when deleting account', (done: Mocha.Done) => {
+    it('private message history should be deleted when deleting account', (done: Mocha.Done) => {
         testDoneWhenAllClientsAreDisconnected(done);
         let accountId: string;
         let accountId2: string;
