@@ -5,6 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
+import { connectMS, disconnectMS } from './database.service.spec';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
 import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
@@ -12,6 +13,7 @@ import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { ObjectId } from 'mongodb';
 import { AccessToken } from '../utils/jwt-util';
+import MongoMemoryServer from 'mongodb-memory-server-core';
 
 export const otherAccountInfo: Register = {
     firstName: 'name',
@@ -24,6 +26,7 @@ export const otherAccountInfo: Register = {
 
 describe('Friends Service', () => {
 
+    let mongoMs: MongoMemoryServer;
     let databaseService: DatabaseService;
     let friendsService: FriendsService;
 
@@ -49,11 +52,11 @@ describe('Friends Service', () => {
             databaseService = instance[0].get<DatabaseService>(Types.DatabaseService);
         });
 
-        await databaseService.connectMS();
+        mongoMs = await connectMS();
     });
 
     afterEach(async () => {
-        await databaseService.disconnectDB();
+        await disconnectMS(mongoMs);
     });
 
     it('should instanciate correctly', (done: Mocha.Done) => {
