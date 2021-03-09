@@ -1,5 +1,6 @@
 package com.projet.clientleger.connexion
 
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponse
@@ -30,14 +31,14 @@ class ConnexionRepositoryTest {
 
     @Inject
     lateinit var apiConnectionInterface: ApiConnectionInterface
-    lateinit var socketService: SocketService
 
+    lateinit var sessionManager: SessionManager
     private lateinit var connectionRepo: ConnectionRepository
 
     @Before
     fun setUp(){
         hiltRule.inject()
-        connectionRepo = ConnectionRepository(socketService,apiConnectionInterface)
+        connectionRepo = ConnectionRepository(sessionManager,apiConnectionInterface)
     }
 
     @Test

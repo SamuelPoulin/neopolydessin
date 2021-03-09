@@ -20,7 +20,7 @@ private const val ACCESS_TOKEN = "accessToken"
 private const val REFRESH_TOKEN = "refreshToken"
 
 @Singleton
-class SessionManager @Inject constructor(
+open class SessionManager @Inject constructor(
     context: Context,
     private val tokenInterceptor: TokenInterceptor,
     private val apiSessionManagerInterface: ApiSessionManagerInterface
@@ -30,7 +30,7 @@ class SessionManager @Inject constructor(
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
 
-    fun saveCreds(accessToken: String, refreshToken: String) {
+    open fun saveCreds(accessToken: String, refreshToken: String) {
         userPrefs.edit {
             putString(ACCESS_TOKEN, accessToken)
             putString(REFRESH_TOKEN, refreshToken)
@@ -39,7 +39,7 @@ class SessionManager @Inject constructor(
         tokenInterceptor.setAccessToken(accessToken)
     }
 
-    fun updateAccessToken(accessToken: String){
+    open fun updateAccessToken(accessToken: String){
         userPrefs.edit {
             putString(ACCESS_TOKEN, accessToken)
             apply()
@@ -47,15 +47,15 @@ class SessionManager @Inject constructor(
         tokenInterceptor.setAccessToken(accessToken)
     }
 
-    fun getAccessToken(): String {
+    open fun getAccessToken(): String {
         return userPrefs.getString(ACCESS_TOKEN, "")!!
     }
 
-    fun getRefreshToken(): String {
+    open fun getRefreshToken(): String {
         return userPrefs.getString(REFRESH_TOKEN, "")!!
     }
 
-    suspend fun refreshAccessToken(): AccessTokenResponse {
+    open suspend fun refreshAccessToken(): AccessTokenResponse {
         val res = apiSessionManagerInterface.refreshToken( RefreshTokenModel(getRefreshToken()) )
         return when(res.code()){
             HttpsURLConnection.HTTP_OK -> {
@@ -69,7 +69,7 @@ class SessionManager @Inject constructor(
         }
     }
 
-    suspend fun <S,T> request(toSend: S, callback: KSuspendFunction1<S,Response<T>>): Response<T>{
+    open suspend fun <S,T> request(toSend: S, callback: KSuspendFunction1<S,Response<T>>): Response<T>{
         var res = callback.invoke(toSend)
         if(res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN){
             refreshAccessToken()
@@ -78,7 +78,7 @@ class SessionManager @Inject constructor(
         return res
     }
 
-    suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T>{
+    open suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T>{
         var res = callback.invoke()
         if(res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN){
             refreshAccessToken()
