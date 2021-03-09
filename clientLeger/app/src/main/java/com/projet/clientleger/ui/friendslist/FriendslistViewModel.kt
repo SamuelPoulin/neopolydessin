@@ -23,6 +23,23 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
             }
             friendsLiveData.value = friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId}))
         }
+        friendslistRepository.friendRequestReceived().subscribe{
+            println(it)
+            updateFriends(it)
+        }
+        friendslistRepository.updateFriendslist().subscribe{
+            updateFriends(it)
+        }
+        friendslistRepository.friendRequestAccepted().subscribe{
+            updateFriends(it)
+        }
+        friendslistRepository.friendRequestRefused().subscribe{
+            updateFriends(it)
+        }
+    }
+
+    suspend fun sendFriendRequest(friendUsername: String){
+        updateFriends(friendslistRepository.sendFriendRequest(friendUsername))
     }
 
     suspend fun acceptFriendRequest(idOfFriend: String){
@@ -38,6 +55,6 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
         for(friend in friendslist.friends){
             friendSimplifiedList.add(FriendSimplified(friend))
         }
-        friendsLiveData.value = friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId}))
+        friendsLiveData.postValue(friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId})))
     }
 }

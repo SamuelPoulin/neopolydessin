@@ -1,45 +1,32 @@
 package com.projet.clientleger.ui.mainmenu.view
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.IBinder
-import android.util.DisplayMetrics
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
-import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
-import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import javax.inject.Inject
+import androidx.fragment.app.add
 
 
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
-    val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
-
+    @Inject
+    lateinit var friendslistFragment: FriendslistFragment
     val vm: MainMenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +39,7 @@ class MainmenuActivity : AppCompatActivity() {
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.friendslistBtn -> toggleFriendslist()
+                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
             }
             true
         }
@@ -60,10 +48,11 @@ class MainmenuActivity : AppCompatActivity() {
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
         ).getString("accessToken", "")!!)
-    }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
+
+        supportFragmentManager.commit{
+            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
+        }
     }
 
     fun toggleFriendslist() {
