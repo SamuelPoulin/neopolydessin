@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { DrawingCommands } from '../app/services/drawing-commands.service';
+import { DrawingCommandsService } from '../app/services/drawing-commands.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { Coord } from './commands/path';
@@ -48,11 +48,11 @@ export class Lobby {
   private gameType: GameType;
 
   private io: Server;
-  private drawingCommands: DrawingCommands;
+  private drawingCommands: DrawingCommandsService;
 
   constructor(io: Server) {
     this.io = io;
-    this.drawingCommands = new DrawingCommands();
+    this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;

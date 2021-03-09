@@ -9,15 +9,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainMenuViewModel @Inject constructor(private val mainmenuRepository: MainmenuRepository): ViewModel(){
-    lateinit var accessToken: String
-    lateinit var refreshToken:String
-    fun connectUser(){
-        viewModelScope.launch {
-            val res = mainmenuRepository.login()
-            println(res.accessToken)
-            accessToken = res.accessToken
-            refreshToken = res.refreshToken
-            mainmenuRepository.connectSocket(accessToken)
-        }
+
+    fun connectSocket(accessToken: String){
+        mainmenuRepository.connectSocket(accessToken)
     }
 }

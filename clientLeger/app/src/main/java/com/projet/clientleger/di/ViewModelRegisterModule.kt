@@ -1,5 +1,6 @@
 package com.projet.clientleger.di
 
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.ApiRegisterInterface
 import com.projet.clientleger.data.repository.RegisterRepository
 import dagger.Module
@@ -14,5 +15,5 @@ object ViewModelRegisterModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(apiRegisterInterface: ApiRegisterInterface) = RegisterRepository(apiRegisterInterface)
+    fun provideRepo(sessionManager: SessionManager, apiRegisterInterface: ApiRegisterInterface) = RegisterRepository(sessionManager, apiRegisterInterface)
 }

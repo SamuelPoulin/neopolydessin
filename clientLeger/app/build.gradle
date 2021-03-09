@@ -57,7 +57,15 @@ android {
             enableTransformForLocalTests = true
         }
     }
+    sourceSets {
+        main {
+            res {
+                srcDirs 'src\\main\\res', 'src\\main\\res\\menu', 'src\\main\\res\\anim'
+            }
+        }
+    }
 }
+
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

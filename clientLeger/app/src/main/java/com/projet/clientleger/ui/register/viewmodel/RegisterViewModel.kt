@@ -39,7 +39,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
 
 
     fun isDifferentPasswords(): Boolean {
-        return !registerPasswordLiveData.value.equals(registerPasswordConfirmLiveData.value)
+        return !registerPasswordLiveData.value.equals(registerPasswordConfirmLiveData.value) || registerPasswordLiveData.value!!.isEmpty() || registerPasswordConfirmLiveData.value!!.isEmpty()
     }
 
     fun passwordContainsNoDigit(): Boolean {

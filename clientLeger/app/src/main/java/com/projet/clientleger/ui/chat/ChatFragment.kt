@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
@@ -42,15 +43,15 @@ class ChatFragment @Inject constructor() : Fragment() {
     lateinit var socketService: SocketService
 
     fun setSubscriptions() {
-        socketService?.receiveMessage()
-            ?.subscribe { message ->
+        socketService.receiveMessage()
+            .subscribe { message ->
                 addMessage(message)
             }
-        socketService?.receivePlayerConnection()?.subscribe { message ->
+        socketService.receivePlayerConnection().subscribe { message ->
             message.content = "${message.content} a rejoint la discussion"
             addMessage(message)
         }
-        socketService?.receivePlayerDisconnection()?.subscribe { message ->
+        socketService.receivePlayerDisconnection().subscribe { message ->
             message.content = "${message.content} a quitté la discussion"
             addMessage(message)
         }
@@ -61,6 +62,9 @@ class ChatFragment @Inject constructor() : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         username = arguments?.getString("username") ?: "unknowned_user"
+        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
+            println(bundle["friend"])
+        }
     }
 
     override fun onCreateView(

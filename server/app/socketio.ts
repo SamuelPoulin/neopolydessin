@@ -10,10 +10,12 @@ import { FriendsList } from '../models/schemas/account';
 import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
+import messagesHistoryModel from '../models/schemas/messages-history';
 import * as jwtUtils from './utils/jwt-util';
-import { DatabaseService, Response } from './services/database.service';
+import { DatabaseService, ErrorMsg, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
+import { Observable } from './utils/observable';
 
 @injectable()
 export class SocketIo {
@@ -28,6 +30,8 @@ export class SocketIo {
     transports: ['websocket']
   };
 
+  clientSuccessfullyDisconnected: Observable<Socket> = new Observable();
+
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
     @inject(Types.DatabaseService) private databaseService: DatabaseService
@@ -36,6 +40,9 @@ export class SocketIo {
   init(server: http.Server): void {
     this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
+    this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
+      console.log(`Disconnected : ${socket.id} \n`);
+    });
   }
 
   validateMessageLength(msg: ChatMessage): boolean {
@@ -56,6 +63,7 @@ export class SocketIo {
       loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
     } catch (err) {
       console.log(err.message);
+      socket.disconnect();
     }
   }
 
@@ -68,12 +76,20 @@ export class SocketIo {
           lobby.removePlayer(accountIdOfSocket, socket);
         }
       });
-      this.databaseService.getAccountById(accountIdOfSocket).then((account) => {
-        socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
-        this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-        this.socketIdService.DisconnectSocketFromLobby(socket.id);
-      });
-      loginsModel.addLogout(accountIdOfSocket).catch((err) => { console.log(err); });
+      this.databaseService.getAccountById(accountIdOfSocket)
+        .then((account) => {
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+          this.socketIdService.DisconnectAccountIdSocketId(socket.id);
+          this.socketIdService.DisconnectSocketFromLobby(socket.id);
+          loginsModel.addLogout(accountIdOfSocket)
+            .then(() => {
+              this.clientSuccessfullyDisconnected.notify(socket);
+            })
+            .catch((err) => console.log(err));
+        })
+        .catch((err: ErrorMsg) => {
+          console.log(`status : ${err.statusCode} ${err.message}`);
+        });
     }
   }
 
@@ -110,7 +126,7 @@ export class SocketIo {
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
         if (this.validateMessageLength(sentMsg)) {
           const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-          if(currentLobby){
+          if (currentLobby) {
             socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
           }
         }
@@ -123,7 +139,12 @@ export class SocketIo {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
-            socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
+            messagesHistoryModel.addMessageToHistory(sentMsg).then((result) => {
+              if (result.nModified === 0) throw new Error('couldn\'t update history');
+              socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
+            }).catch((err) => {
+              console.log(err);
+            });
           }
         }
         else {
@@ -143,7 +164,6 @@ export class SocketIo {
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {
-        console.log(`Disconnected : ${socket.id} \n`);
         this.onDisconnect(socket);
       });
     });
