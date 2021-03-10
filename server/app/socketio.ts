@@ -127,6 +127,9 @@ export class SocketIo {
 
       socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, gametype: GameType, privacySetting: boolean) => {
         let lobby;
+        console.log(accountId);
+        console.log(gametype);
+        console.log(privacySetting);
         switch(gametype) {
           case GameType.CLASSIC: {
             lobby = new LobbyClassique(this.socketIdService, this.io, accountId, privacySetting);

@@ -191,7 +191,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('CreateLobby', testClient.accountId);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, testClient.accountId, GameType.SPRINT_COOP, true);
                 })
 
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
@@ -206,7 +206,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('CreateLobby', testClient.accountId);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, testClient.accountId, GameType.SPRINT_COOP, true);
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
 
@@ -229,5 +229,6 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 })
             });
+        done();
     });
 });
