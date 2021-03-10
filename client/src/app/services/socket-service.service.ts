@@ -27,7 +27,7 @@ export class SocketService {
 
     this.socket = this.manager.socket('/', {
       auth: {
-        token: 'some token', // access token here.
+        token: SocketService.accessToken,
       },
     });
   }
