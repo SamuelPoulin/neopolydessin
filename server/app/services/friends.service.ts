@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from 'http-status-codes';
 import { ObjectId } from 'mongodb';
 import accountModel, { Account, FriendsList, UpdateOneQueryResult } from '../../models/schemas/account';
 import Types from '../types';
@@ -24,7 +24,6 @@ export class FriendsService {
           resolve({ statusCode: OK, documents: messages });
         })
         .catch((err) => {
-          console.log(err.message);
           reject(DatabaseService.rejectErrorMessage(err));
         });
     });
@@ -89,6 +88,16 @@ export class FriendsService {
           return accountModel.acceptFriendship(friendId, myId, false);
         })
         .then(async () => {
+          const history = {
+            accountId: myId,
+            otherAccountId: friendId,
+            messages: [],
+          };
+          const model = new messagesHistoryModel(history);
+          return model.save();
+        })
+        .then(async (result) => {
+          if (!result) throw Error(INTERNAL_SERVER_ERROR.toString());
           return this.getFriendsOfUser(friendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
@@ -140,6 +149,9 @@ export class FriendsService {
         })
         .then(async (doc) => {
           if (doc.nModified === 0) throw Error(NOT_FOUND.toString());
+          return messagesHistoryModel.removeHistory(myId, toUnfriendId);
+        })
+        .then(async (doc) => {
           return this.getFriendsOfUser(toUnfriendId);
         })
         .then(async (friendList: Response<FriendsList>) => {

@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Document, Schema, Model, model, Query } from 'mongoose';
+import { UpdateOneQueryResult } from './account';
 
 export interface Login {
   start: Date;
@@ -15,8 +16,8 @@ export interface Logins extends Document {
 interface LoginsModel extends Model<Logins> {
   findByAccountId: (id: string) => Query<Logins | null, Logins>;
   findByAccountIdAndDelete: (id: string) => Query<Logins | null, Logins>;
-  addLogin: (id: string) => Query<Logins | null, Logins>;
-  addLogout: (id: string) => Query<Logins | null, Logins>;
+  addLogin: (id: string) => Query<UpdateOneQueryResult | null, Logins>;
+  addLogout: (id: string) => Query<UpdateOneQueryResult | null, Logins>;
 }
 
 export const loginSchema = new Schema<Logins, LoginsModel>({

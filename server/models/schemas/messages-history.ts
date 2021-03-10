@@ -18,6 +18,8 @@ export interface Messages extends Document {
 interface MessagesModel extends Model<Messages> {
   findHistory: (id: string, otherId: string, page: number, limit: number) => Query<MessageHistory | null, Messages>;
   addMessageToHistory: (msg: PrivateMessage) => Query<UpdateOneQueryResult, Messages>;
+  removeHistory: (id: string, otherId: string) => Query<Messages | null, Messages>;
+  removeHistoryOfAccount: (id: string) => Query<Messages | null, Messages>;
 }
 
 const findMessagesQuery = (id: string, otherId: string) => {
@@ -35,13 +37,11 @@ export const messagesSchema = new Schema<Messages, MessagesModel>({
   accountId: {
     type: ObjectId,
     required: true,
-    unique: true,
     ref: 'Account'
   },
   otherAccountId: {
     type: ObjectId,
     required: true,
-    unique: true,
     ref: 'Account'
   },
   messages: [
@@ -59,7 +59,6 @@ export const messagesSchema = new Schema<Messages, MessagesModel>({
 
 messagesSchema.statics.findHistory = (id: string, otherId: string, page: number, limit: number) => {
   const skips = limit * (page - 1);
-  console.log(otherId);
   return messagesHistoryModel.findOne(findMessagesQuery(id, otherId), 'messages')
     .skip(skips).limit(limit);
 };
@@ -76,6 +75,19 @@ messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage) => {
       }
     }
   );
+};
+
+messagesSchema.statics.removeHistory = (id: string, otherId: string) => {
+  return messagesHistoryModel.findOneAndRemove(findMessagesQuery(id, otherId), { useFindAndModify: false });
+};
+
+messagesSchema.statics.removeHistoryOfAccount = (id: string) => {
+  return messagesHistoryModel.deleteMany({
+    $or: [
+      { accountId: id, },
+      { otherAccountId: id }
+    ]
+  });
 };
 
 const messagesHistoryModel: MessagesModel = model<Messages, MessagesModel>('MessageHistory', messagesSchema);

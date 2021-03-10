@@ -2,12 +2,12 @@ import * as bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import * as mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/schemas/account';
 import loginsModel, { Logins } from '../../models/schemas/logins';
+import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
 
@@ -29,14 +29,12 @@ export interface LoginTokens {
 @injectable()
 export class DatabaseService {
 
-  private static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
+  static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   };
 
   readonly SALT_ROUNDS: number = 10;
-
-  mongoMS: MongoMemoryServer;
 
   constructor() {
     if (process.env.NODE_ENV !== 'test') {
@@ -74,19 +72,6 @@ export class DatabaseService {
     return { statusCode: errorCode, message: rejectionMsg };
   }
 
-  // Documentation de mongodb-memory-server sur Github
-  // https://github.com/nodkz/mongodb-memory-server
-  async connectMS(): Promise<void> {
-    this.mongoMS = new MongoMemoryServer();
-    return this.mongoMS.getUri().then((mongoUri) => {
-      mongoose.connect(mongoUri, DatabaseService.CONNECTION_OPTIONS);
-
-      mongoose.connection.once('open', () => {
-        console.log(`MongoDB successfully connected local instance ${mongoUri}`);
-      });
-    });
-  }
-
   connectDB(): void {
     if (process.env.MONGODB_KEY) {
       mongoose.connect(process.env.MONGODB_KEY, DatabaseService.CONNECTION_OPTIONS)
@@ -101,9 +86,6 @@ export class DatabaseService {
 
   async disconnectDB(): Promise<void> {
     await mongoose.disconnect();
-    if (this.mongoMS) {
-      await this.mongoMS.stop();
-    }
   }
 
   async getAccountById(id: string): Promise<Response<Account>> {
@@ -287,6 +269,9 @@ export class DatabaseService {
           return loginsModel.findByAccountIdAndDelete(id);
         })
         .then((logins: Logins) => {
+          return messagesHistoryModel.removeHistoryOfAccount(id);
+        })
+        .then((result) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {

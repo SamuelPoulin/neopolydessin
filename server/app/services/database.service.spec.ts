@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as httpStatus from 'http-status-codes';
+import * as mongoose from 'mongoose';
 import { Response } from './database.service';
 import { describe, beforeEach } from 'mocha';
 import { DatabaseService, ErrorMsg, LoginTokens } from './database.service';
@@ -9,6 +10,7 @@ import { Register } from '../../../common/communication/register';
 import { login } from '../../../common/communication/login';
 import * as jwt from 'jsonwebtoken';
 import { Account } from '../../models/schemas/account';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 export const accountInfo: Register = {
   firstName: 'name',
@@ -24,8 +26,30 @@ export const loginInfo: login = {
   password: 'monkey123',
 };
 
+// Documentation de mongodb-memory-server sur Github
+// https://github.com/nodkz/mongodb-memory-server
+export const connectMS = async () => {
+  const mongoMS = new MongoMemoryServer();
+  await mongoMS.getUri().then((mongoUri) => {
+    mongoose.connect(mongoUri, DatabaseService.CONNECTION_OPTIONS);
+
+    mongoose.connection.once('open', () => {
+      console.log(`MongoDB successfully connected local instance ${mongoUri}`);
+    });
+  });
+  return mongoMS;
+}
+
+export const disconnectMS = async (mongoMS: MongoMemoryServer) => {
+  await mongoose.disconnect();
+  if (mongoMS) {
+    await mongoMS.stop();
+  }
+}
+
 describe('Database Service', () => {
   let databaseService: DatabaseService;
+  let mongoMS: MongoMemoryServer;
 
   const env = Object.assign({}, process.env);
 
@@ -43,7 +67,11 @@ describe('Database Service', () => {
       databaseService = instance[0].get<DatabaseService>(Types.DatabaseService);
     });
 
-    await databaseService.connectMS();
+    mongoMS = await connectMS();
+  });
+
+  afterEach(async () => {
+    await disconnectMS(mongoMS);
   });
 
   it('should instanciate correctly', (done: Mocha.Done) => {
@@ -228,10 +256,6 @@ describe('Database Service', () => {
         }
       });
     });
-  });
-
-  afterEach(async () => {
-    await databaseService.disconnectDB();
   });
 });
 

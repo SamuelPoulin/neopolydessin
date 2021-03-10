@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
@@ -14,6 +16,7 @@ import com.projet.clientleger.data.model.Friend
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FriendslistFragmentBinding
+import kotlinx.android.synthetic.main.activity_register.*
 
 @AndroidEntryPoint
 class FriendslistFragment @Inject constructor(): Fragment() {
@@ -21,6 +24,15 @@ class FriendslistFragment @Inject constructor(): Fragment() {
 
     private var friends: ArrayList<Friend> = ArrayList()
     private var binding: FriendslistFragmentBinding? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        vm.friendsLiveData.observe(this){list ->
+            friends.clear()
+            friends.addAll(list)
+            binding?.rvFriends?.adapter?.notifyDataSetChanged()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,32 +44,17 @@ class FriendslistFragment @Inject constructor(): Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-        friends.add(Friend("id", "user", FriendStatus.FRIEND, false))
-
         binding?.rvFriends?.layoutManager = LinearLayoutManager(activity)
-        binding?.rvFriends?.adapter = FriendsAdapter(friends)
-
+        binding?.rvFriends?.adapter = FriendsAdapter(friends, ::openFriendChat)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+    }
+
+    private fun openFriendChat(friend: Friend){
+        setFragmentResult("openFriendChat", bundleOf("friend" to friend))
     }
 
 }

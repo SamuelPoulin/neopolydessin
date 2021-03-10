@@ -4,7 +4,7 @@ import { BrushInfo } from '../../../common/communication/brush-info';
 import { EraseCommand } from '../../models/commands/erase-command';
 import { DrawingCommandsService } from './drawing-commands.service';
 
-describe.only('DrawingCommandService', () => {
+describe('DrawingCommandService', () => {
     let drawingCommands: DrawingCommandsService;
 
     const brushInfo: BrushInfo = { color: '#ffffff', strokeWidth: 1 }
