@@ -32,7 +32,9 @@
               "src/styles.scss"
             ],
             "allowedCommonJsDependencies": ["socket.io-client"],
-            "scripts": []
+            "scripts": [
+              "node_modules/apexcharts/dist/apexcharts.min.js"
+            ]
           },
           "configurations": {
             "dev": {
