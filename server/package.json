@@ -64,7 +64,7 @@
     "inversify": "^5.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongodb-memory-server": "^6.5.0",
-    "mongoose": "^5.11.17",
+    "mongoose": "^5.11.15",
     "morgan": "^1.9.1",
     "nodemailer": "^6.4.18",
     "reflect-metadata": "^0.1.10",
@@ -107,6 +107,7 @@
     "pretty-quick": "^2.0.1",
     "rimraf": "3.0.0",
     "sinon": "^7.5.0",
+    "socket.io-client": "^3.1.2",
     "ts-node": "^8.6.0",
     "typescript": "^3.9.9"
   }

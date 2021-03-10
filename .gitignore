@@ -19,7 +19,7 @@ server/emailAPI.env
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-/build
+*/build
 /captures
 .externalNativeBuild
 .cxx

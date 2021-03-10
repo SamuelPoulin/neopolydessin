@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { inject, injectable } from 'inversify';
-import { body } from 'express-validator';
+import { body, query } from 'express-validator';
 import Types from '../types';
 import { jwtVerify } from '../middlewares/jwt-verify';
 import { FriendsService } from '../services/friends.service';
@@ -8,7 +8,7 @@ import { ErrorMsg, Response } from '../services/database.service';
 import { Decision, FriendRequest } from '../../../common/communication/friend-request';
 import { validationCheck } from '../middlewares/validation-check';
 import { LoggedIn } from '../middlewares/logged-in';
-import { FriendsList } from '../../models/account';
+import { FriendsList } from '../../models/schemas/account';
 
 @injectable()
 export class FriendsController {
@@ -24,6 +24,25 @@ export class FriendsController {
   private configureRouter(): void {
     this.router = express.Router();
 
+    this.router.get('/history',
+      [
+        query('page').isInt(),
+        query('limit').isInt(),
+        query('otherId').isLength({ min: 12, max: 24 })
+
+      ],
+      validationCheck,
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.friendsService.getMessageHistory(req.params._id, req.query.otherId as string, Number(req.query.page), Number(req.query.limit))
+          .then((result) => {
+            res.status(result.statusCode).json(result.documents);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
+      });
+
     this.router.get('/',
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
@@ -36,13 +55,13 @@ export class FriendsController {
       });
 
     this.router.post('/',
-      [body('email').isEmail(),],
+      [body('username').isString(),],
       validationCheck,
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const friendRequest: FriendRequest = req.body;
-        this.friendsService.requestFriendship(req.params._id, friendRequest.email).then((result: Response<FriendsList>) => {
+        this.friendsService.requestFriendship(req.params._id, friendRequest.username).then((result: Response<FriendsList>) => {
           res.status(result.statusCode).json(result.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
