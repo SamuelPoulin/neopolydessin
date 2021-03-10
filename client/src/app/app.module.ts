@@ -1,6 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { AccountModule } from '@components/pages/account/account.module';
+import { AccountComponent } from '@components/pages/account/account/account.component';
+import { DashboardComponent } from '@components/pages/account/dashboard/dashboard.component';
+import { ProfileComponent } from '@components/pages/account/profile/profile.component';
+import { SettingsComponent } from '@components/pages/account/settings/settings.component';
 import { ChatModule } from '@components/pages/chat/chat.module';
 import { ChatComponent } from '@components/pages/chat/chat/chat.component';
 import { EditorModule } from '@components/pages/editor/editor.module';
@@ -21,6 +26,7 @@ import { AppComponent } from './app.component';
     SharedModule,
     HomeModule,
     ChatModule,
+    AccountModule,
     EditorModule,
     UserGuideModule,
     LoginModule,
@@ -32,6 +38,15 @@ import { AppComponent } from './app.component';
         { path: 'chat', component: ChatComponent },
         { path: 'register', component: RegisterComponent },
         { path: 'password-recovery', component: PasswordRecoveryComponent },
+        {
+          path: 'account',
+          component: AccountComponent,
+          children: [
+            { path: '', component: DashboardComponent },
+            { path: 'profile', component: ProfileComponent },
+            { path: 'settings', component: SettingsComponent },
+          ],
+        },
       ],
       { useHash: true },
     ),
