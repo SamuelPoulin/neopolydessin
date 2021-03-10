@@ -1,14 +1,11 @@
 /* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
 import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { keyDown } from '@components/pages/editor/editor/editor.component.spec';
 import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
-import { CreateDrawingModalComponent } from '@components/pages/home/create-drawing-modal/create-drawing-modal.component';
-import { UserGuideModalComponent } from '@components/pages/user-guide/user-guide/user-guide-modal.component';
 import { SharedModule } from '@components/shared/shared.module';
 import { EditorService } from '@services/editor.service';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
@@ -23,11 +20,9 @@ describe('EditorKeyboardListener', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule, SharedModule, ToolbarModule],
-      declarations: [DrawingSurfaceComponent, UserGuideModalComponent, EditorComponent, GridComponent, CreateDrawingModalComponent],
+      declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
       providers: [EditorService],
-    })
-      .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [CreateDrawingModalComponent, UserGuideModalComponent] } })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -105,5 +100,4 @@ describe('EditorKeyboardListener', () => {
     keyboardListener.handle(keyDown('g', false, false));
     expect(component.editorService.gridProperties.visibility.value).toEqual(GridVisibility.visible);
   });
-
 });
