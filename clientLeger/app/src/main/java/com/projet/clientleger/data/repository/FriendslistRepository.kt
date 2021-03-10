@@ -21,7 +21,9 @@ class FriendslistRepository @Inject constructor(private val friendslistSocketSer
     }
 
     suspend fun acceptFriend(idOfFriend: String): Friendslist{
-        return sessionManager.request(FriendRequestDecisionModel(idOfFriend, FriendRequestDecision.ACCEPT.decision),apiFriendslistInterface::friendDecision).body()!!
+        val friends = sessionManager.request(FriendRequestDecisionModel(idOfFriend, FriendRequestDecision.ACCEPT.decision),apiFriendslistInterface::friendDecision).body()!!
+        print("acceptResponse: ${friends}")
+        return friends
     }
 
     suspend fun refuseFriend(idOfFriend: String): Friendslist{

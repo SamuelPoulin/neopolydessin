@@ -16,15 +16,9 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
     init {
         CoroutineScope(Job() + Dispatchers.Main).launch {
-            val responseFriends = friendslistRepository.getFriends().friends
-            val friendSimplifiedList = ArrayList<FriendSimplified>()
-            for(friend in responseFriends){
-                friendSimplifiedList.add(FriendSimplified(friend))
-            }
-            friendsLiveData.value = friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId}))
+            updateFriends(friendslistRepository.getFriends())
         }
         friendslistRepository.friendRequestReceived().subscribe{
-            println(it)
             updateFriends(it)
         }
         friendslistRepository.updateFriendslist().subscribe{
@@ -51,9 +45,12 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
     }
 
     private fun updateFriends(friendslist: Friendslist){
+
         val friendSimplifiedList = ArrayList<FriendSimplified>()
         for(friend in friendslist.friends){
-            friendSimplifiedList.add(FriendSimplified(friend))
+            println(friend)
+            if(friend.friendId != null)
+                friendSimplifiedList.add(FriendSimplified(friend))
         }
         friendsLiveData.postValue(friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId})))
     }
