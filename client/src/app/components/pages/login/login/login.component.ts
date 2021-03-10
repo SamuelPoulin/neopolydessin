@@ -10,7 +10,8 @@ import { UserService } from '@services/user.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  inputValue: string = '';
+  username: string = '';
+  password: string = '';
   currentError: string = '';
 
   constructor(
@@ -21,9 +22,9 @@ export class LoginComponent {
   ) {}
 
   login() {
-    this.socketService.newPlayer(this.inputValue).then((valid) => {
+    this.socketService.newPlayer(this.username).then((valid) => {
       if (valid) {
-        this.userService.username = this.inputValue;
+        this.userService.username = this.username;
         this.router.navigate(['chat']);
       } else {
         this.snackBar.open("Ce nom d'utilisateur est non disponible.", 'Ok', {

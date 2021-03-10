@@ -1,6 +1,11 @@
 <div id="login-page">
   <img id="login-page-image" src="assets/icon.png" />
   <div id="login-page-title">Bienvenue sur PolyDessin</div>
-  <app-username-input [(value)]="inputValue" (keyup.enter)="login()">Nom d'utilisateur</app-username-input>
-  <button id="login-button" mat-raised-button color="primary" (click)="login()">Login</button>
+  <app-username-input class="input" [(value)]="username">Nom d'utilisateur</app-username-input>
+  <app-password-input class="input" [(value)]="password">Mot de passe</app-password-input>
+  <button id="submit-button" mat-raised-button color="primary" (click)="login()">Se connecter</button>
+  <div id="login-links">
+    <div routerLink="/password-recovery">J'ai oublié mon mot de passe</div>
+    <div routerLink="/register">Créer un compte</div>
+  </div>
 </div>

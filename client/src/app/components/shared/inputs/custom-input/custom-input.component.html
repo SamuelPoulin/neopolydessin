@@ -6,7 +6,7 @@
   </mat-label>
   <span *ngIf="prefix" matPrefix>{{prefix}}</span>
   <input #input matInput (focus)='onFocus()' (keyup)="onChange(input.value)" (blur)='onBlur(input.value)'
-    [value]='value' [formControl]="formControl" id="{{id}}">
+    [value]='value' [formControl]="formControl" id="{{id}}" [type]="isPassword ? 'password' : ''">
   <span id="suffix" *ngIf="suffix" matSuffix>{{suffix}}</span>
 
   <div *ngIf="invalid" class="alert alert-danger">
