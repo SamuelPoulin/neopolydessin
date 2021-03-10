@@ -23,6 +23,8 @@ import { Observable } from './utils/observable';
 @injectable()
 export class SocketIo {
 
+  static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
+
   io: Server;
   lobbyList: Lobby[] = [];
   readonly MAX_LENGTH_MSG: number = 200;
@@ -45,6 +47,14 @@ export class SocketIo {
     this.bindIoEvents();
     this.clientSuccessfullyDisconnected.subscribe((socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
+    });
+
+    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId) => {
+      console.log(`Game : ${lobbyId} ended \n`);
+      const index = this.lobbyList.findIndex((game) => game.lobbyId === lobbyId);
+      if (index > -1) {
+        this.lobbyList.splice(index, 1);
+      }
     });
   }
 

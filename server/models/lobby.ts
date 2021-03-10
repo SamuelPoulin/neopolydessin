@@ -8,6 +8,7 @@ import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { ChatMessage } from '../../common/communication/chat-message';
 import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
+import { SocketIo } from '../app/socketio';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
@@ -59,6 +60,7 @@ export abstract class Lobby {
 
   protected players: Player [];
 
+  protected timeLeftSeconds: number;
   protected wordToGuess: string;
   protected ownerAccountId: string;
   protected gameType: GameType;
@@ -79,6 +81,7 @@ export abstract class Lobby {
     this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
     this.socketIdService = new SocketIdService();
+    this.timeLeftSeconds = 0;
   }
 
   toLobbyInfo(): LobbyInfo {
@@ -124,6 +127,11 @@ export abstract class Lobby {
     if (senderAccountId === this.ownerAccountId) {
       this.privateGame = newPrivacySetting;
     }
+  }
+
+  endGame(): void {
+    this.io.in(this.lobbyId).emit(SocketMessages.END_GAME);
+    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }
 
   bindLobbyEndPoints(socket: Socket) {

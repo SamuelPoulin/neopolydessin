@@ -1,10 +1,19 @@
 import { injectable } from 'inversify';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { SocketIdService } from '../app/services/socket-id.service';
 import { Lobby, PlayerStatus } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
+
+  private guessLeft: number;
+
+  constructor(socketIdService: SocketIdService, io: Server, accountId: string, privateGame: boolean) {
+    super(socketIdService, io, accountId, privateGame);
+    this.guessLeft = 5;
+  }
+
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
     if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
       this.bindLobbyCoopEndPoints(socket);
@@ -22,6 +31,10 @@ export class LobbyCoop extends Lobby {
           callback(true);
         }
         else {
+          this.guessLeft--;
+          if (this.guessLeft === 0) {
+            this.guessLeft = 5;
+          }
           callback(false);
         }
       }

@@ -8,9 +8,11 @@ import { Lobby, PlayerStatus } from './lobby';
 export class LobbySolo extends Lobby {
 
   private readonly SOLO_TEAM_SIZE: number = 2;
+  // private guessLeft: number;
   constructor(socketIdService: SocketIdService, io: Server, accountId: string, privateGame: boolean) {
     super(socketIdService, io, accountId, privateGame);
     this.size = this.SOLO_TEAM_SIZE;
+    // this.guessLeft = 5;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
