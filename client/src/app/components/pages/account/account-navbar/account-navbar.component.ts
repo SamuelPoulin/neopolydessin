@@ -15,7 +15,15 @@ export class AccountNavbarComponent {
   closed: boolean;
   matcher: MediaQueryList;
 
+  firstName: string;
+  lastName: string;
+  username: string;
+
   constructor(private mediaMatcher: MediaMatcher) {
+    this.firstName = 'Samuel';
+    this.lastName = 'Poulin';
+    this.username = 'samuelpoulin';
+
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
     AccountNavbarComponent.IS_SCREEN_BIG = this.matcher.matches;
