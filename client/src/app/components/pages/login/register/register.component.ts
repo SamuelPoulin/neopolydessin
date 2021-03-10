@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { APIService } from '@services/api.service';
+import { UserService } from '@services/user.service';
 import { PasswordRule } from '../password-rule';
 
 @Component({
@@ -17,7 +21,12 @@ export class RegisterComponent {
 
   public passwordRules = new Array<PasswordRule>();
 
-  constructor() { 
+  constructor(
+    private API: APIService,
+    private userService: UserService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) { 
     this.passwordRules.push(
       new PasswordRule('Les mots de passe doivent être les mêmes', this.isPasswordIdentical),
       new PasswordRule('Doit contenir un chiffre', this.passwordHasDigit),
@@ -27,6 +36,18 @@ export class RegisterComponent {
   }
 
   public register() {
+    this.API.register(this.firstName, this.lastName, this.username, this.email, this.password)
+      .then(() => {
+        this.userService.username = this.username;
+        this.router.navigate(['/chat']);   // todo - use constant?
+      }).catch(err => {
+        console.error(err);
+        this.snackBar.open("Erreur de connexion", 'Ok', {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        });
+      });
   }
 
   public updatePassword() {
@@ -38,7 +59,6 @@ export class RegisterComponent {
   }
 
   private isPasswordIdentical = () => {
-    console.log(this);
     return this.password === this.passwordConfirm;
   }
 

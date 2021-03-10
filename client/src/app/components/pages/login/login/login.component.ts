@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { SocketService } from '@services/socket-service.service';
+import { APIService } from '@services/api.service';
 import { UserService } from '@services/user.service';
 
 @Component({
@@ -15,24 +15,24 @@ export class LoginComponent {
   currentError: string = '';
 
   constructor(
-    private socketService: SocketService,
+    private API: APIService,
     private router: Router,
     private userService: UserService,
-    private snackBar: MatSnackBar,
+    private snackBar: MatSnackBar
   ) {}
 
   login() {
-    this.socketService.newPlayer(this.username).then((valid) => {
-      if (valid) {
-        this.userService.username = this.username;
-        this.router.navigate(['chat']);
-      } else {
-        this.snackBar.open("Ce nom d'utilisateur est non disponible.", 'Ok', {
-          duration: 2000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-      }
+
+    this.API.login(this.username, this.password).then(() => {
+      this.userService.username = this.username;
+      this.router.navigate(['/chat']);   // todo - use constant?
+    }).catch(err => {
+      console.error(err);
+      this.snackBar.open("Erreur de connexion", 'Ok', {
+        duration: 2000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
     });
   }
 }

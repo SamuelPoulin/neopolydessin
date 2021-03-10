@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
+import { SocketService } from './socket-service.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,24 @@ export class APIService {
     APIService.API_DATABASE_ROUTE = '/database';
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
+  }
+
+  login(username: string, password: string) {
+    const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/login';
+    return this.http.post(url, {username, password}).toPromise()
+      .then((reply: {accessToken: string, refreshToken: string}) => {
+        SocketService.accessToken = reply.accessToken;
+        SocketService.refreshToken = reply.refreshToken;
+      });
+  }
+
+  register(firstName:string, lastName: string, username: string, email: string, password: string) {
+    const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/register';
+    return this.http.post(url, {firstName, lastName, username, email, password, passwordConfirm: password}).toPromise()
+      .then((reply: {accessToken: string, refreshToken: string}) => {
+        SocketService.accessToken = reply.accessToken;
+        SocketService.refreshToken = reply.refreshToken;
+      });  // todo - fix duplicate password
   }
 
   async uploadDrawing(drawing: Drawing): Promise<void> {
