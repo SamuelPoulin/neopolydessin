@@ -126,6 +126,7 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent"/>
                     <Button
+                        android:id="@+id/removePlayer1Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/remove_player_button_text"
@@ -168,6 +169,7 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent"/>
                     <Button
+                        android:id="@+id/removePlayer2Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/remove_player_button_text"
@@ -240,6 +242,7 @@
                             app:layout_constraintLeft_toLeftOf="parent"
                             app:layout_constraintTop_toTopOf="parent"/>
                         <Button
+                            android:id="@+id/removePlayer3Button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/remove_player_button_text"
@@ -282,6 +285,7 @@
                             app:layout_constraintLeft_toLeftOf="parent"
                             app:layout_constraintTop_toTopOf="parent"/>
                         <Button
+                            android:id="@+id/removePlayer4Button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/remove_player_button_text"

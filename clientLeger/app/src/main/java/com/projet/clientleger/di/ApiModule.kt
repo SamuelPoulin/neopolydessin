@@ -7,6 +7,7 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.data.api.service.SocketService
 import dagger.Module
 import dagger.Provides
@@ -60,4 +61,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
+
+    @Provides
+    @Singleton
+    fun provideLobbySocketService(socketService:SocketService): LobbySocketService = LobbySocketService(socketService)
 }
