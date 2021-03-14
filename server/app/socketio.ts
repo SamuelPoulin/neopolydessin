@@ -61,6 +61,7 @@ export class SocketIo {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
       loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
+      console.log(`Connected with ${socket.id} \n`);
     } catch (err) {
       console.log(err.message);
       socket.disconnect();
@@ -95,7 +96,6 @@ export class SocketIo {
 
   bindIoEvents(): void {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
-      console.log(`Connected with ${socket.id} \n`);
 
       this.onConnect(socket, socket.handshake.auth.token);
 
