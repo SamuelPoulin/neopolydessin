@@ -18,6 +18,12 @@ export enum GameType {
   SPRINT_COOP = 'sprintCoop'
 }
 
+export enum Difficulty {
+  EASY = 'easy',
+  INTERMEDIATE = 'intermediate',
+  HARD = 'hard'
+}
+
 export enum PlayerStatus {
   DRAWER = 'active',
   GUESSER = 'guesser',
@@ -37,6 +43,8 @@ export class Lobby {
 
   lobbyId: string;
 
+  privateLobby: boolean;
+
   private size: number;
 
   private players: {
@@ -48,10 +56,13 @@ export class Lobby {
   private gameType: GameType;
 
   private io: Server;
+
   private drawingCommands: DrawingCommandsService;
 
-  constructor(io: Server) {
+  constructor(io: Server, gameType: GameType, difficulty: Difficulty, privateLobby: boolean) {
     this.io = io;
+    this.gameType = gameType;
+    this.privateLobby = privateLobby;
     this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
@@ -99,7 +110,7 @@ export class Lobby {
       if (this.isActivePlayer(socket)) {
         this.drawingCommands.startPath(startPoint, brushInfo)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint);
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint, brushInfo);
           })
           .catch(() => {
             console.log(`failed to start path for ${this.lobbyId}`);
