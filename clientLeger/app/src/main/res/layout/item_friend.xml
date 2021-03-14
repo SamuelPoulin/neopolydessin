@@ -42,16 +42,3 @@
         app:layout_constraintHeight_percent="0.5"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--    <ImageButton-->
-    <!--        android:id="@+id/sendMessageBtn"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        app:layout_constraintDimensionRatio="2:1"-->
-    <!--        android:src="@drawable/ic_send_message"-->
-    <!--        android:backgroundTint="@color/lightGreen"-->
-    <!--        app:layout_constraintLeft_toRightOf="@id/username"-->
-    <!--        app:layout_constraintRight_toRightOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        />-->
