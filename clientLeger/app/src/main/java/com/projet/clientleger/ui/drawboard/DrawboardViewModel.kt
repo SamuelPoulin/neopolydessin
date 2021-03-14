@@ -7,12 +7,13 @@ import androidx.lifecycle.ViewModel
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PenPath
+import com.projet.clientleger.data.repository.DrawboardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.abs
 
 @HiltViewModel
-class DrawboardViewModel @Inject constructor(): ViewModel() {
+class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository): ViewModel() {
     var paths: MutableLiveData<ArrayList<PenPath>> = MutableLiveData(ArrayList())
     private lateinit var currentPath: Path
     private lateinit var lastCoordinate: Coordinate

@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-<com.projet.clientleger.ui.drawboard.DrawingView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawingBoard"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.drawboard.DrawboardFragment">
-
-</com.projet.clientleger.ui.drawboard.DrawingView>
+    tools:context=".ui.drawboard.DrawboardFragment"
+    android:background="@drawable/drawboard_background">
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/drawboard_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        >
+        <com.projet.clientleger.ui.drawboard.DrawingView
+            android:layout_width="1000px"
+            android:layout_height="500px"
+            android:id="@+id/drawingBoard"
+            android:layout_margin="1dp"
+            />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

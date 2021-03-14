@@ -75,7 +75,7 @@ class SocketService @Inject constructor() {
         }
     }
 
-    private fun <T> receiveFromSocket(
+    fun <T> receiveFromSocket(
         endpoint: String,
         parser: (received: Array<Any>) -> T
     ): Observable<T> {
@@ -93,7 +93,6 @@ class SocketService @Inject constructor() {
             socket.emit("newPlayer", username, Ack { args ->
                 val resp = args[0] as JSONObject
                 val status = resp["status"] as String
-                println(status)
                 emitter.onNext(status == "Valid")
             })
 
