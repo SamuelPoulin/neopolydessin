@@ -138,7 +138,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('CreateLobby', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.SPRINT_COOP, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
@@ -154,7 +154,7 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 });
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                     testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
@@ -164,8 +164,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
-                        console.log(lobbies);
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
@@ -190,7 +189,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('CreateLobby', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.SPRINT_COOP, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
@@ -205,7 +204,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('CreateLobby', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.SPRINT_COOP, Difficulty.EASY, false);
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
 
@@ -218,7 +217,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
