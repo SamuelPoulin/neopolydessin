@@ -1,5 +1,6 @@
 package com.projet.clientleger.di
 
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.ApiConnectionInterface
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.repository.ConnectionRepository
@@ -16,5 +17,5 @@ object ViewModelConnectionModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(socketService: SocketService,apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(socketService,apiConnectionInterface)
+    fun provideRepo(sessionManager: SessionManager, socketService: SocketService, apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(sessionManager, socketService,apiConnectionInterface)
 }

@@ -7,10 +7,12 @@ import { CustomInputComponent } from '../custom-input/custom-input.component';
   styleUrls: ['../custom-input/custom-input.component.scss'],
 })
 export class NameInputComponent extends CustomInputComponent implements OnInit {
+  static readonly INVALID_NAME_MSG: string = 'Doit contenir seulement des lettres.';
+
   ngOnInit(): void {
-    this.stringToMatch = '^[A-Za-z0-9. ]+(?:[_&%$*#@!-][A-Za-z0-9. ]+)*$';
+    this.stringToMatch = '^[A-Za-z]+$';
     this.format = (v: string): string => v;
-    this.hintLabel = 'Lettres, espaces et nombres. Maximum 20 charactères';
+    this.errorMessages.pattern = NameInputComponent.INVALID_NAME_MSG;
     super.ngOnInit();
   }
 }

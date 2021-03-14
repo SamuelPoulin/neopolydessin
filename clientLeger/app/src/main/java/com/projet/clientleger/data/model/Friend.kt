@@ -1,5 +1,11 @@
 package com.projet.clientleger.data.model
 
-import com.projet.clientleger.data.enum.FriendStatus
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-data class Friend(val id: String, val username: String, val status: FriendStatus, val received: Boolean)
+@Parcelize
+data class Friend(
+    var friendId: String,
+    var username: String,
+    var status: String,
+    var received: Boolean): Parcelable
