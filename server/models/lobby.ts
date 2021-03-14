@@ -43,6 +43,8 @@ export class Lobby {
 
   lobbyId: string;
 
+  privateLobby: boolean;
+
   private size: number;
 
   private players: {
@@ -54,11 +56,13 @@ export class Lobby {
   private gameType: GameType;
 
   private io: Server;
+
   private drawingCommands: DrawingCommandsService;
 
-  constructor(io: Server, gameType: GameType, difficulty: Difficulty) {
+  constructor(io: Server, gameType: GameType, difficulty: Difficulty, privateLobby: boolean) {
     this.io = io;
     this.gameType = gameType;
+    this.privateLobby = privateLobby;
     this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
