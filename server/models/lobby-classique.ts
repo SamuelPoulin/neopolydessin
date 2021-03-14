@@ -10,7 +10,7 @@ export class LobbyClassique extends Lobby {
 
   constructor(socketIdService: SocketIdService, io: Server, accountId: string, privateGame: boolean) {
     super(socketIdService, io, accountId, privateGame);
-    this.teams = [{teamNumber: 1, currentScore: 0, playersInTeam: []}, {teamNumber: 2, currentScore: 0, playersInTeam: []}];
+    this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}, {teamNumber: 1, currentScore: 0, playersInTeam: []}];
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
