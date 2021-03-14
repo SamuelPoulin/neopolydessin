@@ -164,7 +164,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, testClient.accountId, lobbies[0].lobbyId);
                     });
                 });
@@ -182,7 +182,6 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 });
             })
-        done();
     })
 
     it('multiple lobbies should work correctly', (done: Mocha.Done) => {
@@ -218,7 +217,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit('GetLobbies', (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, testClient.accountId, lobbies[0].lobbyId);
                     });
                 });
@@ -228,7 +227,6 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 })
             });
-        done();
     });
 
     it('friendship notifications should work correctly', (done: Mocha.Done) => {
