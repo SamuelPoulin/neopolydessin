@@ -15,13 +15,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_margin="5dp"
         >
         <com.projet.clientleger.ui.drawboard.DrawingView
             android:layout_width="1000px"
             android:layout_height="500px"
             android:id="@+id/drawingBoard"
-            android:layout_margin="1dp"
-            />
+            android:layout_margin="3dp"/>
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

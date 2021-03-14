@@ -44,6 +44,7 @@ class DrawingView : View {
         pathPaint.style = Paint.Style.STROKE
         pathPaint.strokeJoin = Paint.Join.ROUND
         pathPaint.strokeCap = Paint.Cap.ROUND
+        pathPaint.isAntiAlias = true
     }
 
     override fun onDraw(canvas: Canvas) {
