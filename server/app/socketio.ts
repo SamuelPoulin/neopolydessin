@@ -7,7 +7,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
+import { Difficulty, GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import messagesHistoryModel from '../models/schemas/messages-history';
@@ -116,11 +116,15 @@ export class SocketIo {
         }
       });
 
-      socket.on('CreateLobby', (accountId: string) => {
-        const lobby: Lobby = new Lobby(this.io);
-        // player status is to be changed.
-        lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
-        this.lobbyList.push(lobby);
+      socket.on('CreateLobby', (gameType: GameType, difficulty: Difficulty) => {
+        const lobby: Lobby = new Lobby(this.io, gameType, difficulty);
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (playerId) {
+          lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          this.lobbyList.push(lobby);
+        } else {
+          console.error('player doesn\'t exist');
+        }
       });
 
       socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
