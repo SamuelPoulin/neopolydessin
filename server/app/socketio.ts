@@ -7,7 +7,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
+import { Difficulty, GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import { LobbySolo } from '../models/lobby-solo';
@@ -74,6 +74,7 @@ export class SocketIo {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
       loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
+      console.log(`Connected with ${socket.id} \n`);
     } catch (err) {
       console.log(err.message);
       socket.disconnect();
@@ -108,49 +109,56 @@ export class SocketIo {
 
   bindIoEvents(): void {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
-      console.log(`Connected with ${socket.id} \n`);
 
       this.onConnect(socket, socket.handshake.auth.token);
 
       socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(this.lobbyList.map((lobby) => {
-          return lobby.toLobbyInfo();
-        }));
+        callback(this.lobbyList
+          .filter((lobby) => {
+            return !lobby.privateLobby;
+          }).map((lobby) => {
+            return lobby.toLobbyInfo();
+          }));
       });
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
+      socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
-        if (lobbyToJoin) {
-          // player status is to be changed.
-          lobbyToJoin.addPlayer(accountId, PlayerStatus.GUESSER, socket);
-          this.databaseService.getAccountById(accountId).then((account) => {
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (lobbyToJoin && playerId) {
+          lobbyToJoin.addPlayer(playerId, PlayerStatus.GUESSER, socket);
+          this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
+        } else {
+          console.error('lobby or player doesn\'t exist');
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (accountId: string, gametype: GameType, privacySetting: boolean) => {
+      socket.on(SocketMessages.CREATE_LOBBY, (gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
         let lobby;
-        console.log(accountId);
-        console.log(gametype);
-        console.log(privacySetting);
-        switch(gametype) {
-          case GameType.CLASSIC: {
-            lobby = new LobbyClassique(this.socketIdService, this.io, accountId, privacySetting);
-            break;
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
+        if (playerId) {
+          switch(gametype) {
+            case GameType.CLASSIC: {
+              lobby = new LobbyClassique(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_SOLO: {
+              lobby = new LobbySolo(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_COOP: {
+              lobby = new LobbyCoop(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
           }
-          case GameType.SPRINT_SOLO: {
-            lobby = new LobbySolo(this.socketIdService, this.io, accountId, privacySetting);
-            break;
-          }
-          case GameType.SPRINT_COOP: {
-            lobby = new LobbyCoop(this.socketIdService, this.io, accountId, privacySetting);
-            break;
-          }
+          lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          this.lobbyList.push(lobby);
+        } else {
+          console.error('player doesn\'t exist');
         }
         // player status is to be changed.
-        lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
-        this.lobbyList.push(lobby);
       });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {

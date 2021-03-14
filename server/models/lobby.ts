@@ -30,6 +30,12 @@ export enum GameType {
   SPRINT_COOP = 'sprintCoop'
 }
 
+export enum Difficulty {
+  EASY = 'easy',
+  INTERMEDIATE = 'intermediate',
+  HARD = 'hard'
+}
+
 export enum PlayerStatus {
   DRAWER = 'active',
   GUESSER = 'guesser',
@@ -50,6 +56,9 @@ export abstract class Lobby {
   readonly MAX_LENGTH_MSG: number = 200;
   lobbyId: string;
 
+
+  privateLobby: boolean;
+
   protected size: number;
 
   protected teams: {
@@ -64,17 +73,18 @@ export abstract class Lobby {
   protected wordToGuess: string;
   protected ownerAccountId: string;
   protected gameType: GameType;
+  protected difficulty: Difficulty;
 
-  protected privateGame: boolean;
   protected io: Server;
   protected drawingCommands: DrawingCommandsService;
 
   constructor(@inject(Types.SocketIdService) protected socketIdService: SocketIdService,
-    io: Server, accountId: string, privacySetting: boolean) {
+    io: Server, accountId: string, difficulty: Difficulty, privacySetting: boolean) {
     this.io = io;
     this.wordToGuess = '';
     this.ownerAccountId = accountId;
-    this.privateGame = privacySetting;
+    this.difficulty = difficulty;
+    this.privateLobby = privacySetting;
     this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
@@ -125,7 +135,7 @@ export abstract class Lobby {
   setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
     const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
     if (senderAccountId === this.ownerAccountId) {
-      this.privateGame = newPrivacySetting;
+      this.privateLobby = newPrivacySetting;
     }
   }
 
@@ -142,7 +152,7 @@ export abstract class Lobby {
       if (this.isActivePlayer(socket)) {
         this.drawingCommands.startPath(startPoint, brushInfo)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint);
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint, brushInfo);
           })
           .catch(() => {
             console.log(`failed to start path for ${this.lobbyId}`);
@@ -236,7 +246,7 @@ export abstract class Lobby {
 
     socket.on(SocketMessages.SET_GAME_PRIVACY, (privacySetting: boolean) => {
       this.setPrivacySetting(socket.id, privacySetting);
-      this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateGame);
+      this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateLobby);
     });
 
     socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {

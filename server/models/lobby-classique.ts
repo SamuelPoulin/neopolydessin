@@ -2,14 +2,14 @@ import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Lobby, PlayerStatus } from './lobby';
+import { Difficulty, Lobby, PlayerStatus } from './lobby';
 
 
 @injectable()
 export class LobbyClassique extends Lobby {
 
-  constructor(socketIdService: SocketIdService, io: Server, accountId: string, privateGame: boolean) {
-    super(socketIdService, io, accountId, privateGame);
+  constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean) {
+    super(socketIdService, io, accountId, difficulty, privateGame);
     this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}, {teamNumber: 1, currentScore: 0, playersInTeam: []}];
   }
 
