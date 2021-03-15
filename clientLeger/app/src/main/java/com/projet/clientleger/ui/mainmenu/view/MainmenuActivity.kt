@@ -31,6 +31,7 @@ import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
+import kotlinx.android.synthetic.main.dialog_gamemode.view.*
 import javax.inject.Inject
 
 
@@ -106,5 +107,9 @@ class MainmenuActivity : AppCompatActivity() {
         val adapterDifficulty = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
         adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
         dialogView.findViewById<Spinner>(R.id.difficultySpinner).adapter = adapterDifficulty
+
+        dialogView.actionBtn.setOnClickListener {
+            vm.createGame(dialogView.gameName.text.toString(), gamemodeSpinner.transitionName, difficultySpinner.transitionName)
+        }
     }
 }

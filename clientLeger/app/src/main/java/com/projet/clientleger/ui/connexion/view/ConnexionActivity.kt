@@ -77,6 +77,7 @@ class ConnexionActivity : AppCompatActivity() {
         startActivity(intent)
     }
     private fun goToMainMenu(){
+        println("bonjour")
         val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }
