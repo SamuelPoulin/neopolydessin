@@ -26,6 +26,10 @@ export class Application {
     this.app.use(logger('dev'));
     this.app.use(bodyParser.json({ limit: '25mb' }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
+    this.app.use(bodyParser.raw({
+      type: ['image/png', 'image/jpeg'],
+      limit: '3mb',
+    }));
     this.app.use(cookieParser());
     this.app.use(cors({ optionsSuccessStatus: 200 }));
   }
