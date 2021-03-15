@@ -54,21 +54,13 @@ const gameSizeMap = new Map<GameType, number>([
 export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
-  lobbyId: string;
 
+  lobbyId: string;
 
   privateLobby: boolean;
 
   protected size: number;
-
-  protected teams: {
-    teamNumber: number;
-    currentScore: number;
-    playersInTeam: Player[];
-  }[];
-
-  protected players: Player [];
-
+  protected players: Player[];
   protected timeLeftSeconds: number;
   protected wordToGuess: string;
   protected ownerAccountId: string;
@@ -78,8 +70,19 @@ export abstract class Lobby {
   protected io: Server;
   protected drawingCommands: DrawingCommandsService;
 
-  constructor(@inject(Types.SocketIdService) protected socketIdService: SocketIdService,
-    io: Server, accountId: string, difficulty: Difficulty, privacySetting: boolean) {
+  protected teams: {
+    teamNumber: number;
+    currentScore: number;
+    playersInTeam: Player[];
+  }[];
+
+  constructor(
+    @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
+    io: Server,
+    accountId: string,
+    difficulty: Difficulty,
+    privacySetting: boolean
+  ) {
     this.io = io;
     this.wordToGuess = '';
     this.ownerAccountId = accountId;
@@ -88,9 +91,8 @@ export abstract class Lobby {
     this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
-    this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}];
+    this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
-    this.socketIdService = new SocketIdService();
     this.timeLeftSeconds = 0;
   }
 
@@ -103,9 +105,9 @@ export abstract class Lobby {
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
-      this.players.push({ accountId, playerStatus, socket , teamNumber: 0});
-      this.teams[0].playersInTeam.push({ accountId, playerStatus, socket , teamNumber: 0});
+    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
+      this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
+      this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
     }
@@ -124,7 +126,7 @@ export abstract class Lobby {
   }
 
   isActivePlayer(socket: Socket): boolean {
-    const playerInfo = this.players.find((player) => player.socket === socket);
+    const playerInfo = this.findPlayerBySocket(socket);
     if (playerInfo) {
       return playerInfo.playerStatus === PlayerStatus.DRAWER;
     } else {
@@ -134,7 +136,7 @@ export abstract class Lobby {
 
   setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
     const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
-    if (senderAccountId === this.ownerAccountId) {
+    if (senderAccountId === this.ownerAccountId) {
       this.privateLobby = newPrivacySetting;
     }
   }
@@ -142,6 +144,22 @@ export abstract class Lobby {
   endGame(): void {
     this.io.in(this.lobbyId).emit(SocketMessages.END_GAME);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+  }
+
+  findPlayerById(accountId: string): Player | undefined {
+    return this.players.find((player) => player.accountId === accountId);
+  }
+
+  findPlayerBySocket(socket: Socket): Player | undefined {
+    return this.players.find((player) => player.socket === socket);
+  }
+
+  lobbyHasRoom(): boolean {
+    return this.players.length < this.size;
+  }
+
+  validateMessageLength(msg: ChatMessage): boolean {
+    return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
   bindLobbyEndPoints(socket: Socket) {
@@ -273,9 +291,4 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketMessages.PLAYER_GUESS);
   }
-
-  validateMessageLength(msg: ChatMessage): boolean {
-    return msg.content.length <= this.MAX_LENGTH_MSG;
-  }
-
 }
