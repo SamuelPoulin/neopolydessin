@@ -58,6 +58,8 @@ export abstract class Lobby {
 
 
   privateLobby: boolean;
+  difficulty: Difficulty;
+  gameType: GameType;
 
   protected size: number;
 
@@ -72,8 +74,6 @@ export abstract class Lobby {
   protected timeLeftSeconds: number;
   protected wordToGuess: string;
   protected ownerAccountId: string;
-  protected gameType: GameType;
-  protected difficulty: Difficulty;
 
   protected io: Server;
   protected drawingCommands: DrawingCommandsService;
@@ -137,6 +137,10 @@ export abstract class Lobby {
     if (senderAccountId === this.ownerAccountId) {
       this.privateLobby = newPrivacySetting;
     }
+  }
+
+  lobbyIsFull(): boolean {
+    return this.players.length < this.size;
   }
 
   endGame(): void {
@@ -258,6 +262,13 @@ export abstract class Lobby {
       }
     });
 
+    socket.on(SocketMessages.START_GAME_SERVER, () => {
+      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      if (senderAccountId === this.ownerAccountId) {
+        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
+      }
+    });
+
   }
 
   unbindLobbyEndPoints(socket: Socket) {
@@ -272,6 +283,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketMessages.PLAYER_GUESS);
+    socket.removeAllListeners(SocketMessages.START_GAME_SERVER);
   }
 
   validateMessageLength(msg: ChatMessage): boolean {

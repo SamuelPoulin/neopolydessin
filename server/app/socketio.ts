@@ -94,7 +94,6 @@ export class SocketIo {
         .then((account) => {
           socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
           this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-          this.socketIdService.DisconnectSocketFromLobby(socket.id);
           loginsModel.addLogout(accountIdOfSocket)
             .then(() => {
               this.clientSuccessfullyDisconnected.notify(socket);
@@ -112,10 +111,10 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (gameMode: GameType, difficulty: Difficulty, callback: (lobbies: LobbyInfo[]) => void) => {
         callback(this.lobbyList
           .filter((lobby) => {
-            return !lobby.privateLobby;
+            return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
           }).map((lobby) => {
             return lobby.toLobbyInfo();
           }));
@@ -175,13 +174,6 @@ export class SocketIo {
         }
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-        }
-      });
-
-      socket.on(SocketMessages.START_GAME_SERVER, (callback) => {
-        const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-        if (currentLobby) {
-          this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
         }
       });
 
