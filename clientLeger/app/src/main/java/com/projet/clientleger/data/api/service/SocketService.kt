@@ -96,8 +96,6 @@ class SocketService @Inject constructor() {
                 println(status)
                 emitter.onNext(status == "Valid")
             })
-
         }
-
     }
 }

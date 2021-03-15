@@ -25,14 +25,17 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
+import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
+import java.io.Serializable
 import javax.inject.Inject
 
 
@@ -106,7 +109,12 @@ class MainmenuActivity : AppCompatActivity() {
         setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            vm.createGame(dialogView.gameName.text.toString(),selectedGameMode , selectedDifficulty)
+            vm.createGame(selectedGameMode , selectedDifficulty, false)
+            val gameInfo = GameCreationInfosModel("guiboy", selectedGameMode, selectedDifficulty, false)
+            val intent = Intent(this,LobbyActivity::class.java).apply{
+                putExtra("GAME_INFO",gameInfo as Serializable)
+            }
+            startActivity(intent)
         }
     }
     private fun setupGamemodeSpinner(dialogView:View){
@@ -137,7 +145,6 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-                println("Val changée")
                 selectedDifficulty = adapterDifficulty.getItem(position).toString()
             }
 
@@ -146,5 +153,4 @@ class MainmenuActivity : AppCompatActivity() {
             }
         }
     }
-
 }

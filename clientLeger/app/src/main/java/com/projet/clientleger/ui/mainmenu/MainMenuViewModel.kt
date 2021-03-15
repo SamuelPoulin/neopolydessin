@@ -13,7 +13,7 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun connectSocket(accessToken: String){
         mainmenuRepository.connectSocket(accessToken)
     }
-    fun createGame(gameName:String, gameMode:String,difficulty:String){
-        mainmenuRepository.createGame(gameName,gameMode,difficulty)
+    fun createGame(gameMode:String,difficulty:String,isPrivate:Boolean){
+        mainmenuRepository.createGame(gameMode,difficulty,isPrivate)
     }
 }

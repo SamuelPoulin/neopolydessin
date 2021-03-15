@@ -12,9 +12,7 @@ class MainmenuRepository @Inject constructor(private val socketService: SocketSe
     fun connectSocket(accessToken: String){
         socketService.connect(accessToken)
     }
-    fun createGame(gameName:String, gameMode:String,difficulty:String){
-        println(gameName)
-        println(gameMode)
-        println(difficulty)
+    fun createGame(gameMode:String,difficulty:String, isPrivate:Boolean){
+        lobbySocketService.createGame(gameMode,difficulty,isPrivate)
     }
 }
