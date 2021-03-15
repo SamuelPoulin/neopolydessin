@@ -13,6 +13,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.viewModels
@@ -38,6 +39,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
+    var selectedGameMode:String = "none"
+    var selectedDifficulty:String = "none"
     val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
 
@@ -99,17 +102,49 @@ class MainmenuActivity : AppCompatActivity() {
         dialog.actionBtn.text = action
         dialog.title.text = title
 
-        val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
-        adapterGamemode.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        val spinner = dialogView.findViewById<Spinner>(R.id.gamemodeSpinner)
-        spinner.adapter = adapterGamemode
-
-        val adapterDifficulty = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
-        adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        dialogView.findViewById<Spinner>(R.id.difficultySpinner).adapter = adapterDifficulty
+        setupGamemodeSpinner(dialogView)
+        setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            vm.createGame(dialogView.gameName.text.toString(), gamemodeSpinner.transitionName, difficultySpinner.transitionName)
+            vm.createGame(dialogView.gameName.text.toString(),selectedGameMode , selectedDifficulty)
         }
     }
+    private fun setupGamemodeSpinner(dialogView:View){
+        val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
+        adapterGamemode.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        val spinnerGamemode = dialogView.findViewById<Spinner>(R.id.gamemodeSpinner)
+        spinnerGamemode.adapter = adapterGamemode
+
+        spinnerGamemode.onItemSelectedListener = object :
+                AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>,
+                                        view: View, position: Int, id: Long) {
+                selectedGameMode = adapterGamemode.getItem(position).toString()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // write code to perform some action
+            }
+        }
+    }
+    private fun setupDifficultySpinner(dialogView: View){
+        val adapterDifficulty = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
+        adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        val spinnerDifficulty = dialogView.findViewById<Spinner>(R.id.difficultySpinner)
+        spinnerDifficulty.adapter = adapterDifficulty
+
+        spinnerDifficulty.onItemSelectedListener = object :
+                AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>,
+                                        view: View, position: Int, id: Long) {
+                println("Val changée")
+                selectedDifficulty = adapterDifficulty.getItem(position).toString()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // write code to perform some action
+            }
+        }
+    }
+
 }
