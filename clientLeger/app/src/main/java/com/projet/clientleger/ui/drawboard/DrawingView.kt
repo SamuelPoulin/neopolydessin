@@ -14,7 +14,6 @@ import androidx.lifecycle.MutableLiveData
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.PenPath
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.abs
 
 @AndroidEntryPoint
 class DrawingView : View {
@@ -51,8 +50,8 @@ class DrawingView : View {
         canvas.save()
         canvas.drawColor(ContextCompat.getColor(context,R.color.white))
         for(path in paths){
-            pathPaint.color = path.color
-            pathPaint.strokeWidth = path.strokeWidth
+            pathPaint.color =  Color.parseColor(path.brushInfo.color)
+            pathPaint.strokeWidth = path.brushInfo.strokeWidth
             canvas.drawPath(path.path, pathPaint)
         }
         canvas.restore()

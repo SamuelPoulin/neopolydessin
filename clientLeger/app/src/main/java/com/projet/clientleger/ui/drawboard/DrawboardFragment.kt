@@ -8,24 +8,26 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import com.projet.clientleger.R
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class DrawboardFragment @Inject constructor(): Fragment() {
     val vm: DrawboardViewModel by viewModels()
-    private var binding: DrawboardFragmentBinding? = null;
+    private var binding: DrawboardFragmentBinding? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = DrawboardFragmentBinding.inflate(inflater, container, false)
         setupViewListener()
         setupObservable()
+        binding!!.colorPickerBtn.setOnClickListener { pickColor() }
+        binding!!.vm = vm
         return binding!!.root
     }
 
@@ -40,7 +42,8 @@ class DrawboardFragment @Inject constructor(): Fragment() {
             if (event != null) {
                 when(event.action){
                     MotionEvent.ACTION_DOWN -> {
-                        vm.startPath(Coordinate(event.x, event.y), ContextCompat.getColor(requireContext(),R.color.black))
+                        val strokeWidth = binding!!.strokeWidthSlider.value
+                        vm.startPath(Coordinate(event.x, event.y), strokeWidth)
                         v.invalidate()
                     }
                     MotionEvent.ACTION_MOVE -> {
@@ -56,5 +59,18 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         vm.paths.observe(requireActivity()){
             binding!!.drawingBoard.paths = it
         }
+    }
+
+    private fun pickColor(){
+        val builder = ColorPickerDialog.Builder(requireActivity())
+            builder.setTitle("Choisir sa couleur")
+            .setPositiveButton("Choisir"){ dialogInterface, i ->
+                vm.confirmColor()
+            }
+            .attachAlphaSlideBar(true)
+        builder.colorPickerView.setColorListener(ColorEnvelopeListener{envelope, fromUser ->
+            vm.bufferBrushColor = "#" + envelope.hexCode
+        })
+        builder.show()
     }
 }

@@ -31,7 +31,7 @@ class SocketService @Inject constructor() {
             options.upgrade = false
             socket = IO.socket(BuildConfig.SERVER_URL, options)
         } catch (e: URISyntaxException) {
-            null
+            println("ERROR SOCKET CONNECTION")
         }
         socket.connect()
     }
