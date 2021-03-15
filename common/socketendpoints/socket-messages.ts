@@ -13,4 +13,5 @@ export enum SocketMessages {
     SET_GAME_PRIVACY = 'ChangePrivacySetting',
     EMIT_NEW_PRIVACY_SETTING = 'EmitPrivacySetting',
     END_GAME = 'EndCurrentGame',
+    MATCH_MAKING = 'JoinRandomGame'
 }

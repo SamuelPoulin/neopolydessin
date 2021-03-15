@@ -9,14 +9,14 @@ export class LobbyCoop extends Lobby {
 
   private guessLeft: number;
 
-  constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty ,privateGame: boolean) {
+  constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean) {
     super(socketIdService, io, accountId, difficulty, privateGame);
     this.guessLeft = 5;
     this.gameType = GameType.SPRINT_COOP;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
+    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
       this.bindLobbyCoopEndPoints(socket);
     }
     super.addPlayer(accountId, playerStatus, socket);
