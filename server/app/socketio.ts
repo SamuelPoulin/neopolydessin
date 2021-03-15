@@ -10,6 +10,9 @@ import { FriendsList } from '../models/schemas/account';
 import { Difficulty, GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
+import { LobbySolo } from '../models/lobby-solo';
+import { LobbyClassique } from '../models/lobby-classique';
+import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, ErrorMsg, Response } from './services/database.service';
@@ -19,6 +22,8 @@ import { Observable } from './utils/observable';
 
 @injectable()
 export class SocketIo {
+
+  static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
 
   io: Server;
   lobbyList: Lobby[] = [];
@@ -42,6 +47,14 @@ export class SocketIo {
     this.bindIoEvents();
     this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
+    });
+
+    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId) => {
+      console.log(`Game : ${lobbyId} ended \n`);
+      const index = this.lobbyList.findIndex((game) => game.lobbyId === lobbyId);
+      if (index > -1) {
+        this.lobbyList.splice(index, 1);
+      }
     });
   }
 
@@ -99,7 +112,7 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', (callback: (lobbies: LobbyInfo[]) => void) => {
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
         callback(this.lobbyList
           .filter((lobby) => {
             return !lobby.privateLobby;
@@ -121,27 +134,31 @@ export class SocketIo {
         }
       });
 
-      socket.on('CreateLobby', (gameType: GameType, difficulty: Difficulty, privateLobby: boolean) => {
-        const lobby: Lobby = new Lobby(this.io, gameType, difficulty, privateLobby);
+      socket.on(SocketMessages.CREATE_LOBBY, (gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+        let lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
         if (playerId) {
+          switch(gametype) {
+            case GameType.CLASSIC: {
+              lobby = new LobbyClassique(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_SOLO: {
+              lobby = new LobbySolo(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_COOP: {
+              lobby = new LobbyCoop(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+          }
           lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
           this.lobbyList.push(lobby);
         } else {
           console.error('player doesn\'t exist');
         }
-      });
-
-      socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        if (this.validateMessageLength(sentMsg)) {
-          const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-          if (currentLobby) {
-            socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
-          }
-        }
-        else {
-          console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-        }
+        // player status is to be changed.
       });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
@@ -166,10 +183,6 @@ export class SocketIo {
         if (currentLobby) {
           this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
         }
-      });
-
-      socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
-        console.log(word);
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {

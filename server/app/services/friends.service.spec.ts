@@ -11,7 +11,6 @@ import { FriendsService } from './friends.service';
 import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
-import { ObjectId } from 'mongodb';
 import { AccessToken } from '../utils/jwt-util';
 import MongoMemoryServer from 'mongodb-memory-server-core';
 
@@ -72,7 +71,7 @@ describe('Friends Service', () => {
             })
     })
 
-    it('getFriendsOfUser should resolve to a friendslist if user exists', (done: Mocha.Done) => {
+    it('getFriendsOfUser should resolve to OK if user exists and has no friends', (done: Mocha.Done) => {
         databaseService.createAccount(accountInfo)
             .then((tokens: Response<LoginTokens>) => {
                 const secret_key = process.env.JWT_KEY ? process.env.JWT_KEY : 'wrong key';
@@ -115,9 +114,9 @@ describe('Friends Service', () => {
                     [
                         {
                             friendId: null,
-                            username: null,
                             status: FriendStatus.FRIEND,
                             received: false,
+                            isOnline: false,
                         }
                     ]
                 )
@@ -182,46 +181,22 @@ describe('Friends Service', () => {
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends).to.deep.equal(
-                    [
-                        {
-                            friendId: new ObjectId(otherId),
-                            username: 'username1',
-                            status: FriendStatus.PENDING,
-                            received: false,
-                        }
-                    ]
-                )
+                expect(friendList.documents.friends[0].isOnline).to.be.true;
+                expect(friendList.documents.friends[0].status).to.equal(FriendStatus.PENDING);
                 expect(sendFriendListToStub.calledOnce).to.be.true;
                 return friendsService.acceptFriendship(otherId, myId);
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends).to.deep.equal(
-                    [
-                        {
-                            friendId: new ObjectId(myId),
-                            username: 'username',
-                            status: FriendStatus.FRIEND,
-                            received: true,
-                        }
-                    ]
-                )
+                expect(friendList.documents.friends[0].isOnline).to.be.true;
+                expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
                 expect(sendFriendListToStub.calledTwice).to.be.true;
                 return friendsService.getFriendsOfUser(myId);
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends).to.deep.equal(
-                    [
-                        {
-                            friendId: new ObjectId(otherId),
-                            username: 'username1',
-                            status: FriendStatus.FRIEND,
-                            received: false,
-                        }
-                    ]
-                )
+                expect(friendList.documents.friends[0].isOnline).to.be.true;
+                expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
                 expect(sendFriendListToStub.calledTwice).to.be.true;
                 done();
             })
@@ -267,31 +242,17 @@ describe('Friends Service', () => {
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends).to.deep.equal(
-                    [
-                        {
-                            friendId: new ObjectId(otherId),
-                            username: 'username1',
-                            status: FriendStatus.PENDING,
-                            received: false,
-                        }
-                    ]
-                )
+                expect(friendList.documents.friends[0].isOnline).to.be.true;
+                expect(friendList.documents.friends[0].received).to.be.false;
+                expect(friendList.documents.friends[0].friendId).to.not.be.null;
                 expect(sendFriendListToStub.calledOnce).to.be.true;
                 return friendsService.getFriendsOfUser(otherId);
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends).to.deep.equal(
-                    [
-                        {
-                            friendId: new ObjectId(myId),
-                            username: 'username',
-                            status: FriendStatus.PENDING,
-                            received: true,
-                        }
-                    ]
-                )
+                expect(friendList.documents.friends[0].isOnline).to.be.true;
+                expect(friendList.documents.friends[0].received).to.be.true;
+                expect(friendList.documents.friends[0].friendId).to.not.be.null;
                 expect(sendFriendListToStub.calledOnce).to.be.true;
                 return friendsService.refuseFriendship(otherId, myId);
             })

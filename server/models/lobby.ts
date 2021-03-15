@@ -1,15 +1,27 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { DrawingCommandsService } from '../app/services/drawing-commands.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
+import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { ChatMessage } from '../../common/communication/chat-message';
+import { SocketIdService } from '../app/services/socket-id.service';
+import Types from '../app/types';
+import { SocketIo } from '../app/socketio';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
   lobbyId: string;
   playerIds: string[];
   gameType: GameType;
+}
+
+export interface Player {
+  accountId: string;
+  playerStatus: PlayerStatus;
+  socket: Socket;
+  teamNumber: number;
 }
 
 export enum GameType {
@@ -39,34 +51,49 @@ const gameSizeMap = new Map<GameType, number>([
 ]);
 
 @injectable()
-export class Lobby {
+export abstract class Lobby {
+
+  readonly MAX_LENGTH_MSG: number = 200;
 
   lobbyId: string;
 
   privateLobby: boolean;
 
-  private size: number;
+  protected size: number;
+  protected players: Player[];
+  protected timeLeftSeconds: number;
+  protected wordToGuess: string;
+  protected ownerAccountId: string;
+  protected gameType: GameType;
+  protected difficulty: Difficulty;
 
-  private players: {
-    accountId: string;
-    playerStatus: PlayerStatus;
-    socket: Socket;
+  protected io: Server;
+  protected drawingCommands: DrawingCommandsService;
+
+  protected teams: {
+    teamNumber: number;
+    currentScore: number;
+    playersInTeam: Player[];
   }[];
 
-  private gameType: GameType;
-
-  private io: Server;
-
-  private drawingCommands: DrawingCommandsService;
-
-  constructor(io: Server, gameType: GameType, difficulty: Difficulty, privateLobby: boolean) {
+  constructor(
+    @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
+    io: Server,
+    accountId: string,
+    difficulty: Difficulty,
+    privacySetting: boolean
+  ) {
     this.io = io;
-    this.gameType = gameType;
-    this.privateLobby = privateLobby;
+    this.wordToGuess = '';
+    this.ownerAccountId = accountId;
+    this.difficulty = difficulty;
+    this.privateLobby = privacySetting;
     this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
     this.players = [];
+    this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
+    this.timeLeftSeconds = 0;
   }
 
   toLobbyInfo(): LobbyInfo {
@@ -78,8 +105,9 @@ export class Lobby {
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
-      this.players.push({ accountId, playerStatus, socket });
+    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
+      this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
+      this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
     }
@@ -88,18 +116,50 @@ export class Lobby {
   removePlayer(accountId: string, socket: Socket) {
     const index = this.players.findIndex((player) => player.accountId === accountId);
     if (index > -1) {
+      const teamIndex = this.teams[this.players[index].teamNumber].playersInTeam.findIndex(((player) => player.accountId === accountId));
+      if (teamIndex > -1) {
+        this.teams[this.players[index].teamNumber].playersInTeam.splice(teamIndex, 1);
+      }
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
     }
   }
 
   isActivePlayer(socket: Socket): boolean {
-    const playerInfo = this.players.find((player) => player.socket === socket);
+    const playerInfo = this.findPlayerBySocket(socket);
     if (playerInfo) {
       return playerInfo.playerStatus === PlayerStatus.DRAWER;
     } else {
       return false;
     }
+  }
+
+  setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
+    const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
+    if (senderAccountId === this.ownerAccountId) {
+      this.privateLobby = newPrivacySetting;
+    }
+  }
+
+  endGame(): void {
+    this.io.in(this.lobbyId).emit(SocketMessages.END_GAME);
+    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+  }
+
+  findPlayerById(accountId: string): Player | undefined {
+    return this.players.find((player) => player.accountId === accountId);
+  }
+
+  findPlayerBySocket(socket: Socket): Player | undefined {
+    return this.players.find((player) => player.socket === socket);
+  }
+
+  lobbyHasRoom(): boolean {
+    return this.players.length < this.size;
+  }
+
+  validateMessageLength(msg: ChatMessage): boolean {
+    return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
   bindLobbyEndPoints(socket: Socket) {
@@ -202,6 +262,20 @@ export class Lobby {
       }
     });
 
+    socket.on(SocketMessages.SET_GAME_PRIVACY, (privacySetting: boolean) => {
+      this.setPrivacySetting(socket.id, privacySetting);
+      this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateLobby);
+    });
+
+    socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
+      if (this.validateMessageLength(sentMsg)) {
+        socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+      }
+      else {
+        console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
+      }
+    });
+
   }
 
   unbindLobbyEndPoints(socket: Socket) {
@@ -213,6 +287,8 @@ export class Lobby {
     socket.removeAllListeners(SocketDrawing.END_ERASE);
     socket.removeAllListeners(SocketDrawing.UNDO);
     socket.removeAllListeners(SocketDrawing.REDO);
+    socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
+    socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
+    socket.removeAllListeners(SocketMessages.PLAYER_GUESS);
   }
-
 }
