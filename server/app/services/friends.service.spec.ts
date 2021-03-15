@@ -11,7 +11,6 @@ import { FriendsService } from './friends.service';
 import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
-// import { ObjectId } from 'mongodb';
 import { AccessToken } from '../utils/jwt-util';
 import MongoMemoryServer from 'mongodb-memory-server-core';
 
