@@ -16,7 +16,7 @@ export class LobbySolo extends Lobby {
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
+    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
       this.bindLobbySoloEndPoints(socket);
     }
     super.addPlayer(accountId, playerStatus, socket);
