@@ -110,10 +110,10 @@ class MainmenuActivity : AppCompatActivity() {
         setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            vm.createGame(selectedGameMode , selectedDifficulty, false)
             var username:String = intent.getStringExtra("username").toString()
             val gameInfo = GameCreationInfosModel(username, selectedGameMode, selectedDifficulty, false)
             if(isCreating){
+                vm.createGame(selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
                 }
