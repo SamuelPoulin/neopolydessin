@@ -11,6 +11,8 @@ import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from
 })
 export class SocketService {
   private static API_BASE_URL: string;
+  static ACCESS_TOKEN: string;
+  static REFRESH_TOKEN: string;
 
   socket: Socket;
   manager: Manager;
@@ -25,7 +27,7 @@ export class SocketService {
 
     this.socket = this.manager.socket('/', {
       auth: {
-        token: 'some token', // access token here.
+        token: SocketService.ACCESS_TOKEN,
       },
     });
   }

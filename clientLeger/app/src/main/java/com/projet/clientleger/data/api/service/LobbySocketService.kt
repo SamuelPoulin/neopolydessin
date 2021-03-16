@@ -1,8 +1,12 @@
 package com.projet.clientleger.data.api.service
 
 import com.projet.clientleger.BuildConfig
+import com.projet.clientleger.data.api.model.Difficulty
+import com.projet.clientleger.data.api.model.GameType
+import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.MessageChat
 import io.reactivex.rxjava3.core.Observable
+import io.socket.client.Ack
 import io.socket.client.IO
 import org.json.JSONObject
 import io.socket.client.Socket
@@ -16,7 +20,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
 
     fun createGame(gameMode:String,difficulty:String, isPrivate:Boolean) {
         val obj: JSONObject = JSONObject()
-        obj.put("gameTyoe", gameMode)
+        obj.put("gameType", gameMode)
         obj.put("difficulty", difficulty)
         obj.put("privacySetting", isPrivate)
         socketService.socket.emit("CreateLobby", obj)
@@ -26,5 +30,14 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         return socketService.receiveFromSocket("PlayerConnected"){received ->
             received[0].toString()
         }
+    }
+    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty){
+        val obj: JSONObject = JSONObject()
+        obj.put("gameMode", gameMode)
+        obj.put("difficulty", difficulty)
+        socketService.socket.emit("GetListLobby",obj, Ack{ received ->
+            println("NOUS SOMMES DANS LE SOCKET SERVICE")
+            println(received[0])
+        })
     }
 }

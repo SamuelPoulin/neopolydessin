@@ -8,6 +8,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.service.LobbySocketService
+import com.projet.clientleger.data.api.service.FriendslistSocketService
 import com.projet.clientleger.data.api.service.SocketService
 import dagger.Module
 import dagger.Provides
@@ -57,6 +58,10 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSocketService(): SocketService = SocketService()
+
+    @Provides
+    @Singleton
+    fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)
 
     @Provides
     @Singleton

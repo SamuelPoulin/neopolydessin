@@ -1,6 +1,9 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.model.Difficulty
+import com.projet.clientleger.data.api.model.GameType
+import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.data.api.service.SocketService
 import io.reactivex.rxjava3.core.Observable
@@ -12,5 +15,8 @@ class LobbyRepository @Inject constructor(private val sessionManager:SessionMana
     }
     fun receivedPlayersInfo(): Observable<String> {
         return lobbySocketService.receivePlayersInfo()
+    }
+    fun receivedAllLobbies(gameMode: GameType, difficulty: Difficulty){
+        lobbySocketService.receiveAllLobbies(gameMode,difficulty)
     }
 }

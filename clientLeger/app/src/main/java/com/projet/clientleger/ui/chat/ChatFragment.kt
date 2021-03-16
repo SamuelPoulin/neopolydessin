@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.IMessage
 import com.projet.clientleger.data.model.MessageChat
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,13 +27,8 @@ import kotlinx.android.synthetic.main.fragment_chat.*
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-private const val USERNAME_FORMAT_ERROR: String = "Doit contenir seulement 10 lettres ou chiffres."
-private const val USERNAME_UNICITY_ERROR: String = "Pseudonyme déjà utilisé, choisir un autre !"
 private const val MESSAGE_CONTENT_ERROR: String =
     "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
-private const val CHOOSING_USERNAME_TITLE: String = "Choisir son pseudonyme"
-private const val CONNECT_BUTTON_TITLE: String = "Connect"
-private const val USERNAME_INPUT_HINT: String = "Nom d'utilisateur"
 
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
@@ -64,7 +60,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         super.onCreate(savedInstanceState)
         username = arguments?.getString("username") ?: "unknowned_user"
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
-            println(bundle["friend"])
+            println((bundle["friend"] as FriendSimplified).username)
         }
     }
 
@@ -94,12 +90,12 @@ class ChatFragment @Inject constructor() : Fragment() {
         val adjustedText: String = formatMessageContent(text)
         if (isMessageValidFormat(adjustedText)) {
             addMessage(MessageChat(username, adjustedText, System.currentTimeMillis()))
-            socketService?.sendMessage(
-                MessageChat(
-                    username,
-                    adjustedText,
-                    System.currentTimeMillis()
-                )
+            socketService.sendMessage(
+                    MessageChat(
+                            username,
+                            adjustedText,
+                            System.currentTimeMillis()
+                    )
             )
         } else {
             showErrorToast(MESSAGE_CONTENT_ERROR)

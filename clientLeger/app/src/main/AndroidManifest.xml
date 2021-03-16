@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.connexion.view.SearchLobbyActivity"
+            android:name=".ui.lobbylist.view.SearchLobbyActivity"
             android:label="@string/title_activity_search_lobby"
             android:theme="@style/Theme.ClientLeger.NoActionBar"
             android:screenOrientation="landscape">

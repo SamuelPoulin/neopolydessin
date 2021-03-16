@@ -23,7 +23,17 @@ export class DashboardComponent {
   @ViewChild('chart') chart: ChartComponent;
   chartOptions: Partial<ChartOptions>;
 
+  playTime: number;
+  connectionTime: number;
+  gamesPlayed: number;
+  winRatio: number;
+
   constructor() {
+    this.playTime = 25;
+    this.connectionTime = 38;
+    this.gamesPlayed = 51;
+    this.winRatio = 0.21;
+
     const data1 = Array.from({ length: DashboardComponent.LENGTH_RANDOM }, () => Math.floor(Math.random() * DashboardComponent.MAX_RANDOM));
     const data2 = Array.from({ length: DashboardComponent.LENGTH_RANDOM }, () => Math.floor(Math.random() * DashboardComponent.MAX_RANDOM));
 

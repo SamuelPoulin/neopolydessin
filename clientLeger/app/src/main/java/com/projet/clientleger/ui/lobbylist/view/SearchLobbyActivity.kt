@@ -1,20 +1,24 @@
-package com.projet.clientleger.ui.connexion.view
+package com.projet.clientleger.ui.lobbylist.view
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewManager
-import android.widget.LinearLayout
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.Difficulty
+import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.model.GameInfo
+import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
+import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_search_lobby.*
-import kotlinx.android.synthetic.main.fragment_chat.*
-import java.util.concurrent.ExecutionException
 
+@AndroidEntryPoint
 class SearchLobbyActivity : AppCompatActivity() {
 
+    private val vm: SearchLobbyViewModel by viewModels()
     private var games: ArrayList<GameInfo> = ArrayList<GameInfo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,19 +30,7 @@ class SearchLobbyActivity : AppCompatActivity() {
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
 
-        games.add(GameInfo("123141", "name", "Jesus", "gamemode", "capacity"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        games.add(GameInfo("1231311", "name", "gros gars", "gamemode", "capacity"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        games.add(GameInfo("123", "name", "owner", "gamemode", "capacity"))
-        rvGames.adapter?.notifyItemInserted(games.size-1)
-        rvGames.scrollToPosition(games.size-1)
-
-        removeGameWithID("123")
+        vm.receiveAllLobbies(GameType.CLASSIC, Difficulty.EASY)
 
     }
     private fun removeGameWithID(id:String){

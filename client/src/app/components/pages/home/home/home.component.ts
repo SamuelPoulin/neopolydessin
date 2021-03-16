@@ -28,8 +28,8 @@ export class HomeComponent {
     this.dialog.openByName(link);
   }
 
-  openPage(nextLink: string): void {
-    this.router.navigate([nextLink]);
+  openPage(link: string): void {
+    this.router.navigate([link]);
   }
 
   openGallery(): void {
@@ -53,5 +53,9 @@ export class HomeComponent {
 
   get isDrawingNull(): boolean {
     return this.localSaveService.drawing == null;
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }

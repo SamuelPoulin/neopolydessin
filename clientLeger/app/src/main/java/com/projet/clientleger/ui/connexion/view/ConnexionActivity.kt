@@ -50,7 +50,6 @@ class ConnexionActivity : AppCompatActivity() {
             if (res.isSucessful) {
                 username = binding.connectionUsername.text.toString()
                 binding.connectionUsername.text.clear()
-                setUserTokens(res.accessToken, res.refreshToken)
                 goToMainMenu()
             } else {
                 showToast(res.message)
@@ -60,16 +59,6 @@ class ConnexionActivity : AppCompatActivity() {
     }
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-    private fun setUserTokens(accessToken: String, refreshToken: String) {
-        getSharedPreferences(
-                getString(R.string.user_creds),
-                Context.MODE_PRIVATE
-        ).edit {
-            putString("accessToken", accessToken)
-            putString("refreshToken", refreshToken)
-            apply()
-        }
     }
     private fun forgottenPasswordBtn(){
         //TODO: bouton de récupération de mot de passe non-implémenté
