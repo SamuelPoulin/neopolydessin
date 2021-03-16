@@ -29,10 +29,10 @@ export class DrawingCommandsService {
     });
   }
 
-  async updatePath(updatePoints: Coord[]): Promise<void> {
+  async updatePath(updatePoints: Coord): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (this.currentPath) {
-        this.currentPath.addCoords(updatePoints);
+        this.currentPath.addCoord(updatePoints);
         resolve();
       } else {
         reject();
