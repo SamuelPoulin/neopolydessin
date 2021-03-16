@@ -1,41 +1,40 @@
+import { RegisterComponent } from './register/register.component';
+
 export class PasswordRule {
-  private readonly INVALID_ICON: string = 'clear';
-  private readonly VALID_ICON: string = 'done';
+  private readonly invalidIcon: string = 'clear';
+  private readonly validIcon: string = 'done';
 
-  private readonly VALID_CLASS: string = 'green';
-  private readonly INVALID_CLASS: string = 'red';
+  private readonly validClass: string = 'green';
+  private readonly invalidClass: string = 'red';
 
-  public icon: string;
-  public class: string;
-  public text: string;
+  icon: string;
+  class: string;
+  text: string;
 
   private _isValid: boolean;
 
-  public get isValid() {
+  get isValid() {
     return this._isValid;
   }
 
-  public set isValid(valid: boolean) {
+  set isValid(valid: boolean) {
     this._isValid = valid;
     if (valid) {
-      this.icon = this.VALID_ICON;
-      this.class = this.VALID_CLASS
+      this.icon = this.validIcon;
+      this.class = this.validClass;
     } else {
-      this.icon = this.INVALID_ICON;
-      this.class = this.INVALID_CLASS
+      this.icon = this.invalidIcon;
+      this.class = this.invalidClass;
     }
   }
-    
 
-  constructor(text: string, public callback: () => boolean) {
-    this.icon = this.INVALID_ICON;
-    this.class = this.INVALID_CLASS;
+  constructor(text: string, public callback: (registerComponent: RegisterComponent) => boolean) {
+    this.icon = this.invalidIcon;
+    this.class = this.invalidClass;
     this.text = text;
   }
 
-  verify(): void {
-    this.isValid = this.callback();
+  verify(registerComponent: RegisterComponent): void {
+    this.isValid = this.callback(registerComponent);
   }
-
-
 }
