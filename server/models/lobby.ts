@@ -178,11 +178,11 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.UPDATE_PATH, (updatePoints: Coord[]) => {
+    socket.on(SocketDrawing.UPDATE_PATH, (updateCoord: Coord) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.updatePath(updatePoints)
+        this.drawingCommands.updatePath(updateCoord)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, updatePoints);
+            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, updateCoord);
           })
           .catch(() => {
             console.log(`failed to update path for ${this.lobbyId}`);
