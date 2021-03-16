@@ -20,10 +20,6 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
         drawingSocketService.sendEndPath(endCoords)
     }
 
-    fun createLobby(gameType: GameType, difficulty: Difficulty, isPrivate: Boolean){
-        drawingSocketService.createLobby(gameType, difficulty, isPrivate)
-    }
-
     fun receiveStartPath(): Observable<StartPoint> {
         return drawingSocketService.receiveStartPath()
     }

@@ -33,7 +33,6 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         vm.paths.observe(requireActivity()){
             binding!!.drawingBoard.invalidate()
         }
-        vm.createLobby(GameType.CLASSIC, Difficulty.EASY, false)
         return binding!!.root
     }
 

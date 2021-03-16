@@ -33,10 +33,6 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         socketService.socket.emit(DrawingSocketEndpoints.END_PATH.endpoint, Json.encodeToJsonElement(Coordinate.serializer(), endCoords))
     }
 
-    fun createLobby(gameType: GameType, difficulty: Difficulty, isPrivate: Boolean){
-        socketService.socket.emit(DrawingSocketEndpoints.CREATE_LOBBY.endpoint, gameType.value, difficulty.value, isPrivate)
-    }
-
     fun receiveStartPath() : Observable<StartPoint> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ res ->
             val coord = Json.decodeFromString(Coordinate.serializer(),res[0].toString())

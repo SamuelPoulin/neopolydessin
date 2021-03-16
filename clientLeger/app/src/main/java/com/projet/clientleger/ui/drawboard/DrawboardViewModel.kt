@@ -107,9 +107,4 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             bufferBrushColor = ""
         }
     }
-
-    fun createLobby(gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
-        println("createLobby")
-        drawboardRepository.createLobby(gameType, difficulty, isPrivate)
-    }
 }
