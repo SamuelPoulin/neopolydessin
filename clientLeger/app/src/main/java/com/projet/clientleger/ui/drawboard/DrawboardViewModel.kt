@@ -25,19 +25,21 @@ import kotlin.math.abs
 class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository) :
     ViewModel() {
     var paths: MutableLiveData<ArrayList<PenPath>> = MutableLiveData(ArrayList())
-    private lateinit var currentPath: Path
-    private lateinit var lastCoordinate: Coordinate
-    private val bufferUpdateCoords: ArrayList<Coordinate> = ArrayList()
+    private var currentPath: Path? = null
+    private var lastCoordinate: Coordinate? = null
     lateinit var brushColor: String
     lateinit var bufferBrushColor: String
 
     init {
         brushColor = "#FF000000"
         drawboardRepository.receiveStartPath().subscribe {
-            startPath(it)
+            receiveStartPath(it)
         }
         drawboardRepository.receiveUpdatePath().subscribe {
-            updateCurrentPath(it)
+            receiveUpdateCurrentPath(it)
+        }
+        drawboardRepository.receiveEndPath().subscribe {
+            receiveEndPath(it)
         }
     }
 
@@ -47,12 +49,12 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         const val DEFAULT_STROKE = 10f
     }
 
-    private fun startPath(startPoint: StartPoint) {
+    private fun receiveStartPath(startPoint: StartPoint) {
         println("receive startpath ${LocalDateTime.now()}")
         currentPath = Path()
-        paths.value?.add(PenPath(currentPath, startPoint.brushInfo))
-        currentPath.moveTo(startPoint.coord.x, startPoint.coord.y)
-        currentPath.lineTo(startPoint.coord.x + 0.1f, startPoint.coord.y + 0.1f)
+        paths.value?.add(PenPath(currentPath!!, startPoint.brushInfo))
+        currentPath!!.moveTo(startPoint.coord.x, startPoint.coord.y)
+        currentPath!!.lineTo(startPoint.coord.x + 0.1f, startPoint.coord.y + 0.1f)
         lastCoordinate = startPoint.coord
         paths.postValue(paths.value)
     }
@@ -60,16 +62,17 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun startPath(coords: Coordinate, strokeWidth: Float) {
         println("Send startpath ${LocalDateTime.now()}")
-        lastCoordinate = coords
         drawboardRepository.sendStartPath(coords, BrushInfo(brushColor, strokeWidth))
     }
 
-    private fun updateCurrentPath(coords: ArrayList<Coordinate>) {
+    private fun receiveUpdateCurrentPath(coords: ArrayList<Coordinate>) {
         println("receive update ${LocalDateTime.now()}")
+        if(currentPath == null || lastCoordinate == null)
+            return
         for (coord in coords) {
-            currentPath.quadTo(
-                lastCoordinate.x, lastCoordinate.y,
-                (coord.x + lastCoordinate.x) / 2, (coord.y + lastCoordinate.y) / 2
+            currentPath!!.quadTo(
+                lastCoordinate!!.x, lastCoordinate!!.y,
+                (coord.x + lastCoordinate!!.x) / 2, (coord.y + lastCoordinate!!.y) / 2
             )
         }
         lastCoordinate = coords.last()
@@ -78,13 +81,22 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun updateCurrentPath(coords: Coordinate) {
         println("send update ${LocalDateTime.now()}")
-        val dx = abs(coords.x - lastCoordinate.x)
-        val dy = abs(coords.y - lastCoordinate.y)
-        if (dx >= 2 || dy >= 2) {
-            bufferUpdateCoords.add(coords)
-            drawboardRepository.sendUpdatePath(bufferUpdateCoords)
-            bufferUpdateCoords.clear()
+        var dx = 2f
+        var dy = 2f
+        if(lastCoordinate != null) {
+            dx = abs(coords.x - lastCoordinate!!.x)
+            dy = abs(coords.y - lastCoordinate!!.y)
         }
+        if (dx >= 2 || dy >= 2) {
+            drawboardRepository.sendUpdatePath(coords)
+        }
+    }
+
+    private fun receiveEndPath(coords: Coordinate){
+        currentPath!!.lineTo(coords.x, coords.y)
+
+        lastCoordinate = null
+        currentPath = null
     }
 
     fun endPath(coords: Coordinate) {

@@ -24,8 +24,8 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
                 Json.encodeToJsonElement(BrushInfo.serializer(), brushInfo))
     }
 
-    fun sendUpdatePath(listCoords: ArrayList<Coordinate>){
-        val s = Json.encodeToJsonElement(listCoords)
+    fun sendUpdatePath(coords: Coordinate){
+        val s = Json.encodeToJsonElement(Coordinate.serializer(),coords)
         socketService.socket.emit(DrawingSocketEndpoints.UPDATE_PATH.endpoint, s)
     }
 
@@ -53,6 +53,14 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
             for(i: Int in 0 until list.length())
                 listCoords.add(Gson().fromJson(list.get(i).toString(), Coordinate::class.java))
             listCoords
+        }
+    }
+
+    fun receiveEndPath() : Observable<Coordinate>{
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_END_PATH.endpoint){res ->
+            println(res[0])
+            println(res.size)
+            Json.decodeFromString(Coordinate.serializer(), res[0].toString())
         }
     }
 }

@@ -13,8 +13,8 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
     fun sendStartPath(coords: Coordinate, brushInfo: BrushInfo) {
         drawingSocketService.sendStartPath(coords, brushInfo)
     }
-    fun sendUpdatePath(listCoords: ArrayList<Coordinate>){
-        drawingSocketService.sendUpdatePath(listCoords)
+    fun sendUpdatePath(coords: Coordinate){
+        drawingSocketService.sendUpdatePath(coords)
     }
     fun sendEndPath(endCoords: Coordinate){
         drawingSocketService.sendEndPath(endCoords)
@@ -31,4 +31,9 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
     fun receiveUpdatePath(): Observable<ArrayList<Coordinate>> {
         return drawingSocketService.receiveUpdatePath()
     }
+
+    fun receiveEndPath(): Observable<Coordinate> {
+        return drawingSocketService.receiveEndPath()
+    }
+
 }

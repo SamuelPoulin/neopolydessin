@@ -54,6 +54,9 @@ class DrawboardFragment @Inject constructor(): Fragment() {
                     MotionEvent.ACTION_MOVE -> {
                         vm.updateCurrentPath(Coordinate(event.x, event.y))
                     }
+                    MotionEvent.ACTION_UP -> {
+                        vm.endPath(Coordinate(event.x, event.y))
+                    }
                 }
             }
             true }
