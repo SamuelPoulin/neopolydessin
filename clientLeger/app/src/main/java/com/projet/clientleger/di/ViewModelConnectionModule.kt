@@ -17,5 +17,5 @@ object ViewModelConnectionModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(sessionManager: SessionManager, socketService: SocketService, apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(sessionManager, socketService,apiConnectionInterface)
+    fun provideRepo(sessionManager: SessionManager, apiConnectionInterface: ApiConnectionInterface) = ConnectionRepository(sessionManager,apiConnectionInterface)
 }

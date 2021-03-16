@@ -50,7 +50,7 @@ class SocketService @Inject constructor() {
         obj.put("user", msg.user)
         obj.put("content", msg.content)
         obj.put("timestamp", msg.timestamp)
-        socket?.emit("SendMsg", obj)
+        socket.emit("SendMsg", obj)
     }
 
     fun receivePlayerConnection(): Observable<Message> {
@@ -75,7 +75,7 @@ class SocketService @Inject constructor() {
         }
     }
 
-    private fun <T> receiveFromSocket(
+    fun <T> receiveFromSocket(
         endpoint: String,
         parser: (received: Array<Any>) -> T
     ): Observable<T> {
