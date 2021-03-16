@@ -22,6 +22,7 @@ export class DrawingCommandsService {
     return new Promise<void>((resolve, reject) => {
       if (!this.currentPath) {
         this.currentPath = new Path(startPoint, brush);
+        console.log("START" + this.currentPath)
         resolve();
       } else {
         reject();
@@ -31,6 +32,7 @@ export class DrawingCommandsService {
 
   async updatePath(updatePoints: Coord): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+
       if (this.currentPath) {
         this.currentPath.addCoord(updatePoints);
         resolve();

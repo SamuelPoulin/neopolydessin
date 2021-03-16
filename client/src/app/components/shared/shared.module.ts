@@ -85,7 +85,7 @@ import { NameInputComponent } from './inputs/name-input/name-input.component';
     NumericPropertyInputComponent,
     EnumPropertyInputComponent,
     IconButtonComponent,
-    PasswordInputComponent
+    PasswordInputComponent,
   ],
   exports: [
     AbstractModalComponent,
@@ -121,7 +121,7 @@ import { NameInputComponent } from './inputs/name-input/name-input.component';
     NumericPropertyInputComponent,
     EnumPropertyInputComponent,
     IconButtonComponent,
-    PasswordInputComponent
+    PasswordInputComponent,
   ],
 })
 export class SharedModule {}

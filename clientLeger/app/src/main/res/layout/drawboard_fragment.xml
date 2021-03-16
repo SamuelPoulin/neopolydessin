@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="vm"
+            type="com.projet.clientleger.ui.drawboard.DrawboardViewModel"/>
+    </data>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.drawboard.DrawboardFragment"
+    android:background="@drawable/drawboard_background">
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/drawboard_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_margin="5dp"
+        >
+        <com.projet.clientleger.ui.drawboard.DrawingView
+            android:layout_width="1000px"
+            android:layout_height="500px"
+            android:id="@+id/drawingBoard"
+            android:layout_margin="3dp"/>
+    </FrameLayout>
+    <com.google.android.material.slider.Slider
+        android:id="@+id/strokeWidthSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:value="@{vm.DEFAULT_STROKE}"
+        android:valueFrom="@{vm.MIN_STROKE}"
+        android:valueTo="@{vm.MAX_STROKE}"/>
+    <Button
+        android:id="@+id/colorPickerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Color"
+        app:layout_constraintLeft_toRightOf="@id/strokeWidthSlider"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

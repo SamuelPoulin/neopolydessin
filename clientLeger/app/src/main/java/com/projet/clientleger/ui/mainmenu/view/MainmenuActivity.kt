@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.mainmenu.view
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -14,11 +15,14 @@ import androidx.fragment.app.commit
 import com.projet.clientleger.R
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
+import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import javax.inject.Inject
 import androidx.fragment.app.add
+import kotlinx.android.synthetic.main.dialog_gamemode.view.*
+import java.util.*
 
 
 @AndroidEntryPoint
@@ -48,6 +52,10 @@ class MainmenuActivity : AppCompatActivity() {
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
         ).getString("accessToken", "")!!)
+
+        //To remove before PR --------------------------------------------------------------------------
+        val intent = Intent(this, GameActivity::class.java)
+        startActivity(intent)
 
 
         supportFragmentManager.commit{

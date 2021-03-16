@@ -20,7 +20,7 @@ export class Path {
 
   addCoord(point: Coord) {
     if (!this.path.find((coord) => { return coord.x === point.x && coord.y === point.y; })) {
-      this.path.push(point);
+        this.path.push(point);
     }
   }
 

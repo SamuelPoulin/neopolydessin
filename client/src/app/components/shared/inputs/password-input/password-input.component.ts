@@ -7,7 +7,6 @@ import { CustomInputComponent } from '../custom-input/custom-input.component';
   styleUrls: ['../custom-input/custom-input.component.scss'],
 })
 export class PasswordInputComponent extends CustomInputComponent implements OnInit {
-
   ngOnInit(): void {
     this.isPassword = true;
     this.format = (v: string): string => v;
