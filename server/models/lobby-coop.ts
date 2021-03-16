@@ -1,17 +1,21 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, Lobby, PlayerStatus } from './lobby';
+import { Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
 
   private guessLeft: number;
 
-  constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean) {
-    super(socketIdService, io, accountId, difficulty, privateGame);
+  constructor(socketIdService: SocketIdService, databaseService: DatabaseService,
+    io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean)
+  {
+    super(socketIdService, databaseService, io, accountId, difficulty, privateGame);
     this.guessLeft = 5;
+    this.gameType = GameType.SPRINT_COOP;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
