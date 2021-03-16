@@ -3,8 +3,6 @@ import { Overlay } from '@angular/cdk/overlay';
 import { Injector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CreateDrawingModalComponent } from 'src/app/components/pages/home/create-drawing-modal/create-drawing-modal.component';
-import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { ConfirmModalComponent } from 'src/app/components/shared/abstract-modal/confirm-modal/confirm-modal/confirm-modal.component';
 import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
@@ -45,27 +43,8 @@ describe('ModalDialogService', () => {
     expect(openSpy).not.toHaveBeenCalled();
   });
 
-  it('should not open modal if already opened', () => {
-    service.openByName(ModalType.GUIDE);
-    service.openByName(ModalType.CREATE);
-    expect(openSpy).toHaveBeenCalledTimes(1);
-    expect(openSpy).toHaveBeenCalledWith(UserGuideModalComponent, {});
-  });
-
   it('can open confirm dialog', () => {
     service.openByName(ModalType.CONFIRM);
     expect(openSpy).toHaveBeenCalledWith(ConfirmModalComponent, {});
-  });
-
-  it('should open second modal after first one is closed', () => {
-    service.openByName(ModalType.CREATE);
-    expect(service.modalIsOpened).toEqual(true);
-    expect(openSpy).toHaveBeenCalledWith(CreateDrawingModalComponent, {});
-
-    service.closeAll();
-    expect(service.modalIsOpened).toEqual(false);
-
-    service.openByName(ModalType.GUIDE);
-    expect(openSpy).toHaveBeenCalledTimes(2);
   });
 });

@@ -14,7 +14,6 @@ import { HomeModule } from '@components/pages/home/home.module';
 import { HomeComponent } from '@components/pages/home/home/home.component';
 import { LoginModule } from '@components/pages/login/login.module';
 import { LoginComponent } from '@components/pages/login/login/login.component';
-import { UserGuideModule } from '@components/pages/user-guide/user-guide.module';
 import { SharedModule } from '@components/shared/shared.module';
 import { AppComponent } from './app.component';
 
@@ -26,7 +25,6 @@ import { AppComponent } from './app.component';
     ChatModule,
     AccountModule,
     EditorModule,
-    UserGuideModule,
     LoginModule,
     RouterModule.forRoot(
       [
