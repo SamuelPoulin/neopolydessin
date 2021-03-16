@@ -29,6 +29,7 @@ import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.ui.connexion.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
@@ -63,6 +64,10 @@ class MainmenuActivity : AppCompatActivity() {
             true
         }
 
+        binding.lobbyListBtn.setOnClickListener {
+            openLobbyList()
+        }
+
         vm.connectSocket(getSharedPreferences(
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
@@ -71,6 +76,12 @@ class MainmenuActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+    }
+    private fun openLobbyList(){
+        val intent = Intent(this, SearchLobbyActivity::class.java).apply {
+            putExtra("username", intent.getStringExtra("username").toString())
+        }
+        startActivity(intent)
     }
 
     fun toggleFriendslist() {
