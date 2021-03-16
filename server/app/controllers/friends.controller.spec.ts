@@ -28,10 +28,13 @@ describe('friends controller', () => {
         documents: {
             friends: [
                 {
-                    friendId: '123456789012345678901234',
-                    username: 'itsYaBoi',
+                    friendId: {
+                        _id: '123456789012345678901234',
+                        username: 'itsYaBoi',
+                    },
                     status: FriendStatus.FRIEND,
-                    received: true
+                    received: true,
+                    isOnline: false
                 }
             ]
         }

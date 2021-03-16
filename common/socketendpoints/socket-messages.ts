@@ -9,5 +9,8 @@ export enum SocketMessages {
     START_GAME_CLIENT = 'StartGameFromServerToClient',
     CREATE_LOBBY = 'CreateLobby',
     GET_ALL_LOBBIES = 'GetListLobby',
-    PLAYER_GUESS = 'PlayerGuessWord'
+    PLAYER_GUESS = 'PlayerGuessWord',
+    SET_GAME_PRIVACY = 'ChangePrivacySetting',
+    EMIT_NEW_PRIVACY_SETTING = 'EmitPrivacySetting',
+    END_GAME = 'EndCurrentGame',
 }

@@ -7,9 +7,12 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
+import { Difficulty, GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
+import { LobbySolo } from '../models/lobby-solo';
+import { LobbyClassique } from '../models/lobby-classique';
+import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, ErrorMsg, Response } from './services/database.service';
@@ -19,6 +22,8 @@ import { Observable } from './utils/observable';
 
 @injectable()
 export class SocketIo {
+
+  static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
 
   io: Server;
   lobbyList: Lobby[] = [];
@@ -43,6 +48,14 @@ export class SocketIo {
     this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
     });
+
+    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId) => {
+      console.log(`Game : ${lobbyId} ended \n`);
+      const index = this.lobbyList.findIndex((game) => game.lobbyId === lobbyId);
+      if (index > -1) {
+        this.lobbyList.splice(index, 1);
+      }
+    });
   }
 
   validateMessageLength(msg: ChatMessage): boolean {
@@ -61,6 +74,7 @@ export class SocketIo {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
       loginsModel.addLogin(accountId).catch((err) => { console.log(err); });
+      console.log(`Connected with ${socket.id} \n`);
     } catch (err) {
       console.log(err.message);
       socket.disconnect();
@@ -95,44 +109,56 @@ export class SocketIo {
 
   bindIoEvents(): void {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
-      console.log(`Connected with ${socket.id} \n`);
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on('GetLobbies', (callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(this.lobbyList.map((lobby) => {
-          return lobby.toLobbyInfo();
-        }));
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
+        callback(this.lobbyList
+          .filter((lobby) => {
+            return !lobby.privateLobby;
+          }).map((lobby) => {
+            return lobby.toLobbyInfo();
+          }));
       });
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (accountId: string, lobbyId: string) => {
+      socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
-        if (lobbyToJoin) {
-          // player status is to be changed.
-          lobbyToJoin.addPlayer(accountId, PlayerStatus.GUESSER, socket);
-          this.databaseService.getAccountById(accountId).then((account) => {
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (lobbyToJoin && playerId) {
+          lobbyToJoin.addPlayer(playerId, PlayerStatus.GUESSER, socket);
+          this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
+        } else {
+          console.error('lobby or player doesn\'t exist');
         }
       });
 
-      socket.on('CreateLobby', (accountId: string) => {
-        const lobby: Lobby = new Lobby(this.io);
-        // player status is to be changed.
-        lobby.addPlayer(accountId, PlayerStatus.DRAWER, socket);
-        this.lobbyList.push(lobby);
-      });
-
-      socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
-        if (this.validateMessageLength(sentMsg)) {
-          const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-          if (currentLobby) {
-            socket.to(currentLobby).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+      socket.on(SocketMessages.CREATE_LOBBY, (gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+        let lobby;
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
+        if (playerId) {
+          switch(gametype) {
+            case GameType.CLASSIC: {
+              lobby = new LobbyClassique(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_SOLO: {
+              lobby = new LobbySolo(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
+            case GameType.SPRINT_COOP: {
+              lobby = new LobbyCoop(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              break;
+            }
           }
+          lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          this.lobbyList.push(lobby);
+        } else {
+          console.error('player doesn\'t exist');
         }
-        else {
-          console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-        }
+        // player status is to be changed.
       });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
@@ -157,10 +183,6 @@ export class SocketIo {
         if (currentLobby) {
           this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
         }
-      });
-
-      socket.on(SocketMessages.PLAYER_GUESS, (word: string) => {
-        console.log(word);
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {

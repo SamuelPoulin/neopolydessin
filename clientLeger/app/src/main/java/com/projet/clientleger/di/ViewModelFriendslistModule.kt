@@ -2,6 +2,8 @@ package com.projet.clientleger.di
 
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.ApiFriendslistInterface
+import com.projet.clientleger.data.api.service.FriendslistSocketService
+import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.repository.FriendslistRepository
 import dagger.Module
 import dagger.Provides
@@ -15,5 +17,5 @@ object ViewModelFriendslistModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(sessionManager: SessionManager, apiFriendslistInterface: ApiFriendslistInterface) = FriendslistRepository(sessionManager, apiFriendslistInterface)
+    fun provideRepo(socketService: FriendslistSocketService, sessionManager: SessionManager, apiFriendslistInterface: ApiFriendslistInterface) = FriendslistRepository(socketService, sessionManager, apiFriendslistInterface)
 }
