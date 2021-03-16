@@ -144,15 +144,15 @@ export class SocketIo {
         if (playerId) {
           switch(gametype) {
             case GameType.CLASSIC: {
-              lobby = new LobbyClassique(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
             case GameType.SPRINT_SOLO: {
-              lobby = new LobbySolo(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
             case GameType.SPRINT_COOP: {
-              lobby = new LobbyCoop(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
           }
