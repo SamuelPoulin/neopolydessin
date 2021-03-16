@@ -1,3 +1,5 @@
+import { RegisterComponent } from './register/register.component';
+
 export class PasswordRule {
   private readonly invalidIcon: string = 'clear';
   private readonly validIcon: string = 'done';
@@ -26,13 +28,13 @@ export class PasswordRule {
     }
   }
 
-  constructor(text: string, public callback: () => boolean) {
+  constructor(text: string, public callback: (registerComponent: RegisterComponent) => boolean) {
     this.icon = this.invalidIcon;
     this.class = this.invalidClass;
     this.text = text;
   }
 
-  verify(): void {
-    this.isValid = this.callback();
+  verify(registerComponent: RegisterComponent): void {
+    this.isValid = this.callback(registerComponent);
   }
 }

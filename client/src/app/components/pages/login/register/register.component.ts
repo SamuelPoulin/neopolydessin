@@ -20,7 +20,7 @@ export class RegisterComponent {
   password: string = '';
   passwordConfirm: string = '';
 
-  passwordRules: PasswordRule[] = new Array<PasswordRule>();
+  passwordRules: PasswordRule[] = [];
 
   constructor(private apiService: APIService, private userService: UserService, private router: Router, private snackBar: MatSnackBar) {
     this.passwordRules.push(
@@ -51,21 +51,21 @@ export class RegisterComponent {
   updatePassword() {
     window.setTimeout(() => {
       this.passwordRules.forEach((rule) => {
-        rule.verify();
+        rule.verify(this);
       });
     }, 0);
   }
 
-  private isPasswordIdentical() {
-    return this.password === this.passwordConfirm;
-  }
+  private isPasswordIdentical = (registerComponent: RegisterComponent): boolean => {
+    return registerComponent.password === registerComponent.passwordConfirm;
+  };
 
-  private passwordHasDigit() {
+  private passwordHasDigit = (registerComponent: RegisterComponent): boolean => {
     const expression = /\d/g;
-    return expression.test(this.password);
-  }
+    return expression.test(registerComponent.password);
+  };
 
-  private isPasswordLong() {
-    return this.password.length > this.minPasswordLength;
-  }
+  private isPasswordLong = (registerComponent: RegisterComponent): boolean => {
+    return registerComponent.password.length > registerComponent.minPasswordLength;
+  };
 }
