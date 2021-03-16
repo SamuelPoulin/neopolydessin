@@ -4,6 +4,7 @@ import * as cors from 'cors';
 import * as express from 'express';
 import { inject, injectable } from 'inversify';
 import * as logger from 'morgan';
+import { ContentType } from '../models/schemas/avatar';
 import { APIController } from './controllers/api.controller';
 import Types from './types';
 
@@ -27,7 +28,7 @@ export class Application {
     this.app.use(bodyParser.json({ limit: '25mb' }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
     this.app.use(bodyParser.raw({
-      type: ['image/png', 'image/jpeg'],
+      type: [ContentType.png, ContentType.jpeg],
       limit: '3mb',
     }));
     this.app.use(cookieParser());
