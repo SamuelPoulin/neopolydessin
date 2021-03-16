@@ -4,6 +4,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
+import { SharedModule } from '@components/shared/shared.module';
 import { APIService } from '@services/api.service';
 
 import { RegisterComponent } from './register.component';
@@ -16,7 +17,7 @@ describe('RegisterComponent', () => {
     await TestBed.configureTestingModule({
       providers: [ { provide: HttpXhrBackend, useClass: HttpTestingController }, APIService, MatSnackBar, Overlay ],
       declarations: [ RegisterComponent ],
-      imports: [ HttpClientTestingModule, RouterTestingModule ]
+      imports: [ HttpClientTestingModule, RouterTestingModule, SharedModule ]
     })
     .compileComponents();
   });
