@@ -58,9 +58,9 @@ class MainmenuActivity : AppCompatActivity() {
         startActivity(intent)
 
 
-        //supportFragmentManager.commit{
-        //    add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        //}
+        supportFragmentManager.commit{
+            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
+        }
     }
 
     fun toggleFriendslist() {
