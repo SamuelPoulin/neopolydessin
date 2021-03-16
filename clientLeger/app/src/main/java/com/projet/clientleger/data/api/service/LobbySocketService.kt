@@ -32,10 +32,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         }
     }
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty){
-        val obj: JSONObject = JSONObject()
-        obj.put("gameMode", gameMode)
-        obj.put("difficulty", difficulty)
-        socketService.socket.emit("GetListLobby",obj, Ack{ received ->
+        socketService.socket.emit("GetListLobby",gameMode.value, difficulty.value, Ack{ received ->
             println("NOUS SOMMES DANS LE SOCKET SERVICE")
             println(received[0])
         })

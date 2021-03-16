@@ -1,5 +1,5 @@
 package com.projet.clientleger.data.api.model
 
-enum class GameType {
-    CLASSIC, SPRINT_SOLO, SPRINT_COOP
+enum class GameType(val value: String) {
+    CLASSIC("classic"), SPRINT_SOLO("sprintSolo"), SPRINT_COOP("sprintCoop")
 }
