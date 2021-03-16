@@ -75,7 +75,7 @@ class SocketService @Inject constructor() {
         }
     }
 
-    private fun <T> receiveFromSocket(
+    fun <T> receiveFromSocket(
         endpoint: String,
         parser: (received: Array<Any>) -> T
     ): Observable<T> {

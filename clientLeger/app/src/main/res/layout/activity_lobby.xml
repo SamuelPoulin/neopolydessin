@@ -55,6 +55,17 @@
             android:textStyle="bold"
             app:layout_constraintLeft_toRightOf="@id/logo"
             app:layout_constraintBottom_toBottomOf="parent" />
+        <TextView
+            android:id="@+id/difficulty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/difficulty"
+            android:textColor="@color/black"
+            android:textSize="40sp"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toRightOf="@id/gamemode"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginLeft="40dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -116,6 +127,7 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent">
                     <TextView
+                        android:id="@+id/player1Name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/player1_base_name"
@@ -159,6 +171,7 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent">
                     <TextView
+                        android:id="@+id/player2Name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/player2_base_name"
@@ -232,6 +245,7 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent">
                         <TextView
+                            android:id="@+id/player3Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/player3_base_name"
@@ -275,6 +289,7 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent">
                         <TextView
+                            android:id="@+id/player4Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/player4_base_name"

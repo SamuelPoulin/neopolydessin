@@ -38,15 +38,15 @@
     <string name="difficulty">Difficulté</string>
     <string name="gamemode">Mode de jeu</string>
     <string name="invalid_username_password">"Nom d'utilisateur ou Mot de passe invalide, veuillez réessayer"</string>
-    <string name="start_game_button_text">START GAME</string>
-    <string name="exit_game_button_text">EXIT GAME</string>
-    <string name="team_2_base_name">Team 2</string>
-    <string name="team_1_base_name">Team 1</string>
-    <string name="game_mode_base_text">Game Mode</string>
+    <string name="start_game_button_text">DEMARRER LA PARTIE</string>
+    <string name="exit_game_button_text">QUITTER PARTIE</string>
+    <string name="team_2_base_name">Equipe 2</string>
+    <string name="team_1_base_name">Equipe 1</string>
+    <string name="game_mode_base_text">Mode de Jeu</string>
     <string name="logo">logo</string>
-    <string name="player1_base_name">Player1</string>
+    <string name="player1_base_name">Joueur1</string>
     <string name="remove_player_button_text">REMOVE</string>
-    <string name="player4_base_name">Player4</string>
-    <string name="player3_base_name">Player3</string>
-    <string name="player2_base_name">Player2</string>
+    <string name="player4_base_name">Joueur4</string>
+    <string name="player3_base_name">Joueur3</string>
+    <string name="player2_base_name">Joueur2</string>
 </resources>
