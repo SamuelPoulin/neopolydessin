@@ -14,7 +14,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
+import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
@@ -30,8 +32,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
-    var selectedGameMode:String = "none"
-    var selectedDifficulty:String = "none"
+    var selectedGameMode:GameType = GameType.CLASSIC
+    var selectedDifficulty:Difficulty = Difficulty.EASY
     //val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
     @Inject
@@ -111,7 +113,7 @@ class MainmenuActivity : AppCompatActivity() {
 
         dialogView.actionBtn.setOnClickListener {
             var username:String = intent.getStringExtra("username").toString()
-            val gameInfo = GameCreationInfosModel(username, selectedGameMode, selectedDifficulty, false)
+            val gameInfo = GameCreationInfosModel(username, selectedGameMode.value, selectedDifficulty.value, false)
             if(isCreating){
                 vm.createGame(selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
@@ -137,7 +139,13 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-                selectedGameMode = adapterGamemode.getItem(position).toString()
+
+                selectedGameMode = when(adapterGamemode.getItem(position).toString()){
+                        "Classique" -> GameType.CLASSIC
+                    "Solo" -> GameType.SPRINT_SOLO
+                    "Coop" -> GameType.SPRINT_COOP
+                    else -> GameType.CLASSIC
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -155,7 +163,12 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-                selectedDifficulty = adapterDifficulty.getItem(position).toString()
+                selectedDifficulty = when(adapterDifficulty.getItem(position).toString()){
+                    "Facile" -> Difficulty.EASY
+                    "Intermediaire" -> Difficulty.INTERMEDIATE
+                    "Difficile" -> Difficulty.HARD
+                    else -> Difficulty.EASY
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {

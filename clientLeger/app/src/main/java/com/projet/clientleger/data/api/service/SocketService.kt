@@ -30,6 +30,7 @@ class SocketService @Inject constructor() {
             options.transports = arrayOf("websocket")
             options.upgrade = false
             socket = IO.socket(BuildConfig.SERVER_URL, options)
+            //socket = IO.socket("http://10.0.2.2:3205", options)
         } catch (e: URISyntaxException) {
             null
         }
