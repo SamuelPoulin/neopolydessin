@@ -17,5 +17,7 @@ enum class DrawingSocketEndpoints(val endpoint: String) {
     RECEIVE_UNDO("undoBroadcast"),
 
     REDO("redo"),
-    RECEIVE_REDO("redoBroadcast")
+    RECEIVE_REDO("redoBroadcast"),
+
+    CREATE_LOBBY("CreateLobby")
 }

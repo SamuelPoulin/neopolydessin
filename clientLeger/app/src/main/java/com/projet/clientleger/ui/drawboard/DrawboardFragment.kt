@@ -9,6 +9,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import com.projet.clientleger.data.enum.Difficulty
+import com.projet.clientleger.data.enum.GameType
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -28,6 +30,10 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         setupObservable()
         binding!!.colorPickerBtn.setOnClickListener { pickColor() }
         binding!!.vm = vm
+        vm.paths.observe(requireActivity()){
+            binding!!.drawingBoard.invalidate()
+        }
+        vm.createLobby(GameType.CLASSIC, Difficulty.EASY, false)
         return binding!!.root
     }
 
@@ -44,11 +50,9 @@ class DrawboardFragment @Inject constructor(): Fragment() {
                     MotionEvent.ACTION_DOWN -> {
                         val strokeWidth = binding!!.strokeWidthSlider.value
                         vm.startPath(Coordinate(event.x, event.y), strokeWidth)
-                        v.invalidate()
                     }
                     MotionEvent.ACTION_MOVE -> {
                         vm.updateCurrentPath(Coordinate(event.x, event.y))
-                        v.invalidate()
                     }
                 }
             }
