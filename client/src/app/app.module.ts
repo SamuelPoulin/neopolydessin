@@ -12,8 +12,10 @@ import { EditorModule } from '@components/pages/editor/editor.module';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { HomeModule } from '@components/pages/home/home.module';
 import { HomeComponent } from '@components/pages/home/home/home.component';
+import { LobbyComponent } from '@components/pages/lobby/lobby/lobby.component';
 import { LoginModule } from '@components/pages/login/login.module';
 import { LoginComponent } from '@components/pages/login/login/login.component';
+import { LobbyModule } from '@components/pages/lobby/lobby.module';
 import { PasswordRecoveryComponent } from '@components/pages/login/password-recovery/password-recovery.component';
 import { RegisterComponent } from '@components/pages/login/register/register.component';
 import { SharedModule } from '@components/shared/shared.module';
@@ -28,11 +30,13 @@ import { AppComponent } from './app.component';
     AccountModule,
     EditorModule,
     LoginModule,
+    LobbyModule,
     RouterModule.forRoot(
       [
         { path: '', component: HomeComponent },
         { path: 'login', component: LoginComponent },
         { path: 'edit', component: EditorComponent },
+        { path: 'lobby', component: LobbyComponent },
         { path: 'chat', component: ChatComponent },
         { path: 'register', component: RegisterComponent },
         { path: 'password-recovery', component: PasswordRecoveryComponent },

@@ -6,4 +6,4 @@ import { LobbyComponent } from './lobby/lobby.component';
   imports: [SharedModule],
   declarations: [LobbyComponent],
 })
-export class AccountModule {}
+export class LobbyModule {}

@@ -20,7 +20,7 @@ export class RegisterComponent {
   password: string = '';
   passwordConfirm: string = '';
 
-  passwordRules: PasswordRule[] = new Array<PasswordRule>();
+  passwordRules: PasswordRule[] = [];
 
   constructor(private apiService: APIService, private userService: UserService, private router: Router, private snackBar: MatSnackBar) {
     this.passwordRules.push(
