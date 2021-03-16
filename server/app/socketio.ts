@@ -124,10 +124,14 @@ export class SocketIo {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId) {
-          lobbyToJoin.addPlayer(playerId, PlayerStatus.GUESSER, socket);
+          lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
+          const lobbyJoined = this.findLobby(lobbyId);
+          if (lobbyJoined) {
+            socket.to(socket.id).broadcast.emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyJoined.toLobbyInfo());
+          }
         } else {
           console.error('lobby or player doesn\'t exist');
         }

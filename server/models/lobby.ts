@@ -9,12 +9,18 @@ import { ChatMessage } from '../../common/communication/chat-message';
 import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
+import { DatabaseService } from '../app/services/database.service';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
   lobbyId: string;
-  playerIds: string[];
+  teamsInfo: TeamInfo[];
   gameType: GameType;
+}
+
+export interface TeamInfo {
+  teamNumber: number;
+  playerNames: string[];
 }
 
 export interface Player {
@@ -78,6 +84,7 @@ export abstract class Lobby {
 
   constructor(
     @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
+    @inject(Types.DatabaseService) protected databaseService: DatabaseService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,
@@ -97,9 +104,19 @@ export abstract class Lobby {
   }
 
   toLobbyInfo(): LobbyInfo {
+    const teamInfo: TeamInfo[] = [];
+    this.teams.forEach((element) => {
+      const listPlayerNames: string[] = [];
+      element.playersInTeam.forEach((player) => {
+        this.databaseService.getAccountById(player.accountId).then((account) => {
+          listPlayerNames.push(account.documents.username);
+        });
+      });
+      teamInfo.push({teamNumber: element.teamNumber, playerNames: listPlayerNames});
+    });
     return {
       lobbyId: this.lobbyId,
-      playerIds: this.players.map((player) => { return player.accountId; }),
+      teamsInfo: teamInfo,
       gameType: this.gameType,
     };
   }
@@ -139,10 +156,6 @@ export abstract class Lobby {
     if (senderAccountId === this.ownerAccountId) {
       this.privateLobby = newPrivacySetting;
     }
-  }
-
-  lobbyIsFull(): boolean {
-    return this.players.length < this.size;
   }
 
   endGame(): void {

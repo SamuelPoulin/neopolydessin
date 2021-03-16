@@ -12,5 +12,6 @@ export enum SocketMessages {
     PLAYER_GUESS = 'PlayerGuessWord',
     SET_GAME_PRIVACY = 'ChangePrivacySetting',
     EMIT_NEW_PRIVACY_SETTING = 'EmitPrivacySetting',
+    RECEIVE_LOBBY_INFO = 'ReceiveLobbyInfo',
     END_GAME = 'EndCurrentGame'
 }
