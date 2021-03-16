@@ -14,7 +14,8 @@ import { HomeModule } from '@components/pages/home/home.module';
 import { HomeComponent } from '@components/pages/home/home/home.component';
 import { LoginModule } from '@components/pages/login/login.module';
 import { LoginComponent } from '@components/pages/login/login/login.component';
-import { UserGuideModule } from '@components/pages/user-guide/user-guide.module';
+import { PasswordRecoveryComponent } from '@components/pages/login/password-recovery/password-recovery.component';
+import { RegisterComponent } from '@components/pages/login/register/register.component';
 import { SharedModule } from '@components/shared/shared.module';
 import { AppComponent } from './app.component';
 
@@ -26,7 +27,6 @@ import { AppComponent } from './app.component';
     ChatModule,
     AccountModule,
     EditorModule,
-    UserGuideModule,
     LoginModule,
     RouterModule.forRoot(
       [
@@ -34,6 +34,8 @@ import { AppComponent } from './app.component';
         { path: 'login', component: LoginComponent },
         { path: 'edit', component: EditorComponent },
         { path: 'chat', component: ChatComponent },
+        { path: 'register', component: RegisterComponent },
+        { path: 'password-recovery', component: PasswordRecoveryComponent },
         {
           path: 'account',
           component: AccountComponent,

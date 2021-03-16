@@ -30,7 +30,7 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
     }
 
     fun sendEndPath(endCoords: Coordinate){
-        socketService.socket.emit(DrawingSocketEndpoints.END_PATH.endpoint, endCoords)
+        socketService.socket.emit(DrawingSocketEndpoints.END_PATH.endpoint, Json.encodeToJsonElement(Coordinate.serializer(), endCoords))
     }
 
     fun createLobby(gameType: GameType, difficulty: Difficulty, isPrivate: Boolean){
@@ -45,21 +45,14 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         }
     }
 
-    fun receiveUpdatePath() : Observable<ArrayList<Coordinate>>{
+    fun receiveUpdatePath() : Observable<Coordinate>{
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_UPDATE_PATH.endpoint){ res->
-            val listCoords = ArrayList<Coordinate>()
-            (res[0] as JSONArray)
-            val list = (res[0] as JSONArray)//Gson().fromJson(res[0] as String, Array::class.java)
-            for(i: Int in 0 until list.length())
-                listCoords.add(Gson().fromJson(list.get(i).toString(), Coordinate::class.java))
-            listCoords
+            Json.decodeFromString(Coordinate.serializer(), res[0].toString())
         }
     }
 
     fun receiveEndPath() : Observable<Coordinate>{
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_END_PATH.endpoint){res ->
-            println(res[0])
-            println(res.size)
             Json.decodeFromString(Coordinate.serializer(), res[0].toString())
         }
     }

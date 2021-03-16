@@ -28,7 +28,7 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
         return drawingSocketService.receiveStartPath()
     }
 
-    fun receiveUpdatePath(): Observable<ArrayList<Coordinate>> {
+    fun receiveUpdatePath(): Observable<Coordinate> {
         return drawingSocketService.receiveUpdatePath()
     }
 

@@ -164,7 +164,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.SPRINT_COOP, Difficulty.EASY,(lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
@@ -189,7 +189,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.SPRINT_COOP, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
@@ -204,7 +204,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.SPRINT_COOP, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, GameType.CLASSIC, Difficulty.EASY, false);
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
 
@@ -217,7 +217,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });

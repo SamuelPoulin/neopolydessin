@@ -1,0 +1,19 @@
+<div id="login-page">
+  <img id="login-page-image" src="assets/icon.png" />
+  <div id="login-page-title">Créer votre compte</div>
+  <div class="input input-wrapper">
+    <app-username-input class="input-half" [(value)]="firstName">Prénom</app-username-input>
+    <app-username-input class="input-half" [(value)]="lastName">Nom</app-username-input>
+  </div>
+  <app-username-input class="input" [(value)]="username">Nom d'utilisateur</app-username-input>
+  <app-username-input class="input" [(value)]="email">Email</app-username-input>
+  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="password">Mot de passe</app-password-input>
+  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="passwordConfirm">Confirmer le mot de passe</app-password-input>
+  <div id="register-requirements">
+    <div *ngFor="let rule of passwordRules" [class]="rule.class">
+      <mat-icon>{{rule.icon}}</mat-icon>
+      <div>{{rule.text}}</div>
+    </div>
+  </div>
+  <button id="submit-button" mat-raised-button color="primary" (click)="register()">Créer le compte</button>
+</div>

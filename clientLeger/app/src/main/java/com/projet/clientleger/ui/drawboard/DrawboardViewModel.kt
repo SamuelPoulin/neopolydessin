@@ -23,7 +23,7 @@ import kotlin.math.abs
 
 @HiltViewModel
 class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository) :
-    ViewModel() {
+        ViewModel() {
     var paths: MutableLiveData<ArrayList<PenPath>> = MutableLiveData(ArrayList())
     private var currentPath: Path? = null
     private var lastCoordinate: Coordinate? = null
@@ -65,17 +65,14 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         drawboardRepository.sendStartPath(coords, BrushInfo(brushColor, strokeWidth))
     }
 
-    private fun receiveUpdateCurrentPath(coords: ArrayList<Coordinate>) {
+    private fun receiveUpdateCurrentPath(coords: Coordinate) {
         println("receive update ${LocalDateTime.now()}")
-        if(currentPath == null || lastCoordinate == null)
+        if (currentPath == null || lastCoordinate == null)
             return
-        for (coord in coords) {
-            currentPath!!.quadTo(
-                lastCoordinate!!.x, lastCoordinate!!.y,
-                (coord.x + lastCoordinate!!.x) / 2, (coord.y + lastCoordinate!!.y) / 2
-            )
-        }
-        lastCoordinate = coords.last()
+        currentPath!!.quadTo(lastCoordinate!!.x, lastCoordinate!!.y,
+                (coords.x + lastCoordinate!!.x) / 2, (coords.y + lastCoordinate!!.y) / 2
+        )
+        lastCoordinate = coords
         paths.postValue(paths.value)
     }
 
@@ -83,7 +80,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         println("send update ${LocalDateTime.now()}")
         var dx = 2f
         var dy = 2f
-        if(lastCoordinate != null) {
+        if (lastCoordinate != null) {
             dx = abs(coords.x - lastCoordinate!!.x)
             dy = abs(coords.y - lastCoordinate!!.y)
         }
@@ -92,11 +89,12 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
-    private fun receiveEndPath(coords: Coordinate){
+    private fun receiveEndPath(coords: Coordinate) {
         currentPath!!.lineTo(coords.x, coords.y)
 
         lastCoordinate = null
         currentPath = null
+        paths.postValue(paths.value)
     }
 
     fun endPath(coords: Coordinate) {
@@ -111,6 +109,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     fun createLobby(gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
+        println("createLobby")
         drawboardRepository.createLobby(gameType, difficulty, isPrivate)
     }
 }
