@@ -25,4 +25,5 @@ server/emailAPI.env
 .cxx
 local.properties
 /build/build
+=======
 server/*.env

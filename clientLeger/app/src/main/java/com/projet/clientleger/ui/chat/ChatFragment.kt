@@ -60,6 +60,7 @@ class ChatFragment @Inject constructor() : Fragment() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        println("fragCreation-----------------------------------$savedInstanceState")
         super.onCreate(savedInstanceState)
         username = arguments?.getString("username") ?: "unknowned_user"
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
