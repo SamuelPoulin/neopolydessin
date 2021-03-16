@@ -29,22 +29,26 @@ export class APIService {
     APIService.API_DRAWING_ROUTE = '/drawing';
   }
 
-  login(username: string, password: string) {
+  async login(username: string, password: string) {
     const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/login';
-    return this.http.post(url, {username, password}).toPromise()
-      .then((reply: {accessToken: string, refreshToken: string}) => {
-        SocketService.accessToken = reply.accessToken;
-        SocketService.refreshToken = reply.refreshToken;
+    return this.http
+      .post(url, { username, password })
+      .toPromise()
+      .then((reply: { accessToken: string; refreshToken: string }) => {
+        SocketService.ACCESS_TOKEN = reply.accessToken;
+        SocketService.REFRESH_TOKEN = reply.refreshToken;
       });
   }
 
-  register(firstName:string, lastName: string, username: string, email: string, password: string) {
+  async register(firstName: string, lastName: string, username: string, email: string, password: string) {
     const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/register';
-    return this.http.post(url, {firstName, lastName, username, email, password, passwordConfirm: password}).toPromise()
-      .then((reply: {accessToken: string, refreshToken: string}) => {
-        SocketService.accessToken = reply.accessToken;
-        SocketService.refreshToken = reply.refreshToken;
-      });  // todo - fix duplicate password
+    return this.http
+      .post(url, { firstName, lastName, username, email, password, passwordConfirm: password })
+      .toPromise()
+      .then((reply: { accessToken: string; refreshToken: string }) => {
+        SocketService.ACCESS_TOKEN = reply.accessToken;
+        SocketService.REFRESH_TOKEN = reply.refreshToken;
+      }); // todo - fix duplicate password
   }
 
   async uploadDrawing(drawing: Drawing): Promise<void> {

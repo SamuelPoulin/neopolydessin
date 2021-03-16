@@ -8,9 +8,10 @@ import { PasswordRule } from '../password-rule';
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
+  private readonly minPasswordLength: number = 8;
 
   firstName: string = '';
   lastName: string = '';
@@ -19,14 +20,9 @@ export class RegisterComponent {
   password: string = '';
   passwordConfirm: string = '';
 
-  public passwordRules = new Array<PasswordRule>();
+  passwordRules: PasswordRule[] = new Array<PasswordRule>();
 
-  constructor(
-    private API: APIService,
-    private userService: UserService,
-    private router: Router,
-    private snackBar: MatSnackBar
-  ) { 
+  constructor(private apiService: APIService, private userService: UserService, private router: Router, private snackBar: MatSnackBar) {
     this.passwordRules.push(
       new PasswordRule('Les mots de passe doivent être les mêmes', this.isPasswordIdentical),
       new PasswordRule('Doit contenir un chiffre', this.passwordHasDigit),
@@ -35,14 +31,16 @@ export class RegisterComponent {
     this.updatePassword();
   }
 
-  public register() {
-    this.API.register(this.firstName, this.lastName, this.username, this.email, this.password)
+  register() {
+    this.apiService
+      .register(this.firstName, this.lastName, this.username, this.email, this.password)
       .then(() => {
         this.userService.username = this.username;
-        this.router.navigate(['/chat']);   // todo - use constant?
-      }).catch(err => {
+        this.router.navigate(['/chat']); // todo - use constant?
+      })
+      .catch((err: Error) => {
         console.error(err);
-        this.snackBar.open("Erreur de connexion", 'Ok', {
+        this.snackBar.open('Erreur de connexion', 'Ok', {
           duration: 2000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',
@@ -50,26 +48,24 @@ export class RegisterComponent {
       });
   }
 
-  public updatePassword() {
+  updatePassword() {
     window.setTimeout(() => {
-    this.passwordRules.forEach(rule => {
-      rule.verify();
-    });
+      this.passwordRules.forEach((rule) => {
+        rule.verify();
+      });
     }, 0);
   }
 
-  private isPasswordIdentical = () => {
+  private isPasswordIdentical() {
     return this.password === this.passwordConfirm;
   }
 
-  private passwordHasDigit = () => {
+  private passwordHasDigit() {
     const expression = /\d/g;
     return expression.test(this.password);
   }
 
-  private isPasswordLong = () => {
-    return this.password.length > 8;
+  private isPasswordLong() {
+    return this.password.length > this.minPasswordLength;
   }
-
-
 }
