@@ -42,7 +42,7 @@ describe('DrawingCommandService', () => {
     it('updatePath should add points to current path', (done: Mocha.Done) => {
         drawingCommands.startPath({ x: 0, y: 0 }, brushInfo)
             .then(() => {
-                return drawingCommands.updatePath([{ x: 0, y: 0 }, { x: 2, y: 2 }]);
+                return drawingCommands.updatePath({ x: 2, y: 2 });
             })
             .then(() => {
                 expect(drawingCommands.currentPath?.path).to.deep.equal([
@@ -54,7 +54,7 @@ describe('DrawingCommandService', () => {
     });
 
     it('updatePath should reject if a no path is in progress', (done: Mocha.Done) => {
-        drawingCommands.updatePath([{ x: 0, y: 0 }, { x: 2, y: 2 }])
+        drawingCommands.updatePath({ x: 0, y: 0 })
             .catch(() => {
                 done()
             })
