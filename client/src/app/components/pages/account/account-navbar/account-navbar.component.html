@@ -10,8 +10,8 @@
       {{avatarLetter}}
     </div>
     <div id="navbar-user">
-      <div id="navbar-user-name">Samuel Poulin</div>
-      <div id="navbar-user-username">@samuelpoulin</div>
+      <div id="navbar-user-name">{{firstName + ' ' + lastName}}</div>
+      <div id="navbar-user-username">@{{username}}</div>
     </div>
     <div id="navbar-middle-buttons" class="navbar-section">
       <button class="navbar-button" mat-button [routerLink]="'./'" (click)="toggleClosed()">

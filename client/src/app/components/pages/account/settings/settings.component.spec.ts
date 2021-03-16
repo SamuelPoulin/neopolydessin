@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SharedModule } from '@components/shared/shared.module';
+import { AccountSectionComponent } from '../account-section/account-section.component';
 
 import { SettingsComponent } from './settings.component';
 
@@ -8,9 +10,9 @@ describe('SettingsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SettingsComponent ]
-    })
-    .compileComponents();
+      imports: [SharedModule],
+      declarations: [SettingsComponent, AccountSectionComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

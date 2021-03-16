@@ -54,4 +54,8 @@ export class HomeComponent {
   get isDrawingNull(): boolean {
     return this.localSaveService.drawing == null;
   }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
+  }
 }

@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SharedModule } from '@components/shared/shared.module';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { AccountSectionComponent } from '../account-section/account-section.component';
 
 import { DashboardComponent } from './dashboard.component';
 
@@ -8,9 +11,9 @@ describe('DashboardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DashboardComponent ]
-    })
-    .compileComponents();
+      imports: [SharedModule, NgApexchartsModule],
+      declarations: [DashboardComponent, AccountSectionComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {
