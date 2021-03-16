@@ -6,18 +6,21 @@ export enum FriendStatus {
   FRIEND = 'friend'
 }
 
-interface PopulatedFriend extends Friend {
-  username: string;
+export interface FriendWithConnection extends Friend {
+  isOnline: boolean;
 }
 
 interface Friend {
-  friendId: string;
+  friendId: string | {
+    _id: string;
+    username: string;
+  } | null;
   status: FriendStatus;
   received: boolean;
 }
 
 export interface FriendsList {
-  friends: PopulatedFriend[];
+  friends: FriendWithConnection[];
 }
 export interface Account extends Document {
   _id: ObjectId;
@@ -37,6 +40,7 @@ export interface UpdateOneQueryResult {
   nModified: number;
 }
 interface AccountModel extends Model<Account> {
+  getFriends: (id: string) => Query<FriendsList | null, Account>;
   addFriendRequestToAccountWithUsername: (senderId: string, username: string) => Query<Account | null, Account>;
   addFriendrequestToSenderWithId: (senderId: string, receiverId: string) => Query<Account | null, Account>;
   acceptFriendship: (id: string, otherId: string, receivedOffer: boolean) => Query<UpdateOneQueryResult, Account>;
@@ -177,6 +181,60 @@ accountSchema.statics.unfriend = (id: string, otherId: string) => {
       }
     }
   );
+};
+
+accountSchema.statics.getFriends = (id: string) => {
+  return accountModel
+    .aggregate([
+      {
+        $match: { _id: new ObjectId(id) }
+      },
+      {
+        $lookup: {
+          from: 'refreshes',
+          localField: 'friends.friendId',
+          foreignField: 'accountId',
+          as: 'refreshToken'
+        }
+      },
+      {
+        $unwind: { path: '$friends', preserveNullAndEmptyArrays: true }
+      },
+      {
+        $addFields: {
+          'friends.indexOfRefresh': {
+            $indexOfArray: [
+              '$refreshToken.accountId',
+              '$friends.friendId'
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          'friends.isOnline': {
+            $cond: {
+              if: { $eq: ['$friends.indexOfRefresh', -1] },
+              then: false,
+              else: true
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          friends: {
+            $push: {
+              status: '$friends.status',
+              received: '$friends.received',
+              friendId: '$friends.friendId',
+              isOnline: '$friends.isOnline'
+            }
+          }
+        }
+      }
+    ]);
 };
 
 const accountModel = model<Account, AccountModel>('Account', accountSchema);

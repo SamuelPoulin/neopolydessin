@@ -10,18 +10,18 @@ export class LobbyClassique extends Lobby {
 
   constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean) {
     super(socketIdService, io, accountId, difficulty, privateGame);
-    this.teams = [{teamNumber: 0, currentScore: 0, playersInTeam: []}, {teamNumber: 1, currentScore: 0, playersInTeam: []}];
+    this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.players.find((player) => player.accountId === accountId) && this.players.length < this.size) {
-      if (this.teams[1].playersInTeam.length < this.teams[0].playersInTeam.length) {
-        this.players.push({ accountId, playerStatus, socket , teamNumber: 0});
-        this.teams[0].playersInTeam.push({ accountId, playerStatus, socket , teamNumber: 0});
+    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
+      if (this.teams[1].playersInTeam.length < this.teams[0].playersInTeam.length) {
+        this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
+        this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
       }
       else {
-        this.players.push({ accountId, playerStatus, socket , teamNumber: 1});
-        this.teams[1].playersInTeam.push({ accountId, playerStatus, socket , teamNumber: 1});
+        this.players.push({ accountId, playerStatus, socket, teamNumber: 1 });
+        this.teams[1].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 1 });
       }
       socket.join(this.lobbyId);
       this.bindLobbyEndPoints(socket);
