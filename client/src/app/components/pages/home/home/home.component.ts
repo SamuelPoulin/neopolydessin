@@ -28,8 +28,8 @@ export class HomeComponent {
     this.dialog.openByName(link);
   }
 
-  openPage(nextLink: string): void {
-    this.router.navigate([nextLink]);
+  openPage(link: string): void {
+    this.router.navigate([link]);
   }
 
   openGallery(): void {

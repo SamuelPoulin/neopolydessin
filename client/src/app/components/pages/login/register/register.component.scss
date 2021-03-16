@@ -1,0 +1,33 @@
+@use '../login.scss' as *;
+
+#register-requirements {
+    width: $input-width;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 12px;
+}
+
+#register-requirements > div {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 5px;
+}
+
+#register-requirements > div > * {
+    display: inline-block;
+}
+
+#register-requirements > div > mat-icon {
+    font-size: 15px;
+    font-weight: bolder;
+    height: 15px;
+    width: 18px;
+}
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}

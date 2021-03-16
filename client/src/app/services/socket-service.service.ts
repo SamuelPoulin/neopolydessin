@@ -11,6 +11,8 @@ import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from
 })
 export class SocketService {
   private static API_BASE_URL: string;
+  public static accessToken: string;
+  public static refreshToken: string;
 
   socket: Socket;
   manager: Manager;
@@ -25,7 +27,7 @@ export class SocketService {
 
     this.socket = this.manager.socket('/', {
       auth: {
-        token: 'some token', // access token here.
+        token: SocketService.accessToken,
       },
     });
   }
@@ -56,7 +58,7 @@ export class SocketService {
     this.socket.emit(SocketMessages.SEND_MESSAGE, message);
   }
 
-  async newPlayer(username: string): Promise<boolean> {
+  newPlayer(username: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       this.socket.emit(SocketConnection.PLAYER_CONNECTION, username, (data: PlayerConnectionResult) =>
         resolve(data.status === PlayerConnectionStatus.VALID),
