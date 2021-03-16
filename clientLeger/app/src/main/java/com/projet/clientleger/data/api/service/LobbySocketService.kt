@@ -19,11 +19,7 @@ import javax.inject.Singleton
 class LobbySocketService @Inject constructor(private val socketService: SocketService) {
 
     fun createGame(gameMode:String,difficulty:String, isPrivate:Boolean) {
-        val obj: JSONObject = JSONObject()
-        obj.put("gameType", gameMode)
-        obj.put("difficulty", difficulty)
-        obj.put("privacySetting", isPrivate)
-        socketService.socket.emit("CreateLobby", obj)
+        socketService.socket.emit("CreateLobby", gameMode, difficulty, isPrivate)
     }
     //deja dans le lobby, un joueur rejoins le lobby
     fun receivePlayersInfo(): Observable<String> {
