@@ -57,4 +57,12 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun joinLobby(lobbyId: String){
         socketService.socket.emit(LobbySocketEndpoints.JOIN_LOBBY.value, lobbyId)
     }
+
+    fun startGame(){
+        socketService.socket.emit(LobbySocketEndpoints.START_GAME.value)
+    }
+
+    fun receiveStartGame() : Observable<Any>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {}
+    }
 }

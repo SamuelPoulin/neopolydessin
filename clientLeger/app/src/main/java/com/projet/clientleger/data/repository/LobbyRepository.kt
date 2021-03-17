@@ -25,4 +25,12 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
     fun joinLobby(lobbyId: String){
         lobbySocketService.joinLobby(lobbyId)
     }
+
+    fun startGame(){
+        lobbySocketService.startGame()
+    }
+
+    fun receiveStartGame() : Observable<Any>{
+        return lobbySocketService.receiveStartGame()
+    }
 }

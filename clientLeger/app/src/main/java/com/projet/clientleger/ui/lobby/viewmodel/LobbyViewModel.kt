@@ -13,4 +13,12 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     fun receivePlayersInfo(): Observable<String> {
         return lobbyRepository.receivedPlayersInfo()
     }
+
+    fun startGame(){
+        lobbyRepository.startGame()
+    }
+
+    fun receiveStartGame(): Observable<Any>{
+        return lobbyRepository.receiveStartGame()
+    }
 }

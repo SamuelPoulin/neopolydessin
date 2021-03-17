@@ -1,24 +1,17 @@
 package com.projet.clientleger.ui.lobby.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.LobbyInfo
-import com.projet.clientleger.data.api.service.LobbySocketService
-import com.projet.clientleger.databinding.ConnexionActivityBinding
-import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.databinding.ActivityLobbyBinding
-import com.projet.clientleger.databinding.ActivityMainmenuBinding
+import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
-import com.projet.clientleger.ui.register.view.RegisterActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -36,6 +29,12 @@ class LobbyActivity : AppCompatActivity() {
                         addPlayerToGame(username.toString())
                     }
                 }
+
+        vm.receiveStartGame().subscribe{
+            lifecycleScope.launch {
+                goToActivity(GameActivity::class.java)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,11 +84,15 @@ class LobbyActivity : AppCompatActivity() {
         disableAllRemoveButtons()
     }
     private fun startGame(){
-        //TODO
+        vm.startGame()
     }
     private fun goToMainMenu(){
         val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun <T> goToActivity(java: Class<T>) {
+        startActivity(Intent(this, java))
     }
     private fun retrievePlayerInfos(){
 
