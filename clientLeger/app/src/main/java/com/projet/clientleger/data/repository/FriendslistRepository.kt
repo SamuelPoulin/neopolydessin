@@ -16,7 +16,9 @@ class FriendslistRepository @Inject constructor(private val friendslistSocketSer
     init {
     }
     suspend fun getFriends():Friendslist{
+        println("request")
         val res = sessionManager.request(apiFriendslistInterface::getFriends)
+        println(res)
         return res.body()!!
     }
 

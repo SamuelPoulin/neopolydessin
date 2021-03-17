@@ -7,6 +7,7 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.service.DrawingSocketService
 import com.projet.clientleger.data.api.service.FriendslistSocketService
 import com.projet.clientleger.data.api.service.SocketService
 import dagger.Module
@@ -46,6 +47,7 @@ object ApiModule {
         gson: Gson
     ): Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.SERVER_URL)
+            //.baseUrl("http://10.0.2.2:3205")
         .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
@@ -57,6 +59,10 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSocketService(): SocketService = SocketService()
+
+    @Provides
+    @Singleton
+    fun provideDrawingSocketService(socketService: SocketService): DrawingSocketService = DrawingSocketService(socketService)
 
     @Provides
     @Singleton

@@ -38,4 +38,10 @@
     <string name="difficulty">Difficulté</string>
     <string name="gamemode">Mode de jeu</string>
     <string name="invalid_username_password">"Nom d'utilisateur ou Mot de passe invalide, veuillez réessayer"</string>
+    <string name="title_activity_game">GameActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>

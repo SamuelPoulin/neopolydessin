@@ -15,11 +15,10 @@ describe('RegisterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ { provide: HttpXhrBackend, useClass: HttpTestingController }, APIService, MatSnackBar, Overlay ],
-      declarations: [ RegisterComponent ],
-      imports: [ HttpClientTestingModule, RouterTestingModule, SharedModule ]
-    })
-    .compileComponents();
+      providers: [{ provide: HttpXhrBackend, useClass: HttpTestingController }, APIService, MatSnackBar, Overlay],
+      declarations: [RegisterComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule, SharedModule],
+    }).compileComponents();
   });
 
   beforeEach(() => {

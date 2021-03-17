@@ -94,7 +94,6 @@ export class SocketIo {
         .then((account) => {
           socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
           this.socketIdService.DisconnectAccountIdSocketId(socket.id);
-          this.socketIdService.DisconnectSocketFromLobby(socket.id);
           loginsModel.addLogout(accountIdOfSocket)
             .then(() => {
               this.clientSuccessfullyDisconnected.notify(socket);
@@ -112,23 +111,27 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketMessages.GET_ALL_LOBBIES, (callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(this.lobbyList
+      socket.on(SocketMessages.GET_ALL_LOBBIES, async (gameMode: GameType, difficulty: Difficulty,
+        callback: (lobbies: LobbyInfo[]) => void) => {
+        callback(await Promise.all(this.lobbyList
           .filter((lobby) => {
-            return !lobby.privateLobby;
-          }).map((lobby) => {
+            return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
+          }).map(async (lobby) => {
             return lobby.toLobbyInfo();
-          }));
+          })));
       });
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {
+      socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        console.log(lobbyToJoin);
+        console.log(playerId);
         if (lobbyToJoin && playerId) {
-          lobbyToJoin.addPlayer(playerId, PlayerStatus.GUESSER, socket);
+          lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
+          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, await lobbyToJoin.toLobbyInfo());
         } else {
           console.error('lobby or player doesn\'t exist');
         }
@@ -141,15 +144,15 @@ export class SocketIo {
         if (playerId) {
           switch(gametype) {
             case GameType.CLASSIC: {
-              lobby = new LobbyClassique(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
             case GameType.SPRINT_SOLO: {
-              lobby = new LobbySolo(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
             case GameType.SPRINT_COOP: {
-              lobby = new LobbyCoop(this.socketIdService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
               break;
             }
           }
@@ -175,13 +178,6 @@ export class SocketIo {
         }
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-        }
-      });
-
-      socket.on(SocketMessages.START_GAME_SERVER, (callback) => {
-        const currentLobby = this.socketIdService.GetCurrentLobbyOfSocket(socket.id);
-        if (currentLobby) {
-          this.io.in(currentLobby).emit(SocketMessages.START_GAME_CLIENT);
         }
       });
 
