@@ -1,38 +1,29 @@
 <div id="home-container" [ngStyle]="electronContainer && {'top': 'calc(100vh - 30px)'}">
   <div id="menu-container">
-    <div id="menu-container-account">
-      <div id="account-container">
-        <div id="account-image">S</div>
-        <div id="account-username">samuelpoulin</div>
-      </div>
-      <button mat-flat-button id="dashboard-button" class="home-button" [routerLink]="'account'">
-        <mat-icon class="home-icon">manage_accounts</mat-icon>
-        Tableau de bord
-      </button>
-    </div>
+    <app-status-bar></app-status-bar>
     <div id="menu-container-title">
       <img src="assets/icon.png">
       <div>PolyDessin</div>
     </div>
     <div id="menu-container-buttons">
-      <button mat-flat-button class="home-button home-main-button" [routerLink]="'edit'">
-        <mat-icon class="home-icon home-main-icon">palette</mat-icon>
+      <button mat-flat-button class="menu-button menu-main-button" [routerLink]="'edit'">
+        <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
         Créer une partie privée
       </button>
-      <button mat-flat-button class="home-button home-main-button">
-        <mat-icon class="home-icon home-main-icon">group</mat-icon>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
         Rejoindre une partie
       </button>
-      <button mat-flat-button class="home-button home-main-button">
-        <mat-icon class="home-icon home-main-icon">format_list_bulleted</mat-icon>
+      <button mat-flat-button class="menu-button menu-main-button" [routerLink]="'lobby'">
+        <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
         Liste des parties
       </button>
-      <button mat-flat-button class="home-button home-main-button">
-        <mat-icon class="home-icon home-main-icon">insert_photo</mat-icon>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
         Mot-image
       </button>
-      <button mat-flat-button class="home-button home-main-button">
-        <mat-icon class="home-icon home-main-icon">help</mat-icon>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">help</mat-icon>
         Guide utilisateur
       </button>
     </div>
