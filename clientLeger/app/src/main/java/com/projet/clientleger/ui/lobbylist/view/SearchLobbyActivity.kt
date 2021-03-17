@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.Difficulty
+import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.GameInfo
@@ -52,6 +53,7 @@ class SearchLobbyActivity : AppCompatActivity() {
             println("receive info")
             val intent = Intent(this, LobbyActivity::class.java).apply{
                 putExtra("LOBBY_INFO",it)
+                putExtra("GAME_INFO", GameCreationInfosModel("me", "Classic", "Easy", false) as Serializable)
             }
             startActivity(intent)
         }

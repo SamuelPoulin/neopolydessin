@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.LobbyInfo
@@ -19,6 +20,7 @@ import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LobbyActivity : AppCompatActivity() {
@@ -30,7 +32,9 @@ class LobbyActivity : AppCompatActivity() {
     private fun setSubscriptions() {
         vm.receivePlayersInfo()
                 .subscribe { username ->
-                    addPlayerToGame(username.toString())
+                    lifecycleScope.launch {
+                        addPlayerToGame(username.toString())
+                    }
                 }
     }
 
