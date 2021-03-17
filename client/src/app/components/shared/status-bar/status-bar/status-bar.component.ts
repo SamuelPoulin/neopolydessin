@@ -15,10 +15,12 @@ export class StatusBarComponent {
 
   avatarColor: string;
   username: string;
+  firstLetter: string;
 
   constructor(private router: Router, private userService: UserService) {
     this.username = this.userService.username;
     this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
+    this.firstLetter = this.username[0].toUpperCase();
   }
 
   navigateBack() {

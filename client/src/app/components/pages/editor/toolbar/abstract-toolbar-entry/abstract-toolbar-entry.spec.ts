@@ -1,6 +1,5 @@
 /* tslint:disable:no-string-literal */
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
-import { LocalSaveService } from '@services/localsave.service';
 import { Property } from '@tool-properties/props/property';
 import { ToolProperties } from '@tool-properties/tool-properties';
 import { Tool } from '@tools/tool';
@@ -27,7 +26,7 @@ describe('AbstractToolbarEntry', () => {
   } as ToolProperties;
 
   beforeEach(() => {
-    editorService = new EditorService(new ColorsService(), new LocalSaveService());
+    editorService = new EditorService(new ColorsService());
     editorService.tools.set(type, { toolProperties } as Tool);
     toolbarEntry = new AbstractToolbarEntryMock(editorService);
   });
