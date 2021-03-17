@@ -7,6 +7,7 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.data.api.service.DrawingSocketService
 import com.projet.clientleger.data.api.service.FriendslistSocketService
 import com.projet.clientleger.data.api.service.SocketService
@@ -47,8 +48,8 @@ object ApiModule {
         gson: Gson
     ): Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.SERVER_URL)
-            //.baseUrl("http://10.0.2.2:3205")
-        .client(okHttp)
+//            .baseUrl("http://10.0.2.2:3205")
+            .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
@@ -71,4 +72,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
+
+    @Provides
+    @Singleton
+    fun provideLobbySocketService(socketService:SocketService): LobbySocketService = LobbySocketService(socketService)
 }

@@ -50,7 +50,6 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveStartPath(startPoint: StartPoint) {
-        println("receive startpath ${LocalDateTime.now()}")
         currentPath = Path()
         paths.value?.add(PenPath(currentPath!!, startPoint.brushInfo))
         currentPath!!.moveTo(startPoint.coord.x, startPoint.coord.y)
@@ -61,12 +60,10 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
 
     fun startPath(coords: Coordinate, strokeWidth: Float) {
-        println("Send startpath ${LocalDateTime.now()}")
         drawboardRepository.sendStartPath(coords, BrushInfo(brushColor, strokeWidth))
     }
 
     private fun receiveUpdateCurrentPath(coords: Coordinate) {
-        println("receive update ${LocalDateTime.now()}")
         if (currentPath == null || lastCoordinate == null)
             return
         currentPath!!.quadTo(lastCoordinate!!.x, lastCoordinate!!.y,
@@ -77,7 +74,6 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     fun updateCurrentPath(coords: Coordinate) {
-        println("send update ${LocalDateTime.now()}")
         var dx = 2f
         var dy = 2f
         if (lastCoordinate != null) {
