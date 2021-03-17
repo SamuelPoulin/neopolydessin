@@ -9,8 +9,11 @@ export abstract class CreatorTool extends Tool {
 
   protected constructor(editorService: EditorService, isActive: boolean = false) {
     super(editorService);
+    this.initListeners();
     this.isActive = isActive;
   }
+
+  protected abstract initListeners(): void;
   protected abstract updateProperties(): void;
 
   handleMouseEvent(e: MouseEvent): boolean {

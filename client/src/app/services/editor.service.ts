@@ -13,6 +13,7 @@ import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { ColorsService } from 'src/app/services/colors.service';
 import { APIService } from './api.service';
 import { LocalSaveService } from './localsave.service';
+import { SocketService } from './socket-service.service';
 
 @Injectable({
   providedIn: 'root',
@@ -32,7 +33,7 @@ export class EditorService {
     return this._commandReceiver;
   }
 
-  constructor(public colorsService: ColorsService, private localSaveService: LocalSaveService) {
+  constructor(public colorsService: ColorsService, private localSaveService: LocalSaveService, public socketService: SocketService) {
     this._commandReceiver = new CommandReceiver();
     this.commandReceiver.on('action', () => {
       this.saveLocally();

@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { Coordinate } from '@utils/math/coordinate';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
+import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
 
 @Injectable({
@@ -64,5 +66,47 @@ export class SocketService {
         resolve(data.status === PlayerConnectionStatus.VALID),
       );
     });
+  }
+
+  async createLobby(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      this.socket.emit(SocketMessages.CREATE_LOBBY, 'classic', 'easy', false, (data: string) => resolve(data));
+    });
+  }
+
+  receiveStartPath(): Observable<Coordinate> {
+    return new Observable<Coordinate>((obs) => {
+      this.socket.on(SocketDrawing.START_PATH_BC, (coord: Coordinate) => {
+        obs.next(coord);
+      });
+    });
+  }
+
+  receiveUpdatePath(): Observable<Coordinate> {
+    return new Observable<Coordinate>((obs) => {
+      this.socket.on(SocketDrawing.UPDATE_PATH_BC, (coord: Coordinate) => {
+        obs.next(coord);
+      });
+    });
+  }
+
+  receiveEndPath(): Observable<Coordinate> {
+    return new Observable<Coordinate>((obs) => {
+      this.socket.on(SocketDrawing.END_PATH_BC, (coord: Coordinate) => {
+        obs.next(coord);
+      });
+    });
+  }
+
+  sendStartPath(coord: Coordinate): void {
+    this.socket.emit(SocketDrawing.START_PATH, coord);
+  }
+
+  sendUpdatePath(coord: Coordinate): void {
+    this.socket.emit(SocketDrawing.UPDATE_PATH, coord);
+  }
+
+  sendEndPath(coord: Coordinate): void {
+    this.socket.emit(SocketDrawing.END_PATH, coord);
   }
 }

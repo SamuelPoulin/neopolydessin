@@ -21,7 +21,7 @@ export class LoginComponent {
       .login(this.username, this.password)
       .then(() => {
         this.userService.username = this.username;
-        this.router.navigate(['/chat']); // todo - use constant?
+        this.router.navigate(['/edit']); // todo - use constant?
       })
       .catch((err) => {
         console.error(err);

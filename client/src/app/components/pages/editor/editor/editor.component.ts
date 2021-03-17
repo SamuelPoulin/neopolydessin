@@ -61,6 +61,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.editorService.socketService.createLobby().then((data) => {
+      console.log(data);
+    });
     this.editorService.resetDrawing();
     this.editorService.view = this.drawingSurface;
     if (this.drawingId === LocalSaveService.NEW_DRAWING_ID) {
