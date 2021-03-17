@@ -19,18 +19,33 @@ import javax.inject.Inject
 class DrawingSocketService @Inject constructor(val socketService: SocketService){
 
     fun sendStartPath(coords: Coordinate, brushInfo: BrushInfo){
+        val coordToSend = JSONObject()
+        coordToSend.put("x", coords.x)
+        coordToSend.put("y", coords.y)
+
+        val brushInfoJsonObject = JSONObject()
+        brushInfoJsonObject.put("color", brushInfo.color)
+        brushInfoJsonObject.put("strokeWidth", brushInfo.strokeWidth)
+
         socketService.socket.emit(DrawingSocketEndpoints.START_PATH.endpoint,
-                Json.encodeToJsonElement(Coordinate.serializer(), coords),
-                Json.encodeToJsonElement(BrushInfo.serializer(), brushInfo))
+                coordToSend,
+                brushInfoJsonObject)
     }
 
     fun sendUpdatePath(coords: Coordinate){
-        val s = Json.encodeToJsonElement(Coordinate.serializer(),coords)
-        socketService.socket.emit(DrawingSocketEndpoints.UPDATE_PATH.endpoint, s)
+        val coordJsonObject = JSONObject()
+        coordJsonObject.put("x", coords.x)
+        coordJsonObject.put("y", coords.y)
+
+        socketService.socket.emit(DrawingSocketEndpoints.UPDATE_PATH.endpoint, coordJsonObject)
     }
 
     fun sendEndPath(endCoords: Coordinate){
-        socketService.socket.emit(DrawingSocketEndpoints.END_PATH.endpoint, Json.encodeToJsonElement(Coordinate.serializer(), endCoords))
+        val coordJsonObject = JSONObject()
+        coordJsonObject.put("x", endCoords.x)
+        coordJsonObject.put("y", endCoords.y)
+
+        socketService.socket.emit(DrawingSocketEndpoints.END_PATH.endpoint, coordJsonObject)
     }
 
     fun receiveStartPath() : Observable<StartPoint> {
