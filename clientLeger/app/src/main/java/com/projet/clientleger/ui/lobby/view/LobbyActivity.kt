@@ -101,7 +101,6 @@ class LobbyActivity : AppCompatActivity() {
 
     }
     private fun addPlayerToGame(name:String){
-        println("NOM DU JOUEUR AJOUTÉ $name")
         playerCount++
         when(playerCount){
             1->{

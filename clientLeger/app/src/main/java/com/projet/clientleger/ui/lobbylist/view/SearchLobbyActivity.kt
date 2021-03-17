@@ -50,7 +50,6 @@ class SearchLobbyActivity : AppCompatActivity() {
         }
 
         vm.receiveJoinedLobbyInfo().subscribe{
-            println("receive info")
             val intent = Intent(this, LobbyActivity::class.java).apply{
                 putExtra("LOBBY_INFO",it)
                 putExtra("GAME_INFO", GameCreationInfosModel("me", "Classic", "Easy", false) as Serializable)
@@ -64,7 +63,6 @@ class SearchLobbyActivity : AppCompatActivity() {
         //val tag = "tag"
         for((index,lobby) in lobbyList.withIndex()){
             if(lobby.lobbyId == id){
-                println("TAG TROUVÉ")
                 lobbyList.remove(lobby)
                 rvGames.adapter?.notifyItemRemoved(index)
                 rvGames.adapter?.notifyItemRangeChanged(index,lobbyList.size)
