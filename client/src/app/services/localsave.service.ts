@@ -16,7 +16,11 @@ export class LocalSaveService {
   }
 
   set username(username: string) {
-    localStorage.setItem(LocalSaveService.LOCAL_USER_ID, username);
+    if (username) {
+      localStorage.setItem(LocalSaveService.LOCAL_USER_ID, username);
+    } else {
+      localStorage.removeItem(LocalSaveService.LOCAL_USER_ID);
+    }
   }
 
   get username(): string {

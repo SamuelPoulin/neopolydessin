@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { APIService } from '@services/api.service';
 import { UserService } from '@services/user.service';
 
@@ -13,13 +14,14 @@ export class LoginComponent {
   password: string = '';
   currentError: string = '';
 
-  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar) {}
+  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar, private router: Router) {}
 
   login() {
     this.apiService
       .login(this.username, this.password)
       .then(() => {
         this.userService.login(this.username);
+        this.router.navigate(['']);
       })
       .catch((err) => {
         console.error(err);
@@ -29,5 +31,9 @@ export class LoginComponent {
           verticalPosition: 'bottom',
         });
       });
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }

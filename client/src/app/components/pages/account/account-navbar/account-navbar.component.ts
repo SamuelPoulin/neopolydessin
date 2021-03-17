@@ -23,7 +23,7 @@ export class AccountNavbarComponent {
   constructor(private mediaMatcher: MediaMatcher, private userService: UserService) {
     this.firstName = 'Samuel';
     this.lastName = 'Poulin';
-    this.username = 'samuelpoulin';
+    this.username = this.userService.username;
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
@@ -31,8 +31,8 @@ export class AccountNavbarComponent {
 
     this.closed = true;
 
-    this.avatarLetter = 'S';
-    this.avatarColor = randomColor({ seed: this.avatarLetter, luminosity: 'bright' });
+    this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
+    console.log(this.avatarColor);
   }
 
   screenChanged(event: MediaQueryListEvent) {

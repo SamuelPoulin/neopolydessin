@@ -1,4 +1,4 @@
-<div id="home-container" [ngStyle]="electronContainer && {'top': 'calc(100vh - 30px)'}">
+<div id="home-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <div id="menu-container">
     <app-status-bar></app-status-bar>
     <div id="menu-container-title">
