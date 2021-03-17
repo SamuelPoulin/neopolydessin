@@ -7,13 +7,14 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../models/schemas/account';
-import { Difficulty, GameType, Lobby, LobbyInfo, PlayerStatus } from '../models/lobby';
+import { Difficulty, GameType, LobbyInfo, PlayerStatus } from '../../common/communication/lobby';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
+import { Lobby } from '../models/lobby';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, ErrorMsg, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -121,18 +122,17 @@ export class SocketIo {
           })));
       });
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {
+      socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        console.log(lobbyToJoin);
+        console.log(playerId);
         if (lobbyToJoin && playerId) {
           lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
-          const lobbyJoined = this.findLobby(lobbyId);
-          if (lobbyJoined) {
-            socket.to(socket.id).broadcast.emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyJoined.toLobbyInfo());
-          }
+          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, await lobbyToJoin.toLobbyInfo());
         } else {
           console.error('lobby or player doesn\'t exist');
         }

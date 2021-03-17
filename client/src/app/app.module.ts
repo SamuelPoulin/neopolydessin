@@ -21,6 +21,8 @@ import { RegisterComponent } from '@components/pages/login/register/register.com
 import { SharedModule } from '@components/shared/shared.module';
 import { AuthGuard } from '@services/auth-guard';
 import { LoggedInGuard } from '@services/logged-in-guard';
+import { ServerBrowserModule } from '@components/pages/server-browser/server-browser.module';
+import { ServerBrowserComponent } from '@components/pages/server-browser/server-browser/server-browser.component';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -33,12 +35,14 @@ import { AppComponent } from './app.component';
     EditorModule,
     LoginModule,
     LobbyModule,
+    ServerBrowserModule,
     RouterModule.forRoot(
       [
         { path: '', component: HomeComponent, canActivate: [AuthGuard] },
         { path: 'login', component: LoginComponent, canActivate: [LoggedInGuard] },
         { path: 'edit', component: EditorComponent, canActivate: [AuthGuard] },
         { path: 'lobby', component: LobbyComponent, canActivate: [AuthGuard] },
+        { path: 'browser', component: ServerBrowserComponent, canActivate: [AuthGuard] },
         { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
         { path: 'register', component: RegisterComponent, canActivate: [LoggedInGuard] },
         { path: 'password-recovery', component: PasswordRecoveryComponent, canActivate: [LoggedInGuard] },

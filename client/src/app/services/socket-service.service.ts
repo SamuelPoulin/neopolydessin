@@ -7,19 +7,19 @@ import { ChatMessage, Message } from '../../../../common/communication/chat-mess
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
+import { Difficulty, GameType, LobbyInfo } from '../../../../common/communication/lobby';
+import { LocalSaveService } from './localsave.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private static API_BASE_URL: string;
-  static ACCESS_TOKEN: string;
-  static REFRESH_TOKEN: string;
 
   socket: Socket;
   manager: Manager;
 
-  constructor() {
+  constructor(private localSaveService: LocalSaveService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.manager = new Manager(SocketService.API_BASE_URL, {
@@ -29,7 +29,7 @@ export class SocketService {
 
     this.socket = this.manager.socket('/', {
       auth: {
-        token: SocketService.ACCESS_TOKEN,
+        token: this.localSaveService.accessToken,
       },
     });
   }
@@ -53,6 +53,18 @@ export class SocketService {
       this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string) =>
         msgObs.next({ timestamp: Date.now(), content: `${username} a quitté la discussion.` }),
       );
+    });
+  }
+
+  joinLobby(lobbyId: string) {
+    this.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbyId);
+  }
+
+  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+    return new Observable<LobbyInfo[]>((msgObs) => {
+      this.socket.emit(SocketMessages.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => {
+        msgObs.next(lobbies);
+      });
     });
   }
 

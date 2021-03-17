@@ -10,6 +10,7 @@ import { ColorsService } from 'src/app/services/colors.service';
 import { EditorService } from 'src/app/services/editor.service';
 import { Directive } from '@angular/core';
 import { SocketService } from '@services/socket-service.service';
+import { LocalSaveService } from '@services/localsave.service';
 
 @Directive()
 export class AbstractToolbarEntryMock extends AbstractToolbarEntryDirective<CreatorToolProperties> {
@@ -27,7 +28,7 @@ describe('AbstractToolbarEntry', () => {
   } as ToolProperties;
 
   beforeEach(() => {
-    editorService = new EditorService(new ColorsService(), new SocketService());
+    editorService = new EditorService(new ColorsService(), new SocketService(new LocalSaveService()));
     editorService.tools.set(type, { toolProperties } as Tool);
     toolbarEntry = new AbstractToolbarEntryMock(editorService);
   });

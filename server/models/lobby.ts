@@ -10,44 +10,8 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
 import { Coord } from './commands/path';
-
-export interface LobbyInfo {
-  lobbyId: string;
-  playerInfo: PlayerInfo[];
-  gameType: GameType;
-}
-
-export interface PlayerInfo {
-  teamNumber: number;
-  playerName: string;
-  accountId: string;
-}
-
-export interface Player {
-  accountId: string;
-  playerStatus: PlayerStatus;
-  socket: Socket;
-  teamNumber: number;
-}
-
-export enum GameType {
-  CLASSIC = 'classic',
-  SPRINT_SOLO = 'sprintSolo',
-  SPRINT_COOP = 'sprintCoop'
-}
-
-export enum Difficulty {
-  EASY = 'easy',
-  INTERMEDIATE = 'intermediate',
-  HARD = 'hard'
-}
-
-export enum PlayerStatus {
-  DRAWER = 'active',
-  GUESSER = 'guesser',
-  PASSIVE = 'passive'
-}
 
 const DEFAULT_TEAM_SIZE = 4;
 
@@ -63,20 +27,20 @@ export abstract class Lobby {
   readonly MAX_LENGTH_MSG: number = 200;
 
   lobbyId: string;
-
-  privateLobby: boolean;
-  difficulty: Difficulty;
   gameType: GameType;
-
-  protected size: number;
-  protected players: Player[];
-  protected timeLeftSeconds: number;
-  protected wordToGuess: string;
-  protected ownerAccountId: string;
+  difficulty: Difficulty;
+  privateLobby: boolean;
 
   protected io: Server;
-  protected drawingCommands: DrawingCommandsService;
+  protected ownerAccountId: string;
 
+  protected size: number;
+  protected wordToGuess: string;
+  protected currentGameState: CurrentGameState;
+  protected drawingCommands: DrawingCommandsService;
+  protected timeLeftSeconds: number;
+
+  protected players: Player[];
   protected teams: {
     teamNumber: number;
     currentScore: number;
@@ -92,29 +56,21 @@ export abstract class Lobby {
     privacySetting: boolean
   ) {
     this.io = io;
-    this.wordToGuess = '';
     this.ownerAccountId = accountId;
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
-    this.drawingCommands = new DrawingCommandsService();
     this.lobbyId = uuidv4();
+    this.size = gameSizeMap.get(GameType.CLASSIC) as number;
+    this.wordToGuess = '';
+    this.currentGameState = CurrentGameState.LOBBY;
+    this.drawingCommands = new DrawingCommandsService();
+    this.timeLeftSeconds = 0;
     this.players = [];
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
-    this.size = gameSizeMap.get(GameType.CLASSIC) as number;
-    this.timeLeftSeconds = 0;
   }
 
   async toLobbyInfo(): Promise<LobbyInfo> {
     const playerInfoList: PlayerInfo[] = [];
-    /* this.teams.forEach((element) => {
-      const listPlayerNames: string[] = [];
-      element.playersInTeam.forEach((player) => {
-        this.databaseService.getAccountById(player.accountId).then((account) => {
-          listPlayerNames.push(account.documents.username);
-        });
-      });
-      teamInfo.push({teamNumber: element.teamNumber, playerNames: listPlayerNames});
-    });*/
     const listAccountId: string[] = [];
     this.players.forEach((player) => {
       listAccountId.push(player.accountId);
@@ -153,6 +109,9 @@ export abstract class Lobby {
       }
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      if (this.players.length === 0) {
+        this.endGame();
+      }
     }
   }
 
@@ -173,6 +132,7 @@ export abstract class Lobby {
   }
 
   endGame(): void {
+    this.currentGameState = CurrentGameState.GAME_OVER;
     this.io.in(this.lobbyId).emit(SocketMessages.END_GAME);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }
@@ -311,6 +271,7 @@ export abstract class Lobby {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (senderAccountId === this.ownerAccountId) {
         this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
+        this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
 

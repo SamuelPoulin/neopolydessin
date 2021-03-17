@@ -32,7 +32,6 @@ export class AccountNavbarComponent {
     this.closed = true;
 
     this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
-    console.log(this.avatarColor);
   }
 
   screenChanged(event: MediaQueryListEvent) {

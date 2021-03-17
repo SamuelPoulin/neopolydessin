@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
-import { SocketService } from './socket-service.service';
+import { LocalSaveService } from './localsave.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,7 @@ export class APIService {
   private static API_LOGIN_ROUTE: string;
   private static API_REGISTER_ROUTE: string;
 
-  constructor(private http: HttpClient, private notification: MatSnackBar) {
+  constructor(private http: HttpClient, private notification: MatSnackBar, private localSaveService: LocalSaveService) {
     APIService.API_BASE_URL = environment.apiBaseUrl;
     APIService.API_EMAIL_ROUTE = '/email';
     APIService.API_DATABASE_ROUTE = '/database';
@@ -40,8 +40,8 @@ export class APIService {
       .post(APIService.API_LOGIN_ROUTE, { username, password })
       .toPromise()
       .then((reply: { accessToken: string; refreshToken: string }) => {
-        SocketService.ACCESS_TOKEN = reply.accessToken;
-        SocketService.REFRESH_TOKEN = reply.refreshToken;
+        this.localSaveService.accessToken = reply.accessToken;
+        this.localSaveService.refreshToken = reply.refreshToken;
       });
   }
 
@@ -50,8 +50,8 @@ export class APIService {
       .post(APIService.API_REGISTER_ROUTE, { firstName, lastName, username, email, password, passwordConfirm: password })
       .toPromise()
       .then((reply: { accessToken: string; refreshToken: string }) => {
-        SocketService.ACCESS_TOKEN = reply.accessToken;
-        SocketService.REFRESH_TOKEN = reply.refreshToken;
+        this.localSaveService.accessToken = reply.accessToken;
+        this.localSaveService.refreshToken = reply.refreshToken;
       }); // todo - fix duplicate password
   }
 
