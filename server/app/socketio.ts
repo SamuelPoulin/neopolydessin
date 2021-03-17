@@ -49,7 +49,7 @@ export class SocketIo {
       console.log(`Disconnected : ${socket.id} \n`);
     });
 
-    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId) => {
+    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId: string) => {
       console.log(`Game : ${lobbyId} ended \n`);
       const index = this.lobbyList.findIndex((game) => game.lobbyId === lobbyId);
       if (index > -1) {
@@ -128,6 +128,7 @@ export class SocketIo {
         console.log(playerId);
         if (lobbyToJoin && playerId) {
           lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          socket.join(lobbyId);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
