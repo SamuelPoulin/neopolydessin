@@ -121,7 +121,7 @@ export class SocketIo {
           })));
       });
 
-      socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {
+      socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId) {
@@ -131,7 +131,7 @@ export class SocketIo {
           });
           const lobbyJoined = this.findLobby(lobbyId);
           if (lobbyJoined) {
-            socket.to(socket.id).broadcast.emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyJoined.toLobbyInfo());
+            socket.to(socket.id).broadcast.emit(SocketMessages.RECEIVE_LOBBY_INFO, await lobbyJoined.toLobbyInfo());
           }
         } else {
           console.error('lobby or player doesn\'t exist');
