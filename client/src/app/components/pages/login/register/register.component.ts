@@ -35,8 +35,7 @@ export class RegisterComponent {
     this.apiService
       .register(this.firstName, this.lastName, this.username, this.email, this.password)
       .then(() => {
-        this.userService.username = this.username;
-        this.router.navigate(['/chat']); // todo - use constant?
+        this.userService.login(this.username);
       })
       .catch((err: Error) => {
         console.error(err);

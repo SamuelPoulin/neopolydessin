@@ -1,5 +1,6 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
+import { UserService } from '@services/user.service';
 import randomColor from 'randomcolor';
 
 @Component({
@@ -19,7 +20,7 @@ export class AccountNavbarComponent {
   lastName: string;
   username: string;
 
-  constructor(private mediaMatcher: MediaMatcher) {
+  constructor(private mediaMatcher: MediaMatcher, private userService: UserService) {
     this.firstName = 'Samuel';
     this.lastName = 'Poulin';
     this.username = 'samuelpoulin';
@@ -48,5 +49,9 @@ export class AccountNavbarComponent {
 
   get isBigScreen(): boolean {
     return AccountNavbarComponent.IS_SCREEN_BIG;
+  }
+
+  logout(): void {
+    this.userService.logout();
   }
 }

@@ -19,6 +19,8 @@ import { LobbyModule } from '@components/pages/lobby/lobby.module';
 import { PasswordRecoveryComponent } from '@components/pages/login/password-recovery/password-recovery.component';
 import { RegisterComponent } from '@components/pages/login/register/register.component';
 import { SharedModule } from '@components/shared/shared.module';
+import { AuthGuard } from '@services/auth-guard';
+import { LoggedInGuard } from '@services/logged-in-guard';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -33,16 +35,17 @@ import { AppComponent } from './app.component';
     LobbyModule,
     RouterModule.forRoot(
       [
-        { path: '', component: HomeComponent },
-        { path: 'login', component: LoginComponent },
-        { path: 'edit', component: EditorComponent },
-        { path: 'lobby', component: LobbyComponent },
-        { path: 'chat', component: ChatComponent },
-        { path: 'register', component: RegisterComponent },
-        { path: 'password-recovery', component: PasswordRecoveryComponent },
+        { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+        { path: 'login', component: LoginComponent, canActivate: [LoggedInGuard] },
+        { path: 'edit', component: EditorComponent, canActivate: [AuthGuard] },
+        { path: 'lobby', component: LobbyComponent, canActivate: [AuthGuard] },
+        { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
+        { path: 'register', component: RegisterComponent, canActivate: [LoggedInGuard] },
+        { path: 'password-recovery', component: PasswordRecoveryComponent, canActivate: [LoggedInGuard] },
         {
           path: 'account',
           component: AccountComponent,
+          canActivate: [AuthGuard],
           children: [
             { path: '', component: DashboardComponent },
             { path: 'profile', component: ProfileComponent },
