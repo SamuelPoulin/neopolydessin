@@ -6,7 +6,7 @@ import { BaseShape } from '@models/shapes/base-shape';
 import { Rectangle } from '@models/shapes/rectangle';
 import { EditorService } from '@services/editor.service';
 import { NumericProperty } from '@tool-properties/props/numeric-property/numeric-property';
-import { mouseDown, mouseMove, mouseUp } from '@tools/creator-tools/stroke-tools/stroke-tool.spec';
+import { mouseDown, mouseMove, mouseUp } from '@models/tools/creator-tools/pen-tool/pen-tool.spec';
 import { EraserTool } from '@tools/editing-tools/eraser-tool/eraser-tool';
 import { EraserUtils } from '@tools/editing-tools/eraser-tool/eraser-utils';
 import { Color } from '@utils/color/color';

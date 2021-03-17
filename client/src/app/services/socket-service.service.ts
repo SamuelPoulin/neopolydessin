@@ -98,8 +98,8 @@ export class SocketService {
     });
   }
 
-  sendStartPath(coord: Coordinate): void {
-    this.socket.emit(SocketDrawing.START_PATH, coord);
+  sendStartPath(coord: Coordinate, color: string, strokeWidth: number): void {
+    this.socket.emit(SocketDrawing.START_PATH, coord, { color, strokeWidth });
   }
 
   sendUpdatePath(coord: Coordinate): void {

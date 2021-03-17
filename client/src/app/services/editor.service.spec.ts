@@ -12,6 +12,7 @@ import { ColorsService } from './colors.service';
 import { EditorService } from './editor.service';
 import { LocalSaveService } from './localsave.service';
 import { Path } from '@models/shapes/path';
+import { SocketService } from './socket-service.service';
 
 describe('EditorService', () => {
   let service: EditorService;
@@ -26,7 +27,7 @@ describe('EditorService', () => {
   });
 
   beforeEach(() => {
-    service = new EditorService(new ColorsService(), new LocalSaveService());
+    service = new EditorService(new ColorsService(), new LocalSaveService(), new SocketService());
     BaseShape['SHAPE_ID'] = 0;
     rectangle = new Rectangle();
     path = new Path();
@@ -81,7 +82,7 @@ describe('EditorService', () => {
     api.getDrawingById = async () => {
       return Promise.resolve({ data: service.exportDrawing() } as Drawing);
     };
-    const service2 = new EditorService(new ColorsService(), new LocalSaveService());
+    const service2 = new EditorService(new ColorsService(), new LocalSaveService(), new SocketService());
     service2.importDrawingById('', api);
     expect(service2.shapes.values).toEqual(service.shapes.values);
   });

@@ -3,7 +3,7 @@ import { CommandReceiver } from '@models/commands/command-receiver';
 import { Drawing } from '@models/drawing';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
-import { PenTool } from '@tools/creator-tools/stroke-tools/pen-tool/pen-tool';
+import { PenTool } from '@tools/creator-tools/pen-tool/pen-tool';
 import { EraserTool } from '@tools/editing-tools/eraser-tool/eraser-tool';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
