@@ -257,5 +257,44 @@ describe('Database Service', () => {
       });
     });
   });
+
+  it('getAccountsInfo should return correctly', (done: Mocha.Done) => {
+    const otherAccountInfo = {
+      firstName: 'name',
+      lastName: 'lname',
+      username: 'username1',
+      email: 'email@email1.email',
+      password: 'monkey123',
+      passwordConfirm: 'monkey123'
+    }
+    const ids: string[] = [];
+    databaseService.createAccount(accountInfo)
+      .then((tokens) => {
+        const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY as string) as object;
+        ids.push(decodedJwt['_id']);
+        return databaseService.createAccount(otherAccountInfo);
+      })
+      .then((tokens) => {
+        const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY as string) as object;
+        ids.push(decodedJwt['_id']);
+        return databaseService.getAccountsInfo(ids);
+      })
+      .then((infos) => {
+        expect(infos.documents[0].accountId).to.equal(ids[0]);
+        expect(infos.documents[0].username).to.equal('username');
+        expect(infos.documents[1].accountId).to.equal(ids[1]);
+        expect(infos.documents[1].username).to.equal('username1');
+        done();
+      })
+  });
+
+  it('getAccountsInfo should return correctly', (done: Mocha.Done) => {
+    const ids: string[] = [];
+    databaseService.getAccountsInfo(ids)
+      .catch((err: ErrorMsg) => {
+        expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
+        done();
+      })
+  });
 });
 

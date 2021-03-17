@@ -39,6 +39,7 @@ export interface UpdateOneQueryResult {
   nModified: number;
 }
 interface AccountModel extends Model<Account> {
+  getUsersInfo: (ids: string[]) => Query<Account[] | null, Account>;
   getFriends: (id: string) => Query<FriendsList | null, Account>;
   addFriendRequestToAccountWithUsername: (senderId: string, username: string) => Query<Account | null, Account>;
   addFriendrequestToSenderWithId: (senderId: string, receiverId: string) => Query<Account | null, Account>;
@@ -82,6 +83,15 @@ export const accountSchema = new Schema<Account, AccountModel>({
       received: Boolean,
     }],
 });
+
+accountSchema.statics.getUsersInfo = (ids: string[]) => {
+  const objectIds: ObjectId[] = ids.map((id) => new ObjectId(id));
+  return accountModel.find(
+    {
+      _id: { $in: objectIds }
+    }
+  );
+};
 
 accountSchema.statics.addFriendRequestToAccountWithUsername = (senderId: string, username: string) => {
   return accountModel.findOneAndUpdate(

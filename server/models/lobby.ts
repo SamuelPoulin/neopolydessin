@@ -104,7 +104,7 @@ export abstract class Lobby {
     this.timeLeftSeconds = 0;
   }
 
-  toLobbyInfo(): LobbyInfo {
+  async toLobbyInfo(): Promise<LobbyInfo> {
     const playerInfoList: PlayerInfo[] = [];
     /* this.teams.forEach((element) => {
       const listPlayerNames: string[] = [];
@@ -119,10 +119,14 @@ export abstract class Lobby {
     this.players.forEach((player) => {
       listAccountId.push(player.accountId);
     });
-    this.databaseService.blabla(listAccountId).then((listPlayers) => {
-      for (int i = 0; i < listPlayers.length; ++i) {
-        playerInfoList.push({teamNumber: this.players[i].teamNumber, playerName: listPlayers.documents[i].username, accountId: listPlayers.documents[i].accountId});
-      }
+    return await this.databaseService.getAccountsInfo(listAccountId).then((listPlayers) => {
+      listPlayers.documents.forEach((playerInfo, index) => {
+        playerInfoList.push({
+          teamNumber: this.players[index].teamNumber,
+          playerName: playerInfo.username,
+          accountId: playerInfo.accountId
+        });
+      });
       return {
         lobbyId: this.lobbyId,
         playerInfo: playerInfoList,
