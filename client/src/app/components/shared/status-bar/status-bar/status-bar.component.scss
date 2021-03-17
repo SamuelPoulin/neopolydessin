@@ -38,13 +38,16 @@
   flex-grow: 1;
 }
 
-#back-button {
-  color: white;
+.back-button {
   padding-left: 5px;
   padding-right: 10px;
 }
 
-#back-button-icon {
+.leave-button {
+  color: white;
+}
+
+.leave-button-icon {
   color: white;
   transform: rotate(180deg);
 }

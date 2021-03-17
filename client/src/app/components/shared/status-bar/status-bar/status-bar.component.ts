@@ -10,6 +10,7 @@ import randomColor from 'randomcolor';
 })
 export class StatusBarComponent {
   @Input() quit: boolean;
+  @Input() back: boolean;
   @Input() previousPage: string;
 
   avatarColor: string;
@@ -18,7 +19,6 @@ export class StatusBarComponent {
   constructor(private router: Router, private userService: UserService) {
     this.username = this.userService.username;
     this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
-    console.log(this.avatarColor);
   }
 
   navigateBack() {

@@ -1,8 +1,14 @@
 <div id="status-bar-container-account">
   <ng-container *ngIf="quit !== undefined">
-    <button mat-flat-button color="warn" id="back-button" class="menu-button" (click)="navigateBack()">
-      <mat-icon id="back-button-icon" class="menu-button-icon">logout</mat-icon>
+    <button mat-flat-button color="warn" class="menu-button back-button leave-button" (click)="navigateBack()">
+      <mat-icon class="menu-button-icon leave-button-icon">logout</mat-icon>
       Quitter
+    </button>
+  </ng-container>
+  <ng-container *ngIf="back !== undefined">
+    <button mat-flat-button class="menu-button" (click)="navigateBack()">
+      <mat-icon class="menu-button-icon">arrow_back_ios</mat-icon>
+      Retour
     </button>
   </ng-container>
   <div id="account-container">
