@@ -16,4 +16,8 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     fun receivePlayersInfo(): Observable<String> {
         return lobbyRepository.receivedPlayersInfo()
     }
+
+    fun getLobbies(){
+        lobbyRepository.receivedAllLobbies(GameType.CLASSIC, Difficulty.EASY)
+    }
 }

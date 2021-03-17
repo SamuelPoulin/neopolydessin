@@ -47,6 +47,7 @@ class LobbyActivity : AppCompatActivity() {
         binding.difficulty.text = gameInfo.difficulty
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
+        vm.getLobbies()
     }
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {
