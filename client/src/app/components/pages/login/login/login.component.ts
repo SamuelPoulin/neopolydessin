@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { APIService } from '@services/api.service';
 import { UserService } from '@services/user.service';
 
@@ -14,7 +13,7 @@ export class LoginComponent {
   password: string = '';
   currentError: string = '';
 
-  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar, private router: Router) {}
+  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar) {}
 
   login() {
     this.apiService
