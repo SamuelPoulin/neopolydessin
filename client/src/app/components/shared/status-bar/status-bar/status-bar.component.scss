@@ -1,0 +1,50 @@
+@use 'src/assets/menuButtons';
+
+#status-bar-container-account {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  background-color: #F8F8F8;
+
+  & > * {
+    margin: 12px;
+  }
+}
+
+#account-container {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+#account-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+
+  border-radius: 100%;
+  color: white;
+  font-weight: 400;
+}
+
+#status-bar-filler {
+  display: flex;
+  flex-grow: 1;
+}
+
+#back-button {
+  color: white;
+  padding-left: 5px;
+  padding-right: 10px;
+}
+
+#back-button-icon {
+  color: white;
+  transform: rotate(180deg);
+}

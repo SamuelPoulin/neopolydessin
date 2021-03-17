@@ -6,8 +6,8 @@
         Retour
       </button>
     </div>
-    <div id="navbar-avatar" [ngStyle]="{'background-color': avatarColor}">
-      {{avatarLetter}}
+    <div id="navbar-avatar" [style.background-color]="avatarColor">
+      {{username[0].toUpperCase()}}
     </div>
     <div id="navbar-user">
       <div id="navbar-user-name">{{firstName + ' ' + lastName}}</div>
@@ -28,7 +28,7 @@
       </button>
     </div>
     <div class="navbar-section">
-      <button mat-flat-button color="warn" id="logout-button" class="navbar-button logout" [routerLink]="''">
+      <button mat-flat-button color="warn" id="logout-button" class="navbar-button logout" (click)="logout()">
         <mat-icon id="logout-icon" class="navbar-button-icon" style="transform: rotate(180deg)">logout</mat-icon>
         Déconnexion
       </button>

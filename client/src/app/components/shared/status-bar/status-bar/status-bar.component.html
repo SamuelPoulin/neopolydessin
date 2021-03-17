@@ -1,0 +1,17 @@
+<div id="status-bar-container-account">
+  <ng-container *ngIf="quit !== undefined">
+    <button mat-flat-button color="warn" id="back-button" class="menu-button" (click)="navigateBack()">
+      <mat-icon id="back-button-icon" class="menu-button-icon">logout</mat-icon>
+      Quitter
+    </button>
+  </ng-container>
+  <div id="account-container">
+    <div id="account-image" [style.background-color]="avatarColor">{{username[0].toUpperCase()}}</div>
+    <div id="account-username">{{username}}</div>
+  </div>
+  <div id="status-bar-filler"></div>
+  <button mat-flat-button id="dashboard-button" class="menu-button" [routerLink]="'/account'">
+    <mat-icon class="menu-button-icon">manage_accounts</mat-icon>
+    Tableau de bord
+  </button>
+</div>

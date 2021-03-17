@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { CommandReceiver } from '@models/commands/command-receiver';
-import { Drawing } from '@models/drawing';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
 import { PenTool } from '@tools/creator-tools/pen-tool/pen-tool';
@@ -12,7 +11,6 @@ import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing
 import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { ColorsService } from 'src/app/services/colors.service';
 import { APIService } from './api.service';
-import { LocalSaveService } from './localsave.service';
 import { SocketService } from './socket-service.service';
 
 @Injectable({
@@ -33,11 +31,8 @@ export class EditorService {
     return this._commandReceiver;
   }
 
-  constructor(public colorsService: ColorsService, private localSaveService: LocalSaveService, public socketService: SocketService) {
+  constructor(public colorsService: ColorsService, public socketService: SocketService) {
     this._commandReceiver = new CommandReceiver();
-    this.commandReceiver.on('action', () => {
-      this.saveLocally();
-    });
 
     this.tools = new Map<ToolType, Tool>();
     this.initTools();
@@ -75,22 +70,6 @@ export class EditorService {
         });
       });
     });
-  }
-
-  importLocalDrawing(): void {
-    Object.values(JSON.parse(this.localSaveService.drawing.data)).forEach((shapeData) => {
-      const shape = EditorUtils.createShape(shapeData as BaseShape);
-      this.addShapeToBuffer(shape);
-    });
-    this.applyShapesBuffer();
-  }
-
-  saveLocally(): void {
-    if (this.view) {
-      this.localSaveService.takeSnapshot(
-        new Drawing('localsave', [], this.exportDrawing(), this.view.color.hex, this.view.width, this.view.height, ''),
-      );
-    }
   }
 
   private initTools(): void {
