@@ -54,10 +54,14 @@ export class SocketService {
     });
   }
 
-  async getLobbyList(gameType: GameType, difficulty: Difficulty): Promise<LobbyInfo[]> {
-    return new Promise<LobbyInfo[]>((resolve, reject) => {
+  joinLobby(lobbyId: string) {
+    this.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbyId);
+  }
+
+  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+    return new Observable<LobbyInfo[]>((msgObs) => {
       this.socket.emit(SocketMessages.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => {
-        resolve(lobbies);
+        msgObs.next(lobbies);
       });
     });
   }
