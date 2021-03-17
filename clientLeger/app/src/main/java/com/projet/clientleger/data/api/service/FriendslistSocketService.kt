@@ -5,7 +5,6 @@ import com.projet.clientleger.data.model.Friendslist
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,4 +34,6 @@ class FriendslistSocketService @Inject constructor(val socketService: SocketServ
             Json.decodeFromString(Friendslist.serializer(), (res[0] as JSONObject)["documents"].toString())
         }
     }
+
+
 }

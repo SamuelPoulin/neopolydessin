@@ -111,13 +111,14 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketMessages.GET_ALL_LOBBIES, (gameMode: GameType, difficulty: Difficulty, callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(this.lobbyList
+      socket.on(SocketMessages.GET_ALL_LOBBIES, async (gameMode: GameType, difficulty: Difficulty,
+        callback: (lobbies: LobbyInfo[]) => void) => {
+        callback(await Promise.all(this.lobbyList
           .filter((lobby) => {
             return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
-          }).map((lobby) => {
+          }).map(async (lobby) => {
             return lobby.toLobbyInfo();
-          }));
+          })));
       });
 
       socket.on(SocketConnection.PLAYER_CONNECTION, (lobbyId: string) => {

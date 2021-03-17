@@ -32,7 +32,7 @@ class SocketService @Inject constructor() {
             //socket = IO.socket(BuildConfig.SERVER_URL, options)
             socket = IO.socket("http://10.0.2.2:3205", options)
         } catch (e: URISyntaxException) {
-            null
+            println("ERROR SOCKET CONNECTION")
         }
         socket.connect()
     }
@@ -94,7 +94,6 @@ class SocketService @Inject constructor() {
             socket.emit("newPlayer", username, Ack { args ->
                 val resp = args[0] as JSONObject
                 val status = resp["status"] as String
-                println(status)
                 emitter.onNext(status == "Valid")
             })
         }

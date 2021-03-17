@@ -4,6 +4,7 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.MessageChat
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
@@ -11,6 +12,8 @@ import io.socket.client.IO
 import org.json.JSONObject
 import io.socket.client.Socket
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import org.json.JSONArray
 import java.net.URISyntaxException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,10 +30,16 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
             received[0].toString()
         }
     }
-    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty){
-        socketService.socket.emit("GetListLobby",gameMode.value, difficulty.value, Ack{ received ->
-            println("NOUS SOMMES DANS LE SOCKET SERVICE")
-            println(received[0])
+    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
+        return Observable.create{
+            emitter -> socketService.socket.emit("GetListLobby",gameMode.value, difficulty.value, Ack{ res ->
+            val jsonList = res[0] as JSONArray
+            val list = ArrayList<LobbyInfo>()
+            for(i in 0 until jsonList.length()){
+                list.add(Json.decodeFromString(LobbyInfo.serializer(), jsonList.get(i).toString()))
+            }
+            emitter.onNext(LobbyList(list))
         })
+        }
     }
 }

@@ -1,18 +1,8 @@
 package com.projet.clientleger.data.api.model
 
-data class LobbyInfo(val lobbyId:String, val teamsInfo:Array<TeamInfo>, val gameType:GameType) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+import com.projet.clientleger.data.model.PlayerInfo
+import kotlinx.serialization.Serializable
 
-        other as LobbyInfo
-
-        if (!teamsInfo.contentEquals(other.teamsInfo)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return teamsInfo.contentHashCode()
-    }
+@Serializable
+data class LobbyInfo(val lobbyId:String, val playerInfo:List<PlayerInfo>, val gameType:String) {
 }

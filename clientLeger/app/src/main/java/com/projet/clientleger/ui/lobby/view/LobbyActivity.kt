@@ -37,17 +37,12 @@ class LobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupButtons()
-        vm.connectSocket(getSharedPreferences(
-            getString(R.string.user_creds),
-            Context.MODE_PRIVATE
-        ).getString("accessToken", "")!!)
         retrievePlayerInfos()
-        var gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         binding.gamemode.text = gameInfo.gameMode
         binding.difficulty.text = gameInfo.difficulty
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
-        vm.getLobbies()
     }
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {

@@ -14,13 +14,14 @@ import { Coord } from './commands/path';
 
 export interface LobbyInfo {
   lobbyId: string;
-  teamsInfo: TeamInfo[];
+  playerInfo: PlayerInfo[];
   gameType: GameType;
 }
 
-export interface TeamInfo {
+export interface PlayerInfo {
   teamNumber: number;
-  playerNames: string[];
+  playerName: string;
+  accountId: string;
 }
 
 export interface Player {
@@ -103,9 +104,9 @@ export abstract class Lobby {
     this.timeLeftSeconds = 0;
   }
 
-  toLobbyInfo(): LobbyInfo {
-    const teamInfo: TeamInfo[] = [];
-    this.teams.forEach((element) => {
+  async toLobbyInfo(): Promise<LobbyInfo> {
+    const playerInfoList: PlayerInfo[] = [];
+    /* this.teams.forEach((element) => {
       const listPlayerNames: string[] = [];
       element.playersInTeam.forEach((player) => {
         this.databaseService.getAccountById(player.accountId).then((account) => {
@@ -113,12 +114,25 @@ export abstract class Lobby {
         });
       });
       teamInfo.push({teamNumber: element.teamNumber, playerNames: listPlayerNames});
+    });*/
+    const listAccountId: string[] = [];
+    this.players.forEach((player) => {
+      listAccountId.push(player.accountId);
     });
-    return {
-      lobbyId: this.lobbyId,
-      teamsInfo: teamInfo,
-      gameType: this.gameType,
-    };
+    return await this.databaseService.getAccountsInfo(listAccountId).then((listPlayers) => {
+      listPlayers.documents.forEach((playerInfo, index) => {
+        playerInfoList.push({
+          teamNumber: this.players[index].teamNumber,
+          playerName: playerInfo.username,
+          accountId: playerInfo.accountId
+        });
+      });
+      return {
+        lobbyId: this.lobbyId,
+        playerInfo: playerInfoList,
+        gameType: this.gameType,
+      };
+    });
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {

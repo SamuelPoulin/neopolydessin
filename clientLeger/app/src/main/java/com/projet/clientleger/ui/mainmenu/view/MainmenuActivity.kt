@@ -21,6 +21,7 @@ import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
+import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -63,6 +64,10 @@ class MainmenuActivity : AppCompatActivity() {
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
         ).getString("accessToken", "")!!)
+
+        //To remove before PR --------------------------------------------------------------------------
+//        val intent = Intent(this, GameActivity::class.java)
+//        startActivity(intent)
 
 
         supportFragmentManager.commit{

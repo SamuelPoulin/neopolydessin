@@ -10,14 +10,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
-    fun connectSocket(accessToken: String){
-        lobbyRepository.connectSocket(accessToken)
-    }
     fun receivePlayersInfo(): Observable<String> {
         return lobbyRepository.receivedPlayersInfo()
-    }
-
-    fun getLobbies(){
-        lobbyRepository.receivedAllLobbies(GameType.CLASSIC, Difficulty.EASY)
     }
 }

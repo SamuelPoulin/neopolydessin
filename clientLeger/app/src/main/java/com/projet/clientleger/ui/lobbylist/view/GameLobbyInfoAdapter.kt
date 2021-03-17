@@ -7,9 +7,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.GameInfo
 
-class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
+class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
         val lobbyLinearLayout: LinearLayout = itemView.findViewById<LinearLayout>(R.id.lobbyGame)
         val lobbyNameTextView: TextView = itemView.findViewById<TextView>(R.id.lobbyName)
@@ -27,14 +28,14 @@ class GameLobbyInfoAdapter(private val games: List<GameInfo>): RecyclerView.Adap
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.lobbyLinearLayout.setTag(games[position].lobbyid.toInt())
-        viewHolder.lobbyNameTextView.text = games[position].lobbyName
-        viewHolder.gameOwnerTextView.text = games[position].lobbyOwner
-        viewHolder.gameModeTextView.text = games[position].gameMode
-        viewHolder.gameCapacityTextView.text = games[position].gameCapacity
+        //viewHolder.lobbyLinearLayout.setTag(lobbyList[position].lobbyid.toInt())
+        //viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
+        //viewHolder.gameOwnerTextView.text = lobbyList[position].lobbyOwner
+        viewHolder.gameModeTextView.text = lobbyList[position].gameType
+        viewHolder.gameCapacityTextView.text = "4"
 
     }
     override fun getItemCount(): Int {
-        return games.size
+        return lobbyList.size
     }
 }
