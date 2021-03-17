@@ -19,11 +19,13 @@ export class AccountNavbarComponent {
   firstName: string;
   lastName: string;
   username: string;
+  firstLetter: string;
 
   constructor(private mediaMatcher: MediaMatcher, private userService: UserService) {
     this.firstName = 'Samuel';
     this.lastName = 'Poulin';
     this.username = this.userService.username;
+    this.firstLetter = this.username ? this.username[0].toUpperCase() : '';
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);

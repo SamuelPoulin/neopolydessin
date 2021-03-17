@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { SharedModule } from '../../shared.module';
 
 import { StatusBarComponent } from './status-bar.component';
 
@@ -8,6 +10,7 @@ describe('StatusBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [SharedModule, RouterTestingModule],
       declarations: [StatusBarComponent],
     }).compileComponents();
   });
