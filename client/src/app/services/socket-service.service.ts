@@ -74,6 +74,10 @@ export class SocketService {
     });
   }
 
+  startGame(): void {
+    this.socket.emit(SocketMessages.START_GAME_SERVER);
+  }
+
   receiveStartPath(): Observable<Coordinate> {
     return new Observable<Coordinate>((obs) => {
       this.socket.on(SocketDrawing.START_PATH_BC, (coord: Coordinate) => {

@@ -21,7 +21,7 @@
           <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
           {{inviteCode}}
         </button>
-        <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button">
+        <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button" (click)="startGame()">
           Lancer la partie
           <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
         </button>
@@ -29,25 +29,25 @@
       <div id="players-container">
         <div class="team-container">
           <div class="players-title">Équipe 1</div>
-          <div class="player-container">
+          <!--div class="player-container">
             <div class="player-avatar">S</div>
             <div class="player-username">samuelpoulin</div>
           </div>
           <div class="player-container">
             <div class="player-avatar avatar2">S</div>
             <div class="player-username">samuelpoulin</div>
-          </div>
+          </div-->
         </div>
         <div class="team-container">
           <div class="players-title">Équipe 2</div>
-          <div class="player-container">
+          <!--div class="player-container">
             <div class="player-avatar avatar3">M</div>
             <div class="player-username">memoirekeche</div>
           </div>
           <div class="player-container">
             <div class="player-avatar avatar4">B</div>
             <div class="player-username">BotAndy</div>
-          </div>
+          </div-->
         </div>
       </div>
     </div>

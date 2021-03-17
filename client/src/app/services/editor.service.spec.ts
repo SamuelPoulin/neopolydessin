@@ -10,7 +10,6 @@ import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { ColorsService } from './colors.service';
 import { EditorService } from './editor.service';
-import { LocalSaveService } from './localsave.service';
 import { Path } from '@models/shapes/path';
 import { SocketService } from './socket-service.service';
 
@@ -27,7 +26,7 @@ describe('EditorService', () => {
   });
 
   beforeEach(() => {
-    service = new EditorService(new ColorsService(), new LocalSaveService(), new SocketService());
+    service = new EditorService(new ColorsService(), new SocketService());
     BaseShape['SHAPE_ID'] = 0;
     rectangle = new Rectangle();
     path = new Path();
@@ -36,9 +35,6 @@ describe('EditorService', () => {
     viewSpy.height = 10;
     viewSpy.svg = {
       contains: () => false,
-    };
-    service.saveLocally = () => {
-      return;
     };
     service.view = viewSpy;
 
@@ -82,7 +78,7 @@ describe('EditorService', () => {
     api.getDrawingById = async () => {
       return Promise.resolve({ data: service.exportDrawing() } as Drawing);
     };
-    const service2 = new EditorService(new ColorsService(), new LocalSaveService(), new SocketService());
+    const service2 = new EditorService(new ColorsService(), new SocketService());
     service2.importDrawingById('', api);
     expect(service2.shapes.values).toEqual(service.shapes.values);
   });

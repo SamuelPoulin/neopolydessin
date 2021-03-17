@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { SharedModule } from '@components/shared/shared.module';
 
 import { LobbyComponent } from './lobby.component';
 
@@ -9,6 +11,7 @@ describe('LobbyComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [LobbyComponent],
+      imports: [SharedModule, RouterTestingModule],
     }).compileComponents();
   });
 
