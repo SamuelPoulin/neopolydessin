@@ -102,7 +102,6 @@ export class DatabaseService {
     });
   }
 
-
   async getAccountByUsername(userName: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
       accountModel.findOne({ username: userName })

@@ -19,7 +19,7 @@ export class LobbyClassique extends Lobby {
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
     if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      if (this.teams[1].playersInTeam.length < this.teams[0].playersInTeam.length) {
+      if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
         this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
         this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
       }
