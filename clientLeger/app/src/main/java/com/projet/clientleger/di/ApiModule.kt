@@ -48,7 +48,7 @@ object ApiModule {
         gson: Gson
     ): Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.SERVER_URL)
-//            .baseUrl("http://10.0.2.2:3205")
+            //.baseUrl("http://10.0.2.2:3205")
             .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
