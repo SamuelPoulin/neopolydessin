@@ -58,4 +58,9 @@
     <string name="previous">Previous</string>
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="game_mode">Game Mode</string>
+    <string name="game_owner">Game Owner</string>
+    <string name="lobby_name">Lobby Name</string>
+    <string name="game_capacity">Game Capacity</string>
+    <string name="join_game">Join</string>
 </resources>

@@ -18,7 +18,7 @@
             android:layout_weight="0.25"
             android:textSize="20dp"
             android:textColor="@color/black"
-            android:text="Lobby Name"
+            android:text="@string/lobby_name"
             android:textAlignment="center"
             />
 
@@ -29,7 +29,7 @@
             android:layout_weight="0.25"
             android:textSize="20dp"
             android:textColor="@color/black"
-            android:text="Game Owner"
+            android:text="@string/game_owner"
             android:textAlignment="center"
             />
 
@@ -40,7 +40,7 @@
             android:layout_weight="0.25"
             android:textSize="20dp"
             android:textColor="@color/black"
-            android:text="Game Mode"
+            android:text="@string/game_mode"
             android:textAlignment="center"/>
 
         <TextView
@@ -50,9 +50,16 @@
             android:layout_weight="0.25"
             android:textSize="20dp"
             android:textColor="@color/black"
-            android:text="Game Capacity"
+            android:text="@string/game_capacity"
             android:textAlignment="center"
             />
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.10"
+            android:textSize="20dp"
+            android:text = "@string/join_game">
+        </Button>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
