@@ -17,4 +17,12 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
     fun receivedAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return lobbySocketService.receiveAllLobbies(gameMode,difficulty)
     }
+
+    fun receiveJoinedLobbyInfo() : Observable<LobbyInfo>{
+        return lobbySocketService.receiveJoinedLobbyInfo()
+    }
+
+    fun joinLobby(lobbyId: String){
+        lobbySocketService.joinLobby(lobbyId)
+    }
 }

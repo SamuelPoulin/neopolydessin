@@ -1,9 +1,11 @@
 package com.projet.clientleger.ui.lobbylist.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
@@ -11,10 +13,13 @@ import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.GameInfo
+import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_search_lobby.*
+import kotlinx.coroutines.launch
+import java.io.Serializable
 
 @AndroidEntryPoint
 class SearchLobbyActivity : AppCompatActivity() {
@@ -27,14 +32,28 @@ class SearchLobbyActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search_lobby)
 
         val rvGames = findViewById<View>(R.id.rvGames) as RecyclerView
-        val adapter = GameLobbyInfoAdapter(lobbyList)
+        val adapter = GameLobbyInfoAdapter(lobbyList, ::joinLobby)
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
 
-        vm.receiveAllLobbies(GameType.CLASSIC, Difficulty.EASY).subscribe{
-            println("received: $it")
-            lobbyList.addAll(it.list)
-            rvGames.adapter?.notifyDataSetChanged()
+        lifecycleScope.launch {
+            vm.receiveAllLobbies(GameType.CLASSIC, Difficulty.EASY).subscribe({
+                lifecycleScope.launch {
+                    lobbyList.addAll(it.list)
+                    rvGames.adapter?.notifyDataSetChanged()
+                }
+            },
+                { error ->
+                    println(error)
+                })
+        }
+
+        vm.receiveJoinedLobbyInfo().subscribe{
+            println("receive info")
+            val intent = Intent(this, LobbyActivity::class.java).apply{
+                putExtra("LOBBY_INFO",it)
+            }
+            startActivity(intent)
         }
 
     }
@@ -56,5 +75,9 @@ class SearchLobbyActivity : AppCompatActivity() {
         lobbyList.add(lobby)
         rvGames.adapter?.notifyItemInserted(lobbyList.size-1)
         rvGames.scrollToPosition(lobbyList.size-1)
+    }
+
+    private fun joinLobby(lobbyId: String){
+        vm.joinLobby(lobbyId)
     }
 }

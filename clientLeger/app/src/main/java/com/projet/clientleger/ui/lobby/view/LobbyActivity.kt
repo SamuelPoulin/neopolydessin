@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
+import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.databinding.ConnexionActivityBinding
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
@@ -23,6 +25,7 @@ class LobbyActivity : AppCompatActivity() {
     private val vm: LobbyViewModel by viewModels()
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
+    private val playersView = ArrayList<TextView>()
 
     private fun setSubscriptions() {
         vm.receivePlayersInfo()
@@ -38,12 +41,24 @@ class LobbyActivity : AppCompatActivity() {
 
         setupButtons()
         retrievePlayerInfos()
+        playersView.add(binding.player1Name)
+        playersView.add(binding.player2Name)
+        playersView.add(binding.player3Name)
+        playersView.add(binding.player4Name)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
         binding.gamemode.text = gameInfo.gameMode
         binding.difficulty.text = gameInfo.difficulty
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
     }
+
+    private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
+        for(i in lobbyInfo.playerInfo.indices){
+            playersView[i].text = lobbyInfo.playerInfo[i].playerName
+        }
+    }
+
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {
             startGame()

@@ -17,4 +17,12 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return lobbyRepository.receivedAllLobbies(gameMode, difficulty)
     }
+
+    fun receiveJoinedLobbyInfo() : Observable<LobbyInfo>{
+        return lobbyRepository.receiveJoinedLobbyInfo()
+    }
+
+    fun joinLobby(lobbyId: String){
+        lobbyRepository.joinLobby(lobbyId)
+    }
 }

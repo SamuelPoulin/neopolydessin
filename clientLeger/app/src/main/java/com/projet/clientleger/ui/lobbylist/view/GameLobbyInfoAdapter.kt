@@ -3,6 +3,7 @@ package com.projet.clientleger.ui.lobbylist.view
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +11,8 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.GameInfo
 
-class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
+class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
+private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
         val lobbyLinearLayout: LinearLayout = itemView.findViewById<LinearLayout>(R.id.lobbyGame)
         val lobbyNameTextView: TextView = itemView.findViewById<TextView>(R.id.lobbyName)
@@ -33,7 +35,7 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>): RecyclerView
         //viewHolder.gameOwnerTextView.text = lobbyList[position].lobbyOwner
         viewHolder.gameModeTextView.text = lobbyList[position].gameType
         viewHolder.gameCapacityTextView.text = "4"
-
+        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
     }
     override fun getItemCount(): Int {
         return lobbyList.size
