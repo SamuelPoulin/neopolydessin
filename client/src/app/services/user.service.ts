@@ -19,6 +19,8 @@ export class UserService {
 
   logout() {
     this.localSaveService.username = '';
+    this.localSaveService.accessToken = '';
+    this.localSaveService.refreshToken = '';
     this._username = '';
     this._loggedIn = false;
     this.router.navigate(['/login']);

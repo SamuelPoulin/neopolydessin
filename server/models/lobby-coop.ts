@@ -3,7 +3,8 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
+import { Difficulty, GameType, PlayerStatus } from '../../common/communication/lobby';
+import { Lobby } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
