@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
+import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
@@ -22,6 +22,7 @@ export class LobbyCoop extends Lobby {
     super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
     this.guessLeft = 5;
     this.gameType = GameType.SPRINT_COOP;
+    this.timeLeftSeconds = 10;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
@@ -49,5 +50,29 @@ export class LobbyCoop extends Lobby {
         }
       }
     });
+
+    socket.on(SocketMessages.START_GAME_SERVER, () => {
+      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      if (senderAccountId === this.ownerAccountId) {
+        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
+        this.currentGameState = CurrentGameState.IN_GAME;
+        this.startRoundTimer();
+      }
+    });
+  }
+
+  startRoundTimer() {
+    const interval = setInterval(() => {
+      --this.timeLeftSeconds;
+      console.log(this.timeLeftSeconds);
+      if (this.timeLeftSeconds <= 0) {
+        this.endRoundTimer(interval);
+      }
+    }, this.MS_PER_SEC);
+  }
+
+  endRoundTimer(timeout: NodeJS.Timeout) {
+    clearInterval(timeout);
+    console.log('interval over');
   }
 }

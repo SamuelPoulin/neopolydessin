@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
+import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
 
 
 @injectable()
@@ -20,6 +20,7 @@ export class LobbyClassique extends Lobby {
     super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
+    this.timeLeftSeconds = 30;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
@@ -62,6 +63,14 @@ export class LobbyClassique extends Lobby {
         else {
           callback(false);
         }
+      }
+    });
+
+    socket.on(SocketMessages.START_GAME_SERVER, () => {
+      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      if (senderAccountId === this.ownerAccountId) {
+        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
+        this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
   }

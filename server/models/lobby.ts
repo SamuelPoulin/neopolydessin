@@ -68,12 +68,15 @@ const gameSizeMap = new Map<GameType, number>([
 export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
+  readonly MS_PER_SEC: number = 1000;
 
   lobbyId: string;
   gameType: GameType;
   difficulty: Difficulty;
   privateLobby: boolean;
   lobbyName: string;
+
+  clockTimeout: NodeJS.Timeout = new NodeJS.Timeout();
 
   protected io: Server;
   protected ownerAccountId: string;
@@ -110,7 +113,6 @@ export abstract class Lobby {
     this.wordToGuess = '';
     this.currentGameState = CurrentGameState.LOBBY;
     this.drawingCommands = new DrawingCommandsService();
-    this.timeLeftSeconds = 0;
     this.players = [];
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
   }
@@ -311,14 +313,6 @@ export abstract class Lobby {
       }
       else {
         console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-      }
-    });
-
-    socket.on(SocketMessages.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
-        this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
 

@@ -19,6 +19,7 @@ export class SocketService {
 
   constructor() {
     SocketService.API_BASE_URL = environment.socketUrl;
+    // SocketService.API_BASE_URL = 'http://localhost:3205/socket.io/?EIO=4&transport=websocket/';
 
     this.manager = new Manager(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
