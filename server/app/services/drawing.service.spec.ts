@@ -105,7 +105,7 @@ describe('DrawingCommandService', () => {
                 return drawingCommands.endPath({ x: 3, y: 3 });
             })
             .then(() => {
-                return drawingCommands.addPath(0, [{ x: 0, y: 0 }], { color: "#000000", strokeWidth: 1 });
+                return drawingCommands.addPath(0);
             })
             .catch(() => {
                 expect(drawingCommands.paths).to.be.length(1);
@@ -114,7 +114,7 @@ describe('DrawingCommandService', () => {
     });
 
     it('add path should reject if trying to add a path that didn\'t exist previously', (done: Mocha.Done) => {
-        drawingCommands.addPath(0, [{ x: 0, y: 0 }, { x: 3, y: 3 }], { color: "#000000", strokeWidth: 1 })
+        drawingCommands.addPath(0)
             .catch(() => {
                 expect(drawingCommands.paths).to.be.length(0);
                 done();
@@ -131,12 +131,11 @@ describe('DrawingCommandService', () => {
             })
             .then(() => {
                 expect(drawingCommands.paths).to.be.length(0);
-                return drawingCommands.addPath(0, [{ x: 0, y: 0 }],
-                    { color: "#000000", strokeWidth: 1 });
+                return drawingCommands.addPath(0);
             })
             .then(() => {
                 expect(drawingCommands.paths).to.be.length(1);
-                expect(drawingCommands.paths[0].path).to.deep.equal([{ x: 0, y: 0 }]);
+                expect(drawingCommands.paths[0].path).to.deep.equal([{ x: 0, y: 0 }, { x: 3, y: 3 }]);
                 done();
             });
     });
