@@ -247,11 +247,11 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.ADD_PATH, (id: number, coords: Coord[], brushInfo: BrushInfo) => {
+    socket.on(SocketDrawing.ADD_PATH, (id: number) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.addPath(id, coords, brushInfo)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, id, coords, brushInfo);
+        this.drawingCommands.addPath(id)
+          .then((addedPath) => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.path, addedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to update erase for ${this.lobbyId}`);

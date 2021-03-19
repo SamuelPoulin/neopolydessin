@@ -70,14 +70,12 @@ export class DrawingService {
     });
   }
 
-  async addPath(id: number, coords: Coord[], brushInfo: BrushInfo): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const existingPath = this.paths.find((path) => path.id === id);
-      if (!existingPath && id >= 0 && id < this.id) {
-        const toAdd = new Path(id, undefined, brushInfo);
-        toAdd.addCoords(coords);
-        this.paths.push(toAdd);
-        resolve();
+  async addPath(id: number): Promise<Path> {
+    return new Promise<Path>((resolve, reject) => {
+      const existingPath = this.erasedPaths.find((path) => path.id === id);
+      if (existingPath) {
+        this.paths.push(existingPath);
+        resolve(existingPath);
       }
       else {
         reject();
