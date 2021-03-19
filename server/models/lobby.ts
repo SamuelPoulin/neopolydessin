@@ -235,11 +235,11 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.START_ERASE, (startPoint: Coord) => {
+    socket.on(SocketDrawing.ERASE_ID, (id: number) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.startErase(startPoint)
+        this.drawingCommands.erase(id)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_ERASE_BC, startPoint);
+            this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_ID_BC, id);
           })
           .catch(() => {
             console.log(`failed to start erase for ${this.lobbyId}`);
@@ -247,50 +247,14 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.UPDATE_ERASE, (coords: Coord[]) => {
+    socket.on(SocketDrawing.ADD_PATH, (id: number, coords: Coord[], brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.updateErase(coords)
+        this.drawingCommands.addPath(id, coords, brushInfo)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_ERASE_BC, coords);
+            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, id, coords, brushInfo);
           })
           .catch(() => {
             console.log(`failed to update erase for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.END_ERASE, (endPoint: Coord) => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.endErase(endPoint)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.END_ERASE_BC, endPoint);
-          })
-          .catch(() => {
-            console.log(`failed to end erase for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.UNDO, () => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.undo()
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UNDO_BC);
-          })
-          .catch(() => {
-            console.log(`failed to undo for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.REDO, () => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.redo()
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.REDO_BC);
-          })
-          .catch(() => {
-            console.log(`failed to redo for ${this.lobbyId}`);
           });
       }
     });
@@ -311,7 +275,7 @@ export abstract class Lobby {
 
     socket.on(SocketMessages.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
+      if (senderAccountId === this.ownerAccountId) {
         this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
         this.currentGameState = CurrentGameState.IN_GAME;
       }
@@ -323,11 +287,10 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
-    socket.removeAllListeners(SocketDrawing.START_ERASE);
-    socket.removeAllListeners(SocketDrawing.UPDATE_ERASE);
-    socket.removeAllListeners(SocketDrawing.END_ERASE);
-    socket.removeAllListeners(SocketDrawing.UNDO);
-    socket.removeAllListeners(SocketDrawing.REDO);
+    socket.removeAllListeners(SocketDrawing.ERASE_ID);
+    socket.removeAllListeners(SocketDrawing.ERASE_ID_BC);
+    socket.removeAllListeners(SocketDrawing.ADD_PATH);
+    socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
     socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketMessages.PLAYER_GUESS);

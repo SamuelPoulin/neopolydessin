@@ -1,7 +1,4 @@
 import { injectable } from 'inversify';
-import { Command } from '../../models/commands/command';
-import { DrawCommand } from '../../models/commands/draw-command';
-import { EraseCommand } from '../../models/commands/erase-command';
 import { Coord, Path } from '../../models/commands/path';
 import { BrushInfo } from '../../../common/communication/brush-info';
 @injectable()
@@ -9,20 +6,26 @@ export class DrawingCommandsService {
 
   currentPath: Path | undefined;
 
-  doneCommands: Command[];
+  paths: Path[];
 
-  undoneCommands: Command[];
+  erasedPaths: Path[];
+
+  id: number;
 
   constructor() {
-    this.doneCommands = [];
-    this.undoneCommands = [];
+    this.id = 0;
+    this.paths = [];
+    this.erasedPaths = [];
+  }
+
+  genId(): number {
+    return this.id++;
   }
 
   async startPath(startPoint: Coord, brush: BrushInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (!this.currentPath) {
-        this.currentPath = new Path(startPoint, brush);
-        console.log("START" + this.currentPath)
+        this.currentPath = new Path(this.genId(), startPoint, brush);
         resolve();
       } else {
         reject();
@@ -32,7 +35,6 @@ export class DrawingCommandsService {
 
   async updatePath(updatePoints: Coord): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-
       if (this.currentPath) {
         this.currentPath.addCoord(updatePoints);
         resolve();
@@ -46,7 +48,7 @@ export class DrawingCommandsService {
     return new Promise<void>((resolve, reject) => {
       if (this.currentPath) {
         this.currentPath.addCoord(endPoint);
-        this.do(new DrawCommand(this.currentPath));
+        this.paths.push(this.currentPath);
         this.currentPath = undefined;
         resolve();
       } else {
@@ -55,10 +57,12 @@ export class DrawingCommandsService {
     });
   }
 
-  async startErase(startPoint: Coord): Promise<void> {
+  async erase(id: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (!this.currentPath) {
-        this.currentPath = new Path(startPoint);
+      const toEraseIndex = this.paths.findIndex((path) => path.id === id);
+      if (toEraseIndex !== -1) {
+        this.erasedPaths.push(this.paths[toEraseIndex]);
+        this.paths.splice(toEraseIndex, 1);
         resolve();
       } else {
         reject();
@@ -66,39 +70,13 @@ export class DrawingCommandsService {
     });
   }
 
-  async updateErase(updatePoints: Coord[]): Promise<void> {
+  async addPath(id: number, coords: Coord[], brushInfo: BrushInfo): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (this.currentPath) {
-        this.currentPath.addCoords(updatePoints);
-        resolve();
-      } else {
-        reject();
-      }
-    });
-  }
-
-  async endErase(endPoint: Coord): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      if (this.currentPath) {
-        this.currentPath.addCoord(endPoint);
-        this.do(new EraseCommand(this.currentPath));
-        this.currentPath = undefined;
-        resolve();
-      } else {
-        reject();
-      }
-    });
-  }
-
-  do(todo: Command): void {
-    this.doneCommands.push(todo);
-  }
-
-  async undo(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const commandToUndo = this.doneCommands.pop();
-      if (commandToUndo) {
-        this.undoneCommands.push(commandToUndo);
+      const existingPath = this.paths.find((path) => path.id === id);
+      if (!existingPath && id >= 0 && id < this.id) {
+        const toAdd = new Path(id, undefined, brushInfo);
+        toAdd.addCoords(coords);
+        this.paths.push(toAdd);
         resolve();
       }
       else {
@@ -107,15 +85,4 @@ export class DrawingCommandsService {
     });
   }
 
-  async redo(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const commandToRedo = this.undoneCommands.pop();
-      if (commandToRedo) {
-        this.doneCommands.push(commandToRedo);
-        resolve();
-      } else {
-        reject();
-      }
-    });
-  }
 }
