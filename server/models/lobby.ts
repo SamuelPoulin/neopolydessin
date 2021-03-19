@@ -14,6 +14,7 @@ import { Coord } from './commands/path';
 
 export interface LobbyInfo {
   lobbyId: string;
+  lobbyName: string;
   playerInfo: PlayerInfo[];
   gameType: GameType;
 }
@@ -72,6 +73,7 @@ export abstract class Lobby {
   gameType: GameType;
   difficulty: Difficulty;
   privateLobby: boolean;
+  lobbyName: string;
 
   protected io: Server;
   protected ownerAccountId: string;
@@ -95,12 +97,14 @@ export abstract class Lobby {
     io: Server,
     accountId: string,
     difficulty: Difficulty,
-    privacySetting: boolean
+    privacySetting: boolean,
+    lobbyName: string
   ) {
     this.io = io;
     this.ownerAccountId = accountId;
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
+    this.lobbyName = lobbyName;
     this.lobbyId = uuidv4();
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
     this.wordToGuess = '';
@@ -127,6 +131,7 @@ export abstract class Lobby {
       });
       return {
         lobbyId: this.lobbyId,
+        lobbyName: this.lobbyName,
         playerInfo: playerInfoList,
         gameType: this.gameType,
       };

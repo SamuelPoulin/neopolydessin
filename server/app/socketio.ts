@@ -138,22 +138,23 @@ export class SocketIo {
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+      socket.on(SocketMessages.CREATE_LOBBY, (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
         let lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
         if (playerId) {
-          switch(gametype) {
+          switch (gametype) {
             case GameType.CLASSIC: {
-              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io,
+                playerId, difficulty, privacySetting, lobbyName);
               break;
             }
             case GameType.SPRINT_SOLO: {
-              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting, lobbyName);
               break;
             }
             case GameType.SPRINT_COOP: {
-              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting, lobbyName);
               break;
             }
           }
