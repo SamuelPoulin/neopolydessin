@@ -1,20 +1,20 @@
 import { expect } from 'chai';
 import { describe, beforeEach } from 'mocha';
 import { BrushInfo } from '../../../common/communication/brush-info';
-import { DrawingCommandsService } from './drawing-commands.service';
+import { DrawingService } from './drawing.service';
 
 describe('DrawingCommandService', () => {
-    let drawingCommands: DrawingCommandsService;
+    let drawingCommands: DrawingService;
 
     const brushInfo: BrushInfo = { color: '#ffffff', strokeWidth: 1 }
 
     beforeEach(async () => {
-        drawingCommands = new DrawingCommandsService();
+        drawingCommands = new DrawingService();
     });
 
 
     it('should instantiate correctly', () => {
-        expect(drawingCommands).to.be.instanceof(DrawingCommandsService);
+        expect(drawingCommands).to.be.instanceof(DrawingService);
     });
 
     it('startPath should create new path if there is none', (done: Mocha.Done) => {

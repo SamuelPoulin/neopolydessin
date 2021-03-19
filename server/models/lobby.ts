@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { DrawingCommandsService } from '../app/services/drawing-commands.service';
+import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -79,7 +79,7 @@ export abstract class Lobby {
   protected size: number;
   protected wordToGuess: string;
   protected currentGameState: CurrentGameState;
-  protected drawingCommands: DrawingCommandsService;
+  protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
   protected players: Player[];
@@ -105,7 +105,7 @@ export abstract class Lobby {
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
     this.wordToGuess = '';
     this.currentGameState = CurrentGameState.LOBBY;
-    this.drawingCommands = new DrawingCommandsService();
+    this.drawingCommands = new DrawingService();
     this.timeLeftSeconds = 0;
     this.players = [];
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];

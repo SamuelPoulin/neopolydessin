@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { Coord, Path } from '../../models/commands/path';
 import { BrushInfo } from '../../../common/communication/brush-info';
 @injectable()
-export class DrawingCommandsService {
+export class DrawingService {
 
   currentPath: Path | undefined;
 
