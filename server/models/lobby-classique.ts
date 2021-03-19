@@ -1,21 +1,30 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, Lobby, PlayerStatus } from './lobby';
+import { Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
 
 
 @injectable()
 export class LobbyClassique extends Lobby {
 
-  constructor(socketIdService: SocketIdService, io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean) {
-    super(socketIdService, io, accountId, difficulty, privateGame);
+  constructor(socketIdService: SocketIdService,
+    databaseService: DatabaseService,
+    io: Server,
+    accountId: string,
+    difficulty: Difficulty,
+    privateGame: boolean,
+    lobbyName: string
+  ) {
+    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
+    this.gameType = GameType.CLASSIC;
   }
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
     if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      if (this.teams[1].playersInTeam.length < this.teams[0].playersInTeam.length) {
+      if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
         this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
         this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
       }

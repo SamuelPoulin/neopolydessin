@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { SharedModule } from '@components/shared/shared.module';
 
 import { AccountNavbarComponent } from './account-navbar.component';
 
@@ -8,9 +10,9 @@ describe('AccountNavbarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AccountNavbarComponent ]
-    })
-    .compileComponents();
+      imports: [SharedModule, RouterTestingModule],
+      declarations: [AccountNavbarComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

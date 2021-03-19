@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class Friend(
-    var friendId: String?,
-    var username: String?,
+    var friendId: FriendId?,
     var status: String,
-    var received: Boolean): Parcelable
+    var received: Boolean,
+    var isOnline: Boolean): Parcelable

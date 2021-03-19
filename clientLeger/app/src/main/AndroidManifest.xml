@@ -17,9 +17,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.connexion.view.ConnexionActivity"
-            android:screenOrientation="landscape">
+        <!--
+               Set to true if your app is Standalone, that is, it does not require the handheld
+               app to run.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
 
+        <activity
+            android:name=".ui.game.GameActivity"
+            android:label="@string/title_activity_game"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.connexion.view.ConnexionActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,13 +40,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.mainmenu.view.MainmenuActivity"
+            android:name=".ui.lobbylist.view.SearchLobbyActivity"
+            android:label="@string/title_activity_search_lobby"
+            android:theme="@style/Theme.ClientLeger.NoActionBar"
             android:screenOrientation="landscape">
         </activity>
+
+        <activity android:name=".ui.lobby.view.LobbyActivity"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity
+            android:name=".ui.mainmenu.view.MainmenuActivity"
+            android:screenOrientation="landscape"/>
         <activity
             android:name=".ui.register.view.RegisterActivity"
-            android:label="@string/app_name"
-            />
+            android:label="@string/app_name" />
     </application>
 
 </manifest>

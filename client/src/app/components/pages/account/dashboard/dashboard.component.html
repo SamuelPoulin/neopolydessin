@@ -1,19 +1,19 @@
 <app-account-section title="Statistiques">
   <div class="dashboard-statistic-container">
     <div class="dashboard-statistic-title">Nombre de parties jouées</div>
-    <div class="dashboard-statistic-value">51</div>
+    <div class="dashboard-statistic-value">{{gamesPlayed}}</div>
   </div>
   <div class="dashboard-statistic-container">
     <div class="dashboard-statistic-title">Pourcentage de victoires</div>
-    <div class="dashboard-statistic-value">21%</div>
+    <div class="dashboard-statistic-value">{{winRatio * 100}}%</div>
   </div>
   <div class="dashboard-statistic-container">
-    <div class="dashboard-statistic-title">Nombre d'heures à jouer</div>
-    <div class="dashboard-statistic-value">25h</div>
+    <div class="dashboard-statistic-title">Nombre d'heures jouées</div>
+    <div class="dashboard-statistic-value">{{playTime}}h</div>
   </div>
   <div class="dashboard-statistic-container">
     <div class="dashboard-statistic-title">Nombre d'heures de connexion</div>
-    <div class="dashboard-statistic-value">38h</div>
+    <div class="dashboard-statistic-value">{{connectionTime}}h</div>
   </div>
 </app-account-section>
 <app-account-section title="Historique des parties jouées">

@@ -48,7 +48,6 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
         val friendSimplifiedList = ArrayList<FriendSimplified>()
         for(friend in friendslist.friends){
-            println(friend)
             if(friend.friendId != null)
                 friendSimplifiedList.add(FriendSimplified(friend))
         }

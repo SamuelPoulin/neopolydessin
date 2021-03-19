@@ -1,3 +1,5 @@
+@use '../login.scss' as *;
+
 #login-page {
   display: flex;
   flex-direction: column;
@@ -16,4 +18,24 @@
 
 #login-page-image {
   height: 85px;
+}
+
+.input {
+  width: $input-width;
+}
+
+#login-button {
+  width: $input-width;
+}
+
+#login-links {
+  width: $input-width;
+  margin-top: 15px;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-around;
+}
+
+#login-links > div {
+  cursor: pointer;
 }

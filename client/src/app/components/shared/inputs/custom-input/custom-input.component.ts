@@ -28,6 +28,7 @@ export class CustomInputComponent implements OnInit, OnChanges {
   private _focused: boolean;
   editingValue: string;
   validValue: string;
+  isPassword: boolean;
 
   @Input() value: string;
   @Output() valueChange: EventEmitter<string>;
@@ -49,6 +50,7 @@ export class CustomInputComponent implements OnInit, OnChanges {
     this.hintLabel = '';
     this._focused = false;
     this.format = (v: string) => v;
+    this.isPassword = false;
   }
 
   ngOnInit(): void {

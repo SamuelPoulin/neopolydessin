@@ -33,7 +33,6 @@ class SessionManager @Inject constructor(
         const val ERROR_MESSAGE = "errorMessage"
         const val SESSION_EXPIRED = "Session expirée"
     }
-
     private var userPrefs: SharedPreferences =
             context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
 

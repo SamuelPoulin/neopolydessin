@@ -12,6 +12,10 @@ import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
 
+export interface AccountInfo {
+  accountId: string;
+  username: string;
+}
 export interface Response<T> {
   statusCode: number;
   documents: T;
@@ -97,6 +101,25 @@ export class DatabaseService {
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+  async getAccountsInfo(ids: string[]): Promise<Response<AccountInfo[]>> {
+    return new Promise<Response<AccountInfo[]>>((resolve, reject) => {
+      accountModel.getUsersInfo(ids)
+        .then((accounts: Account[]) => {
+          if (accounts.length === 0) throw new Error(NOT_FOUND.toString());
+          const userInfos: AccountInfo[] = accounts.map((account) => {
+            return {
+              accountId: account._id.toHexString(),
+              username: account.username,
+            };
+          });
+          resolve({ statusCode: OK, documents: userInfos });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
