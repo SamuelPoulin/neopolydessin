@@ -2,4 +2,4 @@ package com.projet.clientleger.data.model
 
 import android.graphics.Path
 
-data class PenPath(val path: Path, val brushInfo: BrushInfo)
+data class PenPath(val path: Path, val brushInfo: BrushInfo, val pathCoords: ArrayList<Coordinate> = ArrayList(), val visualCoords: ArrayList<Coordinate> = ArrayList())

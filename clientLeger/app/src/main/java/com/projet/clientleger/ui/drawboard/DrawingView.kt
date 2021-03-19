@@ -12,13 +12,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import com.projet.clientleger.R
+import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PenPath
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DrawingView : View {
-
-    var paths = ArrayList<PenPath>()
+    private var paths = ArrayList<PenPath>()
     private lateinit var pathPaint: Paint
 
 
@@ -36,6 +36,11 @@ class DrawingView : View {
         defStyle
     ) {
         init()
+    }
+
+    fun updatePaths(newList: ArrayList<PenPath>){
+        paths = newList
+        invalidate()
     }
 
     private fun init() {
@@ -56,4 +61,5 @@ class DrawingView : View {
         }
         canvas.restore()
     }
+
 }
