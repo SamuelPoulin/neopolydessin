@@ -207,8 +207,8 @@ export abstract class Lobby {
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket)) {
         this.drawingCommands.startPath(startPoint, brushInfo)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint, brushInfo);
+          .then((startedPath) => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startedPath.id, startedPath.path, startedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to start path for ${this.lobbyId}`);

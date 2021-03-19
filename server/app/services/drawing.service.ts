@@ -22,11 +22,11 @@ export class DrawingService {
     return this.id++;
   }
 
-  async startPath(startPoint: Coord, brush: BrushInfo): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  async startPath(startPoint: Coord, brush: BrushInfo): Promise<Path> {
+    return new Promise<Path>((resolve, reject) => {
       if (!this.currentPath) {
         this.currentPath = new Path(this.genId(), startPoint, brush);
-        resolve();
+        resolve(this.currentPath);
       } else {
         reject();
       }
