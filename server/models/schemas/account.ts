@@ -14,6 +14,7 @@ interface Friend {
   friendId: string | {
     _id: string;
     username: string;
+    avatar: string;
   } | null;
   status: FriendStatus;
   received: boolean;

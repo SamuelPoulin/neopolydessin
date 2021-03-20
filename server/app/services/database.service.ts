@@ -15,6 +15,7 @@ import * as jwtUtils from '../utils/jwt-util';
 export interface AccountInfo {
   accountId: string;
   username: string;
+  avatar: string | undefined;
 }
 export interface Response<T> {
   statusCode: number;
@@ -117,6 +118,7 @@ export class DatabaseService {
             return {
               accountId: account._id.toHexString(),
               username: account.username,
+              avatar: account.avatar
             };
           });
           resolve({ statusCode: OK, documents: userInfos });

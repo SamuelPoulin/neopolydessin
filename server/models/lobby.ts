@@ -23,6 +23,7 @@ export interface PlayerInfo {
   teamNumber: number;
   playerName: string;
   accountId: string;
+  avatar: string | undefined;
 }
 
 export interface Player {
@@ -126,7 +127,8 @@ export abstract class Lobby {
         playerInfoList.push({
           teamNumber: this.players[index].teamNumber,
           playerName: playerInfo.username,
-          accountId: playerInfo.accountId
+          accountId: playerInfo.accountId,
+          avatar: playerInfo.avatar
         });
       });
       return {

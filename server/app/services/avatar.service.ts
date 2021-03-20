@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { INTERNAL_SERVER_ERROR, OK, UNSUPPORTED_MEDIA_TYPE } from 'http-status-codes';
+import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNSUPPORTED_MEDIA_TYPE } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import avatarModel, { Avatar, ContentType } from '../../models/schemas/avatar';
@@ -36,6 +36,7 @@ export class AvatarService {
       let contentType: ContentType | undefined;
       avatarModel.findById(new ObjectId(avatarId))
         .then(async (avatar: Avatar) => {
+          if (!avatar.filePath) throw new Error(NOT_FOUND.toString());
           switch (path.extname(avatar.filePath)) {
             case '.jpg':
               contentType = ContentType.jpeg;
