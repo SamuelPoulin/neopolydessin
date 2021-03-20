@@ -11,7 +11,6 @@ import com.projet.clientleger.data.model.command.ErasePathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -31,7 +30,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         const val DEFAULT_ERASER_SIZE = 22f
         const val DEFAULT_COLOR = "#FF000000" //Black
     }
-    var paths: MutableLiveData<ArrayList<PathExtended>> = MutableLiveData(ArrayList())
+    var paths: MutableLiveData<ArrayList<BufferedPathData>> = MutableLiveData(ArrayList())
     var currentBrushInfo: BrushInfo = BrushInfo(DEFAULT_COLOR, DEFAULT_STROKE)
     var eraserWidth: Float = DEFAULT_ERASER_SIZE
     lateinit var bufferBrushColor: String
@@ -87,8 +86,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
-    private fun receiveStartPath(startPoint: PathBasicData) {
-        val newPath = PathExtended(PathBasicData(startPoint.pathId,startPoint.brushInfo))
+    private fun receiveStartPath(startPoint: PathData) {
+        val newPath = BufferedPathData(PathData(startPoint.pathId,startPoint.brushInfo))
         newPath.addStartCoord(startPoint.coords.first())
         paths.value?.add(newPath)
         paths.postValue(paths.value)
@@ -133,17 +132,17 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
 
 
-    private fun addPath(pathBasicData: PathBasicData){
-        val pathExtended = PathExtended(pathBasicData)
+    private fun addPath(pathData: PathData){
+        val pathExtended = BufferedPathData(pathData)
         paths.value!!.add(pathExtended)
-        paths.value!!.sortBy { it.basicData.pathId }
+        paths.value!!.sortBy { it.data.pathId }
         paths.postValue(paths.value)
     }
 
     private fun deletePath(pathId: Int){
         for(i in 0 until paths.value!!.size){
             paths.value!!.removeIf{
-                it.basicData.pathId == pathId
+                it.data.pathId == pathId
             }
         }
         paths.postValue(paths.value)
@@ -151,7 +150,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun endPath(coord: Coordinate) {
         drawboardRepository.sendEndPath(coord)
-        drawingCommandsService.add(DrawPathCommand(paths.value!!.last().basicData.pathId, drawboardRepository))
+        drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
     }
 
     fun confirmColor(): String {
@@ -183,8 +182,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         for(i in paths.value!!.size-1 downTo 0){
             for(buffCoord in paths.value!![i].extendedCoords){
                 if(rectF.contains(buffCoord.x, buffCoord.y)) {
-                    println("${Random.nextInt()} Collision detected with rect at index $i")
-                    return paths.value!![i].basicData.pathId
+                    return paths.value!![i].data.pathId
                 }
             }
         }

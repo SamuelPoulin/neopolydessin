@@ -1,17 +1,9 @@
 package com.projet.clientleger.data.api.service
 
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.projet.clientleger.data.enum.Difficulty
 import com.projet.clientleger.data.enum.DrawingSocketEndpoints
-import com.projet.clientleger.data.enum.GameType
 import com.projet.clientleger.data.model.*
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -56,7 +48,7 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         socketService.socket.emit(DrawingSocketEndpoints.SEND_ERASE.endpoint, pathId)
     }
 
-    fun receivePath(): Observable<PathBasicData> {
+    fun receivePath(): Observable<PathData> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_PATH.endpoint){ (id, resCoords, resBrushInfo) ->
             val coords: ArrayList<Coordinate> = ArrayList()
             val JSONcoords = resCoords as JSONArray
@@ -64,7 +56,7 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
                 coords.add(Json.decodeFromString(Coordinate.serializer(),JSONcoords.get(i).toString()))
             }
             val brushInfo = Json.decodeFromString(BrushInfo.serializer(), resBrushInfo.toString())
-            PathBasicData(id as Int, brushInfo, coords)
+            PathData(id as Int, brushInfo, coords)
         }
     }
 
@@ -74,12 +66,12 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         }
     }
 
-    fun receiveStartPath() : Observable<PathBasicData> {
+    fun receiveStartPath() : Observable<PathData> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ (id, coordReceive, info) ->
             val coord = ArrayList<Coordinate>()
             coord.add(Json.decodeFromString(Coordinate.serializer(),coordReceive.toString()))
             val brushInfo = Json.decodeFromString(BrushInfo.serializer(), info.toString())
-            PathBasicData(id as Int,brushInfo, coord)
+            PathData(id as Int,brushInfo, coord)
         }
     }
 

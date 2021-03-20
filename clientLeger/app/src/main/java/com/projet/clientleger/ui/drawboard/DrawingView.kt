@@ -6,12 +6,12 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.projet.clientleger.R
-import com.projet.clientleger.data.model.PathExtended
+import com.projet.clientleger.data.model.BufferedPathData
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DrawingView : View {
-    private var paths = ArrayList<PathExtended>()
+    private var paths = ArrayList<BufferedPathData>()
     private lateinit var pathPaint: Paint
 
 
@@ -31,7 +31,7 @@ class DrawingView : View {
         init()
     }
 
-    fun updatePaths(newList: ArrayList<PathExtended>){
+    fun updatePaths(newList: ArrayList<BufferedPathData>){
         paths = newList
         invalidate()
     }
@@ -48,8 +48,8 @@ class DrawingView : View {
         canvas.save()
         canvas.drawColor(ContextCompat.getColor(context,R.color.white))
         for(path in paths){
-            pathPaint.color =  Color.parseColor(path.basicData.brushInfo.color)
-            pathPaint.strokeWidth = path.basicData.brushInfo.strokeWidth
+            pathPaint.color =  Color.parseColor(path.data.brushInfo.color)
+            pathPaint.strokeWidth = path.data.brushInfo.strokeWidth
             canvas.drawPath(path.graphicPath, pathPaint)
         }
         canvas.restore()

@@ -30,10 +30,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         binding = DrawboardFragmentBinding.inflate(inflater, container, false)
         setupViewListener()
         setupObservable()
-        binding!!.colorPickerBtn.setOnClickListener { pickColor() }
-        binding!!.eraserBtn.setOnClickListener { changeTool() }
-        binding!!.undoBtn.setOnClickListener { vm.undo() }
-        binding!!.redoBtn.setOnClickListener { vm.redo() }
+        setupBtnClickListeners()
         binding!!.strokeWidthSlider.addOnChangeListener{ _: Slider, value: Float, fromUser: Boolean ->
             if(fromUser){
                 vm.updateWidth(value)
@@ -47,6 +44,13 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+    }
+
+    private fun setupBtnClickListeners(){
+        binding!!.colorPickerBtn.setOnClickListener { pickColor() }
+        binding!!.eraserBtn.setOnClickListener { changeTool() }
+        binding!!.undoBtn.setOnClickListener { vm.undo() }
+        binding!!.redoBtn.setOnClickListener { vm.redo() }
     }
 
     @SuppressLint("ClickableViewAccessibility")
