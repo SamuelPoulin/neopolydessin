@@ -10,14 +10,9 @@ enum class DrawingSocketEndpoints(val endpoint: String) {
     END_PATH("endPath"),
     RECEIVE_END_PATH("endPathBroadcast"),
 
-    START_ERASE("startErase"),
-    RECEIVE_START_ERASE("startEraseBroadcast"),
+    SEND_ERASE("erase"),
+    RECEIVE_ERASE("eraseBroadcast"),
 
-    UNDO("undo"),
-    RECEIVE_UNDO("undoBroadcast"),
-
-    REDO("redo"),
-    RECEIVE_REDO("redoBroadcast"),
-
-    CREATE_LOBBY("CreateLobby")
+    SEND_PATH("addPath"),
+    RECEIVE_PATH("addPathBroadcast")
 }

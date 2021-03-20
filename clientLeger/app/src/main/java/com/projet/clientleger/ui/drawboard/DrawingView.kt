@@ -57,7 +57,7 @@ class DrawingView : View {
         for(path in paths){
             pathPaint.color =  Color.parseColor(path.brushInfo.color)
             pathPaint.strokeWidth = path.brushInfo.strokeWidth
-            canvas.drawPath(path.path, pathPaint)
+            canvas.drawPath(path.path!!, pathPaint)
         }
         canvas.restore()
     }

@@ -2,24 +2,18 @@ package com.projet.clientleger.ui.drawboard
 
 import android.graphics.Path
 import android.graphics.RectF
-import android.graphics.Region
-import android.os.Process
-import androidx.core.content.ContextCompat
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.R
-import com.projet.clientleger.data.enum.Difficulty
 import com.projet.clientleger.data.enum.DrawTool
-import com.projet.clientleger.data.enum.GameType
 import com.projet.clientleger.data.model.BrushInfo
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PenPath
 import com.projet.clientleger.data.model.StartPoint
+import com.projet.clientleger.data.model.command.CommandFactory
+import com.projet.clientleger.data.model.command.DrawPathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
+import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
@@ -27,7 +21,7 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 @HiltViewModel
-class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository) :
+class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService) :
         ViewModel() {
     companion object {
         val DEFAULT_TOOL = DrawTool.PEN
@@ -47,6 +41,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     var eraserWidth: Float = DEFAULT_ERASER_SIZE
     lateinit var bufferBrushColor: String
     var currentTool = DEFAULT_TOOL
+    private val commandFactory = CommandFactory(::addPath, ::deletePath)
 
     init {
         drawboardRepository.receiveStartPath().subscribe {
@@ -57,6 +52,9 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
         drawboardRepository.receiveEndPath().subscribe {
             receiveEndPath(it)
+        }
+        drawboardRepository.receievPath().subscribe {
+            drawingCommandsService.addAndExecute(commandFactory.createDrawPathCommand(it))
         }
     }
 
@@ -94,7 +92,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     private fun receiveStartPath(startPoint: StartPoint) {
         currentPath = Path()
-        val newPath = PenPath(currentPath!!, startPoint.brushInfo)
+        val newPath = PenPath(startPoint.pathId, currentPath!!, startPoint.brushInfo)
         newPath.pathCoords.add(startPoint.coord)
         newPath.visualCoords.add(startPoint.coord)
         paths.value?.add(newPath)
@@ -104,10 +102,17 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         paths.postValue(paths.value)
     }
 
+    fun redo(){
+        drawingCommandsService.redo()
+    }
+
+    fun undo(){
+        drawingCommandsService.undo()
+    }
 
     fun startPath(coords: Coordinate) {
-        //drawboardRepository.sendStartPath(coords, BrushInfo(brushColor, strokeWidth))
-        receiveStartPath(StartPoint(coords, currentBrushInfo.clone()))
+        drawboardRepository.sendStartPath(coords, currentBrushInfo)
+        //receiveStartPath(StartPoint(0, coords, currentBrushInfo.clone()))
     }
 
     private fun receiveUpdateCurrentPath(coord: Coordinate) {
@@ -144,8 +149,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             dy = abs(coords.y - lastCoordinate!!.y)
         }
         if (dx >= MIN_DELTA_UPDATE || dy >= MIN_DELTA_UPDATE) {
-            //drawboardRepository.sendUpdatePath(coords)
-            receiveUpdateCurrentPath(coords)
+            drawboardRepository.sendUpdatePath(coords)
+            //receiveUpdateCurrentPath(coords)
         }
     }
 
@@ -156,11 +161,31 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         lastCoordinate = null
         currentPath = null
         paths.postValue(paths.value)
+        drawingCommandsService.add(commandFactory.createDrawPathCommand(paths.value!!.last()))
+
+    }
+
+    private fun receiveErasePath(pathId: Int){
+        drawingCommandsService.addAndExecute(commandFactory.createErasePathCommand(paths.value!!.last()))
+    }
+
+    private fun addPath(penPath: PenPath){
+        paths.value!!.add(penPath)
+        paths.value!!.sortBy { it.pathId }
+    }
+
+    private fun deletePath(pathId: Int){
+        for(i in 0 until paths.value!!.size){
+            if(paths.value!![i].pathId == pathId){
+                paths.value!!.removeAt(i)
+                break
+            }
+        }
     }
 
     fun endPath(coords: Coordinate) {
-        //drawboardRepository.sendEndPath(coords)
-        receiveEndPath(coords)
+        drawboardRepository.sendEndPath(coords)
+        //receiveEndPath(coords)
     }
 
     fun confirmColor(): String {
@@ -172,10 +197,13 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     fun erase(coord: Coordinate){
-        detectPathCollision(coord)
+        val pathId = detectPathCollision(coord)
+        if(pathId != -1){
+            drawboardRepository.sendErasePath(pathId)
+        }
     }
 
-    private fun detectPathCollision(coord: Coordinate){
+    private fun detectPathCollision(coord: Coordinate) : Int{
         val rectF = RectF()
         val path = Path()
         path.moveTo(coord.x - eraserWidth, coord.y - eraserWidth)
@@ -185,13 +213,14 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         path.close()
         path.computeBounds(rectF, true)
 
-        breakLoop@for(i in paths.value!!.size-1 downTo 0){
+        for(i in paths.value!!.size-1 downTo 0){
             for(coordPath in paths.value!![i].pathCoords){
                 if(rectF.contains(coordPath.x, coordPath.y)) {
                     println("${Random.nextInt()} Collision detected with rect at index $i")
-                    break@breakLoop
+                    return paths.value!![i].pathId
                 }
             }
         }
+        return -1
     }
 }
