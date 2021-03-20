@@ -31,6 +31,7 @@ describe('friends controller', () => {
                     friendId: {
                         _id: '123456789012345678901234',
                         username: 'itsYaBoi',
+                        avatar: '123456789012345678901234'
                     },
                     status: FriendStatus.FRIEND,
                     received: true,
