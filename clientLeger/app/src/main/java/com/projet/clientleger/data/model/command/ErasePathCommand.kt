@@ -1,16 +1,14 @@
 package com.projet.clientleger.data.model.command
 
-import com.projet.clientleger.data.model.PenPath
+import com.projet.clientleger.data.repository.DrawboardRepository
 
 class ErasePathCommand(private val pathId: Int,
-                       private val drawPathCallback: (penPath: PenPath) -> Unit,
-                       private val erasePathCallback: (pathId: Int) -> PenPath?): DrawingCommand(drawPathCallback, erasePathCallback) {
-    private var penPath: PenPath? = null
+                       private val drawboardRepository: DrawboardRepository): Command {
     override fun execute() {
-        penPath = erasePathCallback.invoke(pathId)
+        drawboardRepository.sendErasePath(pathId)
     }
 
     override fun undo() {
-        penPath?.let { drawPathCallback.invoke(it) }
+        drawboardRepository.sendPath(pathId)
     }
 }

@@ -32,6 +32,8 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         setupObservable()
         binding!!.colorPickerBtn.setOnClickListener { pickColor() }
         binding!!.eraserBtn.setOnClickListener { changeTool() }
+        binding!!.undoBtn.setOnClickListener { vm.undo() }
+        binding!!.redoBtn.setOnClickListener { vm.redo() }
         binding!!.strokeWidthSlider.addOnChangeListener{ _: Slider, value: Float, fromUser: Boolean ->
             if(fromUser){
                 vm.updateWidth(value)

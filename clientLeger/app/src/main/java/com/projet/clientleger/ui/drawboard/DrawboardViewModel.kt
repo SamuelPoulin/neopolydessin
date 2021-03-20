@@ -5,12 +5,9 @@ import android.graphics.RectF
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enum.DrawTool
-import com.projet.clientleger.data.model.BrushInfo
-import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
-import com.projet.clientleger.data.model.StartPoint
-import com.projet.clientleger.data.model.command.CommandFactory
+import com.projet.clientleger.data.model.*
 import com.projet.clientleger.data.model.command.DrawPathCommand
+import com.projet.clientleger.data.model.command.ErasePathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,14 +31,11 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         const val DEFAULT_ERASER_SIZE = 22f
         const val DEFAULT_COLOR = "#FF000000" //Black
     }
-    var paths: MutableLiveData<ArrayList<PenPath>> = MutableLiveData(ArrayList())
-    private var currentPath: Path? = null
-    private var lastCoordinate: Coordinate? = null
+    var paths: MutableLiveData<ArrayList<PathExtended>> = MutableLiveData(ArrayList())
     var currentBrushInfo: BrushInfo = BrushInfo(DEFAULT_COLOR, DEFAULT_STROKE)
     var eraserWidth: Float = DEFAULT_ERASER_SIZE
     lateinit var bufferBrushColor: String
     var currentTool = DEFAULT_TOOL
-    private val commandFactory = CommandFactory(::addPath, ::deletePath)
 
     init {
         drawboardRepository.receiveStartPath().subscribe {
@@ -54,10 +48,10 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             receiveEndPath(it)
         }
         drawboardRepository.receivePath().subscribe {
-            drawingCommandsService.addAndExecute(commandFactory.createDrawPathCommand(it))
+            addPath(it)
         }
         drawboardRepository.receiveErase().subscribe{
-            drawingCommandsService.addAndExecute(commandFactory.createErasePathCommand(it))
+            deletePath(it)
         }
     }
 
@@ -93,15 +87,10 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
-    private fun receiveStartPath(startPoint: StartPoint) {
-        currentPath = Path()
-        val newPath = PenPath(startPoint.pathId, currentPath!!, startPoint.brushInfo)
-        newPath.pathCoords.add(startPoint.coord)
-        newPath.visualCoords.add(startPoint.coord)
+    private fun receiveStartPath(startPoint: PathBasicData) {
+        val newPath = PathExtended(PathBasicData(startPoint.pathId,startPoint.brushInfo))
+        newPath.addStartCoord(startPoint.coords.first())
         paths.value?.add(newPath)
-        currentPath!!.moveTo(startPoint.coord.x, startPoint.coord.y)
-        currentPath!!.lineTo(startPoint.coord.x + 0.1f, startPoint.coord.y + 0.1f)
-        lastCoordinate = startPoint.coord
         paths.postValue(paths.value)
     }
 
@@ -113,81 +102,56 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         drawingCommandsService.undo()
     }
 
-    fun startPath(coords: Coordinate) {
-        drawboardRepository.sendStartPath(coords, currentBrushInfo)
-        //receiveStartPath(StartPoint(0, coords, currentBrushInfo.clone()))
+    fun startPath(coord: Coordinate) {
+        drawboardRepository.sendStartPath(coord, currentBrushInfo)
     }
 
     private fun receiveUpdateCurrentPath(coord: Coordinate) {
-        if (currentPath == null || lastCoordinate == null)
-            return
-        currentPath!!.quadTo(lastCoordinate!!.x, lastCoordinate!!.y,
-                (coord.x + lastCoordinate!!.x) / 2, (coord.y + lastCoordinate!!.y) / 2
-        )
-       // currentPath!!.lineTo(coord.x, coord.y)
-        paths.value?.last()?.visualCoords?.add(coord)
-        addBufferCoords(coord)
-        lastCoordinate = coord
+        paths.value?.last()?.addCoord(coord)
         paths.postValue(paths.value)
-    }
-
-    private fun addBufferCoords(coord: Coordinate){
-        var direction = (coord-lastCoordinate!!)
-        val numBufferNeeded = (direction.distance()/eraserWidth).toInt()
-        direction = direction.normalized()
-        var baseBuffCoord = lastCoordinate!!
-        for(i in 1..numBufferNeeded){
-            val buffCoord = baseBuffCoord + direction*eraserWidth
-            paths.value!!.last().pathCoords.add(buffCoord)
-            baseBuffCoord = buffCoord
-        }
-        paths.value!!.last().pathCoords.add(coord)
     }
 
     fun updateCurrentPath(coords: Coordinate) {
         var dx = MIN_DELTA_UPDATE
         var dy = MIN_DELTA_UPDATE
-        if (lastCoordinate != null) {
-            dx = abs(coords.x - lastCoordinate!!.x)
-            dy = abs(coords.y - lastCoordinate!!.y)
+        if(paths.value!!.isNotEmpty()) {
+            val lastCoordinate = paths.value!!.last().getLastCoord()
+            if (lastCoordinate != null) {
+                dx = abs(coords.x - lastCoordinate.x)
+                dy = abs(coords.y - lastCoordinate.y)
+            }
         }
         if (dx >= MIN_DELTA_UPDATE || dy >= MIN_DELTA_UPDATE) {
             drawboardRepository.sendUpdatePath(coords)
-            //receiveUpdateCurrentPath(coords)
         }
     }
 
     private fun receiveEndPath(coord: Coordinate) {
-        currentPath!!.lineTo(coord.x, coord.y)
-        paths.value?.last()?.visualCoords?.add(coord)
-        addBufferCoords(coord)
-        lastCoordinate = null
-        currentPath = null
+        paths.value?.last()?.addEndCoord(coord)
         paths.postValue(paths.value)
-        drawingCommandsService.add(commandFactory.createDrawPathCommand(paths.value!!.last()))
-
     }
 
-    private fun addPath(penPath: PenPath){
-        paths.value!!.add(penPath)
-        paths.value!!.sortBy { it.pathId }
+
+
+    private fun addPath(pathBasicData: PathBasicData){
+        val pathExtended = PathExtended(pathBasicData)
+        paths.value!!.add(pathExtended)
+        paths.value!!.sortBy { it.basicData.pathId }
+        paths.postValue(paths.value)
     }
 
-    private fun deletePath(pathId: Int): PenPath?{
-        var removedPath: PenPath? = null
+    private fun deletePath(pathId: Int){
         for(i in 0 until paths.value!!.size){
-            if(paths.value!![i].pathId == pathId){
-                removedPath =  paths.value!![i]
-                paths.value!!.removeAt(i)
-                break
+            paths.value!!.removeIf{
+                it.basicData.pathId == pathId
             }
         }
-        return removedPath
+        paths.postValue(paths.value)
     }
 
-    fun endPath(coords: Coordinate) {
-        drawboardRepository.sendEndPath(coords)
-        //receiveEndPath(coords)
+    fun endPath(coord: Coordinate) {
+        drawboardRepository.sendEndPath(coord)
+        drawingCommandsService.add(DrawPathCommand(paths.value!!.last().basicData.pathId, drawboardRepository))
     }
 
     fun confirmColor(): String {
@@ -202,6 +166,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         val pathId = detectPathCollision(coord)
         if(pathId != -1){
             drawboardRepository.sendErasePath(pathId)
+            drawingCommandsService.add(ErasePathCommand(pathId, drawboardRepository))
         }
     }
 
@@ -216,10 +181,10 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         path.computeBounds(rectF, true)
 
         for(i in paths.value!!.size-1 downTo 0){
-            for(coordPath in paths.value!![i].pathCoords){
-                if(rectF.contains(coordPath.x, coordPath.y)) {
+            for(buffCoord in paths.value!![i].extendedCoords){
+                if(rectF.contains(buffCoord.x, buffCoord.y)) {
                     println("${Random.nextInt()} Collision detected with rect at index $i")
-                    return paths.value!![i].pathId
+                    return paths.value!![i].basicData.pathId
                 }
             }
         }

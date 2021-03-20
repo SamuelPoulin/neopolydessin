@@ -43,6 +43,20 @@
             android:layout_margin="5dp"
             />
     </FrameLayout>
+    <Button
+        android:id="@+id/undoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="undo"
+        app:layout_constraintLeft_toRightOf="@id/toolPreviewContainer"
+        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
+    <Button
+        android:id="@+id/redoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="redo"
+        app:layout_constraintLeft_toRightOf="@id/undoBtn"
+        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
     <com.google.android.material.slider.Slider
         android:id="@+id/strokeWidthSlider"
         android:layout_width="0dp"

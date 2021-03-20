@@ -3,15 +3,12 @@ package com.projet.clientleger.ui.drawboard
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enum.DrawTool
 import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
 import dagger.hilt.android.AndroidEntryPoint
 
 

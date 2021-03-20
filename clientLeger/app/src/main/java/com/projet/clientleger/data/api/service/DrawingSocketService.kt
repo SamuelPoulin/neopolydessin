@@ -1,13 +1,11 @@
 package com.projet.clientleger.data.api.service
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.projet.clientleger.data.enum.Difficulty
 import com.projet.clientleger.data.enum.DrawingSocketEndpoints
 import com.projet.clientleger.data.enum.GameType
-import com.projet.clientleger.data.model.BrushInfo
-import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
-import com.projet.clientleger.data.model.StartPoint
+import com.projet.clientleger.data.model.*
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
@@ -58,27 +56,30 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         socketService.socket.emit(DrawingSocketEndpoints.SEND_ERASE.endpoint, pathId)
     }
 
-    fun receivePath(): Observable<PenPath> {
-        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_PATH.endpoint){ (id, coords, brushInfo) ->
-            println(id)
-            println(coords)
-            println(brushInfo)
-            PenPath(0, null, BrushInfo("", 0f), ArrayList(), ArrayList())
+    fun receivePath(): Observable<PathBasicData> {
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_PATH.endpoint){ (id, resCoords, resBrushInfo) ->
+            val coords: ArrayList<Coordinate> = ArrayList()
+            val JSONcoords = resCoords as JSONArray
+            for(i in 0 until JSONcoords.length()){
+                coords.add(Json.decodeFromString(Coordinate.serializer(),JSONcoords.get(i).toString()))
+            }
+            val brushInfo = Json.decodeFromString(BrushInfo.serializer(), resBrushInfo.toString())
+            PathBasicData(id as Int, brushInfo, coords)
         }
     }
 
     fun receiveErasePath(): Observable<Int> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_ERASE.endpoint){ (pathId) ->
-            println(pathId)
             pathId as Int
         }
     }
 
-    fun receiveStartPath() : Observable<StartPoint> {
-        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ res ->
-            val coord = Json.decodeFromString(Coordinate.serializer(),res[0].toString())
-            val brushInfo = Json.decodeFromString(BrushInfo.serializer(), res[1].toString())
-            StartPoint(0,coord, brushInfo)
+    fun receiveStartPath() : Observable<PathBasicData> {
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ (id, coordReceive, info) ->
+            val coord = ArrayList<Coordinate>()
+            coord.add(Json.decodeFromString(Coordinate.serializer(),coordReceive.toString()))
+            val brushInfo = Json.decodeFromString(BrushInfo.serializer(), info.toString())
+            PathBasicData(id as Int,brushInfo, coord)
         }
     }
 

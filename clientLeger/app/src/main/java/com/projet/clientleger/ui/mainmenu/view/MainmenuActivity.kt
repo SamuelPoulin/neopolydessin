@@ -66,8 +66,8 @@ class MainmenuActivity : AppCompatActivity() {
         ).getString("accessToken", "")!!)
 
         //To remove before PR --------------------------------------------------------------------------
-        val intent = Intent(this, GameActivity::class.java)
-        startActivity(intent)
+//        val intent = Intent(this, GameActivity::class.java)
+//        startActivity(intent)
 
 
         supportFragmentManager.commit{

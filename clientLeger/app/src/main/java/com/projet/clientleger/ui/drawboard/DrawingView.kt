@@ -2,23 +2,16 @@ package com.projet.clientleger.ui.drawboard
 
 import android.content.Context
 import android.graphics.*
-import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import com.projet.clientleger.R
-import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
+import com.projet.clientleger.data.model.PathExtended
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DrawingView : View {
-    private var paths = ArrayList<PenPath>()
+    private var paths = ArrayList<PathExtended>()
     private lateinit var pathPaint: Paint
 
 
@@ -38,7 +31,7 @@ class DrawingView : View {
         init()
     }
 
-    fun updatePaths(newList: ArrayList<PenPath>){
+    fun updatePaths(newList: ArrayList<PathExtended>){
         paths = newList
         invalidate()
     }
@@ -55,9 +48,9 @@ class DrawingView : View {
         canvas.save()
         canvas.drawColor(ContextCompat.getColor(context,R.color.white))
         for(path in paths){
-            pathPaint.color =  Color.parseColor(path.brushInfo.color)
-            pathPaint.strokeWidth = path.brushInfo.strokeWidth
-            canvas.drawPath(path.path!!, pathPaint)
+            pathPaint.color =  Color.parseColor(path.basicData.brushInfo.color)
+            pathPaint.strokeWidth = path.basicData.brushInfo.strokeWidth
+            canvas.drawPath(path.graphicPath, pathPaint)
         }
         canvas.restore()
     }

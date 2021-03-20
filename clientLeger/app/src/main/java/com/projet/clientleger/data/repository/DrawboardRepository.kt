@@ -3,10 +3,7 @@ package com.projet.clientleger.data.repository
 import com.projet.clientleger.data.api.service.DrawingSocketService
 import com.projet.clientleger.data.enum.Difficulty
 import com.projet.clientleger.data.enum.GameType
-import com.projet.clientleger.data.model.BrushInfo
-import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
-import com.projet.clientleger.data.model.StartPoint
+import com.projet.clientleger.data.model.*
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
@@ -21,7 +18,7 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
         drawingSocketService.sendEndPath(endCoords)
     }
 
-    fun receiveStartPath(): Observable<StartPoint> {
+    fun receiveStartPath(): Observable<PathBasicData> {
         return drawingSocketService.receiveStartPath()
     }
 
@@ -33,7 +30,7 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
         return drawingSocketService.receiveEndPath()
     }
 
-    fun receivePath(): Observable<PenPath>{
+    fun receivePath(): Observable<PathBasicData>{
         return drawingSocketService.receivePath()
     }
 
@@ -43,5 +40,9 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
 
     fun sendErasePath(pathId: Int){
         drawingSocketService.sendErasePath(pathId)
+    }
+
+    fun sendPath(pathId: Int){
+        drawingSocketService.sendPath(pathId)
     }
 }
