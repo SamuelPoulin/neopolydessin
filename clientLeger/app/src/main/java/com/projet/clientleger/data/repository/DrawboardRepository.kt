@@ -33,8 +33,12 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
         return drawingSocketService.receiveEndPath()
     }
 
-    fun receievPath(): Observable<PenPath>{
+    fun receivePath(): Observable<PenPath>{
         return drawingSocketService.receivePath()
+    }
+
+    fun receiveErase(): Observable<Int>{
+        return drawingSocketService.receiveErasePath()
     }
 
     fun sendErasePath(pathId: Int){

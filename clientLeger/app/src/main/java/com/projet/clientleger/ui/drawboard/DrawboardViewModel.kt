@@ -53,8 +53,11 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         drawboardRepository.receiveEndPath().subscribe {
             receiveEndPath(it)
         }
-        drawboardRepository.receievPath().subscribe {
+        drawboardRepository.receivePath().subscribe {
             drawingCommandsService.addAndExecute(commandFactory.createDrawPathCommand(it))
+        }
+        drawboardRepository.receiveErase().subscribe{
+            drawingCommandsService.addAndExecute(commandFactory.createErasePathCommand(it))
         }
     }
 
@@ -165,22 +168,21 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     }
 
-    private fun receiveErasePath(pathId: Int){
-        drawingCommandsService.addAndExecute(commandFactory.createErasePathCommand(paths.value!!.last()))
-    }
-
     private fun addPath(penPath: PenPath){
         paths.value!!.add(penPath)
         paths.value!!.sortBy { it.pathId }
     }
 
-    private fun deletePath(pathId: Int){
+    private fun deletePath(pathId: Int): PenPath?{
+        var removedPath: PenPath? = null
         for(i in 0 until paths.value!!.size){
             if(paths.value!![i].pathId == pathId){
+                removedPath =  paths.value!![i]
                 paths.value!!.removeAt(i)
                 break
             }
         }
+        return removedPath
     }
 
     fun endPath(coords: Coordinate) {

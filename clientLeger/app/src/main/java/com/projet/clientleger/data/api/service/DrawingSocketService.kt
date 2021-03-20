@@ -67,6 +67,12 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
         }
     }
 
+    fun receiveErasePath(): Observable<Int> {
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_ERASE.endpoint){ (pathId) ->
+            println(pathId)
+            pathId as Int
+        }
+    }
 
     fun receiveStartPath() : Observable<StartPoint> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ res ->
