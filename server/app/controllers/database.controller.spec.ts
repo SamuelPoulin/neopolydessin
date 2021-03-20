@@ -1,7 +1,7 @@
-import * as chai from 'chai';
+import chai from 'chai';
 import 'chai-http';
 import { describe, beforeEach } from 'mocha';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 chai.use(require('chai-http'));
 import { testingContainer } from '../../test/test-utils';
 import { Application } from '../app';
@@ -10,7 +10,7 @@ import Types from '../types';
 import { DatabaseController } from './database.controller';
 import { Account } from '../../models/schemas/account';
 import * as jwtVerify from '../middlewares/jwt-verify';
-import * as express from 'express';
+import express from 'express';
 import { expect } from 'chai';
 import { BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
 import { ObjectId } from 'mongodb';

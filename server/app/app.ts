@@ -1,9 +1,9 @@
-import * as bodyParser from 'body-parser';
-import * as cookieParser from 'cookie-parser';
-import * as cors from 'cors';
-import * as express from 'express';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
 import { inject, injectable } from 'inversify';
-import * as logger from 'morgan';
+import logger from 'morgan';
 import { ContentType } from '../models/schemas/avatar';
 import { APIController } from './controllers/api.controller';
 import Types from './types';

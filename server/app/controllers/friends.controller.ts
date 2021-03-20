@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { inject, injectable } from 'inversify';
 import { body, query } from 'express-validator';
 import Types from '../types';

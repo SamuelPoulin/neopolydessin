@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { inject, injectable } from 'inversify';
 import { EmailService } from '../services/email.service';
 import Types from '../types';

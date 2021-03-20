@@ -9,41 +9,31 @@ export enum ContentType {
 interface AvatarModel extends Model<Avatar> {
   addAvatarDocument: (accountId: string) => Promise<Avatar>;
   removeAvatar: (accountId: string) => Query<Avatar | null, Avatar>;
-  uploadAvatarForUser: (accountId: string, data: Buffer, contentType: ContentType) => Query<Avatar | null, Avatar>;
+  uploadAvatarForUser: (accountId: string, filePath: string) => Query<Avatar | null, Avatar>;
 }
 
 export interface Avatar extends Document {
   _id: ObjectId;
-  accountId: string;
-  avatar: {
-    data: Buffer;
-    contentType: ContentType;
-  } | undefined;
+  filePath: string;
 }
 
 export const avatarSchema = new Schema<Avatar, AvatarModel>({
   accountId: String,
-  avatar: {
-    data: Buffer,
-    contentType: {
-      type: String,
-      enum: [ContentType.png, ContentType.jpeg]
-    }
-  }
+  filePath: String
 });
 
-avatarSchema.statics.uploadAvatarForUser = (accountId: string, body: Buffer, contentType: ContentType) => {
+avatarSchema.statics.uploadAvatarForUser = (accountId: string, filePath: string) => {
   const update = {
     accountId,
-    avatar: {
-      data: body,
-      contentType
-    }
+    filePath
   };
   return avatarModel.findOneAndUpdate(
     { accountId },
     update,
-    { useFindAndModify: false }
+    {
+      useFindAndModify: false,
+      returnOriginal: false
+    }
   );
 };
 
