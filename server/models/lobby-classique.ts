@@ -9,6 +9,8 @@ import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus } from './l
 @injectable()
 export class LobbyClassique extends Lobby {
 
+  private clockTimeout: NodeJS.Timeout;
+
   constructor(socketIdService: SocketIdService,
     databaseService: DatabaseService,
     io: Server,
@@ -71,7 +73,44 @@ export class LobbyClassique extends Lobby {
       if (senderAccountId === this.ownerAccountId) {
         this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
         this.currentGameState = CurrentGameState.IN_GAME;
+        this.startRoundTimer();
       }
     });
+  }
+
+  startRoundTimer() {
+    // DECIDE ROLES
+    // SEND ROLES TO CLIENT
+    // SEND WORD TO DRAWER
+    // START TIMER AND SEND TIME TO CLIENT
+    clearInterval(this.clockTimeout);
+    this.currentGameState = CurrentGameState.DRAWING;
+    this.clockTimeout = setInterval(() => {
+      --this.timeLeftSeconds;
+      console.log(this.timeLeftSeconds);
+      if (this.timeLeftSeconds <= 0) {
+        this.endRoundTimer();
+      }
+    }, this.MS_PER_SEC);
+  }
+
+  endRoundTimer() {
+    clearInterval(this.clockTimeout);
+    console.log('interval over');
+    this.startReply();
+  }
+
+  startReply() {
+    // SEND REPLY PHASE TO CLIENTS WITH ROLES (GUESS-GUESS / PASSIVE-PASSIVE)
+    // SEND TIME TO CLIENT (10 SECONDS)
+    this.currentGameState = CurrentGameState.REPLY;
+    this.timeLeftSeconds = 10;
+    this.clockTimeout = setInterval(() => {
+      --this.timeLeftSeconds;
+      console.log(this.timeLeftSeconds);
+      if (this.timeLeftSeconds <= 0) {
+        this.startRoundTimer();
+      }
+    }, this.MS_PER_SEC);
   }
 }

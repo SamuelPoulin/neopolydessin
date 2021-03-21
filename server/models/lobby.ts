@@ -27,9 +27,15 @@ export interface PlayerInfo {
 
 export interface Player {
   accountId: string;
+  username: string;
   playerStatus: PlayerStatus;
   socket: Socket;
   teamNumber: number;
+}
+
+export interface RoleArray {
+  playerName: string;
+  playerStatus: PlayerStatus;
 }
 
 export enum GameType {
@@ -53,6 +59,8 @@ export enum PlayerStatus {
 export enum CurrentGameState {
   LOBBY = 'lobby',
   IN_GAME = 'game',
+  DRAWING = 'draw',
+  REPLY = 'reply',
   GAME_OVER = 'over'
 }
 
@@ -75,8 +83,6 @@ export abstract class Lobby {
   difficulty: Difficulty;
   privateLobby: boolean;
   lobbyName: string;
-
-  clockTimeout: NodeJS.Timeout = new NodeJS.Timeout();
 
   protected io: Server;
   protected ownerAccountId: string;
@@ -142,10 +148,13 @@ export abstract class Lobby {
 
   addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
     if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
-      this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
-      socket.join(this.lobbyId);
-      this.bindLobbyEndPoints(socket);
+      this.databaseService.getAccountById(accountId).then((account) => {
+        const username = account.documents.username;
+        this.players.push({ accountId, username, playerStatus, socket, teamNumber: 0 });
+        this.teams[0].playersInTeam.push({ accountId, username, playerStatus, socket, teamNumber: 0 });
+        socket.join(this.lobbyId);
+        this.bindLobbyEndPoints(socket);
+      });
     }
   }
 
