@@ -146,14 +146,21 @@ export abstract class Lobby {
     });
   }
 
-  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      this.databaseService.getAccountById(accountId).then((account) => {
-        const username = account.documents.username;
-        this.players.push({ accountId, username, playerStatus, socket, teamNumber: 0 });
-        this.teams[0].playersInTeam.push({ accountId, username, playerStatus, socket, teamNumber: 0 });
-        socket.join(this.lobbyId);
-        this.bindLobbyEndPoints(socket);
+  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
+      this.databaseService.getAccountById(accountIdPlayer).then((account) => {
+        const playerName = account.documents.username;
+        const player: Player = {
+          accountId: accountIdPlayer,
+          username: playerName,
+          playerStatus: status,
+          socket: socketPlayer,
+          teamNumber: 0
+        };
+        this.players.push(player);
+        this.teams[0].playersInTeam.push(player);
+        socketPlayer.join(this.lobbyId);
+        this.bindLobbyEndPoints(socketPlayer);
       });
     }
   }

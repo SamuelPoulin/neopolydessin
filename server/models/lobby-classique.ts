@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus } from './lobby';
+import { CurrentGameState, Difficulty, GameType, Lobby, Player, PlayerStatus } from './lobby';
 
 
 @injectable()
@@ -25,19 +25,36 @@ export class LobbyClassique extends Lobby {
     this.timeLeftSeconds = 30;
   }
 
-  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
-        this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
-        this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
-      }
-      else {
-        this.players.push({ accountId, playerStatus, socket, teamNumber: 1 });
-        this.teams[1].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 1 });
-      }
-      socket.join(this.lobbyId);
-      this.bindLobbyEndPoints(socket);
-      this.bindLobbyClassiqueEndPoints(socket);
+  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
+      this.databaseService.getAccountById(accountIdPlayer).then((account) => {
+        const playerName = account.documents.username;
+        if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
+          const player: Player = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 0
+          };
+          this.players.push(player);
+          this.teams[0].playersInTeam.push(player);
+        }
+        else {
+          const player: Player = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 1
+          };
+          this.players.push(player);
+          this.teams[1].playersInTeam.push(player);
+        }
+        socketPlayer.join(this.lobbyId);
+        this.bindLobbyEndPoints(socketPlayer);
+        this.bindLobbyClassiqueEndPoints(socketPlayer);
+      });
     }
   }
 
@@ -85,6 +102,8 @@ export class LobbyClassique extends Lobby {
     // START TIMER AND SEND TIME TO CLIENT
     clearInterval(this.clockTimeout);
     this.currentGameState = CurrentGameState.DRAWING;
+    this.timeLeftSeconds = 30;
+    this.startTimerGuessToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
       console.log(this.timeLeftSeconds);
@@ -96,7 +115,7 @@ export class LobbyClassique extends Lobby {
 
   endRoundTimer() {
     clearInterval(this.clockTimeout);
-    console.log('interval over');
+    console.log('Guess over');
     this.startReply();
   }
 
@@ -105,12 +124,30 @@ export class LobbyClassique extends Lobby {
     // SEND TIME TO CLIENT (10 SECONDS)
     this.currentGameState = CurrentGameState.REPLY;
     this.timeLeftSeconds = 10;
+    this.startTimerReplyToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
       console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
-        this.startRoundTimer();
+        this.endReplyTimer();
       }
     }, this.MS_PER_SEC);
+  }
+
+  endReplyTimer() {
+    clearInterval(this.clockTimeout);
+    console.log('Reply over');
+    this.startRoundTimer();
+  }
+
+  startTimerGuessToClient() {
+    const gameStartTime = new Date(Date.now() +  this.timeLeftSeconds * this.MS_PER_SEC);
+    this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, gameStartTime);
+  }
+
+  startTimerReplyToClient() {
+    const replyTimeSeconds = 10;
+    const timerValue = new Date(Date.now() +  replyTimeSeconds * this.MS_PER_SEC);
+    this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, timerValue);
   }
 }

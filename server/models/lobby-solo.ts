@@ -28,11 +28,11 @@ export class LobbySolo extends Lobby {
     this.privateLobby = true;
   }
 
-  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      this.bindLobbySoloEndPoints(socket);
+  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
+      this.bindLobbySoloEndPoints(socketPlayer);
     }
-    super.addPlayer(accountId, playerStatus, socket);
+    super.addPlayer(accountIdPlayer, status, socketPlayer);
   }
 
   bindLobbySoloEndPoints(socket: Socket) {
@@ -77,7 +77,6 @@ export class LobbySolo extends Lobby {
 
   startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
-    // START TIMER AND SEND TIME TO CLIENT
     // START DRAWING BY BOT
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {

@@ -26,11 +26,11 @@ export class LobbyCoop extends Lobby {
     this.timeLeftSeconds = 60;
   }
 
-  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      this.bindLobbyCoopEndPoints(socket);
+  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
+      this.bindLobbyCoopEndPoints(socketPlayer);
     }
-    super.addPlayer(accountId, playerStatus, socket);
+    super.addPlayer(accountIdPlayer, status, socketPlayer);
   }
 
   bindLobbyCoopEndPoints(socket: Socket) {
@@ -74,7 +74,6 @@ export class LobbyCoop extends Lobby {
 
   startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
-    // START TIMER AND SEND TIME TO CLIENT
     // START DRAWING BY BOT
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {
