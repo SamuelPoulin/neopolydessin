@@ -29,6 +29,7 @@ export class LobbyClassique extends Lobby {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;
+        console.log(playerName);
         if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
           const player: Player = {
             accountId: accountIdPlayer,

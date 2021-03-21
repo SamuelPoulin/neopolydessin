@@ -124,8 +124,6 @@ export class SocketIo {
       socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        console.log(lobbyToJoin);
-        console.log(playerId);
         if (lobbyToJoin && playerId) {
           lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
           socket.join(lobbyId);
@@ -138,7 +136,8 @@ export class SocketIo {
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+      // eslint-disable-next-line max-len
+      socket.on(SocketMessages.CREATE_LOBBY, async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
         let lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
@@ -158,7 +157,7 @@ export class SocketIo {
               break;
             }
           }
-          lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
           this.lobbyList.push(lobby);
         } else {
           console.error('player doesn\'t exist');

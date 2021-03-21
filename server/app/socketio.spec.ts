@@ -192,7 +192,7 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyIdToJoin: string) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
 
