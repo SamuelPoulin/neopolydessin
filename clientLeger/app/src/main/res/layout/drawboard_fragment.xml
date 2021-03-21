@@ -24,10 +24,39 @@
         >
         <com.projet.clientleger.ui.drawboard.DrawingView
             android:layout_width="1000px"
-            android:layout_height="500px"
+            android:layout_height="1000px"
             android:id="@+id/drawingBoard"
             android:layout_margin="3dp"/>
     </FrameLayout>
+    <FrameLayout
+        android:id="@+id/toolPreviewContainer"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/tool_preview_background"
+        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_margin="5dp">
+        <com.projet.clientleger.ui.drawboard.ToolPreviewView
+            android:id="@+id/toolPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            />
+    </FrameLayout>
+    <Button
+        android:id="@+id/undoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="undo"
+        app:layout_constraintLeft_toRightOf="@id/toolPreviewContainer"
+        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
+    <Button
+        android:id="@+id/redoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="redo"
+        app:layout_constraintLeft_toRightOf="@id/undoBtn"
+        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
     <com.google.android.material.slider.Slider
         android:id="@+id/strokeWidthSlider"
         android:layout_width="0dp"
@@ -44,6 +73,13 @@
         android:layout_height="wrap_content"
         android:text="Color"
         app:layout_constraintLeft_toRightOf="@id/strokeWidthSlider"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+    <Button
+        android:id="@+id/eraserBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Eraser"
+        app:layout_constraintLeft_toRightOf="@id/colorPickerBtn"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

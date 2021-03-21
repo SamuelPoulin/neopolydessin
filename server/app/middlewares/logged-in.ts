@@ -1,5 +1,5 @@
-import * as express from 'express';
-import * as httpStatus from 'http-status-codes';
+import express from 'express';
+import httpStatus from 'http-status-codes';
 import { inject, injectable } from 'inversify';
 import { DatabaseService, ErrorMsg } from '../services/database.service';
 import Types from '../types';

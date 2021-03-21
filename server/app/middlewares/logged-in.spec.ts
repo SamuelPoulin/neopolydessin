@@ -1,6 +1,6 @@
 import { describe } from 'mocha';
 import { Request, Response, NextFunction } from 'express'
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { testingContainer } from '../../test/test-utils';
 import { DatabaseService } from '../services/database.service';
 import { LoggedIn } from './logged-in';

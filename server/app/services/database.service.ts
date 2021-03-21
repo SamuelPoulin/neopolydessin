@@ -1,11 +1,12 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import accountModel, { Account } from '../../models/schemas/account';
+import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
@@ -14,6 +15,7 @@ import * as jwtUtils from '../utils/jwt-util';
 export interface AccountInfo {
   accountId: string;
   username: string;
+  avatar: string | undefined;
 }
 export interface Response<T> {
   statusCode: number;
@@ -96,6 +98,7 @@ export class DatabaseService {
     return new Promise<Response<Account>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
         .populate('logins', 'logins')
+        .populate('avatar', 'avatar')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
@@ -115,6 +118,7 @@ export class DatabaseService {
             return {
               accountId: account._id.toHexString(),
               username: account.username,
+              avatar: account.avatar
             };
           });
           resolve({ statusCode: OK, documents: userInfos });
@@ -183,6 +187,10 @@ export class DatabaseService {
         })
         .then(async (logins: Logins) => {
           loginsModelId = logins._id.toHexString();
+          return avatarModel.addAvatarDocument(model._id.toHexString());
+        })
+        .then(async (result: Avatar) => {
+          model.avatar = result._id.toHexString();
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
@@ -293,6 +301,9 @@ export class DatabaseService {
         })
         .then((logins: Logins) => {
           return messagesHistoryModel.removeHistoryOfAccount(id);
+        })
+        .then((result) => {
+          return avatarModel.removeAvatar(id);
         })
         .then((result) => {
           return accountModel.findByIdAndDelete(id);

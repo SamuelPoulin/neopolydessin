@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 export interface Refresh extends mongoose.Document {
   _id: ObjectId;

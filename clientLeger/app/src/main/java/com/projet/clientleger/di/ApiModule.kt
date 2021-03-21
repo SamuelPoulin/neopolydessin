@@ -11,6 +11,7 @@ import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.data.api.service.DrawingSocketService
 import com.projet.clientleger.data.api.service.FriendslistSocketService
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,6 +57,10 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideTokenInterceptor(): TokenInterceptor = TokenInterceptor()
+
+    @Provides
+    @Singleton
+    fun provideDrawingCommandService(): DrawingCommandsService = DrawingCommandsService()
 
     @Provides
     @Singleton
