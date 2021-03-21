@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -146,7 +147,7 @@ export abstract class Lobby {
     });
   }
 
-  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;

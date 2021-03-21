@@ -36,6 +36,7 @@ export class SocketIo {
   };
 
   clientSuccessfullyDisconnected: Observable<Socket> = new Observable();
+  finishedLoadingPlayerInfo: Observable<void> = new Observable();
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
@@ -47,6 +48,10 @@ export class SocketIo {
     this.bindIoEvents();
     this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
+    });
+
+    this.finishedLoadingPlayerInfo.subscribe(() => {
+      console.log('Finished loading player');
     });
 
     SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId: string) => {
@@ -125,7 +130,9 @@ export class SocketIo {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId) {
-          lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          await lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket).then(() => {
+            this.finishedLoadingPlayerInfo.notify();
+          });;
           socket.join(lobbyId);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
@@ -138,9 +145,8 @@ export class SocketIo {
 
       // eslint-disable-next-line max-len
       socket.on(SocketMessages.CREATE_LOBBY, async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
-        let lobby;
+        let lobby: Lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
         if (playerId) {
           switch (gametype) {
             case GameType.CLASSIC: {
@@ -157,8 +163,11 @@ export class SocketIo {
               break;
             }
           }
-          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
-          this.lobbyList.push(lobby);
+          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket).then(() => {
+            this.finishedLoadingPlayerInfo.notify();
+            console.log(lobby.findPlayerBySocket(socket)?.username + 'THIS IS MY LOBBY IM ADDING');
+            this.lobbyList.push(lobby);
+          });
         } else {
           console.error('player doesn\'t exist');
         }

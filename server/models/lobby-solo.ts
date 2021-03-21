@@ -28,7 +28,7 @@ export class LobbySolo extends Lobby {
     this.privateLobby = true;
   }
 
-  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       this.bindLobbySoloEndPoints(socketPlayer);
     }

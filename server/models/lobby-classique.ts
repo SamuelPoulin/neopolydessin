@@ -25,7 +25,7 @@ export class LobbyClassique extends Lobby {
     this.timeLeftSeconds = 30;
   }
 
-  addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;

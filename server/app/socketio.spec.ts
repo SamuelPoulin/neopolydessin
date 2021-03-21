@@ -191,14 +191,14 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
-
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyIdToJoin: string) => {
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                })
-
+                
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     testClient.socket.close();
+                })
+                
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyIdToJoin: string) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
                 return createClient(otherAccountInfo);
             })
@@ -217,9 +217,13 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
-                    });
+                    socketIo.finishedLoadingPlayerInfo.subscribe(() => {
+                        testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                            console.log(lobbies + 'ASSSSSSSSSSSSSSSSSSSSSSSSSS');
+                            testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
+                        });
+                    })
+                    
                 });
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
