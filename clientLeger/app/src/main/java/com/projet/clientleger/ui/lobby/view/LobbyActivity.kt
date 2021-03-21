@@ -13,6 +13,7 @@ import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_lobby.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -43,17 +44,32 @@ class LobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupButtons()
-        retrievePlayerInfos()
         playersView.add(binding.player1Name)
         playersView.add(binding.player2Name)
         playersView.add(binding.player3Name)
         playersView.add(binding.player4Name)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
-        binding.gamemode.text = gameInfo.gameMode
-        binding.difficulty.text = gameInfo.difficulty
+        binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
+        binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
+    }
+    private fun getFrenchGameMode(englishMode:String):String{
+        when(englishMode){
+            "classic" -> return "Classique"
+            "solo" -> return "Solo"
+            "coop" -> return "Coop"
+        }
+        return "Classique"
+    }
+    private fun getFrenchDifficulty(englishDifficulty:String):String{
+        when(englishDifficulty){
+            "easy" -> return "Facile"
+            "intermediate" -> return "Intermediaire"
+            "hard" -> return "Difficile"
+        }
+        return "Facile"
     }
 
     private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
@@ -93,9 +109,6 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun <T> goToActivity(java: Class<T>) {
         startActivity(Intent(this, java))
-    }
-    private fun retrievePlayerInfos(){
-
     }
     private fun kickPlayer(playerIndex:Int){
 

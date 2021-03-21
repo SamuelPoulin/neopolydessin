@@ -27,6 +27,8 @@ class SearchLobbyActivity : AppCompatActivity() {
 
     private val vm: SearchLobbyViewModel by viewModels()
     private var lobbyList = ArrayList<LobbyInfo>()
+    private var selectedGameMode:GameType = GameType.CLASSIC
+    private var selectedDifficulty:Difficulty = Difficulty.EASY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,11 +36,14 @@ class SearchLobbyActivity : AppCompatActivity() {
 
         val rvGames = findViewById<View>(R.id.rvGames) as RecyclerView
         val adapter = GameLobbyInfoAdapter(lobbyList, ::joinLobby)
+        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        setGameModeWithInput(gameInfo.gameMode)
+        setDifficultyWithInput(gameInfo.difficulty)
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
 
         lifecycleScope.launch {
-            vm.receiveAllLobbies(GameType.CLASSIC, Difficulty.EASY).subscribe({
+            vm.receiveAllLobbies(selectedGameMode, selectedDifficulty).subscribe({
                 lifecycleScope.launch {
                     lobbyList.addAll(it.list)
                     rvGames.adapter?.notifyDataSetChanged()
@@ -52,11 +57,10 @@ class SearchLobbyActivity : AppCompatActivity() {
         vm.receiveJoinedLobbyInfo().subscribe{
             val intent = Intent(this, LobbyActivity::class.java).apply{
                 putExtra("LOBBY_INFO",it)
-                putExtra("GAME_INFO", GameCreationInfosModel("me", "Classic", "Easy", false) as Serializable)
+                putExtra("GAME_INFO", GameCreationInfosModel("me", gameInfo.gameMode, gameInfo.difficulty, false) as Serializable)
             }
             startActivity(intent)
         }
-
     }
     private fun removeGameWithID(id:String){
         //algo pour trouver les items par tag (pour remove). sera plus facile lorsqu'on aura une map
@@ -79,5 +83,19 @@ class SearchLobbyActivity : AppCompatActivity() {
 
     private fun joinLobby(lobbyId: String){
         vm.joinLobby(lobbyId)
+    }
+    private fun setGameModeWithInput(gameMode:String){
+        when(gameMode){
+            "Classique" -> selectedGameMode = GameType.CLASSIC
+            "Solo" -> selectedGameMode = GameType.SPRINT_SOLO
+            "Coop" -> selectedGameMode = GameType.SPRINT_COOP
+        }
+    }
+    private fun setDifficultyWithInput(difficulty:String){
+        when(difficulty){
+            "Facile" -> selectedDifficulty = Difficulty.EASY
+            "Intermediaire" -> selectedDifficulty = Difficulty.INTERMEDIATE
+            "Difficile" -> selectedDifficulty = Difficulty.HARD
+        }
     }
 }
