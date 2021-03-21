@@ -1,6 +1,6 @@
 import { describe } from 'mocha';
 import { Request, Response, NextFunction } from 'express'
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { validationCheck } from './validation-check';
 import { InternalRequest } from 'express-validator/src/base';
 

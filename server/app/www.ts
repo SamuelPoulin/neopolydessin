@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import { Container } from 'inversify';
 import 'reflect-metadata';
 import { containerBootstrapper } from './inversify.config';

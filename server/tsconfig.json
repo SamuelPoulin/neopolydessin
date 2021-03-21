@@ -9,6 +9,7 @@
     "outDir": "out",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "esModuleInterop" : true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,

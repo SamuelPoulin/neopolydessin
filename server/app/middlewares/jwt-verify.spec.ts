@@ -1,9 +1,9 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { describe } from 'mocha';
 import { jwtVerify } from './jwt-verify';
 import { Request, Response, NextFunction } from 'express'
 import { FORBIDDEN } from 'http-status-codes';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 
 describe('jwtVerify', () => {
 

@@ -1,5 +1,5 @@
-import * as express from 'express';
-import * as httpStatus from 'http-status-codes';
+import express from 'express';
+import httpStatus from 'http-status-codes';
 import * as jwtUtils from '../utils/jwt-util';
 
 export const jwtVerify = (req: express.Request, res: express.Response, next: express.NextFunction) => {

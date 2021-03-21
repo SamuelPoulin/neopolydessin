@@ -1,6 +1,6 @@
-import * as express from 'express';
+import express from 'express';
 import { validationResult } from 'express-validator';
-import * as httpStatus from 'http-status-codes';
+import httpStatus from 'http-status-codes';
 
 export const validationCheck = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errors = validationResult(req);
