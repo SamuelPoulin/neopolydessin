@@ -1,9 +1,9 @@
 /* tslint:disable:no-require-imports no-var-requires no-magic-numbers no-any */
-import * as chai from 'chai';
+import chai from 'chai';
 import 'chai-http';
 chai.use(require('chai-http'));
 
-import * as httpStatus from 'http-status-codes';
+import httpStatus from 'http-status-codes';
 
 import { testingContainer } from '../test/test-utils';
 import Types from './types';

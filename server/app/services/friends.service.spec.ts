@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { describe } from 'mocha';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
