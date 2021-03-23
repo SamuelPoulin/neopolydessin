@@ -45,9 +45,7 @@ export class PenTool extends CreatorTool {
   initMouseHandler(): void {
     this.handleMouseDown = () => {
       if (!this.isActive) {
-        // todo - change when lobbies send player role
-        this.isActive = true;
-        // this.startShape();
+        this.startShape();
         this.editorService.socketService.sendStartPath(
           this.mousePosition,
           this.editorService.colorsService.primaryColor.hexString,
@@ -58,16 +56,14 @@ export class PenTool extends CreatorTool {
 
     this.handleMouseMove = () => {
       if (this.isActive) {
-        // todo - change when lobbies send player role
-        // this.shape.addPoint(this.mousePosition);
+        this.shape.addPoint(this.mousePosition);
         this.editorService.socketService.sendUpdatePath(this.mousePosition);
       }
     };
 
     this.handleMouseUp = () => {
       if (this.isActive) {
-        // todo - change when lobbies send player role
-        // this.applyShape();
+        this.applyShape();
         this.editorService.socketService.sendEndPath(this.mousePosition);
       }
     };

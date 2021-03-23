@@ -7,7 +7,7 @@ import { ChatMessage, Message } from '../../../../common/communication/chat-mess
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
-import { Difficulty, GameType, LobbyInfo } from '../../../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
 import { LocalSaveService } from './localsave.service';
 
 @Injectable({
@@ -80,9 +80,25 @@ export class SocketService {
     });
   }
 
-  async createLobby(): Promise<string> {
+  async createLobby(name: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketMessages.CREATE_LOBBY, 'classic', 'easy', false, (data: string) => resolve(data));
+      this.socket.emit(SocketMessages.CREATE_LOBBY, name, 'classic', 'easy', false, (data: string) => resolve(data));
+    });
+  }
+
+  getPlayerJoined(): Observable<string> {
+    return new Observable<string>((obs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: string) => {
+        obs.next(player);
+      });
+    });
+  }
+
+  getLobbyInfo(): Observable<Player> {
+    return new Observable<Player>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_LOBBY_INFO, (player: Player) => {
+        obs.next(player);
+      });
     });
   }
 

@@ -3,6 +3,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from '@services/socket-service.service';
 import { Router } from '@angular/router';
+import { UserService } from '@services/user.service';
 
 @Component({
   selector: 'app-lobby',
@@ -12,8 +13,18 @@ import { Router } from '@angular/router';
 export class LobbyComponent implements AfterViewInit {
   gamemode: string = 'classique';
   inviteCode: string = 'dWA1gV';
+  playersTeam1: string[] = new Array<string>();
+  playersTeam2: string[] = new Array<string>();
 
-  constructor(private clipboard: Clipboard, private snackBar: MatSnackBar, private socketService: SocketService, private router: Router) {}
+  constructor(
+    private clipboard: Clipboard,
+    private snackBar: MatSnackBar,
+    private socketService: SocketService,
+    private router: Router,
+    userService: UserService,
+  ) {
+    this.playersTeam1.push(userService.username);
+  }
 
   get gamemodeName(): string {
     switch (this.gamemode) {
@@ -31,8 +42,9 @@ export class LobbyComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.socketService.createLobby().then((data) => {
-      console.log(data);
+    this.socketService.createLobby('client-lourd');
+    this.socketService.getPlayerJoined().subscribe((player) => {
+      this.playersTeam2.push(player);
     });
   }
 

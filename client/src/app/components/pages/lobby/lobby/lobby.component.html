@@ -29,25 +29,17 @@
       <div id="players-container">
         <div class="team-container">
           <div class="players-title">Équipe 1</div>
-          <!--div class="player-container">
+          <div *ngFor="let player of playersTeam1" class="player-container">
             <div class="player-avatar">S</div>
-            <div class="player-username">samuelpoulin</div>
+            <div class="player-username">{{player}}</div>
           </div>
-          <div class="player-container">
-            <div class="player-avatar avatar2">S</div>
-            <div class="player-username">samuelpoulin</div>
-          </div-->
         </div>
         <div class="team-container">
           <div class="players-title">Équipe 2</div>
-          <!--div class="player-container">
-            <div class="player-avatar avatar3">M</div>
-            <div class="player-username">memoirekeche</div>
+          <div *ngFor="let player of playersTeam2" class="player-container">
+            <div class="player-avatar">S</div>
+            <div class="player-username">{{player}}</div>
           </div>
-          <div class="player-container">
-            <div class="player-avatar avatar4">B</div>
-            <div class="player-username">BotAndy</div>
-          </div-->
         </div>
       </div>
     </div>
