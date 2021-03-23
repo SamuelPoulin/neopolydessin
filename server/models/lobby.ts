@@ -6,11 +6,11 @@ import { DrawingCommandsService } from '../app/services/drawing-commands.service
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { ChatMessage } from '../../common/communication/chat-message';
 import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
+import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
@@ -34,7 +34,7 @@ export interface Player {
   teamNumber: number;
 }
 
-export interface RoleArray {
+export interface PlayerRole {
   playerName: string;
   playerStatus: PlayerStatus;
 }
@@ -87,6 +87,7 @@ export abstract class Lobby {
 
   protected io: Server;
   protected ownerAccountId: string;
+  protected ownerUsername: string;
 
   protected size: number;
   protected wordToGuess: string;
@@ -112,6 +113,9 @@ export abstract class Lobby {
   ) {
     this.io = io;
     this.ownerAccountId = accountId;
+    this.databaseService.getAccountById(accountId).then((account) => {
+      this.ownerUsername =  account.documents.username;
+    });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
     this.lobbyName = lobbyName;
@@ -158,12 +162,23 @@ export abstract class Lobby {
           socket: socketPlayer,
           teamNumber: 0
         };
+
         this.players.push(player);
         this.teams[0].playersInTeam.push(player);
         socketPlayer.join(this.lobbyId);
         this.bindLobbyEndPoints(socketPlayer);
       });
     }
+  }
+
+  getOwnerName(): string {
+    return this.ownerUsername;
+  }
+
+  getallPlayerNames(): string[]{
+    return this.players.map((player: Player) => {
+      return player.username;
+    });
   }
 
   removePlayer(accountId: string, socket: Socket) {
@@ -177,6 +192,12 @@ export abstract class Lobby {
       this.unbindLobbyEndPoints(socket);
       if (this.players.length === 0) {
         this.endGame();
+      }
+      else {
+        if (accountId === this.ownerAccountId) {
+          this.ownerAccountId = this.players[0].accountId;
+          this.ownerUsername = this.players[0].username;
+        }
       }
     }
   }
@@ -215,7 +236,7 @@ export abstract class Lobby {
     return this.players.length < this.size;
   }
 
-  validateMessageLength(msg: ChatMessage): boolean {
+  validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
@@ -324,9 +345,17 @@ export abstract class Lobby {
       this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateLobby);
     });
 
-    socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
+    socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: Message) => {
       if (this.validateMessageLength(sentMsg)) {
-        socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        const player = this.findPlayerBySocket(socket);
+        if (player) {
+          const messageWithUsername: ChatMessage = {
+            content: sentMsg.content,
+            timestamp: sentMsg.timestamp,
+            senderUsername: player.username
+          };
+          socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
+        }
       }
       else {
         console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);

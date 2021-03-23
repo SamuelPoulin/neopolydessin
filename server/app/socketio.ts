@@ -2,7 +2,7 @@ import * as http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { ChatMessage } from '../../common/communication/chat-message';
+import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -63,7 +63,7 @@ export class SocketIo {
     });
   }
 
-  validateMessageLength(msg: ChatMessage): boolean {
+  validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
@@ -130,9 +130,11 @@ export class SocketIo {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId) {
-          await lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket).then(() => {
-            this.finishedLoadingPlayerInfo.notify();
-          });;
+          await lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          console.log('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+          lobbyToJoin.getallPlayerNames().forEach((playerName) => { console.log(playerName + '\n'); });
+          console.log(lobbyToJoin.getOwnerName());
+          console.log('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
           socket.join(lobbyId);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
@@ -163,11 +165,12 @@ export class SocketIo {
               break;
             }
           }
-          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket).then(() => {
-            this.finishedLoadingPlayerInfo.notify();
-            console.log(lobby.findPlayerBySocket(socket)?.username + 'THIS IS MY LOBBY IM ADDING');
-            this.lobbyList.push(lobby);
-          });
+          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          console.log('ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
+          lobby.getallPlayerNames().forEach((playerName) => { console.log(playerName + '\n'); });
+          console.log(lobby.getOwnerName());
+          console.log('ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
+          this.lobbyList.push(lobby);
         } else {
           console.error('player doesn\'t exist');
         }
@@ -178,12 +181,15 @@ export class SocketIo {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
-            messagesHistoryModel.addMessageToHistory(sentMsg).then((result) => {
-              if (result.nModified === 0) throw new Error('couldn\'t update history');
-              socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
-            }).catch((err) => {
-              console.log(err);
-            });
+            const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+            if (senderAccountId) {
+              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId).then((result) => {
+                if (result.nModified === 0) throw new Error('couldn\'t update history');
+                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg, senderAccountId);
+              }).catch((err) => {
+                console.log(err);
+              });
+            }
           }
         }
         else {

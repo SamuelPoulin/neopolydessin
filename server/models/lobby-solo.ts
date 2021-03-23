@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus, RoleArray } from './lobby';
+import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus, PlayerRole } from './lobby';
 
 @injectable()
 export class LobbySolo extends Lobby {
@@ -64,7 +64,7 @@ export class LobbySolo extends Lobby {
     socket.on(SocketMessages.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (senderAccountId === this.ownerAccountId) {
-        const roleArray: RoleArray[] = [];
+        const roleArray: PlayerRole[] = [];
         this.players.forEach((player) => {
           roleArray.push({playerName: player.username, playerStatus: PlayerStatus.GUESSER});
         });
