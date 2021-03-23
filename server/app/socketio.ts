@@ -116,14 +116,14 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketMessages.GET_ALL_LOBBIES, async (gameMode: GameType, difficulty: Difficulty,
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (gameMode: GameType, difficulty: Difficulty,
         callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(await Promise.all(this.lobbyList
+        callback(this.lobbyList
           .filter((lobby) => {
             return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
-          }).map(async (lobby) => {
-            return lobby.toLobbyInfo();
-          })));
+          }).map((lobby) => {
+            return lobby.getLobbySummary();
+          }));;
       });
 
       socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
@@ -131,15 +131,12 @@ export class SocketIo {
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId) {
           await lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
-          console.log('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
-          lobbyToJoin.getallPlayerNames().forEach((playerName) => { console.log(playerName + '\n'); });
-          console.log(lobbyToJoin.getOwnerName());
-          console.log('REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
           socket.join(lobbyId);
-          this.databaseService.getAccountById(playerId).then((account) => {
-            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
-          });
-          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, await lobbyToJoin.toLobbyInfo());
+          const playerAddedInfo = lobbyToJoin.getPlayerAddedInfo(socket);
+          if (playerAddedInfo) {
+            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerAddedInfo);
+          }
+          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyToJoin.toLobbyInfo());
         } else {
           console.error('lobby or player doesn\'t exist');
         }
@@ -166,10 +163,6 @@ export class SocketIo {
             }
           }
           await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
-          console.log('ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
-          lobby.getallPlayerNames().forEach((playerName) => { console.log(playerName + '\n'); });
-          console.log(lobby.getOwnerName());
-          console.log('ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
           this.lobbyList.push(lobby);
         } else {
           console.error('player doesn\'t exist');

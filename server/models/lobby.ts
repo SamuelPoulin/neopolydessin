@@ -16,7 +16,8 @@ import { Coord } from './commands/path';
 export interface LobbyInfo {
   lobbyId: string;
   lobbyName: string;
-  playerInfo: PlayerInfo[];
+  ownerUsername: string;
+  nbPlayerInLobby: number;
   gameType: GameType;
 }
 
@@ -30,6 +31,7 @@ export interface PlayerInfo {
 export interface Player {
   accountId: string;
   username: string;
+  avatarId: string;
   playerStatus: PlayerStatus;
   socket: Socket;
   teamNumber: number;
@@ -130,58 +132,65 @@ export abstract class Lobby {
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
   }
 
-  async toLobbyInfo(): Promise<LobbyInfo> {
+  toLobbyInfo(): PlayerInfo[] {
     const playerInfoList: PlayerInfo[] = [];
-    const listAccountId: string[] = [];
     this.players.forEach((player) => {
-      listAccountId.push(player.accountId);
-    });
-    return await this.databaseService.getAccountsInfo(listAccountId).then((listPlayers) => {
-      listPlayers.documents.forEach((playerInfo, index) => {
-        playerInfoList.push({
-          teamNumber: this.players[index].teamNumber,
-          playerName: playerInfo.username,
-          accountId: playerInfo.accountId,
-          avatar: playerInfo.avatar
-        });
+      playerInfoList.push({
+        teamNumber: player.teamNumber,
+        playerName: player.username,
+        accountId: player.accountId,
+        avatar: player.avatarId
       });
-      return {
-        lobbyId: this.lobbyId,
-        lobbyName: this.lobbyName,
-        playerInfo: playerInfoList,
-        gameType: this.gameType,
-      };
     });
+    return playerInfoList;
+  }
+
+  getLobbySummary(): LobbyInfo {
+    return {
+      lobbyId: this.lobbyId,
+      lobbyName: this.lobbyName,
+      ownerUsername: this.ownerUsername,
+      nbPlayerInLobby: this.players.length,
+      gameType: this.gameType
+    };
   }
 
   async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
-      this.databaseService.getAccountById(accountIdPlayer).then((account) => {
+      await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;
-        const player: Player = {
-          accountId: accountIdPlayer,
-          username: playerName,
-          playerStatus: status,
-          socket: socketPlayer,
-          teamNumber: 0
-        };
+        if (account.documents.avatar) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const playerAvatar = (account.documents.avatar as any)._id;
+          const player: Player = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            avatarId: playerAvatar,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 0
+          };
 
-        this.players.push(player);
-        this.teams[0].playersInTeam.push(player);
-        socketPlayer.join(this.lobbyId);
-        this.bindLobbyEndPoints(socketPlayer);
+          this.players.push(player);
+          this.teams[0].playersInTeam.push(player);
+          socketPlayer.join(this.lobbyId);
+          this.bindLobbyEndPoints(socketPlayer);
+        }
       });
     }
   }
 
-  getOwnerName(): string {
-    return this.ownerUsername;
-  }
-
-  getallPlayerNames(): string[]{
-    return this.players.map((player: Player) => {
-      return player.username;
-    });
+  getPlayerAddedInfo(socket: Socket): PlayerInfo  | undefined{
+    const player = this.findPlayerBySocket(socket);
+    if (player) {
+      return {
+        teamNumber: player.teamNumber,
+        playerName: player.username,
+        accountId: player.accountId,
+        avatar: player.avatarId
+      };
+    }
+    return;
   }
 
   removePlayer(accountId: string, socket: Socket) {

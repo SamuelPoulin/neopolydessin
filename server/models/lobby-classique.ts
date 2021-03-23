@@ -29,28 +29,33 @@ export class LobbyClassique extends Lobby {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;
-        console.log(playerName + '----FROM INSIDE ADDPLAYER');
-        if (this.teams[1].playersInTeam.length <= this.teams[0].playersInTeam.length) {
-          const player: Player = {
-            accountId: accountIdPlayer,
-            username: playerName,
-            playerStatus: status,
-            socket: socketPlayer,
-            teamNumber: 0
-          };
-          this.players.push(player);
-          this.teams[0].playersInTeam.push(player);
-        }
-        else {
-          const player: Player = {
-            accountId: accountIdPlayer,
-            username: playerName,
-            playerStatus: status,
-            socket: socketPlayer,
-            teamNumber: 1
-          };
-          this.players.push(player);
-          this.teams[1].playersInTeam.push(player);
+        if (account.documents.avatar) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const playerAvatar = (account.documents.avatar as any)._id;
+          if (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) {
+            const player: Player = {
+              accountId: accountIdPlayer,
+              username: playerName,
+              avatarId: playerAvatar,
+              playerStatus: status,
+              socket: socketPlayer,
+              teamNumber: 0
+            };
+            this.players.push(player);
+            this.teams[0].playersInTeam.push(player);
+          }
+          else {
+            const player: Player = {
+              accountId: accountIdPlayer,
+              username: playerName,
+              avatarId: playerAvatar,
+              playerStatus: status,
+              socket: socketPlayer,
+              teamNumber: 1
+            };
+            this.players.push(player);
+            this.teams[1].playersInTeam.push(player);
+          }
         }
         socketPlayer.join(this.lobbyId);
         this.bindLobbyEndPoints(socketPlayer);

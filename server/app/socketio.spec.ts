@@ -139,7 +139,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -167,7 +167,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.SPRINT_COOP, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, async (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
@@ -198,18 +198,13 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                })
-
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 1\n");
                     testClient.socket.close();
                 })
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyIdToJoin: string) => {
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
                 return createClient(otherAccountInfo);
@@ -222,30 +217,17 @@ describe('Socketio', () => {
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    console.log('shouldnt be here');
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 2\n");
-                    testClient.socket.close();
                 })
 
                 return createClient(accountInfo3);
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, async (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
-                        console.log(lobbies[0].lobbyId + 'IN TEST EMIT');
-                        lobbies.forEach((ass) => {
-                            console.log("GameType: " + ass.gameType + "\n");
-                            console.log("LobbyId: " + ass.lobbyId + "\n");
-                            console.log("LobbyName: " + ass.lobbyName + "\n");
-                            console.log("-------------------------------------------\n");
-                            ass.playerInfo.forEach((player) => {
-                                console.log("PlayerName: " + player.playerName + "\n");
-                                console.log("AccountId: " + player.accountId + "\n");
-                                console.log("teamId: " + player.teamNumber + "\n");
-                            });
-                        });
                     })
 
                 });
@@ -253,7 +235,6 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 3\n");
                     testClient.socket.close();
                 })
             });
