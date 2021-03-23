@@ -1,5 +1,5 @@
-<div class="chat-message" [ngClass]="{'chat-message-user': message.senderAccountId === 'user'}">
-    <div class="chat-message-author">{{ message.senderAccountId }}</div>
+<div class="chat-message" [ngClass]="{'chat-message-user': message.senderUsername === 'user'}">
+    <div class="chat-message-author">{{ message.senderUsername }}</div>
     <div class="chat-message-content" [ngClass]="{'chat-message-content-user': message.senderUsername  === userService.username}">{{ message.content }}</div>
     <div class="chat-message-timestamp">{{ timestamp }}</div>
 </div>
