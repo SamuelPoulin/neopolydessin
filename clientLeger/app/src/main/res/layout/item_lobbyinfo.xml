@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:id="@+id/lobbyGame"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:id="@+id/lobbyName"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:text="@string/lobby_name"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:id="@+id/gameOwner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:text="@string/game_owner"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:id="@+id/gameMode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:text="@string/game_mode"
+            android:textAlignment="center"/>
+
+        <TextView
+            android:id="@+id/gameCapacity"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:text="@string/game_capacity"
+            android:textAlignment="center"
+            />
+        <Button
+            android:id="@+id/joinGamebtn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.10"
+            android:textSize="20dp"
+            android:text = "@string/join_game">
+        </Button>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

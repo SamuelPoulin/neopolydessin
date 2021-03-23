@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import * as httpStatus from 'http-status-codes';
-import * as mongoose from 'mongoose';
+import httpStatus from 'http-status-codes';
+import mongoose from 'mongoose';
 import { Response } from './database.service';
 import { describe, beforeEach } from 'mocha';
 import { DatabaseService, ErrorMsg, LoginTokens } from './database.service';
@@ -8,7 +8,7 @@ import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { Register } from '../../../common/communication/register';
 import { login } from '../../../common/communication/login';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Account } from '../../models/schemas/account';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 

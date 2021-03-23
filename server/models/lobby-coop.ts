@@ -11,10 +11,16 @@ export class LobbyCoop extends Lobby {
 
   private guessLeft: number;
 
-  constructor(socketIdService: SocketIdService, databaseService: DatabaseService,
-    io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean)
-  {
-    super(socketIdService, databaseService, io, accountId, difficulty, privateGame);
+  constructor(
+    socketIdService: SocketIdService,
+    databaseService: DatabaseService,
+    io: Server,
+    accountId: string,
+    difficulty: Difficulty,
+    privateGame: boolean,
+    lobbyName: string
+  ) {
+    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
     this.guessLeft = 5;
     this.gameType = GameType.SPRINT_COOP;
   }

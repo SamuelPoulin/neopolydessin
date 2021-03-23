@@ -1,4 +1,4 @@
-import * as http from 'http';
+import http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
@@ -50,7 +50,7 @@ export class SocketIo {
       console.log(`Disconnected : ${socket.id} \n`);
     });
 
-    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId) => {
+    SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId: string) => {
       console.log(`Game : ${lobbyId} ended \n`);
       const index = this.lobbyList.findIndex((game) => game.lobbyId === lobbyId);
       if (index > -1) {
@@ -129,6 +129,7 @@ export class SocketIo {
         console.log(playerId);
         if (lobbyToJoin && playerId) {
           lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          socket.join(lobbyId);
           this.databaseService.getAccountById(playerId).then((account) => {
             socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
           });
@@ -138,22 +139,23 @@ export class SocketIo {
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+      socket.on(SocketMessages.CREATE_LOBBY, (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
         let lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
         if (playerId) {
-          switch(gametype) {
+          switch (gametype) {
             case GameType.CLASSIC: {
-              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io,
+                playerId, difficulty, privacySetting, lobbyName);
               break;
             }
             case GameType.SPRINT_SOLO: {
-              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting, lobbyName);
               break;
             }
             case GameType.SPRINT_COOP: {
-              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting);
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io, playerId, difficulty, privacySetting, lobbyName);
               break;
             }
           }

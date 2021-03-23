@@ -1,8 +1,8 @@
-import * as chai from 'chai';
+import chai from 'chai';
 import { describe, beforeEach } from 'mocha';
 import 'chai-http';
 chai.use(require('chai-http'));
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { testingContainer } from '../../test/test-utils';
 import { Application } from '../app';
 import { EmailService } from '../services/email.service';

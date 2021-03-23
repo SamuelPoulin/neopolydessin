@@ -1,5 +1,4 @@
 package com.projet.clientleger.data.model
-
 import kotlinx.serialization.Serializable
 
 @Serializable

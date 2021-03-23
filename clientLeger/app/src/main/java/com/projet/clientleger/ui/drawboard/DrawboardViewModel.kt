@@ -1,37 +1,42 @@
 package com.projet.clientleger.ui.drawboard
 
 import android.graphics.Path
-import androidx.core.content.ContextCompat
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
+import android.graphics.RectF
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.R
-import com.projet.clientleger.data.enum.Difficulty
-import com.projet.clientleger.data.enum.GameType
-import com.projet.clientleger.data.model.BrushInfo
-import com.projet.clientleger.data.model.Coordinate
-import com.projet.clientleger.data.model.PenPath
-import com.projet.clientleger.data.model.StartPoint
+import com.projet.clientleger.data.enum.DrawTool
+import com.projet.clientleger.data.model.*
+import com.projet.clientleger.data.model.command.DrawPathCommand
+import com.projet.clientleger.data.model.command.ErasePathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
+import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDateTime
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.math.abs
+import kotlin.random.Random
 
 @HiltViewModel
-class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository) :
+class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService) :
         ViewModel() {
-    var paths: MutableLiveData<ArrayList<PenPath>> = MutableLiveData(ArrayList())
-    private var currentPath: Path? = null
-    private var lastCoordinate: Coordinate? = null
-    lateinit var brushColor: String
+    companion object {
+        val DEFAULT_TOOL = DrawTool.PEN
+        const val MIN_DELTA_UPDATE = 5f
+        const val MIN_STROKE = 5f
+        const val MAX_STROKE = 20f
+        const val MIN_ERASER_WIDTH = 15f
+        const val MAX_ERASER_WIDTH = 30f
+        const val DEFAULT_STROKE = 10f
+        const val DEFAULT_ERASER_SIZE = 22f
+        const val DEFAULT_COLOR = "#FF000000" //Black
+    }
+    var paths: MutableLiveData<ArrayList<BufferedPathData>> = MutableLiveData(ArrayList())
+    var currentBrushInfo: BrushInfo = BrushInfo(DEFAULT_COLOR, DEFAULT_STROKE)
+    var eraserWidth: Float = DEFAULT_ERASER_SIZE
     lateinit var bufferBrushColor: String
+    var currentTool = DEFAULT_TOOL
 
     init {
-        brushColor = "#FF000000"
         drawboardRepository.receiveStartPath().subscribe {
             receiveStartPath(it)
         }
@@ -41,70 +46,146 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         drawboardRepository.receiveEndPath().subscribe {
             receiveEndPath(it)
         }
+        drawboardRepository.receivePath().subscribe {
+            addPath(it)
+        }
+        drawboardRepository.receiveErase().subscribe{
+            deletePath(it)
+        }
     }
 
-    companion object {
-        const val MIN_STROKE = 5f
-        const val MAX_STROKE = 20f
-        const val DEFAULT_STROKE = 10f
+    fun switchCurrentTool(){
+        currentTool = currentTool.switchTool()
     }
 
-    private fun receiveStartPath(startPoint: StartPoint) {
-        println("receive startpath ${LocalDateTime.now()}")
-        currentPath = Path()
-        paths.value?.add(PenPath(currentPath!!, startPoint.brushInfo))
-        currentPath!!.moveTo(startPoint.coord.x, startPoint.coord.y)
-        currentPath!!.lineTo(startPoint.coord.x + 0.1f, startPoint.coord.y + 0.1f)
-        lastCoordinate = startPoint.coord
+    fun getCurrentToolWidth(): Float{
+        return when(currentTool){
+            DrawTool.PEN -> currentBrushInfo.strokeWidth
+            DrawTool.ERASER -> eraserWidth
+        }
+    }
+
+    fun getCurrentToolMinWidth():Float{
+        return when(currentTool){
+            DrawTool.PEN -> MIN_STROKE
+            DrawTool.ERASER -> MIN_ERASER_WIDTH
+        }
+    }
+
+    fun getCurrentToolMaxWidth(): Float{
+        return when(currentTool){
+            DrawTool.PEN -> MAX_STROKE
+            DrawTool.ERASER -> MAX_ERASER_WIDTH
+        }
+    }
+
+    fun updateWidth(value: Float){
+        when(currentTool){
+            DrawTool.PEN -> currentBrushInfo.strokeWidth = value
+            DrawTool.ERASER -> eraserWidth = value
+        }
+    }
+
+    private fun receiveStartPath(startPoint: PathData) {
+        val newPath = BufferedPathData(PathData(startPoint.pathId,startPoint.brushInfo))
+        newPath.addStartCoord(startPoint.coords.first())
+        paths.value?.add(newPath)
         paths.postValue(paths.value)
     }
 
-
-    fun startPath(coords: Coordinate, strokeWidth: Float) {
-        println("Send startpath ${LocalDateTime.now()}")
-        drawboardRepository.sendStartPath(coords, BrushInfo(brushColor, strokeWidth))
+    fun redo(){
+        drawingCommandsService.redo()
     }
 
-    private fun receiveUpdateCurrentPath(coords: Coordinate) {
-        println("receive update ${LocalDateTime.now()}")
-        if (currentPath == null || lastCoordinate == null)
-            return
-        currentPath!!.quadTo(lastCoordinate!!.x, lastCoordinate!!.y,
-                (coords.x + lastCoordinate!!.x) / 2, (coords.y + lastCoordinate!!.y) / 2
-        )
-        lastCoordinate = coords
+    fun undo(){
+        drawingCommandsService.undo()
+    }
+
+    fun startPath(coord: Coordinate) {
+        drawboardRepository.sendStartPath(coord, currentBrushInfo)
+    }
+
+    private fun receiveUpdateCurrentPath(coord: Coordinate) {
+        paths.value?.last()?.addCoord(coord)
         paths.postValue(paths.value)
     }
 
     fun updateCurrentPath(coords: Coordinate) {
-        println("send update ${LocalDateTime.now()}")
-        var dx = 2f
-        var dy = 2f
-        if (lastCoordinate != null) {
-            dx = abs(coords.x - lastCoordinate!!.x)
-            dy = abs(coords.y - lastCoordinate!!.y)
+        var dx = MIN_DELTA_UPDATE
+        var dy = MIN_DELTA_UPDATE
+        if(paths.value!!.isNotEmpty()) {
+            val lastCoordinate = paths.value!!.last().getLastCoord()
+            if (lastCoordinate != null) {
+                dx = abs(coords.x - lastCoordinate.x)
+                dy = abs(coords.y - lastCoordinate.y)
+            }
         }
-        if (dx >= 2 || dy >= 2) {
+        if (dx >= MIN_DELTA_UPDATE || dy >= MIN_DELTA_UPDATE) {
             drawboardRepository.sendUpdatePath(coords)
         }
     }
 
-    private fun receiveEndPath(coords: Coordinate) {
-        currentPath!!.lineTo(coords.x, coords.y)
-
-        lastCoordinate = null
-        currentPath = null
+    private fun receiveEndPath(coord: Coordinate) {
+        paths.value?.last()?.addEndCoord(coord)
         paths.postValue(paths.value)
     }
 
-    fun endPath(coords: Coordinate) {
-        drawboardRepository.sendEndPath(coords)
+
+
+    private fun addPath(pathData: PathData){
+        val pathExtended = BufferedPathData(pathData)
+        paths.value!!.add(pathExtended)
+        paths.value!!.sortBy { it.data.pathId }
+        paths.postValue(paths.value)
     }
 
-    fun confirmColor() {
+    private fun deletePath(pathId: Int){
+        for(i in 0 until paths.value!!.size){
+            paths.value!!.removeIf{
+                it.data.pathId == pathId
+            }
+        }
+        paths.postValue(paths.value)
+    }
+
+    fun endPath(coord: Coordinate) {
+        drawboardRepository.sendEndPath(coord)
+        drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
+    }
+
+    fun confirmColor(): String {
         if (bufferBrushColor.isNotEmpty()) {
-            brushColor = bufferBrushColor
+            currentBrushInfo.color = bufferBrushColor
             bufferBrushColor = ""
         }
+        return currentBrushInfo.color
+    }
+
+    fun erase(coord: Coordinate){
+        val pathId = detectPathCollision(coord)
+        if(pathId != -1){
+            drawboardRepository.sendErasePath(pathId)
+            drawingCommandsService.add(ErasePathCommand(pathId, drawboardRepository))
+        }
+    }
+
+    private fun detectPathCollision(coord: Coordinate) : Int{
+        val rectF = RectF()
+        val path = Path()
+        path.moveTo(coord.x - eraserWidth, coord.y - eraserWidth)
+        path.moveTo(coord.x + eraserWidth, coord.y - eraserWidth)
+        path.moveTo(coord.x + eraserWidth, coord.y + eraserWidth)
+        path.moveTo(coord.x - eraserWidth, coord.y + eraserWidth)
+        path.close()
+        path.computeBounds(rectF, true)
+
+        for(i in paths.value!!.size-1 downTo 0){
+            for(buffCoord in paths.value!![i].extendedCoords){
+                if(rectF.contains(buffCoord.x, buffCoord.y)) {
+                    return paths.value!![i].data.pathId
+                }
+            }
+        }
+        return -1
     }
 }

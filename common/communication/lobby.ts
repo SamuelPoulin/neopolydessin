@@ -2,6 +2,7 @@ import { Socket } from '../../server/node_modules/socket.io';
 
 export interface LobbyInfo {
   lobbyId: string;
+  lobbyName: string;
   playerInfo: PlayerInfo[];
   gameType: GameType;
 }
@@ -10,6 +11,7 @@ export interface PlayerInfo {
   teamNumber: number;
   playerName: string;
   accountId: string;
+  avatar: string | undefined;
 }
 
 export interface Player {
