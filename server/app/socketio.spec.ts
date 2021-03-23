@@ -24,6 +24,7 @@ import { PrivateMessage } from '../../common/communication/private-message';
 import { FriendsService } from './services/friends.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import { BrushInfo } from '../../common/communication/brush-info';
 
 export const accountInfo3: Register = {
     firstName: 'a',
@@ -141,8 +142,10 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
                 });
 
                 testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
@@ -169,8 +172,11 @@ describe('Socketio', () => {
                     });
                 });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
+
                 });
 
                 testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
@@ -191,13 +197,18 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
-                
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 1\n");
                     testClient.socket.close();
                 })
-                
+
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyIdToJoin: string) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
@@ -210,7 +221,8 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 2\n");
                     testClient.socket.close();
@@ -235,10 +247,11 @@ describe('Socketio', () => {
                             });
                         });
                     })
-                    
+
                 });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (coord: Coord) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                    expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     console.log(testClient.socket.id + "CLOSE SOCKET CLIENT 3\n");
                     testClient.socket.close();

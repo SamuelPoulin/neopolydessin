@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { injectable } from 'inversify';
-import * as request from 'request';
+import request from 'request';
 
 @injectable()
 export class EmailService {

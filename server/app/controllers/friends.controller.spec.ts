@@ -1,6 +1,6 @@
 import Types from '../types';
-import * as sinon from 'sinon';
-import * as chai from 'chai';
+import sinon from 'sinon';
+import chai from 'chai';
 import 'chai-http';
 import { describe } from 'mocha';
 chai.use(require('chai-http'));
@@ -13,7 +13,7 @@ import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
 import { FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Application } from '../app';
 import { expect } from 'chai';
-import * as express from 'express';
+import express from 'express';
 import { Decision } from '../../../common/communication/friend-request';
 
 describe('friends controller', () => {
@@ -31,6 +31,7 @@ describe('friends controller', () => {
                     friendId: {
                         _id: '123456789012345678901234',
                         username: 'itsYaBoi',
+                        avatar: '123456789012345678901234'
                     },
                     status: FriendStatus.FRIEND,
                     received: true,

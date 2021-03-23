@@ -1,4 +1,4 @@
-import * as http from 'http';
+import http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';

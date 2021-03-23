@@ -34,7 +34,7 @@ export class FriendsService {
       accountModel.getFriends(id)
         .then(async (doc: FriendsList) => {
           if (!doc[0]) throw new Error(NOT_FOUND.toString());
-          return accountModel.populate(doc, { path: 'friends.friendId', select: 'username' });
+          return accountModel.populate(doc, { path: 'friends.friendId', select: ['username', 'avatar'] });
         })
         .then((result) => {
           let friendList: FriendsList = result[0];
