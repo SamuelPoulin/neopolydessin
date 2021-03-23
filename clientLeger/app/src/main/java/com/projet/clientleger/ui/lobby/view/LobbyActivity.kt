@@ -2,14 +2,16 @@ package com.projet.clientleger.ui.lobby.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.databinding.ActivityLobbyBinding
-import com.projet.clientleger.ui.game.GameActivity
+import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +24,7 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
     private val playersView = ArrayList<TextView>()
+    private var rolesList = ArrayList<PlayerRole>()
 
     private fun setSubscriptions() {
         vm.receivePlayersInfo()
@@ -33,6 +36,8 @@ class LobbyActivity : AppCompatActivity() {
 
         vm.receiveStartGame().subscribe{
             lifecycleScope.launch {
+                rolesList = it
+                println(rolesList)
                 goToActivity(GameActivity::class.java)
             }
         }
@@ -49,11 +54,17 @@ class LobbyActivity : AppCompatActivity() {
         playersView.add(binding.player3Name)
         playersView.add(binding.player4Name)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        val username = intent.getSerializableExtra("username")
         intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
         binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
         binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
+        if(gameInfo.gameCreator != username){
+            println(gameInfo.gameCreator)
+            println(username)
+            startGameButton.visibility = View.INVISIBLE
+        }
     }
     private fun getFrenchGameMode(englishMode:String):String{
         when(englishMode){

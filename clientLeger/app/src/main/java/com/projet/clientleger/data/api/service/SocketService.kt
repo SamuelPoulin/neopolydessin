@@ -43,11 +43,10 @@ class SocketService @Inject constructor() {
         }
     }
 
-    fun sendMessage(msg: MessageChat) {
+    fun sendMessage(content:String, timestamp:Long) {
         val obj: JSONObject = JSONObject()
-        obj.put("user", msg.user)
-        obj.put("content", msg.content)
-        obj.put("timestamp", msg.timestamp)
+        obj.put("content", content)
+        obj.put("timestamp", timestamp)
         socket.emit("SendMsg", obj)
     }
 

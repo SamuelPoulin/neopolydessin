@@ -51,7 +51,6 @@ class ChatFragment @Inject constructor() : Fragment() {
             message.content = "${message.content} a quitté la discussion"
             addMessage(message)
         }
-
     }
 
 
@@ -89,13 +88,10 @@ class ChatFragment @Inject constructor() : Fragment() {
         val text: String = (chatBox.text).toString()
         val adjustedText: String = formatMessageContent(text)
         if (isMessageValidFormat(adjustedText)) {
-            addMessage(MessageChat(username, adjustedText, System.currentTimeMillis()))
+            addMessage(MessageChat(adjustedText, System.currentTimeMillis(),username))
             socketService.sendMessage(
-                    MessageChat(
-                            username,
-                            adjustedText,
-                            System.currentTimeMillis()
-                    )
+                    adjustedText,
+                    System.currentTimeMillis()
             )
         } else {
             showErrorToast(MESSAGE_CONTENT_ERROR)

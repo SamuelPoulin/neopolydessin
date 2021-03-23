@@ -4,6 +4,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.service.LobbySocketService
 import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.model.LobbyList
@@ -30,7 +31,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         lobbySocketService.startGame()
     }
 
-    fun receiveStartGame() : Observable<Any>{
+    fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
         return lobbySocketService.receiveStartGame()
     }
 }

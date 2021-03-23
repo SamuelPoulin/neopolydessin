@@ -4,6 +4,7 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.enum.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.MessageChat
@@ -58,7 +59,15 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.START_GAME.value)
     }
 
-    fun receiveStartGame() : Observable<Any>{
-        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {}
+    fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
+        return Observable.create {
+            socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) { res ->
+                val jsonList =res[0] as JSONArray
+                val list = ArrayList<PlayerRole>()
+                for(i in 0 until jsonList.length()){
+                    list.add(Json.decodeFromString(PlayerRole.serializer(), jsonList.get(i).toString()))
+                }
+            }
+        }
     }
 }

@@ -21,7 +21,6 @@ import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
-import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -123,12 +122,14 @@ class MainmenuActivity : AppCompatActivity() {
                 vm.createGame(selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
+                    putExtra("username", username)
                 }
                 startActivity(intent)
             }
             else{
                 val intent = Intent(this, SearchLobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
+                    putExtra("username", username)
                 }
                 startActivity(intent)
             }
