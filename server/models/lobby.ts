@@ -11,6 +11,7 @@ import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
+import { PlayerInfo } from '../../common/communication/player-info';
 import { Coord } from './commands/path';
 
 export interface LobbyInfo {
@@ -19,13 +20,6 @@ export interface LobbyInfo {
   ownerUsername: string;
   nbPlayerInLobby: number;
   gameType: GameType;
-}
-
-export interface PlayerInfo {
-  teamNumber: number;
-  playerName: string;
-  accountId: string;
-  avatar: string | undefined;
 }
 
 export interface Player {

@@ -167,7 +167,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, async (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
@@ -217,7 +217,6 @@ describe('Socketio', () => {
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
-                    console.log('shouldnt be here');
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 })

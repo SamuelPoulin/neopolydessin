@@ -36,7 +36,6 @@ export class SocketIo {
   };
 
   clientSuccessfullyDisconnected: Observable<Socket> = new Observable();
-  finishedLoadingPlayerInfo: Observable<void> = new Observable();
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
@@ -48,10 +47,6 @@ export class SocketIo {
     this.bindIoEvents();
     this.clientSuccessfullyDisconnected.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
-    });
-
-    this.finishedLoadingPlayerInfo.subscribe(() => {
-      console.log('Finished loading player');
     });
 
     SocketIo.GAME_SUCCESSFULLY_ENDED.subscribe((lobbyId: string) => {
