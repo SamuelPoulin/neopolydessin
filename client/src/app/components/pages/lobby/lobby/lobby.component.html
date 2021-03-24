@@ -17,9 +17,9 @@
             </ng-container>
           </ng-container>
         </div>
-        <button id="invite-button" mat-flat-button class="menu-button menu-main-button" (click)="copyInviteCode()">
+        <button id="invite-button" mat-flat-button class="menu-button menu-main-button" (click)="copyInviteCode()" disabled>
           <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
-          {{inviteCode}}
+          Lien d'invitation
         </button>
         <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button" (click)="startGame()">
           Lancer la partie

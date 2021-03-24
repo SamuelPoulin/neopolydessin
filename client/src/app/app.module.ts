@@ -41,6 +41,7 @@ import { AppComponent } from './app.component';
         { path: '', component: HomeComponent, canActivate: [AuthGuard] },
         { path: 'login', component: LoginComponent, canActivate: [LoggedInGuard] },
         { path: 'edit', component: EditorComponent, canActivate: [AuthGuard] },
+        { path: 'lobby', redirectTo: 'lobby/', pathMatch: 'full', canActivate: [AuthGuard] },
         { path: 'lobby/:id', component: LobbyComponent, canActivate: [AuthGuard] },
         { path: 'browser', component: ServerBrowserComponent, canActivate: [AuthGuard] },
         { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },

@@ -7,7 +7,7 @@
   position: fixed;
   width: 60px;
   height: 100vh;
-  background-color: $primary;
+  background-color: #eeeeee;
   z-index: 1000;
 }
 
@@ -45,7 +45,7 @@
 }
 
 #toolbar-primary-color {
-  border: 1px solid $accent;
+  border: 1px solid #2F2F2F;
   height: 35px;
   width: 35px;
   z-index: 1000;
@@ -55,7 +55,7 @@
 }
 
 #toolbar-secondary-color {
-  border: 1px solid $accent;
+  border: 1px solid #2F2F2F;
   height: 35px;
   width: 35px;
   z-index: 500;
@@ -79,8 +79,8 @@ mat-drawer-container {
 }
 
 mat-drawer {
-  box-shadow: $elevationShadow;
-  background-color: $primaryDark;
+  border-right: 5px solid #2F2F2F;
+  background-color: #EEEEEE;
 }
 
 mat-drawer-content {
@@ -109,7 +109,7 @@ mat-drawer-content {
 .toolbar-option-section {
   display: flex;
   align-self: flex-start;
-  color: $accent;
+  color: #2F2F2F;
   margin-bottom: 25px;
 }
 

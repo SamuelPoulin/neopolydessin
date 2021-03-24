@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { SocketService } from '@services/socket-service.service';
-// import { Router } from '@angular/router';
-// import { SocketService } from '@services/socket-service.service';
 import { Observable } from 'rxjs';
 import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
 
@@ -60,8 +58,6 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   joinLobby(lobbyId: string): void {
-    console.log(lobbyId);
-    this.socketService.joinLobby(lobbyId);
     this.router.navigate([`/lobby/${lobbyId}`]);
   }
 

@@ -1,4 +1,5 @@
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
+  <app-status-bar quit previousPage=""></app-status-bar>
   <app-toolbar #toolbar id='toolbar'
     [(currentToolType)]=currentToolType
     (editorBackgroundChanged)="changeBackground($event)"
@@ -6,6 +7,7 @@
     (guideButtonClicked)="openGuide()"
     (mouseenter)='setToolbarState(true)'
   ></app-toolbar>
+  <div id="editor-game-area">hi</div>
   <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
     (dblclick)="handleMouseEvent($event)"
     (mousedown)="handleMouseEvent($event)"

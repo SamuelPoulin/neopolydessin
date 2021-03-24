@@ -19,6 +19,6 @@ export class GridProperties extends ToolProperties {
     super();
     this.size = new NumericProperty(GridProperties.GRID_SIZE_INCREMENT, GridProperties.MAX_GRID_SIZE, GridProperties.DEFAULT_GRID_SIZE);
     this.opacity = new NumericProperty(GridProperties.MIN_OPACITY, GridProperties.MAX_OPACITY, GridProperties.DEFAULT_GRID_OPACITY);
-    this.visibility = new EnumProperty(GridVisibility.visible, GridVisibility);
+    this.visibility = new EnumProperty(GridVisibility.hidden, GridVisibility);
   }
 }
