@@ -2,7 +2,7 @@ import http from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { ChatMessage } from '../../common/communication/chat-message';
+import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -58,7 +58,7 @@ export class SocketIo {
     });
   }
 
-  validateMessageLength(msg: ChatMessage): boolean {
+  validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
@@ -111,37 +111,36 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketMessages.GET_ALL_LOBBIES, async (gameMode: GameType, difficulty: Difficulty,
+      socket.on(SocketMessages.GET_ALL_LOBBIES, (gameMode: GameType, difficulty: Difficulty,
         callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(await Promise.all(this.lobbyList
+        callback(this.lobbyList
           .filter((lobby) => {
             return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
-          }).map(async (lobby) => {
-            return lobby.toLobbyInfo();
-          })));
+          }).map((lobby) => {
+            return lobby.getLobbySummary();
+          }));;
       });
 
       socket.on(SocketConnection.PLAYER_CONNECTION, async (lobbyId: string) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        console.log(lobbyToJoin);
-        console.log(playerId);
         if (lobbyToJoin && playerId) {
-          lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          await lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
           socket.join(lobbyId);
-          this.databaseService.getAccountById(playerId).then((account) => {
-            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, account.documents.username);
-          });
-          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, await lobbyToJoin.toLobbyInfo());
+          const playerAddedInfo = lobbyToJoin.getPlayerAddedInfo(socket);
+          if (playerAddedInfo) {
+            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerAddedInfo);
+          }
+          this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyToJoin.toLobbyInfo());
         } else {
           console.error('lobby or player doesn\'t exist');
         }
       });
 
-      socket.on(SocketMessages.CREATE_LOBBY, (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
-        let lobby;
+      // eslint-disable-next-line max-len
+      socket.on(SocketMessages.CREATE_LOBBY, async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
+        let lobby: Lobby;
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        console.log(playerId + ' <-----------------PLAYER ID CREATE GAME');
         if (playerId) {
           switch (gametype) {
             case GameType.CLASSIC: {
@@ -158,7 +157,7 @@ export class SocketIo {
               break;
             }
           }
-          lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+          await lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
           this.lobbyList.push(lobby);
         } else {
           console.error('player doesn\'t exist');
@@ -170,12 +169,15 @@ export class SocketIo {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
-            messagesHistoryModel.addMessageToHistory(sentMsg).then((result) => {
-              if (result.nModified === 0) throw new Error('couldn\'t update history');
-              socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg);
-            }).catch((err) => {
-              console.log(err);
-            });
+            const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+            if (senderAccountId) {
+              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId).then((result) => {
+                if (result.nModified === 0) throw new Error('couldn\'t update history');
+                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg, senderAccountId);
+              }).catch((err) => {
+                console.log(err);
+              });
+            }
           }
         }
         else {

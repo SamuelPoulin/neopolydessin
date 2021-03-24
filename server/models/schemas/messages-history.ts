@@ -1,23 +1,23 @@
 import { ObjectId } from 'mongodb';
 import { Document, Schema, Model, model, Query } from 'mongoose';
-import { ChatMessage } from '../../../common/communication/chat-message';
+import { Message } from '../../../common/communication/chat-message';
 import { PrivateMessage } from '../../../common/communication/private-message';
 import { UpdateOneQueryResult } from './account';
 
 export interface MessageHistory {
-  messages: ChatMessage[];
+  messages: Message[];
 }
 
 export interface Messages extends Document {
   _id: ObjectId;
   accountId: ObjectId;
   otherAccountId: ObjectId;
-  messages: [ChatMessage];
+  messages: [Message];
 }
 
 interface MessagesModel extends Model<Messages> {
   findHistory: (id: string, otherId: string, page: number, limit: number) => Query<MessageHistory | null, Messages>;
-  addMessageToHistory: (msg: PrivateMessage) => Query<UpdateOneQueryResult, Messages>;
+  addMessageToHistory: (msg: PrivateMessage, senderId: string) => Query<UpdateOneQueryResult, Messages>;
   removeHistory: (id: string, otherId: string) => Query<Messages | null, Messages>;
   removeHistoryOfAccount: (id: string) => Query<Messages | null, Messages>;
 }
@@ -63,12 +63,12 @@ messagesSchema.statics.findHistory = (id: string, otherId: string, page: number,
     .skip(skips).limit(limit);
 };
 
-messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage) => {
-  return messagesHistoryModel.updateOne(findMessagesQuery(msg.senderAccountId, msg.receiverAccountId),
+messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage, senderId: string) => {
+  return messagesHistoryModel.updateOne(findMessagesQuery(senderId, msg.receiverAccountId),
     {
       $push: {
         messages: {
-          senderAccountId: msg.senderAccountId,
+          senderAccountId: senderId,
           content: msg.content,
           timestamp: msg.timestamp,
         }

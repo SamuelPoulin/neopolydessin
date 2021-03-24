@@ -4,5 +4,5 @@ export interface Message {
 }
 
 export interface ChatMessage extends Message {
-  senderAccountId: string;
+  senderUsername: string;
 }

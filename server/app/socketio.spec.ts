@@ -139,7 +139,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -167,7 +167,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.SPRINT_COOP, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
                     });
                 });
@@ -198,14 +198,14 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) => {
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                })
-
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     testClient.socket.close();
+                })
+
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 })
                 return createClient(otherAccountInfo);
             })
@@ -213,12 +213,12 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby2', GameType.CLASSIC, Difficulty.EASY, false);
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                    testClient.socket.close();
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.close();
                 })
 
                 return createClient(accountInfo3);
@@ -227,7 +227,8 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
-                    });
+                    })
+
                 });
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -282,13 +283,12 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId2);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
                     expect(msg.content).to.equal('bonjourhi');
                     expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(msg.senderAccountId).to.equal(accountId2);
+                    expect(senderId).to.equal(accountId2);
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId2,
-                        senderAccountId: accountId,
                         content: 'eyo what up',
                         timestamp: Date.now(),
                     }
@@ -304,10 +304,10 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
                     expect(msg.content).to.equal('eyo what up');
                     expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(msg.senderAccountId).to.equal(accountId);
+                    expect(senderId).to.equal(accountId);
                     friendService.getMessageHistory(accountId, accountId2, 1, 5)
                         .then((history) => {
                             expect(history.statusCode).to.equal(OK);
@@ -319,7 +319,6 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
                     const msg: PrivateMessage = {
                         receiverAccountId: accountId,
-                        senderAccountId: testClient.accountId,
                         content: 'bonjourhi',
                         timestamp: Date.now(),
                     }
@@ -340,10 +339,10 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId2);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
                     expect(msg.content).to.equal('bonjourhi');
                     expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(msg.senderAccountId).to.equal(accountId2);
+                    expect(senderId).to.equal(accountId2);
                     friendService.unfriend(accountId, accountId2);
                     testClient.socket.close();
                 })
@@ -367,7 +366,6 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
                     const msg: PrivateMessage = {
                         receiverAccountId: accountId,
-                        senderAccountId: testClient.accountId,
                         content: 'bonjourhi',
                         timestamp: Date.now(),
                     }
@@ -401,10 +399,9 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId3);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId3,
-                        senderAccountId: testClient.accountId,
                         content: 'eyo what up',
                         timestamp: Date.now(),
                     }
@@ -439,9 +436,9 @@ describe('Socketio', () => {
                     }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
                     expect(msg.receiverAccountId).to.be.equal(testClient.accountId);
-                    expect(msg.senderAccountId).to.be.equal(accountId2);
+                    expect(senderId).to.be.equal(accountId2);
                     friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
                         .then((history) => {
                             expect(history.documents.messages).to.be.lengthOf(2);
