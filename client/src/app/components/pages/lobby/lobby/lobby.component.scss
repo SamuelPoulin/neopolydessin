@@ -48,18 +48,6 @@
   border-radius: 25px;
 }
 
-#options-gamemode {
-  color: #2F2F2F;
-  font-size: 32px;
-  font-weight: 500;
-  margin-right: 10px;
-}
-
-#options-gamemode-container {
-  display: flex;
-  align-items: center;
-}
-
 #start-button {
   color: white;
   background-color: #04D800;
@@ -113,14 +101,6 @@
   color: #2F2F2F;
   font-size: 24px;
   font-weight: 500;
-}
-
-.gamemode-icon {
-  color: #2F2F2F;
-}
-
-.gamemode-icon-flipped {
-  transform: scaleX(-1);
 }
 
 .avatar2 {

@@ -12,7 +12,6 @@ import randomColor from 'randomcolor';
   styleUrls: ['./lobby.component.scss'],
 })
 export class LobbyComponent implements AfterViewInit {
-  gamemode: string = 'classique';
   inviteCode: string = 'Bientôt';
   playersTeam1: string[] = [];
   playersTeam2: string[] = [];
@@ -25,17 +24,6 @@ export class LobbyComponent implements AfterViewInit {
     userService: UserService,
   ) {
     this.playersTeam1.push(userService.username);
-  }
-
-  get gamemodeName(): string {
-    switch (this.gamemode) {
-      case 'classique':
-        return 'Classique';
-      case 'coop':
-        return 'Co-op';
-      default:
-        return '';
-    }
   }
 
   get electronContainer(): Element | null {

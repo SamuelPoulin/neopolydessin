@@ -1,27 +1,26 @@
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
   <app-status-bar quit previousPage=""></app-status-bar>
-  <app-toolbar #toolbar id='toolbar'
-    [(currentToolType)]=currentToolType
-    (editorBackgroundChanged)="changeBackground($event)"
-    (mouseleave)="setToolbarState(false)"
-    (guideButtonClicked)="openGuide()"
-    (mouseenter)='setToolbarState(true)'
-  ></app-toolbar>
-  <div id="editor-game-area">hi</div>
-  <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
-    (dblclick)="handleMouseEvent($event)"
-    (mousedown)="handleMouseEvent($event)"
-    (click)="handleMouseEvent($event)"
-    (wheel)="handleMouseEvent($event)"
-    (mousemove)="handleMouseEvent($event)"
-    (mouseleave)="handleMouseEvent($event)"
-    (contextmenu)="handleMouseEvent($event)"
-  >
-	  <app-grid
-			  [width]=surfaceWidth
-			  [height]=surfaceHeight
-	  ></app-grid>
-  </app-drawing-surface>
-  <mat-spinner *ngIf=loading [diameter]=50></mat-spinner>
+  <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
+    (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)"
+    (guideButtonClicked)="openGuide()" (mouseenter)='setToolbarState(true)'></app-toolbar>
+  <div id="editor-game-area">
+    <div id="game-area-infos">
+      <app-gamemode-title gamemode="classique"></app-gamemode-title>
+      <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
+        (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)" (click)="handleMouseEvent($event)"
+        (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
+        (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">
+        <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
+      </app-drawing-surface>
+      <div id="game-area-player">
+        <div id="game-area-player-text">C'est le tour à&nbsp;</div>
+        <div id="game-area-player-name">samuelpoulin</div>
+      </div>
+        <div id="game-area-timer">
+          <mat-icon [inline]="true">timer</mat-icon>
+          <div id="game-area-timer-value">0:15</div>
+        </div>
+    </div>
+    <div id="game-area-teams">Équipes et liste de joueurs</div>
+  </div>
 </div>
-

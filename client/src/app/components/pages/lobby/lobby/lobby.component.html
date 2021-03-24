@@ -3,20 +3,7 @@
     <app-status-bar quit previousPage=""></app-status-bar>
     <div id="content-container">
       <div id="options-container">
-        <div id="options-gamemode-container">
-          <div id="options-gamemode">Classique</div>
-          <ng-container [ngSwitch]="gamemode">
-            <ng-container *ngSwitchCase="'classique'">
-              <mat-icon class="gamemode-icon gamemode-icon-flipped">group</mat-icon>
-              <mat-icon class="gamemode-icon">palette</mat-icon>
-              <mat-icon class="gamemode-icon">group</mat-icon>
-            </ng-container>
-            <ng-container *ngSwitchCase="'coop'">
-              <mat-icon class="gamemode-icon gamemode-icon-flipped">groups</mat-icon>
-              <mat-icon class="gamemode-icon">palette</mat-icon>
-            </ng-container>
-          </ng-container>
-        </div>
+        <app-gamemode-title></app-gamemode-title>
         <button id="invite-button" mat-flat-button class="menu-button menu-main-button" (click)="copyInviteCode()" disabled>
           <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
           Lien d'invitation

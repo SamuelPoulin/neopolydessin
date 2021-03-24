@@ -43,9 +43,6 @@
         <label *ngSwitchCase="SelectedColorType.secondary">Couleur secondaire</label>
         <app-color-picker [isVertical]=true [showHistory]=true #colorPicker [color]="color"
           (colorChanged)="handleColorChanged($event)" (closed)='close()'></app-color-picker>
-        <button id='btn-update-background' mat-flat-button (click)='updateBackground(colorPicker.color)'>
-          Appliquer comme couleur de fond
-        </button>
       </div>
       <div *ngIf='toolbarType === ToolbarType.grid'>
         <app-grid-toolbar class='toolbar-tool-section'></app-grid-toolbar>
