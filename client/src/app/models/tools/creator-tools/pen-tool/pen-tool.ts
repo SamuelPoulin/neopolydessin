@@ -1,8 +1,10 @@
 import { PenToolProperties } from '@models/tool-properties/creator-tool-properties/pen-tool-properties';
 import { EditorService } from '@services/editor.service';
 import { Coordinate } from '@utils/math/coordinate';
+import { Color } from '@utils/color/color';
 import { Path } from '../../../shapes/path';
 import { CreatorTool } from '../creator-tool';
+import { BrushInfo } from '../../../../../../../common/communication/brush-info';
 
 export class PenTool extends CreatorTool {
   shape: Path;
@@ -28,8 +30,11 @@ export class PenTool extends CreatorTool {
   }
 
   initListeners(): void {
-    this.editorService.socketService.receiveStartPath().subscribe((coord: Coordinate) => {
-      this.startShape(coord);
+    this.editorService.socketService.receiveStartPath().subscribe((pathData: { coord: Coordinate; brush: BrushInfo }) => {
+      this.editorService.colorsService.primaryColor = Color.hex(pathData.brush.color.slice(1));
+      this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth;
+      this.startShape(pathData.coord);
+      this.shape.updateProperties();
     });
 
     this.editorService.socketService.receiveUpdatePath().subscribe((coord: Coordinate) => {

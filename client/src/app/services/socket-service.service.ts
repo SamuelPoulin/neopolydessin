@@ -8,6 +8,7 @@ import { Path } from '@models/shapes/path';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
+import { BrushInfo } from '../../../../common/communication/brush-info';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
 import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
@@ -124,10 +125,10 @@ export class SocketService {
     this.socket.emit(SocketMessages.START_GAME_SERVER);
   }
 
-  receiveStartPath(): Observable<Coordinate> {
-    return new Observable<Coordinate>((obs) => {
-      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate) => {
-        obs.next(coord);
+  receiveStartPath(): Observable<{ coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ coord: Coordinate; brush: BrushInfo }>((obs) => {
+      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate, brush: BrushInfo) => {
+        obs.next({ coord, brush });
       });
     });
   }
