@@ -48,7 +48,7 @@ const uploadPicture: Multer = multer({
   }
 });
 
-const validPicture = (fileType: string, fileName: string): boolean => {
+export const validPicture = (fileType: string, fileName: string): boolean => {
   const fileExtension = path.extname(fileName);
   return (fileType === ContentType.png || fileType === ContentType.jpeg) && (fileExtension === '.jpg' || fileExtension === '.png');
 };
