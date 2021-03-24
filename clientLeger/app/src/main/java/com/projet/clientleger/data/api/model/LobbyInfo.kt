@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class LobbyInfo(val lobbyId:String, val playerInfo:List<PlayerInfo>, val gameType:String) : Parcelable{
+data class LobbyInfo(val lobbyId:String, val lobbyName:String, val ownerUsername:String, val playerInfo:List<PlayerInfo>, val gameType:String) : Parcelable{
 }

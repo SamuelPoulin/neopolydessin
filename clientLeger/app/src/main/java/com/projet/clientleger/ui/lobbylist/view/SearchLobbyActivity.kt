@@ -53,7 +53,7 @@ class SearchLobbyActivity : AppCompatActivity() {
                     println(error)
                 })
         }
-
+        println("reception faite")
         vm.receiveJoinedLobbyInfo().subscribe{
             val intent = Intent(this, LobbyActivity::class.java).apply{
                 putExtra("LOBBY_INFO",it)

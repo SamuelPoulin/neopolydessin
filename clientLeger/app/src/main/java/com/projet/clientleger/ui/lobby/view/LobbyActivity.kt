@@ -55,14 +55,12 @@ class LobbyActivity : AppCompatActivity() {
         playersView.add(binding.player4Name)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         val username = intent.getSerializableExtra("username")
-        intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
+        //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
         binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
         binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
         addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
         if(gameInfo.gameCreator != username){
-            println(gameInfo.gameCreator)
-            println(username)
             startGameButton.visibility = View.INVISIBLE
         }
     }
@@ -83,11 +81,11 @@ class LobbyActivity : AppCompatActivity() {
         return "Facile"
     }
 
-    private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
+    /*private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
         for(i in lobbyInfo.playerInfo.indices){
             playersView[i].text = lobbyInfo.playerInfo[i].playerName
         }
-    }
+    }*/
 
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {
