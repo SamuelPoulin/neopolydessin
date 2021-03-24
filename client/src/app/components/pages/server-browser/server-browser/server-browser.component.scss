@@ -1,3 +1,5 @@
+@use 'src/assets/menuButtons';
+
 #server-browser-container {
   display: flex;
   align-items: center;
@@ -18,4 +20,54 @@
   overflow-y: auto;
 
   background-color: #FBFBFB;
+}
+
+#content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+}
+
+#server-browser-table, #server-browser-paginator {
+  width: 100%;
+}
+
+#server-browser-empty-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 50px;
+  width: 100%;
+  background-color: white;
+}
+
+#server-browser-table-container {
+  width: 800px;
+  height: 750px;
+  overflow: auto;
+
+  background-color: white;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.05);
+  border-radius: 25px;
+}
+
+.join-button {
+  color: white;
+  background-color: #04D800;
+}
+
+.join-button-icon {
+  color: white;
+}
+
+.join-button-cell {
+  text-align: center;
+}
+
+.server-browser-row {
+  height: 55px;
 }
