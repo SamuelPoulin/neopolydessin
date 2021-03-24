@@ -14,7 +14,7 @@ import { SocketConnection } from '../../common/socketendpoints/socket-connection
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { Difficulty, GameType, LobbyInfo } from '../models/lobby';
+import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';

@@ -1,0 +1,47 @@
+<div id="lobby-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
+  <div id="menu-container">
+    <app-status-bar quit previousPage=""></app-status-bar>
+    <div id="content-container">
+      <div id="options-container">
+        <div id="options-gamemode-container">
+          <div id="options-gamemode">Classique</div>
+          <ng-container [ngSwitch]="gamemode">
+            <ng-container *ngSwitchCase="'classique'">
+              <mat-icon class="gamemode-icon gamemode-icon-flipped">group</mat-icon>
+              <mat-icon class="gamemode-icon">palette</mat-icon>
+              <mat-icon class="gamemode-icon">group</mat-icon>
+            </ng-container>
+            <ng-container *ngSwitchCase="'coop'">
+              <mat-icon class="gamemode-icon gamemode-icon-flipped">groups</mat-icon>
+              <mat-icon class="gamemode-icon">palette</mat-icon>
+            </ng-container>
+          </ng-container>
+        </div>
+        <button id="invite-button" mat-flat-button class="menu-button menu-main-button" (click)="copyInviteCode()">
+          <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
+          {{inviteCode}}
+        </button>
+        <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button" (click)="startGame()">
+          Lancer la partie
+          <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
+        </button>
+      </div>
+      <div id="players-container">
+        <div class="team-container">
+          <div class="players-title">Équipe 1</div>
+          <div *ngFor="let player of playersTeam1" class="player-container">
+            <div class="player-avatar">S</div>
+            <div class="player-username">{{player}}</div>
+          </div>
+        </div>
+        <div class="team-container">
+          <div class="players-title">Équipe 2</div>
+          <div *ngFor="let player of playersTeam2" class="player-container">
+            <div class="player-avatar">S</div>
+            <div class="player-username">{{player}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,56 +10,12 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
-import { PlayerInfo } from '../../common/communication/player-info';
 import { Coord } from './commands/path';
 
-export interface LobbyInfo {
-  lobbyId: string;
-  lobbyName: string;
-  ownerUsername: string;
-  nbPlayerInLobby: number;
-  gameType: GameType;
-}
-
-export interface Player {
-  accountId: string;
-  username: string;
-  avatarId: string;
-  playerStatus: PlayerStatus;
+export interface ServerPlayer extends Player {
   socket: Socket;
-  teamNumber: number;
-}
-
-export interface PlayerRole {
-  playerName: string;
-  playerStatus: PlayerStatus;
-}
-
-export enum GameType {
-  CLASSIC = 'classic',
-  SPRINT_SOLO = 'sprintSolo',
-  SPRINT_COOP = 'sprintCoop'
-}
-
-export enum Difficulty {
-  EASY = 'easy',
-  INTERMEDIATE = 'intermediate',
-  HARD = 'hard'
-}
-
-export enum PlayerStatus {
-  DRAWER = 'active',
-  GUESSER = 'guesser',
-  PASSIVE = 'passive'
-}
-
-export enum CurrentGameState {
-  LOBBY = 'lobby',
-  IN_GAME = 'game',
-  DRAWING = 'draw',
-  REPLY = 'reply',
-  GAME_OVER = 'over'
 }
 
 const DEFAULT_TEAM_SIZE = 4;
@@ -92,11 +48,11 @@ export abstract class Lobby {
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
-  protected players: Player[];
+  protected players: ServerPlayer[];
   protected teams: {
     teamNumber: number;
     currentScore: number;
-    playersInTeam: Player[];
+    playersInTeam: ServerPlayer[];
   }[];
 
   constructor(
@@ -156,7 +112,7 @@ export abstract class Lobby {
         if (account.documents.avatar) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const playerAvatar = (account.documents.avatar as any)._id;
-          const player: Player = {
+          const player: ServerPlayer = {
             accountId: accountIdPlayer,
             username: playerName,
             avatarId: playerAvatar,

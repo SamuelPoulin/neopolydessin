@@ -3,7 +3,8 @@ import { Server, Socket } from 'socket.io';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, Lobby, Player, PlayerStatus } from './lobby';
+import { CurrentGameState, Difficulty, GameType, PlayerStatus } from '../../common/communication/lobby';
+import { Lobby, ServerPlayer } from './lobby';
 
 
 @injectable()
@@ -33,7 +34,7 @@ export class LobbyClassique extends Lobby {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const playerAvatar = (account.documents.avatar as any)._id;
           if (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) {
-            const player: Player = {
+            const player: ServerPlayer = {
               accountId: accountIdPlayer,
               username: playerName,
               avatarId: playerAvatar,
@@ -45,7 +46,7 @@ export class LobbyClassique extends Lobby {
             this.teams[0].playersInTeam.push(player);
           }
           else {
-            const player: Player = {
+            const player: ServerPlayer = {
               accountId: accountIdPlayer,
               username: playerName,
               avatarId: playerAvatar,
