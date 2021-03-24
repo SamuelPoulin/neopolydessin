@@ -17,7 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientLeger"
         android:usesCleartextTraffic="true">
-
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
                app to run.
@@ -40,6 +39,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.lobbylist.view.SearchLobbyActivity"
+            android:label="@string/title_activity_search_lobby"
+            android:theme="@style/Theme.ClientLeger.NoActionBar"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity android:name=".ui.lobby.view.LobbyActivity"
+            android:screenOrientation="landscape">
+        </activity>
+
         <activity
             android:name=".ui.mainmenu.view.MainmenuActivity"
             android:screenOrientation="landscape"/>

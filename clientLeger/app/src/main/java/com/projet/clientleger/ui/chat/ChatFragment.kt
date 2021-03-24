@@ -59,7 +59,8 @@ class ChatFragment @Inject constructor() : Fragment() {
         super.onCreate(savedInstanceState)
         username = arguments?.getString("username") ?: "unknowned_user"
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
-            println((bundle["friend"] as FriendSimplified).username)
+            (bundle["friend"] as FriendSimplified).username
+            // TODO chat openned from friendslists
         }
     }
 

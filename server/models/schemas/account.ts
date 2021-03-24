@@ -14,6 +14,7 @@ interface Friend {
   friendId: string | {
     _id: string;
     username: string;
+    avatar: string;
   } | null;
   status: FriendStatus;
   received: boolean;
@@ -24,6 +25,7 @@ export interface FriendsList {
 }
 export interface Account extends Document {
   _id: ObjectId;
+  avatar: string | undefined;
   firstName: string;
   lastName: string;
   username: string;
@@ -49,6 +51,9 @@ interface AccountModel extends Model<Account> {
 }
 
 export const accountSchema = new Schema<Account, AccountModel>({
+  avatar: {
+    type: ObjectId, ref: 'Avatar'
+  },
   firstName: String,
   lastName: String,
   username: {

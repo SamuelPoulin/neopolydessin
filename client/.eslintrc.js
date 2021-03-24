@@ -37,6 +37,8 @@ module.exports = {
         "@typescript-eslint",
     ],
     "ignorePatterns": [
+        '*.html',
+        '*.scss',
         '*.spec.ts',
         '.eslintrc.js'
     ],

@@ -10,10 +10,15 @@ import { Lobby } from './lobby';
 @injectable()
 export class LobbyClassique extends Lobby {
 
-  constructor(socketIdService: SocketIdService, databaseService: DatabaseService,
-    io: Server, accountId: string, difficulty: Difficulty, privateGame: boolean)
-  {
-    super(socketIdService, databaseService, io, accountId, difficulty, privateGame);
+  constructor(socketIdService: SocketIdService,
+    databaseService: DatabaseService,
+    io: Server,
+    accountId: string,
+    difficulty: Difficulty,
+    privateGame: boolean,
+    lobbyName: string
+  ) {
+    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
   }

@@ -1,6 +1,6 @@
 /* tslint:disable:no-any no-magic-numbers */
 import { expect } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 
 import { Server } from './server';
 

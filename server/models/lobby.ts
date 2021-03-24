@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { DrawingCommandsService } from '../app/services/drawing-commands.service';
+import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -12,6 +12,10 @@ import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
 import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
 import { Coord } from './commands/path';
+
+export interface ServerPlayer extends Player {
+  socket: Socket;
+}
 
 const DEFAULT_TEAM_SIZE = 4;
 
@@ -30,6 +34,7 @@ export abstract class Lobby {
   gameType: GameType;
   difficulty: Difficulty;
   privateLobby: boolean;
+  lobbyName: string;
 
   protected io: Server;
   protected ownerAccountId: string;
@@ -37,14 +42,14 @@ export abstract class Lobby {
   protected size: number;
   protected wordToGuess: string;
   protected currentGameState: CurrentGameState;
-  protected drawingCommands: DrawingCommandsService;
+  protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
-  protected players: Player[];
+  protected players: ServerPlayer[];
   protected teams: {
     teamNumber: number;
     currentScore: number;
-    playersInTeam: Player[];
+    playersInTeam: ServerPlayer[];
   }[];
 
   constructor(
@@ -53,17 +58,19 @@ export abstract class Lobby {
     io: Server,
     accountId: string,
     difficulty: Difficulty,
-    privacySetting: boolean
+    privacySetting: boolean,
+    lobbyName: string
   ) {
     this.io = io;
     this.ownerAccountId = accountId;
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
+    this.lobbyName = lobbyName;
     this.lobbyId = uuidv4();
     this.size = gameSizeMap.get(GameType.CLASSIC) as number;
     this.wordToGuess = '';
     this.currentGameState = CurrentGameState.LOBBY;
-    this.drawingCommands = new DrawingCommandsService();
+    this.drawingCommands = new DrawingService();
     this.timeLeftSeconds = 0;
     this.players = [];
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
@@ -80,11 +87,13 @@ export abstract class Lobby {
         playerInfoList.push({
           teamNumber: this.players[index].teamNumber,
           playerName: playerInfo.username,
-          accountId: playerInfo.accountId
+          accountId: playerInfo.accountId,
+          avatar: playerInfo.avatar
         });
       });
       return {
         lobbyId: this.lobbyId,
+        lobbyName: this.lobbyName,
         playerInfo: playerInfoList,
         gameType: this.gameType,
       };
@@ -160,8 +169,8 @@ export abstract class Lobby {
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket)) {
         this.drawingCommands.startPath(startPoint, brushInfo)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startPoint, brushInfo);
+          .then((startedPath) => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startedPath.id, startPoint, startedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to start path for ${this.lobbyId}`);
@@ -193,11 +202,11 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.START_ERASE, (startPoint: Coord) => {
+    socket.on(SocketDrawing.ERASE_ID, (id: number) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.startErase(startPoint)
+        this.drawingCommands.erase(id)
           .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_ERASE_BC, startPoint);
+            this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_ID_BC, id);
           })
           .catch(() => {
             console.log(`failed to start erase for ${this.lobbyId}`);
@@ -205,50 +214,14 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketDrawing.UPDATE_ERASE, (coords: Coord[]) => {
+    socket.on(SocketDrawing.ADD_PATH, (id: number) => {
       if (this.isActivePlayer(socket)) {
-        this.drawingCommands.updateErase(coords)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_ERASE_BC, coords);
+        this.drawingCommands.addPath(id)
+          .then((addedPath) => {
+            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.path, addedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to update erase for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.END_ERASE, (endPoint: Coord) => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.endErase(endPoint)
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.END_ERASE_BC, endPoint);
-          })
-          .catch(() => {
-            console.log(`failed to end erase for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.UNDO, () => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.undo()
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UNDO_BC);
-          })
-          .catch(() => {
-            console.log(`failed to undo for ${this.lobbyId}`);
-          });
-      }
-    });
-
-    socket.on(SocketDrawing.REDO, () => {
-      if (this.isActivePlayer(socket)) {
-        this.drawingCommands.redo()
-          .then(() => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.REDO_BC);
-          })
-          .catch(() => {
-            console.log(`failed to redo for ${this.lobbyId}`);
           });
       }
     });
@@ -269,7 +242,7 @@ export abstract class Lobby {
 
     socket.on(SocketMessages.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
+      if (senderAccountId === this.ownerAccountId) {
         this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
         this.currentGameState = CurrentGameState.IN_GAME;
       }
@@ -281,11 +254,10 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
-    socket.removeAllListeners(SocketDrawing.START_ERASE);
-    socket.removeAllListeners(SocketDrawing.UPDATE_ERASE);
-    socket.removeAllListeners(SocketDrawing.END_ERASE);
-    socket.removeAllListeners(SocketDrawing.UNDO);
-    socket.removeAllListeners(SocketDrawing.REDO);
+    socket.removeAllListeners(SocketDrawing.ERASE_ID);
+    socket.removeAllListeners(SocketDrawing.ERASE_ID_BC);
+    socket.removeAllListeners(SocketDrawing.ADD_PATH);
+    socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
     socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketMessages.PLAYER_GUESS);

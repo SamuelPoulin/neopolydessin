@@ -1,8 +1,5 @@
 package com.projet.clientleger.data.api.service
 
-import android.app.Service
-import android.content.Intent
-import android.os.*
 import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.model.Message
 import com.projet.clientleger.data.model.MessageChat
@@ -96,8 +93,6 @@ class SocketService @Inject constructor() {
                 val status = resp["status"] as String
                 emitter.onNext(status == "Valid")
             })
-
         }
-
     }
 }

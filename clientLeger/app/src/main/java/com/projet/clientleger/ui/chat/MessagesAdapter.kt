@@ -63,7 +63,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
             viewHolder.messageTimeTextView.text = time
         }
         viewHolder.messageTextView.text = mMessages[position].content
-
     }
 
     override fun getItemCount(): Int {

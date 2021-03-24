@@ -1,6 +1,6 @@
-import * as express from 'express';
+import express from 'express';
 import { body } from 'express-validator';
-import * as httpStatus from 'http-status-codes';
+import httpStatus from 'http-status-codes';
 import { inject, injectable } from 'inversify';
 import { jwtVerify } from '../middlewares/jwt-verify';
 import { LoggedIn } from '../middlewares/logged-in';
