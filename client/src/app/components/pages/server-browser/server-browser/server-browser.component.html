@@ -1,0 +1,8 @@
+<div id="server-browser-container">
+  <div id="menu-container">
+    <app-status-bar back previousPage=""></app-status-bar>
+    <div id="content-container">
+      <div *ngFor="let lobby of lobbies" (click)="joinLobby(lobby.lobbyId)">{{lobby.lobbyId}}</div>
+    </div>
+  </div>
+</div>

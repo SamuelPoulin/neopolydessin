@@ -2,6 +2,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { StatusBarModule } from '@components/shared/status-bar/status-bar.module';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 // import { ModalType } from 'src/app/services/modal/modal-type.enum';
 import { SharedModule } from '../../../shared/shared.module';
@@ -17,7 +18,7 @@ describe('HomeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule],
+      imports: [SharedModule, RouterTestingModule, StatusBarModule],
       declarations: [HomeComponent],
       providers: [
         {
