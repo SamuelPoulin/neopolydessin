@@ -35,6 +35,10 @@ class ChatFragment @Inject constructor() : Fragment() {
     private var messages: ArrayList<IMessage> = ArrayList()
     private lateinit var username: String
 
+    companion object {
+        fun newInstance() = ChatFragment()
+    }
+
     @Inject
     lateinit var socketService: SocketService
 

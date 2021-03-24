@@ -7,10 +7,12 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.databinding.ActivityLobbyBinding
+import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
@@ -62,6 +64,15 @@ class LobbyActivity : AppCompatActivity() {
         setSubscriptions()
         if(gameInfo.gameCreator != username){
             startGameButton.visibility = View.INVISIBLE
+        }
+
+        val fragment :ChatFragment = ChatFragment.newInstance()
+
+        if(savedInstanceState == null){
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.chat_root,fragment,"chat_fragment")
+                .commit()
         }
     }
     private fun getFrenchGameMode(englishMode:String):String{
