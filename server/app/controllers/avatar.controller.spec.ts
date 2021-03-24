@@ -21,7 +21,6 @@ describe('AvatarController', () => {
     let checkLoggedInStub: any;
     let uploadAvatarStub: any;
     let getAvatarStub: any;
-    let removeFolderAtEndOfTests: boolean;
 
     before(() => {
         jwtVerifyStub = sinon.stub(jwtVerify, 'jwtVerify');
