@@ -44,6 +44,13 @@ export class EditorService {
     this.gridProperties = new GridProperties();
 
     this.loading = false;
+
+    this.socketService.receiveRemovePath().subscribe((id: number) => {
+      const shape = this.findShapeById(id + 1); // todo - conform to server standard
+      if (shape) {
+        this.removeShape(shape);
+      }
+    });
   }
 
   resetDrawing(): void {

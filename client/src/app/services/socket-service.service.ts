@@ -3,24 +3,31 @@ import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { Path } from '@models/shapes/path';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
+import { BrushInfo } from '../../../../common/communication/brush-info';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
 import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
+import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private static API_BASE_URL: string;
+  private jwtService: JwtHelperService;
 
   socket: Socket;
   manager: Manager;
 
-  constructor(private localSaveService: LocalSaveService) {
+  constructor(private localSaveService: LocalSaveService, private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
+    this.jwtService = new JwtHelperService();
 
     this.manager = new Manager(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
@@ -32,6 +39,18 @@ export class SocketService {
         token: this.localSaveService.accessToken,
       },
     });
+
+    this.refreshToken();
+
+    setInterval(() => {
+      this.refreshToken();
+    }, ACCESS_TOKEN_REFRESH_INTERVAL);
+  }
+
+  refreshToken(): void {
+    if (this.jwtService.isTokenExpired(this.localSaveService.accessToken)) {
+      this.userService.refreshToken(this.localSaveService.refreshToken);
+    }
   }
 
   receiveMessage(): Observable<ChatMessage> {
@@ -106,10 +125,10 @@ export class SocketService {
     this.socket.emit(SocketMessages.START_GAME_SERVER);
   }
 
-  receiveStartPath(): Observable<Coordinate> {
-    return new Observable<Coordinate>((obs) => {
-      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate) => {
-        obs.next(coord);
+  receiveStartPath(): Observable<{ coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ coord: Coordinate; brush: BrushInfo }>((obs) => {
+      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate, brush: BrushInfo) => {
+        obs.next({ coord, brush });
       });
     });
   }
@@ -130,6 +149,22 @@ export class SocketService {
     });
   }
 
+  receiveAddPath(): Observable<Path> {
+    return new Observable<Path>((obs) => {
+      this.socket.on(SocketDrawing.ADD_PATH_BC, (path: Path) => {
+        obs.next(path);
+      });
+    });
+  }
+
+  receiveRemovePath(): Observable<number> {
+    return new Observable<number>((obs) => {
+      this.socket.on(SocketDrawing.ERASE_ID_BC, (id: number) => {
+        obs.next(id);
+      });
+    });
+  }
+
   sendStartPath(coord: Coordinate, color: string, strokeWidth: number): void {
     this.socket.emit(SocketDrawing.START_PATH, coord, { color, strokeWidth });
   }
@@ -140,5 +175,13 @@ export class SocketService {
 
   sendEndPath(coord: Coordinate): void {
     this.socket.emit(SocketDrawing.END_PATH, coord);
+  }
+
+  sendAddPath(path: Path): void {
+    this.socket.emit(SocketDrawing.ADD_PATH, path);
+  }
+
+  sendRemovePath(id: number): void {
+    this.socket.emit(SocketDrawing.ERASE_ID, id);
   }
 }
