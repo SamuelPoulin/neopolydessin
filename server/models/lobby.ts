@@ -277,7 +277,7 @@ export abstract class Lobby {
         if (player) {
           const messageWithUsername: ChatMessage = {
             content: sentMsg.content,
-            timestamp: sentMsg.timestamp,
+            timestamp: Date.now(),
             senderUsername: player.username
           };
           socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);

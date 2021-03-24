@@ -70,7 +70,7 @@ messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage, senderId: str
         messages: {
           senderAccountId: senderId,
           content: msg.content,
-          timestamp: msg.timestamp,
+          timestamp: Date.now(),
         }
       }
     }
