@@ -12,7 +12,7 @@ import { AvatarService } from '../services/avatar.service';
 import { ErrorMsg } from '../services/database.service';
 import Types from '../types';
 
-export const AVATAR_PATH = '/PolyDessin/avatars';
+export const AVATAR_PATH = '/var/www/Polydessin/avatars';
 
 const validPicture = (fileType: string, fileName: string): boolean => {
   const fileExtension = path.extname(fileName);
@@ -26,6 +26,8 @@ export class AvatarController {
   pictureStorage: StorageEngine;
 
   uploadPicture: Multer;
+
+  avatarPath: string;
 
   constructor(
     @inject(Types.AvatarService) private avatarService: AvatarService,

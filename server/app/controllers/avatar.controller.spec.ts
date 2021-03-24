@@ -30,10 +30,6 @@ describe('AvatarController', () => {
                 req.params._id = '1';
                 return next();
             });
-        if (!fs.existsSync(AVATAR_PATH)) {
-            removeFolderAtEndOfTests = true;
-        }
-
     })
 
     beforeEach((done: Mocha.Done) => {
@@ -51,9 +47,6 @@ describe('AvatarController', () => {
 
     after(() => {
         jwtVerifyStub.restore();
-        if (removeFolderAtEndOfTests) {
-            fs.rmdirSync('/PolyDessin', { recursive: true });
-        }
     });
 
     afterEach(async () => {
