@@ -14,9 +14,8 @@ import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KSuspendFunction1
 
 class FakeSessionManager @Inject constructor(
-        context: Context,
         tokenInterceptor:TokenInterceptor,
-        apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager(context, tokenInterceptor, apiSessionManagerInterface){
+        apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager(null, tokenInterceptor, apiSessionManagerInterface){
 
     override fun saveCreds(accessToken: String, refreshToken: String){}
     override fun updateAccessToken(accessToken: String){}

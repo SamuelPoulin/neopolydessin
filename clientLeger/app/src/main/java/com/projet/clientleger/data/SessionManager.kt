@@ -21,14 +21,18 @@ private const val REFRESH_TOKEN = "refreshToken"
 
 @Singleton
 open class SessionManager @Inject constructor(
-    context: Context,
+    context: Context?,
     private val tokenInterceptor: TokenInterceptor,
     private val apiSessionManagerInterface: ApiSessionManagerInterface
 ) {
-    private var userPrefs: SharedPreferences =
-        context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
+    private lateinit var userPrefs: SharedPreferences
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
+    init {
+        if(context != null){
+            userPrefs = context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
+        }
+    }
 
     open fun saveCreds(accessToken: String, refreshToken: String) {
         userPrefs.edit {

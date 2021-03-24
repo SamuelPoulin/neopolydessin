@@ -1,4 +1,4 @@
-package com.projet.clientleger.register
+package com.projet.clientleger.connexion
 
 import com.projet.clientleger.data.api.ApiConnectionInterface
 import com.projet.clientleger.data.api.model.ConnectionModel

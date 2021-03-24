@@ -32,7 +32,9 @@ class ConnexionRepositoryTest {
     @Inject
     lateinit var apiConnectionInterface: ApiConnectionInterface
 
+    @Inject
     lateinit var sessionManager: SessionManager
+
     private lateinit var connectionRepo: ConnectionRepository
 
     @Before

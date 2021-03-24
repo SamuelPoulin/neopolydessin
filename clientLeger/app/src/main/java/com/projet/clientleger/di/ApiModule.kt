@@ -56,8 +56,4 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideSocketService(): SocketService = SocketService()
-
-    @Provides
-    @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
 }
