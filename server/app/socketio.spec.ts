@@ -290,7 +290,6 @@ describe('Socketio', () => {
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId2,
                         content: 'eyo what up',
-                        timestamp: Date.now(),
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                     testClient.socket.close();
@@ -320,7 +319,6 @@ describe('Socketio', () => {
                     const msg: PrivateMessage = {
                         receiverAccountId: accountId,
                         content: 'bonjourhi',
-                        timestamp: Date.now(),
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                 });
@@ -367,7 +365,6 @@ describe('Socketio', () => {
                     const msg: PrivateMessage = {
                         receiverAccountId: accountId,
                         content: 'bonjourhi',
-                        timestamp: Date.now(),
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                 });
@@ -403,7 +400,6 @@ describe('Socketio', () => {
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId3,
                         content: 'eyo what up',
-                        timestamp: Date.now(),
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                     testClient.socket.close();
