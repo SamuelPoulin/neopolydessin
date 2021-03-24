@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
-import { SocketService } from './socket-service.service';
+import { LocalSaveService } from './localsave.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,34 +20,38 @@ export class APIService {
   private static API_DRAWINGS_ROUTE: string;
   private static API_DRAWING_ROUTE: string;
   private static API_EMAIL_ROUTE: string;
+  private static API_AUTH_ROUTE: string;
+  private static API_LOGIN_ROUTE: string;
+  private static API_REGISTER_ROUTE: string;
 
-  constructor(private http: HttpClient, private notification: MatSnackBar) {
+  constructor(private http: HttpClient, private notification: MatSnackBar, private localSaveService: LocalSaveService) {
     APIService.API_BASE_URL = environment.apiBaseUrl;
     APIService.API_EMAIL_ROUTE = '/email';
     APIService.API_DATABASE_ROUTE = '/database';
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
+    APIService.API_AUTH_ROUTE = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth';
+    APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
+    APIService.API_REGISTER_ROUTE = APIService.API_AUTH_ROUTE + '/register';
   }
 
   async login(username: string, password: string) {
-    const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/login';
     return this.http
-      .post(url, { username, password })
+      .post(APIService.API_LOGIN_ROUTE, { username, password })
       .toPromise()
       .then((reply: { accessToken: string; refreshToken: string }) => {
-        SocketService.ACCESS_TOKEN = reply.accessToken;
-        SocketService.REFRESH_TOKEN = reply.refreshToken;
+        this.localSaveService.accessToken = reply.accessToken;
+        this.localSaveService.refreshToken = reply.refreshToken;
       });
   }
 
   async register(firstName: string, lastName: string, username: string, email: string, password: string) {
-    const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth/register';
     return this.http
-      .post(url, { firstName, lastName, username, email, password, passwordConfirm: password })
+      .post(APIService.API_REGISTER_ROUTE, { firstName, lastName, username, email, password, passwordConfirm: password })
       .toPromise()
       .then((reply: { accessToken: string; refreshToken: string }) => {
-        SocketService.ACCESS_TOKEN = reply.accessToken;
-        SocketService.REFRESH_TOKEN = reply.refreshToken;
+        this.localSaveService.accessToken = reply.accessToken;
+        this.localSaveService.refreshToken = reply.refreshToken;
       }); // todo - fix duplicate password
   }
 
