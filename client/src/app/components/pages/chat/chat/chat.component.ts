@@ -61,12 +61,11 @@ export class ChatComponent implements OnInit {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
         this.socketService.sendMessage({
           content: this.inputValue,
-          timestamp: Date.now(),
         });
-        this.messages.push({
+        /* this.messages.push({
           content: this.inputValue,
           timestamp: Date.now(),
-        } as ChatMessage);
+        } as ChatMessage);*/
         this.inputValue = '';
         this.scrollToBottom();
       } else {
