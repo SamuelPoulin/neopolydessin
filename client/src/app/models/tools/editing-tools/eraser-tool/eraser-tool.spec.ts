@@ -27,6 +27,7 @@ describe('EraserTool', () => {
     }).compileComponents();
 
     eraser = new EraserTool(TestBed.inject(EditorService));
+    eraser.initMouseHandler();
     fixture = TestBed.createComponent(DrawingSurfaceComponent);
     drawingSurface = fixture.componentInstance;
     fixture.detectChanges();

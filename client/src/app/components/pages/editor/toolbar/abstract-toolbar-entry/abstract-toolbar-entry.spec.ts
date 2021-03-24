@@ -6,11 +6,9 @@ import { Tool } from '@tools/tool';
 import { AbstractToolbarEntryDirective } from 'src/app/components/pages/editor/toolbar/abstract-toolbar-entry/abstract-toolbar-entry';
 import { CreatorToolProperties } from 'src/app/models/tool-properties/creator-tool-properties/creator-tool-properties';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
-import { ColorsService } from 'src/app/services/colors.service';
 import { EditorService } from 'src/app/services/editor.service';
 import { Directive } from '@angular/core';
-import { SocketService } from '@services/socket-service.service';
-import { LocalSaveService } from '@services/localsave.service';
+import { TestBed } from '@angular/core/testing';
 
 @Directive()
 export class AbstractToolbarEntryMock extends AbstractToolbarEntryDirective<CreatorToolProperties> {
@@ -28,7 +26,7 @@ describe('AbstractToolbarEntry', () => {
   } as ToolProperties;
 
   beforeEach(() => {
-    editorService = new EditorService(new ColorsService(), new SocketService(new LocalSaveService()));
+    editorService = TestBed.inject(EditorService);
     editorService.tools.set(type, { toolProperties } as Tool);
     toolbarEntry = new AbstractToolbarEntryMock(editorService);
   });

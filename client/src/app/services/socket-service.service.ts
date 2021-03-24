@@ -108,7 +108,7 @@ export class SocketService {
 
   receiveStartPath(): Observable<Coordinate> {
     return new Observable<Coordinate>((obs) => {
-      this.socket.on(SocketDrawing.START_PATH_BC, (coord: Coordinate) => {
+      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate) => {
         obs.next(coord);
       });
     });

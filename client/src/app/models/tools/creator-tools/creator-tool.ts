@@ -1,19 +1,18 @@
 import { AddShapesCommand } from '@models/commands/shape-commands/add-shapes-command';
+import { Coordinate } from '@utils/math/coordinate';
 import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { Tool } from 'src/app/models/tools/tool';
 import { EditorService } from 'src/app/services/editor.service';
 
 export abstract class CreatorTool extends Tool {
   abstract shape: BaseShape | undefined;
-  abstract createShape(): BaseShape;
+  abstract createShape(coord: Coordinate): BaseShape;
 
   protected constructor(editorService: EditorService, isActive: boolean = false) {
     super(editorService);
-    this.initListeners();
     this.isActive = isActive;
   }
 
-  protected abstract initListeners(): void;
   protected abstract updateProperties(): void;
 
   handleMouseEvent(e: MouseEvent): boolean {
@@ -24,9 +23,9 @@ export abstract class CreatorTool extends Tool {
     return result;
   }
 
-  protected startShape(): void {
+  protected startShape(coord: Coordinate): void {
     this.isActive = true;
-    this.shape = this.createShape();
+    this.shape = this.createShape(coord);
     this.updateProperties();
     this.addShape();
   }

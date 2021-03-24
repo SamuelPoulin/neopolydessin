@@ -106,7 +106,7 @@ describe('EditorComponent', () => {
       }
     }
 
-    const tool: ToolImpl = new ToolImpl({} as EditorService, 'toolMock');
+    const tool: ToolImpl = new ToolImpl(TestBed.inject(EditorService), 'toolMock');
     component.editorService.tools.set('toolMock' as ToolType, tool);
 
     component.currentToolType = 'toolMock' as ToolType;

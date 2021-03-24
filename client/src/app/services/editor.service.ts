@@ -11,6 +11,7 @@ import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing
 import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { ColorsService } from 'src/app/services/colors.service';
 import { APIService } from './api.service';
+import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
 
 @Injectable({
@@ -31,7 +32,7 @@ export class EditorService {
     return this._commandReceiver;
   }
 
-  constructor(public colorsService: ColorsService, public socketService: SocketService) {
+  constructor(public colorsService: ColorsService, public socketService: SocketService, public gameService: GameService) {
     this._commandReceiver = new CommandReceiver();
 
     this.tools = new Map<ToolType, Tool>();

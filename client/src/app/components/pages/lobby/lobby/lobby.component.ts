@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from '@services/socket-service.service';
 import { Router } from '@angular/router';
 import { UserService } from '@services/user.service';
+import { GameService } from '@services/game.service';
 
 @Component({
   selector: 'app-lobby',
@@ -21,6 +22,7 @@ export class LobbyComponent implements AfterViewInit {
     private snackBar: MatSnackBar,
     private socketService: SocketService,
     private router: Router,
+    private gameService: GameService,
     userService: UserService,
   ) {
     this.playersTeam1.push(userService.username);
@@ -42,7 +44,8 @@ export class LobbyComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.socketService.createLobby('client-lourd');
+    this.gameService.isDrawer = true;
+    this.socketService.createLobby('client-lourd'); // todo - host only must create lobby;
     this.socketService.getPlayerJoined().subscribe((player) => {
       this.playersTeam2.push(player);
     });

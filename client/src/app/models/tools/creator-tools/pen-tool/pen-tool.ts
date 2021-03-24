@@ -19,16 +19,15 @@ export class PenTool extends CreatorTool {
     this.shape.updateProperties();
   }
 
-  createShape(): Path {
-    return new Path(this.mousePosition);
+  createShape(coord: Coordinate): Path {
+    return new Path(coord);
   }
 
   protected startShape(coord: Coordinate = this.mousePosition): void {
-    super.startShape();
-    this.shape.addPoint(coord);
+    super.startShape(coord);
   }
 
-  protected initListeners(): void {
+  initListeners(): void {
     this.editorService.socketService.receiveStartPath().subscribe((coord: Coordinate) => {
       this.startShape(coord);
     });
@@ -37,7 +36,8 @@ export class PenTool extends CreatorTool {
       this.shape.addPoint(coord);
     });
 
-    this.editorService.socketService.receiveEndPath().subscribe(() => {
+    this.editorService.socketService.receiveEndPath().subscribe((coord: Coordinate) => {
+      this.shape.addPoint(coord);
       this.applyShape();
     });
   }
