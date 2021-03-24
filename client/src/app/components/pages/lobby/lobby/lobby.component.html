@@ -36,8 +36,8 @@
         </div>
         <div class="team-container">
           <div class="players-title">Équipe 2</div>
-          <div *ngFor="let player of playersTeam2" class="player-container">
-            <div class="player-avatar">S</div>
+          <div *ngFor="let player of playersTeam2" class="player-container ennemy-container">
+            <div class="player-avatar" [style.background-color]="avatarColor(player)">{{firstLetter(player)}}</div>
             <div class="player-username">{{player}}</div>
           </div>
         </div>

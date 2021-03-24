@@ -5,6 +5,7 @@ import { SocketService } from '@services/socket-service.service';
 import { Router } from '@angular/router';
 import { UserService } from '@services/user.service';
 import { GameService } from '@services/game.service';
+import randomColor from 'randomcolor';
 
 @Component({
   selector: 'app-lobby',
@@ -13,9 +14,9 @@ import { GameService } from '@services/game.service';
 })
 export class LobbyComponent implements AfterViewInit {
   gamemode: string = 'classique';
-  inviteCode: string = 'dWA1gV';
-  playersTeam1: string[] = new Array<string>();
-  playersTeam2: string[] = new Array<string>();
+  inviteCode: string = 'Bientôt';
+  playersTeam1: string[] = [];
+  playersTeam2: string[] = [];
 
   constructor(
     private clipboard: Clipboard,
@@ -41,6 +42,14 @@ export class LobbyComponent implements AfterViewInit {
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
+  }
+
+  firstLetter(username: string): string {
+    return username ? username[0].toUpperCase() : '';
+  }
+
+  avatarColor(username: string): string {
+    return randomColor({ seed: username, luminosity: 'bright' });
   }
 
   ngAfterViewInit(): void {

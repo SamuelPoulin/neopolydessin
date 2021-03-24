@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { SocketService } from '@services/socket-service.service';
 // import { Router } from '@angular/router';
 // import { SocketService } from '@services/socket-service.service';
 import { Observable } from 'rxjs';
@@ -19,14 +21,12 @@ export class ServerBrowserComponent implements OnInit {
   dataSource: MatTableDataSource<LobbyInfo>;
   lobbyCount: number;
 
-  constructor() // private socketService: SocketService,
-  // private router: Router
-  {
+  constructor(private socketService: SocketService, private router: Router) {
     this.dataSource = new MatTableDataSource<LobbyInfo>();
   }
 
   ngOnInit() {
-    this.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
+    this.socketService.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
       this.dataSource.data = lobbies;
       this.lobbyCount = lobbies.length;
     });
@@ -61,8 +61,8 @@ export class ServerBrowserComponent implements OnInit {
 
   joinLobby(lobbyId: string): void {
     console.log(lobbyId);
-    // this.socketService.joinLobby(lobbyId);
-    // this.router.navigate(['/edit']);
+    this.socketService.joinLobby(lobbyId);
+    this.router.navigate([`/lobby/${lobbyId}`]);
   }
 
   get showEmptyMessage(): boolean {
