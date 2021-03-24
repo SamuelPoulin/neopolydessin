@@ -51,7 +51,8 @@ export class ServerBrowserComponent implements OnInit {
           playerInfo: [{ teamNumber: 1, playerName: 'Hello', accountId: '123' }],
           lobbyId: Math.floor(Math.random() * this.idMax).toString(),
           gameType: GameType.CLASSIC,
-        });
+          lobbyName: '123',
+        } as LobbyInfo);
       }
 
       resolve(array);
