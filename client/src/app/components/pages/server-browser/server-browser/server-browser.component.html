@@ -1,0 +1,38 @@
+<div id="server-browser-container">
+  <div id="menu-container">
+    <app-status-bar back previousPage=""></app-status-bar>
+    <div id="content-container">
+      <div id="server-browser-table-container">
+        <table mat-table id="server-browser-table" [dataSource]="dataSource">
+          <ng-container matColumnDef="lobbyId">
+            <th mat-header-cell *matHeaderCellDef> Lobby Id </th>
+            <td mat-cell *matCellDef="let lobby"> {{lobby.lobbyId}} </td>
+          </ng-container>
+          <ng-container matColumnDef="playerInfo">
+            <th mat-header-cell *matHeaderCellDef> Players </th>
+            <td mat-cell *matCellDef="let lobby"> {{lobby.playerInfo}} </td>
+          </ng-container>
+          <ng-container matColumnDef="gameType">
+            <th mat-header-cell *matHeaderCellDef> Gamemode </th>
+            <td mat-cell *matCellDef="let lobby"> {{lobby.gameType}} </td>
+          </ng-container>
+          <ng-container matColumnDef="joinButton">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell class="join-button-cell" *matCellDef="let lobby">
+              <button mat-flat-button color="warn" class="menu-button join-button"
+                (click)="joinLobby(lobby.lobbyId)">
+                Rejoindre
+                <mat-icon class="menu-button-icon join-button-icon">arrow_forward</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row class="server-browser-row server-browser-header-row"
+            *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row class="server-browser-row" *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <div id="server-browser-empty-message" *ngIf="showEmptyMessage">Il n'y a présentement aucun lobby public.</div>
+      </div>
+    </div>
+  </div>
+</div>

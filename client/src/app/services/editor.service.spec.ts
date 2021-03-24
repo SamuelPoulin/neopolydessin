@@ -8,9 +8,7 @@ import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing-surface/drawing-surface.component';
 import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
-import { ColorsService } from './colors.service';
 import { EditorService } from './editor.service';
-import { LocalSaveService } from './localsave.service';
 import { Path } from '@models/shapes/path';
 
 describe('EditorService', () => {
@@ -26,7 +24,7 @@ describe('EditorService', () => {
   });
 
   beforeEach(() => {
-    service = new EditorService(new ColorsService(), new LocalSaveService());
+    service = TestBed.inject(EditorService);
     BaseShape['SHAPE_ID'] = 0;
     rectangle = new Rectangle();
     path = new Path();
@@ -35,9 +33,6 @@ describe('EditorService', () => {
     viewSpy.height = 10;
     viewSpy.svg = {
       contains: () => false,
-    };
-    service.saveLocally = () => {
-      return;
     };
     service.view = viewSpy;
 
@@ -81,7 +76,7 @@ describe('EditorService', () => {
     api.getDrawingById = async () => {
       return Promise.resolve({ data: service.exportDrawing() } as Drawing);
     };
-    const service2 = new EditorService(new ColorsService(), new LocalSaveService());
+    const service2 = TestBed.inject(EditorService);
     service2.importDrawingById('', api);
     expect(service2.shapes.values).toEqual(service.shapes.values);
   });

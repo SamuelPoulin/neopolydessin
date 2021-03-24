@@ -14,13 +14,6 @@ export class HomeKeyboardListener extends KeyboardListenerService {
           return true;
         },
       ],
-      [
-        KeyboardListenerService.getIdentifier('g', true),
-        () => {
-          homeComponent.openGallery();
-          return true;
-        },
-      ],
     ]);
   }
 }

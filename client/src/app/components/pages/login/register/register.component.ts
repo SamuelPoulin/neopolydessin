@@ -22,7 +22,7 @@ export class RegisterComponent {
 
   passwordRules: PasswordRule[] = [];
 
-  constructor(private apiService: APIService, private userService: UserService, private router: Router, private snackBar: MatSnackBar) {
+  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar, private router: Router) {
     this.passwordRules.push(
       new PasswordRule('Les mots de passe doivent être les mêmes', this.isPasswordIdentical),
       new PasswordRule('Doit contenir un chiffre', this.passwordHasDigit),
@@ -35,8 +35,8 @@ export class RegisterComponent {
     this.apiService
       .register(this.firstName, this.lastName, this.username, this.email, this.password)
       .then(() => {
-        this.userService.username = this.username;
-        this.router.navigate(['/chat']); // todo - use constant?
+        this.userService.login(this.username);
+        this.router.navigate(['']);
       })
       .catch((err: Error) => {
         console.error(err);
@@ -68,4 +68,8 @@ export class RegisterComponent {
   private isPasswordLong = (registerComponent: RegisterComponent): boolean => {
     return registerComponent.password.length > registerComponent.minPasswordLength;
   };
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
+  }
 }
