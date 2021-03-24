@@ -4,6 +4,7 @@ import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { Path } from '@models/shapes/path';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
@@ -147,6 +148,22 @@ export class SocketService {
     });
   }
 
+  receiveAddPath(): Observable<Path> {
+    return new Observable<Path>((obs) => {
+      this.socket.on(SocketDrawing.ADD_PATH_BC, (path: Path) => {
+        obs.next(path);
+      });
+    });
+  }
+
+  receiveRemovePath(): Observable<number> {
+    return new Observable<number>((obs) => {
+      this.socket.on(SocketDrawing.ERASE_ID_BC, (id: number) => {
+        obs.next(id);
+      });
+    });
+  }
+
   sendStartPath(coord: Coordinate, color: string, strokeWidth: number): void {
     this.socket.emit(SocketDrawing.START_PATH, coord, { color, strokeWidth });
   }
@@ -157,5 +174,13 @@ export class SocketService {
 
   sendEndPath(coord: Coordinate): void {
     this.socket.emit(SocketDrawing.END_PATH, coord);
+  }
+
+  sendAddPath(path: Path): void {
+    this.socket.emit(SocketDrawing.ADD_PATH, path);
+  }
+
+  sendRemovePath(id: number): void {
+    this.socket.emit(SocketDrawing.ERASE_ID, id);
   }
 }
