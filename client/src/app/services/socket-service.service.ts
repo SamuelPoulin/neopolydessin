@@ -41,18 +41,21 @@ export class SocketService {
     });
   }
 
-  receivePlayerConnections(): Observable<Message> {
-    return new Observable<Message>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo) =>
-        msgObs.next({ timestamp: Date.now(), content: `${playerInfo.playerName} a rejoint la discussion.` }),
+  receivePlayerConnections(): Observable<ChatMessage> {
+    return new Observable<ChatMessage>((msgObs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>
+        msgObs.next({
+          timestamp: timeStamp,
+          content: `${playerInfo.playerName} a rejoint la discussion.`,
+          senderUsername: playerInfo.playerName }),
       );
     });
   }
 
-  receivePlayerDisconnections(): Observable<Message> {
-    return new Observable<Message>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string) =>
-        msgObs.next({ timestamp: Date.now(), content: `${username} a quitté la discussion.` }),
+  receivePlayerDisconnections(): Observable<ChatMessage> {
+    return new Observable<ChatMessage>((msgObs) => {
+      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string, timeStamp: number) =>
+        msgObs.next({ timestamp: timeStamp, content: `${username} a quitté la discussion.`, senderUsername: username }),
       );
     });
   }

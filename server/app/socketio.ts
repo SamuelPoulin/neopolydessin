@@ -93,7 +93,7 @@ export class SocketIo {
       });
       this.databaseService.getAccountById(accountIdOfSocket)
         .then((account) => {
-          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username);
+          socket.broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, account.documents.username, Date.now());
           this.socketIdService.DisconnectAccountIdSocketId(socket.id);
           loginsModel.addLogout(accountIdOfSocket)
             .then(() => {
@@ -130,7 +130,7 @@ export class SocketIo {
           socket.join(lobbyId);
           const playerAddedInfo = lobbyToJoin.getPlayerAddedInfo(socket);
           if (playerAddedInfo) {
-            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerAddedInfo);
+            socket.to(lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, playerAddedInfo, Date.now());
           }
           this.io.to(socket.id).emit(SocketMessages.RECEIVE_LOBBY_INFO, lobbyToJoin.toLobbyInfo());
         } else {
