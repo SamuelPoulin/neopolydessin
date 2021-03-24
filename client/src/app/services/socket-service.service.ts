@@ -3,24 +3,29 @@ import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
+import { JwtHelperService } from '@auth0/angular-jwt';
 import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
 import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
+import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private static API_BASE_URL: string;
+  private jwtService: JwtHelperService;
 
   socket: Socket;
   manager: Manager;
 
-  constructor(private localSaveService: LocalSaveService) {
+  constructor(private localSaveService: LocalSaveService, private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
+    this.jwtService = new JwtHelperService();
 
     this.manager = new Manager(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
@@ -32,6 +37,18 @@ export class SocketService {
         token: this.localSaveService.accessToken,
       },
     });
+
+    this.refreshToken();
+
+    setInterval(() => {
+      this.refreshToken();
+    }, ACCESS_TOKEN_REFRESH_INTERVAL);
+  }
+
+  refreshToken(): void {
+    if (this.jwtService.isTokenExpired(this.localSaveService.accessToken)) {
+      this.userService.refreshToken(this.localSaveService.refreshToken);
+    }
   }
 
   receiveMessage(): Observable<ChatMessage> {
