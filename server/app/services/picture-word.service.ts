@@ -1,29 +1,28 @@
 import { OK } from 'http-status-codes';
 import { injectable } from 'inversify';
-import pictureWordModel from 'models/schemas/picture-word-pair';
-import { PictureWordDrawing } from '../../../common/communication/picture-word';
+import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
+import pictureWordModel from '../../models/schemas/picture-word-pair';
 import { DatabaseService, Response } from './database.service';
 
 @injectable()
 export class PictureWordService {
 
-  // async uploadPicture(accountId: string, filePath: string): Promise<Response<void>> {
-  //   return new Promise<Response<void>>((resolve, reject) => {
-  //     pictureWordModel.uplo(accountId, filePath)
-  //       .then((result: Avatar) => {
-  //         resolve({ statusCode: OK, documents: { id: result._id.toHexString() } });
-  //       })
-  //       .catch((err) => {
-  //         reject(DatabaseService.rejectErrorMessage(err));
-  //       });
-  //   });
-  // }
+  async uploadPicture(body: PictureWordPicture): Promise<Response<void>> {
+    return new Promise<Response<void>>((resolve, reject) => {
+      pictureWordModel.uploadPicture(body)
+        .then((picture) => {
+          resolve({ statusCode: OK, documents: undefined });
+        })
+        .catch((err) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
 
   async uploadDrawing(body: PictureWordDrawing): Promise<Response<void>> {
     return new Promise<Response<void>>((resolve, reject) => {
       pictureWordModel.uploadDrawing(body)
-        .then((pictureWord) => {
-          console.log(pictureWord);
+        .then((drawing) => {
           resolve({ statusCode: OK, documents: undefined });
         })
         .catch((err: Error) => {

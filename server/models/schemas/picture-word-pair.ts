@@ -1,15 +1,15 @@
-import { Path } from 'models/commands/path';
 import { Document, Schema, model, ObjectId, Model } from 'mongoose';
+import { Path } from '../../models/commands/path';
 import { DrawMode } from '../../../common/communication/draw-mode';
-import { Difficulty } from '../../../common/communication/difficulty';
 import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
+import { Difficulty } from '../../../common/communication/lobby';
 
 export interface PictureWord extends Document {
   _id: ObjectId;
   word: string;
   uploadedPicturePath?: string;
-  drawnPaths?: [Path];
-  hints: [string];
+  drawnPaths?: Path[];
+  hints: string[];
   difficulty: Difficulty;
   drawMode: DrawMode;
 }
@@ -32,12 +32,7 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
     type: [
       {
         id: Number,
-        path: [
-          {
-            x: Number,
-            y: Number
-          }
-        ],
+        path: [{ x: Number, y: Number }],
         brushInfo: {
           color: String,
           strokeWidth: Number
@@ -59,20 +54,10 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
   }
 });
 
-// pictureWordSchema.statics.uploadPicture = () => {
-
-//   pictureWordModel
-// }
-
-// export interface PictureWord extends Document {
-//   _id: ObjectId;
-//   word: string;
-//   uploadedPicturePath?: string;
-//   drawnPaths?: [Path];
-//   hints: [string];
-//   difficulty: Difficulty;
-//   drawMode: DrawMode;
-// }
+pictureWordSchema.statics.uploadPicture = async (info: PictureWordPicture) => {
+  const toSave = new pictureWordModel(info);
+  return toSave.save();
+};
 
 pictureWordSchema.statics.uploadDrawing = async (info: PictureWordDrawing) => {
   const toSave = new pictureWordModel(info);

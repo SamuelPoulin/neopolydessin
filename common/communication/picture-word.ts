@@ -1,6 +1,6 @@
-import { Difficulty } from './difficulty';
 import { DrawMode } from './draw-mode';
 import { BrushInfo } from './brush-info';
+import { Difficulty } from './lobby';
 
 export interface PictureWordDrawing {
     word: string,
