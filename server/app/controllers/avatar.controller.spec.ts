@@ -60,6 +60,7 @@ describe('AvatarController', () => {
         uploadAvatarStub.restore();
         getAvatarStub.restore();
         if (fs.existsSync(`${AVATAR_PATH}/1.png`)) {
+            console.log('exists');
             fs.unlinkSync(`${AVATAR_PATH}/1.png`);
         }
     });
@@ -82,14 +83,26 @@ describe('AvatarController', () => {
     });
 
     it('get with id should return picture correctly', (done: Mocha.Done) => {
-        getAvatarStub.resolves({ statusCode: OK, documents: { avatar: {} } })
+        uploadAvatarStub.resolves({ statusCode: OK, documents: { id: 'someId' } })
+        getAvatarStub.resolves({ statusCode: OK, documents: `${AVATAR_PATH}/1.png` })
+
         chai
             .request(application.app)
-            .get('/api/avatar/1')
+            .post('/api/avatar/upload')
+            .set('content-type', 'multipart/form-data')
+            .attach('file', 'test/icon.png', 'icon.png')
             .then(() => {
-                chai.expect(getAvatarStub.called).to.equal(true);
-                done();
+                chai.expect(uploadAvatarStub.called).to.equal(true);
+                chai.request(application.app)
+                    .get('/api/avatar/1')
+                    .end((err, res) => {
+                        chai.expect(getAvatarStub.called).to.equal(true);
+                        chai.expect(res.status).to.be.equal(OK);
+                        done();
+                    });
             });
+
+
     });
 
     it('get with id should return 404 if avatar with given id doesn\'t exist', (done: Mocha.Done) => {
