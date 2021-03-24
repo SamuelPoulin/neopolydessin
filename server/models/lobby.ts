@@ -13,6 +13,10 @@ import { DatabaseService } from '../app/services/database.service';
 import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
 import { Coord } from './commands/path';
 
+export interface ServerPlayer extends Player {
+  socket: Socket;
+}
+
 const DEFAULT_TEAM_SIZE = 4;
 
 const gameSizeMap = new Map<GameType, number>([
@@ -41,11 +45,11 @@ export abstract class Lobby {
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
-  protected players: Player[];
+  protected players: ServerPlayer[];
   protected teams: {
     teamNumber: number;
     currentScore: number;
-    playersInTeam: Player[];
+    playersInTeam: ServerPlayer[];
   }[];
 
   constructor(

@@ -1,5 +1,3 @@
-import { Socket } from '../../server/node_modules/socket.io';
-
 export interface LobbyInfo {
   lobbyId: string;
   lobbyName: string;
@@ -17,7 +15,6 @@ export interface PlayerInfo {
 export interface Player {
   accountId: string;
   playerStatus: PlayerStatus;
-  socket: Socket;
   teamNumber: number;
 }
 
