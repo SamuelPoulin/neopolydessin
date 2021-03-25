@@ -8,6 +8,7 @@ declare module 'potrace' {
   export function posterize(
     file: string | Buffer,
     otions: PosterizeOptions,
+    // res should be written to file as .svg
     cb: (err: Error, res: string) => void
   ): void;
 
@@ -15,7 +16,7 @@ declare module 'potrace' {
     background?: string;
     color?: string;
     threshold?: number;
-    steps?: number;
+    steps?: number | number[];
     fillStrategy?: FillStrategy;
   }
 

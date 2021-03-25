@@ -7,6 +7,7 @@ import { Difficulty } from '../../../common/communication/lobby';
 export interface PictureWord extends Document {
   _id: ObjectId;
   word: string;
+  color?: string;
   uploadedPicturePath?: string;
   drawnPaths?: Path[];
   hints: string[];
@@ -24,6 +25,7 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
     type: String,
     required: true,
   },
+  color: String,
   uploadedPicturePath: {
     type: String,
     required: false,

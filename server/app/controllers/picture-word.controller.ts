@@ -27,7 +27,22 @@ export class PictureWordController {
 
     this.router.post('/upload/picture',
       [
-        header('Content-Type').contains('application/json')
+        header('Content-Type').contains('application/json'),
+        body('word').exists(),
+        body('picture').isArray({ min: 1 }),
+        body('hints').isArray({ min: 3, max: 3 }),
+        body('difficulty').isIn([
+          Difficulty.EASY,
+          Difficulty.INTERMEDIATE,
+          Difficulty.HARD
+        ]),
+        body('drawMode').isIn([
+          DrawMode.CONVENTIONAL,
+          DrawMode.RANDOM,
+          DrawMode.PANORAMIC,
+          DrawMode.CENTER_FIRST,
+        ])
+
       ],
       validationCheck,
       jwtVerify,

@@ -17,6 +17,7 @@ export interface PictureWordDrawing {
 export interface PictureWordPicture {
     word: string,
     picture: ArrayBuffer,
+    color: string,
     hints: string[],
     difficulty: Difficulty,
     drawMoode: DrawMode
