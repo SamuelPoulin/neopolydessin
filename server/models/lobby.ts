@@ -67,7 +67,7 @@ export abstract class Lobby {
     this.io = io;
     this.ownerAccountId = accountId;
     this.databaseService.getAccountById(accountId).then((account) => {
-      this.ownerUsername =  account.documents.username;
+      this.ownerUsername = account.documents.username;
     });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
@@ -109,28 +109,24 @@ export abstract class Lobby {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;
-        if (account.documents.avatar) {
+        const player: ServerPlayer = {
+          accountId: accountIdPlayer,
+          username: playerName,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const playerAvatar = (account.documents.avatar as any)._id;
-          const player: ServerPlayer = {
-            accountId: accountIdPlayer,
-            username: playerName,
-            avatarId: playerAvatar,
-            playerStatus: status,
-            socket: socketPlayer,
-            teamNumber: 0
-          };
-
-          this.players.push(player);
-          this.teams[0].playersInTeam.push(player);
-          socketPlayer.join(this.lobbyId);
-          this.bindLobbyEndPoints(socketPlayer);
-        }
+          avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
+          playerStatus: status,
+          socket: socketPlayer,
+          teamNumber: 0
+        };
+        this.players.push(player);
+        this.teams[0].playersInTeam.push(player);
+        socketPlayer.join(this.lobbyId);
+        this.bindLobbyEndPoints(socketPlayer);
       });
     }
   }
 
-  getPlayerAddedInfo(socket: Socket): PlayerInfo  | undefined{
+  getPlayerAddedInfo(socket: Socket): PlayerInfo | undefined {
     const player = this.findPlayerBySocket(socket);
     if (player) {
       return {
@@ -191,7 +187,7 @@ export abstract class Lobby {
   }
 
   findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => player.socket === socket);
+    return this.players.find((player) => player.socket.id === socket.id);
   }
 
   lobbyHasRoom(): boolean {

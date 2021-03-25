@@ -30,33 +30,31 @@ export class LobbyClassique extends Lobby {
     if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
       await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
         const playerName = account.documents.username;
-        if (account.documents.avatar) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const playerAvatar = (account.documents.avatar as any)._id;
-          if (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) {
-            const player: ServerPlayer = {
-              accountId: accountIdPlayer,
-              username: playerName,
-              avatarId: playerAvatar,
-              playerStatus: status,
-              socket: socketPlayer,
-              teamNumber: 0
-            };
-            this.players.push(player);
-            this.teams[0].playersInTeam.push(player);
-          }
-          else {
-            const player: ServerPlayer = {
-              accountId: accountIdPlayer,
-              username: playerName,
-              avatarId: playerAvatar,
-              playerStatus: status,
-              socket: socketPlayer,
-              teamNumber: 1
-            };
-            this.players.push(player);
-            this.teams[1].playersInTeam.push(player);
-          }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const avatarId = account.documents.avatar ? (account.documents.avatar as any)._id : null;
+        if (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) {
+          const player: ServerPlayer = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            avatarId,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 0
+          };
+          this.players.push(player);
+          this.teams[0].playersInTeam.push(player);
+        }
+        else {
+          const player: ServerPlayer = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            avatarId,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 1
+          };
+          this.players.push(player);
+          this.teams[1].playersInTeam.push(player);
         }
         socketPlayer.join(this.lobbyId);
         this.bindLobbyEndPoints(socketPlayer);
@@ -148,13 +146,13 @@ export class LobbyClassique extends Lobby {
   }
 
   startTimerGuessToClient() {
-    const gameStartTime = new Date(Date.now() +  this.timeLeftSeconds * this.MS_PER_SEC);
+    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, gameStartTime);
   }
 
   startTimerReplyToClient() {
     const replyTimeSeconds = 10;
-    const timerValue = new Date(Date.now() +  replyTimeSeconds * this.MS_PER_SEC);
+    const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, timerValue);
   }
 }
