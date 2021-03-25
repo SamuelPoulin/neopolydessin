@@ -26,11 +26,10 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
 
     override fun getItemViewType(position: Int): Int {
         val type: MessageType
-        println(mMessages[position])
         when {
             mMessages[position] is MessageChat -> {
                 val msg = mMessages[position] as MessageChat
-                type = when (msg.user) {
+                type = when (msg.username) {
                     username -> MessageType.USER
                     else -> MessageType.OTHER
                 }
@@ -81,8 +80,9 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
         //button.text = if (contact.isOnline) "Message" else "Offline"
         //button.isEnabled = contact.isOnline
         if(getItemViewType(position) == MessageType.OTHER.ordinal){
-            val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
-            viewHolder.messageUsernameTextView.text = (mMessages[position] as MessageChat).user //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
+            val msg = mMessages[position] as MessageChat
+            val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(msg.timestamp))
+            viewHolder.messageUsernameTextView.text = msg.username //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
             viewHolder.messageTimeTextView.text = time
         }
         viewHolder.messageTextView.text = mMessages[position].content

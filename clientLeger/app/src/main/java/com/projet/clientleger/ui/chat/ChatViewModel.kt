@@ -3,10 +3,7 @@ package com.projet.clientleger.ui.chat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.GuessStatus
-import com.projet.clientleger.data.model.chat.IMessage
-import com.projet.clientleger.data.model.chat.Message
-import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.MessageGuess
+import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -28,7 +25,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     fun sendMessage(): Boolean{
         messageContentLiveData.value?.let{
-            chatRepository.sendMessage(MessageChat(username, formatMessageContent(it), 0))
+            chatRepository.sendMessage(Message(formatMessageContent(it)))
         }
         return true
     }
@@ -37,11 +34,11 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         return chatRepository.receiveMessage()
     }
 
-    fun receivePlayerConnection(): Observable<Message>{
+    fun receivePlayerConnection(): Observable<MessageSystem>{
         return chatRepository.receivePlayerConnection()
     }
 
-    fun receivePlayerDisconnect(): Observable<Message>{
+    fun receivePlayerDisconnect(): Observable<MessageSystem>{
         return chatRepository.receivePlayerDisconnection()
     }
 

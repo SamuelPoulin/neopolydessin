@@ -5,5 +5,5 @@ import com.projet.clientleger.data.enumData.GuessStatus
 data class MessageGuess(
         override var content: String,
         override var timestamp: Long,
-        val guessStatus: GuessStatus
-) : IMessage
+        override var guessStatus: GuessStatus
+) : IMessageGuess

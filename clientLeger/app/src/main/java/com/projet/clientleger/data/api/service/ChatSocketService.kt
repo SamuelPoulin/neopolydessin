@@ -1,8 +1,10 @@
 package com.projet.clientleger.data.api.service
 
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
+import com.projet.clientleger.data.model.PlayerInfo
 import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
+import com.projet.clientleger.data.model.chat.MessageSystem
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
@@ -15,33 +17,21 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         }
     }
 
-    fun receivePlayerConnection(): Observable<Message>{
-        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value){ (user) ->
-            val userString: String = try {
-                user.toString()
-            } catch (e: Exception) {
-                "utilisteur inconnu"
-            }
-            Message(userString, 0)
+    fun receivePlayerConnection(): Observable<MessageSystem>{
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value){ (playerInfo, timestamp) ->
+            MessageSystem((playerInfo as PlayerInfo).playerName, timestamp as Long)
         }
     }
 
-    fun receivePlayerDisconnection(): Observable<Message>{
-        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_DISCONNECT.value){ (user) ->
-            val userString: String = try {
-                user.toString()
-            } catch (e: Exception) {
-                "utilisteur inconnu"
-            }
-            Message(userString, 0)
+    fun receivePlayerDisconnection(): Observable<MessageSystem>{
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_DISCONNECT.value){ (username, timestamp) ->
+            MessageSystem(username.toString(), timestamp as Long)
         }
     }
 
-    fun sendMessage(msg: MessageChat){
+    fun sendMessage(msg: Message){
         val obj = JSONObject()
-        obj.put("user", msg.user)
         obj.put("content", msg.content)
-        obj.put("timestamp", msg.timestamp)
         socketService.socket.emit(ChatSocketEndpoints.SEND_MSG.value, obj)
     }
 }

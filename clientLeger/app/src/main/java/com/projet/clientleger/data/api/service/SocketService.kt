@@ -26,51 +26,12 @@ class SocketService @Inject constructor() {
             options.auth = mapOf("token" to accessToken)
             options.transports = arrayOf("websocket")
             options.upgrade = false
-            socket = IO.socket(BuildConfig.SERVER_URL, options)
-            //socket = IO.socket("http://10.0.2.2:3205", options)
+            //socket = IO.socket(BuildConfig.SERVER_URL, options)
+            socket = IO.socket("http://10.0.2.2:3205", options)
         } catch (e: URISyntaxException) {
             println("ERROR SOCKET CONNECTION")
         }
         socket.connect()
-    }
-
-    fun receiveMessage(): Observable<MessageChat> {
-        return receiveFromSocket("ReceiveMsg") { received ->
-            Json.decodeFromString(
-                MessageChat.serializer(),
-                (received[0] as JSONObject).toString()
-            )
-        }
-    }
-
-    fun sendMessage(msg: MessageChat) {
-        val obj: JSONObject = JSONObject()
-        obj.put("user", msg.user)
-        obj.put("content", msg.content)
-        obj.put("timestamp", msg.timestamp)
-        socket.emit("SendMsg", obj)
-    }
-
-    fun receivePlayerConnection(): Observable<Message> {
-        return receiveFromSocket("PlayerConnected") { received ->
-            val user: String = try {
-                received[0].toString()
-            } catch (e: Exception) {
-                "utilisteur inconnu"
-            }
-            Message(user, System.currentTimeMillis())
-        }
-    }
-
-    fun receivePlayerDisconnection(): Observable<Message> {
-        return receiveFromSocket("PlayerDisconnected") { received ->
-            val user: String = try {
-                received[0].toString()
-            } catch (e: Exception) {
-                "utilisteur inconnu"
-            }
-            Message(user, System.currentTimeMillis())
-        }
     }
 
     fun <T> receiveFromSocket(
@@ -83,16 +44,6 @@ class SocketService @Inject constructor() {
                     parser(received)
                 )
             }
-        }
-    }
-
-    fun usernameConnexion(username: String): Observable<Boolean> {
-        return Observable.create { emitter ->
-            socket.emit("newPlayer", username, Ack { args ->
-                val resp = args[0] as JSONObject
-                val status = resp["status"] as String
-                emitter.onNext(status == "Valid")
-            })
         }
     }
 }
