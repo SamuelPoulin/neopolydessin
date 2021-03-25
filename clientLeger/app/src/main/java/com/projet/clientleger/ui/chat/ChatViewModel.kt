@@ -21,6 +21,9 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     init {
         messages.add(MessageGuess("WRONG", 1, GuessStatus.WRONG))
+        messages.add(MessageGuess("CLOSE", 2, GuessStatus.CLOSE))
+        messages.add(MessageGuess("CORRECT", 2, GuessStatus.CORRECT))
+        messages.add(MessageGuess("esadasdasfasdfdasfasfdsafasfasfdasfasfasd", 2, GuessStatus.CORRECT))
     }
 
     fun sendMessage(): Boolean{

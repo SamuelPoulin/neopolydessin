@@ -61,6 +61,8 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
             MessageType.USER.ordinal -> inflater.inflate(R.layout.item_user_message, parent, false)
             MessageType.OTHER.ordinal -> inflater.inflate(R.layout.item_message, parent, false)
             MessageType.GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_message, parent, false)
+            MessageType.GUESS_CLOSE.ordinal -> inflater.inflate(R.layout.item_guess_close_message, parent, false)
+            MessageType.GUESS_CORRECT.ordinal -> inflater.inflate(R.layout.item_guess_correct_message, parent, false)
             else -> inflater.inflate(R.layout.item_system_message, parent, false)
             // Return a new holder instance
         }
