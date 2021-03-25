@@ -276,7 +276,7 @@ export abstract class Lobby {
             timestamp: Date.now(),
             senderUsername: player.username
           };
-          socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
+          this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
         }
       }
       else {
