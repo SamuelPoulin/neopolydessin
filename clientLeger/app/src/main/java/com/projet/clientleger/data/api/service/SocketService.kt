@@ -1,8 +1,8 @@
 package com.projet.clientleger.data.api.service
 
 import com.projet.clientleger.BuildConfig
-import com.projet.clientleger.data.model.Message
-import com.projet.clientleger.data.model.MessageChat
+import com.projet.clientleger.data.model.chat.Message
+import com.projet.clientleger.data.model.chat.MessageChat
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import io.socket.client.IO

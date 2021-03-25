@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.model
+package com.projet.clientleger.data.model.chat
 
 import kotlinx.serialization.Serializable
 

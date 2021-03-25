@@ -6,10 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.enum.MessageType
-import com.projet.clientleger.data.model.IMessage
-import com.projet.clientleger.data.model.Message
-import com.projet.clientleger.data.model.MessageChat
+import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.enumData.MessageType
+import com.projet.clientleger.data.model.chat.IMessage
+import com.projet.clientleger.data.model.chat.Message
+import com.projet.clientleger.data.model.chat.MessageChat
+import com.projet.clientleger.data.model.chat.MessageGuess
 import java.text.SimpleDateFormat
 import java.util.*
 class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adapter<MessagesAdapter.ViewHolderMessage>() {
@@ -23,11 +25,29 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when {
-            mMessages[position] is Message -> MessageType.SYSTEM.ordinal
-            (mMessages[position] as MessageChat).user == username -> MessageType.USER.ordinal
-            else -> MessageType.OTHER.ordinal
+        val type: MessageType
+        println(mMessages[position])
+        when {
+            mMessages[position] is MessageChat -> {
+                val msg = mMessages[position] as MessageChat
+                type = when (msg.user) {
+                    username -> MessageType.USER
+                    else -> MessageType.OTHER
+                }
+            }
+            mMessages[position] is MessageGuess -> {
+                val msg = mMessages[position] as MessageGuess
+                type = when(msg.guessStatus){
+                    GuessStatus.WRONG -> MessageType.GUESS_WRONG
+                    GuessStatus.CLOSE -> MessageType.GUESS_CLOSE
+                    GuessStatus.CORRECT -> MessageType.GUESS_CORRECT
+                }
+            }
+            else -> {
+                type = MessageType.SYSTEM
+            }
         }
+        return type.ordinal
     }
 
     fun setUsername(username: String) {
@@ -40,6 +60,7 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
         val messageView: View = when(viewType) {
             MessageType.USER.ordinal -> inflater.inflate(R.layout.item_user_message, parent, false)
             MessageType.OTHER.ordinal -> inflater.inflate(R.layout.item_message, parent, false)
+            MessageType.GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_message, parent, false)
             else -> inflater.inflate(R.layout.item_system_message, parent, false)
             // Return a new holder instance
         }
@@ -57,9 +78,9 @@ class MessagesAdapter(private val mMessages: List<IMessage>) : RecyclerView.Adap
         //val button = viewHolder.messageButton
         //button.text = if (contact.isOnline) "Message" else "Offline"
         //button.isEnabled = contact.isOnline
-        if(getItemViewType(position) != MessageType.SYSTEM.ordinal){
+        if(getItemViewType(position) == MessageType.OTHER.ordinal){
             val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
-            viewHolder.messageUsernameTextView.text = (mMessages[position] as MessageChat ).user //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
+            viewHolder.messageUsernameTextView.text = (mMessages[position] as MessageChat).user //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
             viewHolder.messageTimeTextView.text = time
         }
         viewHolder.messageTextView.text = mMessages[position].content

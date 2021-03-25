@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.enum
+package com.projet.clientleger.data.endpoint
 
 enum class DrawingSocketEndpoints(val endpoint: String) {
     START_PATH("startPath"),

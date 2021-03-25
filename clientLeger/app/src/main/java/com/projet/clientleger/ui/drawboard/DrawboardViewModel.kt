@@ -4,7 +4,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.data.enum.DrawTool
+import com.projet.clientleger.data.enumData.DrawTool
 import com.projet.clientleger.data.model.*
 import com.projet.clientleger.data.model.command.DrawPathCommand
 import com.projet.clientleger.data.model.command.ErasePathCommand
@@ -14,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.math.abs
-import kotlin.random.Random
 
 @HiltViewModel
 class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService) :
