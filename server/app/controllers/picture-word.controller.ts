@@ -18,8 +18,6 @@ export class PictureWordController {
     @inject(Types.LoggedIn) private loggedIn: LoggedIn,
   ) {
     this.configureRouter();
-    console.log(this.pictureWordService);
-    console.log(this.loggedIn);
   }
 
   private configureRouter(): void {
