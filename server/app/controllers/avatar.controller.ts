@@ -16,7 +16,7 @@ export const AVATAR_PATH = '/var/www/Polydessin/avatars';
 
 const validPicture = (fileType: string, fileName: string): boolean => {
   const fileExtension = path.extname(fileName);
-  return (fileType === ContentType.png || fileType === ContentType.jpeg) && (fileExtension === '.jpg' || fileExtension === '.png');
+  return (fileType === ContentType.png && fileExtension === '.png') || (fileType === ContentType.jpeg || fileExtension === '.jpg');
 };
 
 @injectable()

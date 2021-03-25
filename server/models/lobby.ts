@@ -187,7 +187,7 @@ export abstract class Lobby {
   }
 
   findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => player.socket === socket);
+    return this.players.find((player) => player.socket.id === socket.id);
   }
 
   lobbyHasRoom(): boolean {
