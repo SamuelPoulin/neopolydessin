@@ -14,20 +14,8 @@
         </button>
       </div>
       <div id="players-container">
-        <div class="team-container">
-          <div class="players-title">Équipe 1</div>
-          <div *ngFor="let player of playersTeam1" class="player-container">
-            <div class="player-avatar">S</div>
-            <div class="player-username">{{player}}</div>
-          </div>
-        </div>
-        <div class="team-container">
-          <div class="players-title">Équipe 2</div>
-          <div *ngFor="let player of playersTeam2" class="player-container ennemy-container">
-            <div class="player-avatar" [style.background-color]="avatarColor(player)">{{firstLetter(player)}}</div>
-            <div class="player-username">{{player}}</div>
-          </div>
-        </div>
+        <app-team [team]="playersTeam1" name="Équipe 1"></app-team>
+        <app-team [team]="playersTeam2" name="Équipe 2" ennemy></app-team>
       </div>
     </div>
   </div>

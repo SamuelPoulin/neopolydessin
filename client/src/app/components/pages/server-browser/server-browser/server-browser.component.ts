@@ -15,7 +15,7 @@ export class ServerBrowserComponent implements OnInit {
   private readonly lobbyMax: number = 100;
   private readonly refreshInterval: number = 2000;
 
-  displayedColumns: string[] = ['lobbyId', 'playerInfo', 'gameType', 'joinButton'];
+  displayedColumns: string[] = ['lobbyName', 'playerInfo', 'gameType', 'joinButton'];
   dataSource: MatTableDataSource<LobbyInfo>;
   lobbyCount: number;
 

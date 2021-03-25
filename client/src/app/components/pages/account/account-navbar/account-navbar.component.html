@@ -6,9 +6,10 @@
         Retour
       </button>
     </div>
-    <div id="navbar-avatar" [style.background-color]="avatarColor">
-      {{firstLetter}}
-    </div>
+    <app-avatar [username]="username" 
+    [size]="100" 
+    [fontSize]="48" 
+    ></app-avatar>
     <div id="navbar-user">
       <div id="navbar-user-name">{{firstName + ' ' + lastName}}</div>
       <div id="navbar-user-username">@{{username}}</div>

@@ -5,7 +5,7 @@ import { ToolProperties } from '@tool-properties/tool-properties';
 
 export class GridProperties extends ToolProperties {
   static readonly DEFAULT_GRID_SIZE: number = 16;
-  static readonly DEFAULT_GRID_OPACITY: number = 0.75;
+  static readonly DEFAULT_GRID_OPACITY: number = 0.2;
   static readonly MAX_GRID_SIZE: number = 100;
   static readonly GRID_SIZE_INCREMENT: number = 5;
   static readonly MIN_OPACITY: number = 0.1;
