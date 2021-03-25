@@ -12,7 +12,7 @@ export class ChatMessageComponent {
   @Input() message: ChatMessage;
 
   constructor(public userService: UserService) {
-    this.message = { senderAccountId: '', content: '', timestamp: Date.now() };
+    this.message = { senderUsername: '', content: '', timestamp: Date.now() };
   }
 
   get timestamp() {

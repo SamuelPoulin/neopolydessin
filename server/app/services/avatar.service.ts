@@ -1,17 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNSUPPORTED_MEDIA_TYPE } from 'http-status-codes';
+import { NOT_FOUND, OK } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
-import avatarModel, { Avatar, ContentType } from '../../models/schemas/avatar';
+import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import { DatabaseService, Response } from './database.service';
-interface PublicAvatar {
-  avatar: {
-    data: Buffer;
-    contentType: ContentType;
-  };
-}
-
 interface AvatarId {
   id: string;
 }
@@ -31,39 +22,16 @@ export class AvatarService {
     });
   }
 
-  async getAvatar(avatarId: string): Promise<Response<PublicAvatar>> {
-    return new Promise<Response<PublicAvatar>>((resolve, reject) => {
-      let contentType: ContentType | undefined;
+  async getAvatar(avatarId: string): Promise<Response<string>> {
+    return new Promise<Response<string>>((resolve, reject) => {
       avatarModel.findById(new ObjectId(avatarId))
         .then(async (avatar: Avatar) => {
           if (!avatar.filePath) throw new Error(NOT_FOUND.toString());
-          switch (path.extname(avatar.filePath)) {
-            case '.jpg':
-              contentType = ContentType.jpeg;
-              break;
-            case '.png':
-              contentType = ContentType.png;
-              break;
-          }
-          return this.readAvatarFile(avatar.filePath);
-        })
-        .then((data: Buffer) => {
-          if (!contentType) throw new Error(UNSUPPORTED_MEDIA_TYPE.toString());
-          const publicAvatar: PublicAvatar = { avatar: { data, contentType } };
-          resolve({ statusCode: OK, documents: publicAvatar });
+          resolve({ statusCode: OK, documents: avatar.filePath });
         })
         .catch((err) => {
           reject(DatabaseService.rejectErrorMessage(err));
         });
-    });
-  }
-
-  async readAvatarFile(filePath: string): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-      fs.readFile(filePath, (err, data) => {
-        if (err) reject(INTERNAL_SERVER_ERROR);
-        resolve(data);
-      });
     });
   }
 }

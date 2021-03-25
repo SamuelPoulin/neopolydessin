@@ -3,7 +3,8 @@ import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
-import { ChatMessage, Message } from '../../../../common/communication/chat-message';
+import { PlayerInfo } from '../../../../common/communication/player-info';
+import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
@@ -40,18 +41,21 @@ export class SocketService {
     });
   }
 
-  receivePlayerConnections(): Observable<Message> {
-    return new Observable<Message>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (username: string) =>
-        msgObs.next({ timestamp: Date.now(), content: `${username} a rejoint la discussion.` }),
+  receivePlayerConnections(): Observable<SystemMessage> {
+    return new Observable<SystemMessage>((msgObs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>
+        msgObs.next({
+          timestamp: timeStamp,
+          content: `${playerInfo.playerName} a rejoint la discussion.`,
+        }),
       );
     });
   }
 
-  receivePlayerDisconnections(): Observable<Message> {
-    return new Observable<Message>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string) =>
-        msgObs.next({ timestamp: Date.now(), content: `${username} a quitté la discussion.` }),
+  receivePlayerDisconnections(): Observable<SystemMessage> {
+    return new Observable<SystemMessage>((msgObs) => {
+      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string, timeStamp: number) =>
+        msgObs.next({ timestamp: timeStamp, content: `${username} a quitté la discussion.` }),
       );
     });
   }
@@ -68,7 +72,7 @@ export class SocketService {
     });
   }
 
-  sendMessage(message: ChatMessage): void {
+  sendMessage(message: Message): void {
     this.socket.emit(SocketMessages.SEND_MESSAGE, message);
   }
 

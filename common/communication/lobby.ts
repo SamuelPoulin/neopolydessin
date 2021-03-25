@@ -1,21 +1,29 @@
 export interface LobbyInfo {
   lobbyId: string;
   lobbyName: string;
-  playerInfo: PlayerInfo[];
+  ownerUsername: string;
+  nbPlayerInLobby: number;
   gameType: GameType;
-}
-
-export interface PlayerInfo {
-  teamNumber: number;
-  playerName: string;
-  accountId: string;
-  avatar: string | undefined;
 }
 
 export interface Player {
   accountId: string;
+  username: string;
+  avatarId: string;
   playerStatus: PlayerStatus;
   teamNumber: number;
+}
+
+export interface PlayerInfo {
+  teamNumber: number
+  playerName: string
+  accountId: string
+  avatar: string
+}
+
+export interface PlayerRole {
+  playerName: string;
+  playerStatus: PlayerStatus;
 }
 
 export enum GameType {
@@ -39,5 +47,7 @@ export enum PlayerStatus {
 export enum CurrentGameState {
   LOBBY = 'lobby',
   IN_GAME = 'game',
+  DRAWING = 'draw',
+  REPLY = 'reply',
   GAME_OVER = 'over'
 }

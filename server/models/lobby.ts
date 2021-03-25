@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -5,12 +6,12 @@ import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { ChatMessage } from '../../common/communication/chat-message';
 import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
 import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
+import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
 export interface ServerPlayer extends Player {
@@ -29,6 +30,7 @@ const gameSizeMap = new Map<GameType, number>([
 export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
+  readonly MS_PER_SEC: number = 1000;
 
   lobbyId: string;
   gameType: GameType;
@@ -38,6 +40,7 @@ export abstract class Lobby {
 
   protected io: Server;
   protected ownerAccountId: string;
+  protected ownerUsername: string;
 
   protected size: number;
   protected wordToGuess: string;
@@ -63,6 +66,9 @@ export abstract class Lobby {
   ) {
     this.io = io;
     this.ownerAccountId = accountId;
+    this.databaseService.getAccountById(accountId).then((account) => {
+      this.ownerUsername =  account.documents.username;
+    });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
     this.lobbyName = lobbyName;
@@ -76,37 +82,65 @@ export abstract class Lobby {
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
   }
 
-  async toLobbyInfo(): Promise<LobbyInfo> {
+  toLobbyInfo(): PlayerInfo[] {
     const playerInfoList: PlayerInfo[] = [];
-    const listAccountId: string[] = [];
     this.players.forEach((player) => {
-      listAccountId.push(player.accountId);
-    });
-    return await this.databaseService.getAccountsInfo(listAccountId).then((listPlayers) => {
-      listPlayers.documents.forEach((playerInfo, index) => {
-        playerInfoList.push({
-          teamNumber: this.players[index].teamNumber,
-          playerName: playerInfo.username,
-          accountId: playerInfo.accountId,
-          avatar: playerInfo.avatar
-        });
+      playerInfoList.push({
+        teamNumber: player.teamNumber,
+        playerName: player.username,
+        accountId: player.accountId,
+        avatar: player.avatarId
       });
-      return {
-        lobbyId: this.lobbyId,
-        lobbyName: this.lobbyName,
-        playerInfo: playerInfoList,
-        gameType: this.gameType,
-      };
     });
+    return playerInfoList;
   }
 
-  addPlayer(accountId: string, playerStatus: PlayerStatus, socket: Socket) {
-    if (!this.findPlayerById(accountId) && this.lobbyHasRoom()) {
-      this.players.push({ accountId, playerStatus, socket, teamNumber: 0 });
-      this.teams[0].playersInTeam.push({ accountId, playerStatus, socket, teamNumber: 0 });
-      socket.join(this.lobbyId);
-      this.bindLobbyEndPoints(socket);
+  getLobbySummary(): LobbyInfo {
+    return {
+      lobbyId: this.lobbyId,
+      lobbyName: this.lobbyName,
+      ownerUsername: this.ownerUsername,
+      nbPlayerInLobby: this.players.length,
+      gameType: this.gameType
+    };
+  }
+
+  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
+    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
+      await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
+        const playerName = account.documents.username;
+        if (account.documents.avatar) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const playerAvatar = (account.documents.avatar as any)._id;
+          const player: ServerPlayer = {
+            accountId: accountIdPlayer,
+            username: playerName,
+            avatarId: playerAvatar,
+            playerStatus: status,
+            socket: socketPlayer,
+            teamNumber: 0
+          };
+
+          this.players.push(player);
+          this.teams[0].playersInTeam.push(player);
+          socketPlayer.join(this.lobbyId);
+          this.bindLobbyEndPoints(socketPlayer);
+        }
+      });
     }
+  }
+
+  getPlayerAddedInfo(socket: Socket): PlayerInfo  | undefined{
+    const player = this.findPlayerBySocket(socket);
+    if (player) {
+      return {
+        teamNumber: player.teamNumber,
+        playerName: player.username,
+        accountId: player.accountId,
+        avatar: player.avatarId
+      };
+    }
+    return;
   }
 
   removePlayer(accountId: string, socket: Socket) {
@@ -120,6 +154,12 @@ export abstract class Lobby {
       this.unbindLobbyEndPoints(socket);
       if (this.players.length === 0) {
         this.endGame();
+      }
+      else {
+        if (accountId === this.ownerAccountId) {
+          this.ownerAccountId = this.players[0].accountId;
+          this.ownerUsername = this.players[0].username;
+        }
       }
     }
   }
@@ -158,7 +198,7 @@ export abstract class Lobby {
     return this.players.length < this.size;
   }
 
-  validateMessageLength(msg: ChatMessage): boolean {
+  validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
@@ -231,20 +271,20 @@ export abstract class Lobby {
       this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateLobby);
     });
 
-    socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: ChatMessage) => {
+    socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: Message) => {
       if (this.validateMessageLength(sentMsg)) {
-        socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, sentMsg);
+        const player = this.findPlayerBySocket(socket);
+        if (player) {
+          const messageWithUsername: ChatMessage = {
+            content: sentMsg.content,
+            timestamp: Date.now(),
+            senderUsername: player.username
+          };
+          socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
+        }
       }
       else {
         console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
-      }
-    });
-
-    socket.on(SocketMessages.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT);
-        this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
 
