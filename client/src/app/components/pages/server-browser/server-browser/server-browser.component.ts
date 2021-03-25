@@ -11,8 +11,6 @@ import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/com
   styleUrls: ['./server-browser.component.scss'],
 })
 export class ServerBrowserComponent implements OnInit {
-  private readonly idMax: number = 1000000000000000000000;
-  private readonly lobbyMax: number = 100;
   private readonly refreshInterval: number = 2000;
 
   displayedColumns: string[] = ['lobbyId', 'playerInfo', 'gameType', 'joinButton'];
@@ -44,18 +42,7 @@ export class ServerBrowserComponent implements OnInit {
 
   async dummyLobbies(): Promise<LobbyInfo[]> {
     return new Promise<LobbyInfo[]>((resolve, reject) => {
-      const array = [];
-
-      for (let i = 0; i < Math.random() * this.lobbyMax; i++) {
-        array.push({
-          playerInfo: [{ teamNumber: 1, playerName: 'Hello', accountId: '123' }],
-          lobbyId: Math.floor(Math.random() * this.idMax).toString(),
-          gameType: GameType.CLASSIC,
-          lobbyName: '123',
-        } as LobbyInfo);
-      }
-
-      resolve(array);
+      resolve([]);
     });
   }
 
