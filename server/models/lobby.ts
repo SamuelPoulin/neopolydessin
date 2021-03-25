@@ -67,7 +67,7 @@ export abstract class Lobby {
     this.io = io;
     this.ownerAccountId = accountId;
     this.databaseService.getAccountById(accountId).then((account) => {
-      this.ownerUsername =  account.documents.username;
+      this.ownerUsername = account.documents.username;
     });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
@@ -130,7 +130,7 @@ export abstract class Lobby {
     }
   }
 
-  getPlayerAddedInfo(socket: Socket): PlayerInfo  | undefined{
+  getPlayerAddedInfo(socket: Socket): PlayerInfo | undefined {
     const player = this.findPlayerBySocket(socket);
     if (player) {
       return {
@@ -191,7 +191,7 @@ export abstract class Lobby {
   }
 
   findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => player.socket === socket);
+    return this.players.find((player) => player.socket.id === socket.id);
   }
 
   lobbyHasRoom(): boolean {
