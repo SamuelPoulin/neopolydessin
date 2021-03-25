@@ -12,56 +12,29 @@ import { AvatarService } from '../services/avatar.service';
 import { ErrorMsg } from '../services/database.service';
 import Types from '../types';
 
-const AVATAR_PATH = '/PolyDessin/avatars';
-
-const pictureStorage: StorageEngine = diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, AVATAR_PATH);
-  },
-  filename: (req, file, cb) => {
-    console.log(req.params._id);
-
-    // remove already existing file if there are any
-    // with this one user can only have one uploaded avatar at a time.
-    const filePath = `${AVATAR_PATH}/${req.params._id}`;
-    if (fs.existsSync(`${filePath}.png`)) {
-      fs.unlinkSync(`${filePath}.png`);
-    }
-    if (fs.existsSync(`${filePath}.jpg`)) {
-      fs.unlinkSync(`${filePath}.jpg`);
-    }
-
-    const fileName: string = `${req.params._id}${path.extname(file.originalname)}`;
-    req.params.filePath = `${AVATAR_PATH}/${fileName}`;
-    cb(null, fileName);
-  }
-});
-
-const uploadPicture: Multer = multer({
-  storage: pictureStorage,
-  fileFilter: (req, file, cb) => {
-    if (validPicture(file.mimetype, file.originalname)) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
-  }
-});
+export const AVATAR_PATH = '/var/www/Polydessin/avatars';
 
 const validPicture = (fileType: string, fileName: string): boolean => {
   const fileExtension = path.extname(fileName);
   return (fileType === ContentType.png || fileType === ContentType.jpeg) && (fileExtension === '.jpg' || fileExtension === '.png');
 };
+
 @injectable()
 export class AvatarController {
   router: express.Router;
 
+  pictureStorage: StorageEngine;
+
+  uploadPicture: Multer;
+
+  avatarPath: string;
 
   constructor(
     @inject(Types.AvatarService) private avatarService: AvatarService,
     @inject(Types.LoggedIn) private loggedIn: LoggedIn,
   ) {
     this.checkForAvatarFolder();
+    this.setupPictureStorage();
     this.configureRouter();
   }
 
@@ -76,6 +49,39 @@ export class AvatarController {
     }
   }
 
+  private setupPictureStorage(): void {
+    this.pictureStorage = diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, AVATAR_PATH);
+      },
+      filename: (req, file, cb) => {
+        // remove already existing file if there are any.
+        // With this, one user can only have one uploaded avatar at a time.
+        const filePath = `${AVATAR_PATH}/${req.params._id}`;
+        if (fs.existsSync(`${filePath}.png`)) {
+          fs.unlinkSync(`${filePath}.png`);
+        }
+        if (fs.existsSync(`${filePath}.jpg`)) {
+          fs.unlinkSync(`${filePath}.jpg`);
+        }
+
+        const fileName: string = `${req.params._id}${path.extname(file.originalname)}`;
+        req.params.filePath = `${AVATAR_PATH}/${fileName}`;
+        cb(null, fileName);
+      }
+    });
+    this.uploadPicture = multer({
+      storage: this.pictureStorage,
+      fileFilter: (req, file, cb) => {
+        if (validPicture(file.mimetype, file.originalname)) {
+          cb(null, true);
+        } else {
+          cb(null, false);
+        }
+      }
+    });
+  }
+
   private configureRouter(): void {
     this.router = express.Router();
 
@@ -86,7 +92,7 @@ export class AvatarController {
       validationCheck,
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
-      uploadPicture.single('file'),
+      this.uploadPicture.single('file'),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.avatarService.upload(req.params._id, req.params.filePath)
           .then((response) => {
@@ -103,7 +109,7 @@ export class AvatarController {
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.avatarService.getAvatar(req.params.id)
           .then((response) => {
-            res.status(response.statusCode).json(response.documents);
+            res.status(response.statusCode).sendFile(response.documents);
           })
           .catch((err: ErrorMsg) => {
             res.status(err.statusCode).json(err.message);
