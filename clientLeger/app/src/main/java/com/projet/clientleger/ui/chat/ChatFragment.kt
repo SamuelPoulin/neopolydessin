@@ -29,24 +29,9 @@ class ChatFragment @Inject constructor() : Fragment() {
     val vm: ChatViewModel by viewModels()
     private var binding: FragmentChatBinding? = null
 
-    private fun setSocketSubscriptions() {
-        vm.receiveMessage().subscribe{
-            addMessage(it)
-        }
-        vm.receivePlayerConnection().subscribe{
-            it.content = "${it.content} a rejoint la discussion"
-            addMessage(it)
-        }
-        vm.receivePlayerDisconnect().subscribe{
-            it.content = "${it.content} a quitté la discussion"
-            addMessage(it)
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vm.username = arguments?.getString("username") ?: "unknowned_user"
         setFragmentResultListener("isGuessing"){ requestKey, bundle ->
             isGuessing(bundle["boolean"] as Boolean)
         }
@@ -66,9 +51,12 @@ class ChatFragment @Inject constructor() : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChatBinding.inflate(inflater, container, false)
-        setSocketSubscriptions()
         binding!!.sendButton.setOnClickListener { sendMessage() }
         binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
+        vm.messagesLiveData.observe(requireActivity()){
+            rvMessages.adapter?.notifyDataSetChanged()
+            rvMessages.scrollToPosition(it.size - 1)
+        }
         binding!!.vm = vm
         return binding!!.root
     }
@@ -77,7 +65,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
-        val adapter = MessagesAdapter(vm.messages)
+        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
@@ -85,24 +73,12 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun sendMessage() {
-        if(!vm.sendMessage())
-            showErrorToast(MESSAGE_CONTENT_ERROR)
+        vm.sendMessage()
 
         //TODO show loading message
 
         chatBox.text?.clear()
     }
-
-    private fun addMessage(message: IMessage) {
-        message.content = vm.formatMessageContent(message.content)
-        vm.messages.add(message)
-        activity?.runOnUiThread {
-            //rvMessages.adapter?.notifyItemInserted(messages.size - 1)
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(vm.messages.size - 1)
-        }
-    }
-
     private fun isMessageValidFormat(message: String): Boolean {
         return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()
     }

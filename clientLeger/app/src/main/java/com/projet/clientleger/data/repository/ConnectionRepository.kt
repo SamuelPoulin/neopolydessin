@@ -23,7 +23,7 @@ open class ConnectionRepository @Inject constructor(private val sessionManager: 
                     ""
             )
             HttpsURLConnection.HTTP_OK -> {
-                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken)
+                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken, connectionModel.username!!)
                 RegisterResponse(
                     true,
                     "",

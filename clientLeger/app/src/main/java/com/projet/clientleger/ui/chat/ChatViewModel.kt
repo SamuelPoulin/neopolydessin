@@ -12,34 +12,57 @@ import javax.inject.Inject
 @HiltViewModel
 class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
-    lateinit var username: String
-    val messages: ArrayList<IMessage> = ArrayList()
+    val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
+    val username: String = chatRepository.getUsername()
     var sendingModeIsGuessing = false
 
     init {
-        messages.add(MessageGuess("WRONG", 1, GuessStatus.WRONG))
-        messages.add(MessageGuess("CLOSE", 2, GuessStatus.CLOSE))
-        messages.add(MessageGuess("CORRECT", 2, GuessStatus.CORRECT))
-        messages.add(MessageGuess("esadasdasfasdfdasfasfdsafasfasfdasfasfasd", 2, GuessStatus.CORRECT))
+        messagesLiveData.value!!.add(MessageGuess("WRONG", 1, GuessStatus.WRONG.value))
+        messagesLiveData.value!!.add(MessageGuess("CLOSE", 2, GuessStatus.CLOSE.value))
+        messagesLiveData.value!!.add(MessageGuess("CORRECT", 2, GuessStatus.CORRECT.value))
+        messagesLiveData.value!!.add(MessageGuess("esadasdasfasdfdasfasfdsafasfasfdasfasfasd", 2, GuessStatus.CORRECT.value))
+        receiveMessage()
+        receivePlayerConnection()
+        receivePlayerDisconnect()
     }
 
-    fun sendMessage(): Boolean{
+    fun sendMessage(){
         messageContentLiveData.value?.let{
-            chatRepository.sendMessage(Message(formatMessageContent(it)))
+            if(sendingModeIsGuessing) {
+                chatRepository.sendGuess(it).subscribe { guess ->
+                    println(guess)
+                    messagesLiveData.value!!.add(guess)
+                    messagesLiveData.postValue(messagesLiveData.value)
+                }
+            } else{
+                chatRepository.sendMessage(Message(formatMessageContent(it)))
+            }
         }
-        return true
     }
 
-    fun receiveMessage(): Observable<MessageChat>{
-        return chatRepository.receiveMessage()
+
+
+    private fun receiveMessage(){
+        chatRepository.receiveMessage().subscribe{
+            messagesLiveData.value!!.add(it)
+            messagesLiveData.postValue(messagesLiveData.value)
+        }
     }
 
-    fun receivePlayerConnection(): Observable<MessageSystem>{
-        return chatRepository.receivePlayerConnection()
+    private fun receivePlayerConnection(){
+        chatRepository.receivePlayerConnection().subscribe{
+            it.content = "${it.content} a rejoint la discussion"
+            messagesLiveData.value!!.add(it)
+            messagesLiveData.postValue(messagesLiveData.value)
+        }
     }
 
-    fun receivePlayerDisconnect(): Observable<MessageSystem>{
-        return chatRepository.receivePlayerDisconnection()
+    private fun receivePlayerDisconnect(){
+        chatRepository.receivePlayerDisconnection().subscribe{
+            it.content = "${it.content} a quitté la discussion"
+            messagesLiveData.value!!.add(it)
+            messagesLiveData.postValue(messagesLiveData.value)
+        }
     }
 
     fun formatMessageContent(messageContent: String): String {
