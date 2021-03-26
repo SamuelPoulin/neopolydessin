@@ -7,7 +7,7 @@ import { PlayerInfo } from '../../../../common/communication/player-info';
 import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
-import { SocketConnection, PlayerConnectionResult, PlayerConnectionStatus } from '../../../../common/socketendpoints/socket-connection';
+import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
 import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
 import { LocalSaveService } from './localsave.service';
 
@@ -61,12 +61,12 @@ export class SocketService {
   }
 
   joinLobby(lobbyId: string) {
-    this.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbyId);
+    this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
   getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((msgObs) => {
-      this.socket.emit(SocketMessages.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => {
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => {
         msgObs.next(lobbies);
       });
     });
@@ -76,17 +76,9 @@ export class SocketService {
     this.socket.emit(SocketMessages.SEND_MESSAGE, message);
   }
 
-  async newPlayer(username: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      this.socket.emit(SocketConnection.PLAYER_CONNECTION, username, (data: PlayerConnectionResult) =>
-        resolve(data.status === PlayerConnectionStatus.VALID),
-      );
-    });
-  }
-
   async createLobby(name: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketMessages.CREATE_LOBBY, name, 'classic', 'easy', false, (data: string) => resolve(data));
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, 'classic', 'easy', false, (data: string) => resolve(data));
     });
   }
 
@@ -100,14 +92,14 @@ export class SocketService {
 
   getLobbyInfo(): Observable<Player> {
     return new Observable<Player>((obs) => {
-      this.socket.on(SocketMessages.RECEIVE_LOBBY_INFO, (player: Player) => {
+      this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (player: Player) => {
         obs.next(player);
       });
     });
   }
 
   startGame(): void {
-    this.socket.emit(SocketMessages.START_GAME_SERVER);
+    this.socket.emit(SocketLobby.START_GAME_SERVER);
   }
 
   receiveStartPath(): Observable<Coordinate> {

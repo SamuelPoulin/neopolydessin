@@ -10,7 +10,6 @@ import { connectMS, disconnectMS } from './services/database.service.spec';
 import { Account, FriendsList, FriendStatus } from '../models/schemas/account';
 import { TEST_PORT } from './constants';
 import { accountInfo } from './services/database.service.spec';
-import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
@@ -25,6 +24,7 @@ import { FriendsService } from './services/friends.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import { BrushInfo } from '../../common/communication/brush-info';
+import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 
 export const accountInfo3: Register = {
     firstName: 'a',
@@ -86,8 +86,12 @@ describe('Socketio', () => {
             }
         })
         server.close();
-        await disconnectMS(mongoMemoryServer)
-    })
+        SocketIo.CLIENT_CONNECTED.observers = [];
+        SocketIo.CLIENT_DISCONNECTED.observers = [];
+        SocketIo.GAME_SUCCESSFULLY_ENDED.observers = [];
+
+        await disconnectMS(mongoMemoryServer);
+    });
 
     interface TestClient {
         accountId: string;
@@ -107,7 +111,7 @@ describe('Socketio', () => {
     }
 
     const testDoneWhenAllClientsAreDisconnected = (done: Mocha.Done) => {
-        socketIo.clientSuccessfullyDisconnected.subscribe(() => {
+        SocketIo.CLIENT_DISCONNECTED.subscribe(() => {
             nbDisconnectedClients++;
             if (nbDisconnectedClients === clients.length) {
                 done();
@@ -117,7 +121,7 @@ describe('Socketio', () => {
 
     it('client socket connection should call addLogin and disconnection should call addLogout', (done: Mocha.Done) => {
         let accountId: string;
-        socketIo.clientSuccessfullyDisconnected.subscribe(() => {
+        SocketIo.CLIENT_DISCONNECTED.subscribe(() => {
             databaseService.getAccountById(accountId)
                 .then((account: Response<Account>) => {
                     const login: Login = (account.documents.logins as any).logins[0];
@@ -139,7 +143,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -167,8 +171,8 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
                     });
                 });
 
@@ -186,6 +190,7 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
                     testClient.socket.close();
+
                 });
             })
     })
@@ -195,7 +200,7 @@ describe('Socketio', () => {
         createClient(accountInfo)
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -211,7 +216,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.CREATE_LOBBY, 'lobby2', GameType.CLASSIC, Difficulty.EASY, false);
+                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.CLASSIC, Difficulty.EASY, false);
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.close();
                 })
@@ -225,8 +230,8 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketMessages.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketConnection.PLAYER_CONNECTION, lobbies[0].lobbyId);
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
                     })
 
                 });
@@ -375,7 +380,7 @@ describe('Socketio', () => {
         let accountId: string;
         let accountId2: string;
         let accountId3: string;
-
+        testDoneWhenAllClientsAreDisconnected(done);
         createClient(accountInfo)
             .then((testClient) => {
                 accountId = testClient.accountId;
@@ -454,7 +459,6 @@ describe('Socketio', () => {
                         .catch((err: ErrorMsg) => {
                             expect(err.statusCode).to.be.equal(NOT_FOUND);
                             testClient.socket.close();
-                            done();
                         });
                 });
             });
