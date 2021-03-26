@@ -34,5 +34,4 @@ class GameActivity : AppCompatActivity() {
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
     }
-
 }
