@@ -1,130 +1,99 @@
 package com.projet.clientleger.ui.chat
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.service.SocketService
 import com.projet.clientleger.data.model.FriendSimplified
-import com.projet.clientleger.data.model.IMessage
-import com.projet.clientleger.data.model.MessageChat
+import com.projet.clientleger.data.model.chat.IMessage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_chat.*
 import java.util.regex.Pattern
 import javax.inject.Inject
+import com.projet.clientleger.databinding.FragmentChatBinding
 
 private const val MESSAGE_CONTENT_ERROR: String =
     "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
 
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
-    private var messages: ArrayList<IMessage> = ArrayList()
-    private lateinit var username: String
-
-    @Inject
-    lateinit var socketService: SocketService
-
-    fun setSubscriptions() {
-        socketService.receiveMessage()
-            .subscribe { message ->
-                addMessage(message)
-            }
-        socketService.receivePlayerConnection().subscribe { message ->
-            message.content = "${message.content} a rejoint la discussion"
-            addMessage(message)
-        }
-        socketService.receivePlayerDisconnection().subscribe { message ->
-            message.content = "${message.content} a quitté la discussion"
-            addMessage(message)
-        }
-
-    }
+    val vm: ChatViewModel by viewModels()
+    private var binding: FragmentChatBinding? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        username = arguments?.getString("username") ?: "unknowned_user"
+        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
+            isGuessing(bundle["boolean"] as Boolean)
+        }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             (bundle["friend"] as FriendSimplified).username
             // TODO chat openned from friendslists
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false)
+    ): View {
+        binding = FragmentChatBinding.inflate(inflater, container, false)
+        binding!!.sendButton.setOnClickListener { sendMessage() }
+        binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
+        vm.messagesLiveData.observe(requireActivity()){
+            rvMessages.adapter?.notifyDataSetChanged()
+            rvMessages.scrollToPosition(it.size - 1)
+        }
+        binding!!.vm = vm
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sendButton.setOnClickListener {
-            sendButton()
-        }
+
         val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
-        val adapter = MessagesAdapter(messages)
+        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
         rvMessages.adapter = adapter
     }
 
-    private fun sendButton() {
-        val text: String = (chatBox.text).toString()
-        val adjustedText: String = formatMessageContent(text)
-        if (isMessageValidFormat(adjustedText)) {
-            addMessage(MessageChat(username, adjustedText, System.currentTimeMillis()))
-            socketService.sendMessage(
-                    MessageChat(
-                            username,
-                            adjustedText,
-                            System.currentTimeMillis()
-                    )
-            )
-        } else {
-            showErrorToast(MESSAGE_CONTENT_ERROR)
-        }
+    private fun sendMessage() {
+        vm.sendMessage()
+
+        //TODO show loading message
+
         chatBox.text?.clear()
     }
-
-    private fun addMessage(message: IMessage) {
-        message.content = formatMessageContent(message.content)
-        messages.add(message)
-        activity?.runOnUiThread {
-            //rvMessages.adapter?.notifyItemInserted(messages.size - 1)
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(messages.size - 1)
-        }
-    }
-
-    private fun isUsernameValidFormat(username: String): Boolean {
-        return Pattern.matches("^[A-Za-z0-9. ]+(?:[_&%$*#@!-][A-Za-z0-9. ]+)*$", username)
-    }
-
     private fun isMessageValidFormat(message: String): Boolean {
         return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()
     }
 
-    private fun formatMessageContent(messageContent: String): String {
-        var adjustedText: String = messageContent.replace("\\s+".toRegex(), " ")
-        adjustedText = adjustedText.trimStart()
-        return adjustedText
+    private fun toggleSendMode(){
+        vm.toggleSendMode()
+        if(vm.sendingModeIsGuessing) {
+            binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_guessing_input_background)
+            binding!!.guessingToggleBtn.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_lightbulb_white)
+            binding!!.sendButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_sent)
+        } else{
+            binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_input_background)
+            binding!!.guessingToggleBtn.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_lightbulb)
+            binding!!.sendButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_send_24)
+        }
     }
 
     private fun showErrorToast(errorMessage: String) {
@@ -138,5 +107,15 @@ class ChatFragment @Inject constructor() : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    fun isGuessing(isGuessing: Boolean){
+        if(isGuessing){
+            binding!!.guessingToggleBtn.visibility = View.VISIBLE
+        }
+        else{
+            binding!!.guessingToggleBtn.visibility = View.GONE
+        }
+
     }
 }

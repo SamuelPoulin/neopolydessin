@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.enum
+package com.projet.clientleger.data.endpoint
 
 enum class LobbySocketEndpoints(val value: String) {
     RECEIVE_LOBBY_INFO("receiveLobbyInfo"),

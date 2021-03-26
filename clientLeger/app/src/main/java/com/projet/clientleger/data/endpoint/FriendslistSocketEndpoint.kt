@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.enum
+package com.projet.clientleger.data.endpoint
 
 enum class FriendslistSocketEndpoint(val endpoint: String) {
     FRIEND_REQUEST_RECEIVED("friendRequestReceived"),

@@ -1,6 +1,6 @@
 package com.projet.clientleger.data.api.service
 
-import com.projet.clientleger.data.enum.FriendslistSocketEndpoint
+import com.projet.clientleger.data.endpoint.FriendslistSocketEndpoint
 import com.projet.clientleger.data.model.Friendslist
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
