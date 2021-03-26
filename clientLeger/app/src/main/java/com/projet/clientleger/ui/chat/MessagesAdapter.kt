@@ -27,8 +27,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
         when {
             mMessages[position] is MessageChat -> {
                 val msg = mMessages[position] as MessageChat
-                println(msg.senderUsername)
-                println(username)
                 type = when (msg.senderUsername) {
                     username -> MessageType.USER
                     else -> MessageType.OTHER
