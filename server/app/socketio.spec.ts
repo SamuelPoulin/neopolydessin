@@ -407,7 +407,6 @@ describe('Socketio', () => {
                         content: 'eyo what up',
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
-                    testClient.socket.close();
                 })
 
                 return createClient(accountInfo3);
@@ -438,6 +437,7 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                    clients[1].close();
                     expect(msg.receiverAccountId).to.be.equal(testClient.accountId);
                     expect(senderId).to.be.equal(accountId2);
                     friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
