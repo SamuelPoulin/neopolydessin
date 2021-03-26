@@ -1,9 +1,9 @@
 import fs from 'fs';
-import { INTERNAL_SERVER_ERROR, OK } from 'http-status-codes';
+import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from 'http-status-codes';
 import { injectable } from 'inversify';
 import potrace from 'potrace';
 import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
-import pictureWordModel from '../../models/schemas/picture-word-pair';
+import pictureWordModel, { PictureWord } from '../../models/schemas/picture-word-pair';
 import { DatabaseService, Response } from './database.service';
 @injectable()
 export class PictureWordService {
@@ -40,6 +40,24 @@ export class PictureWordService {
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+
+  async getRandomWord(): Promise<PictureWord> {
+    return new Promise<PictureWord>((resolve, reject) => {
+      pictureWordModel.countDocuments()
+        .then((count) => {
+          const random = Math.floor(Math.random() * count);
+          return pictureWordModel.findOne().skip(random);
+        })
+        .then((pictureWord) => {
+          if (!pictureWord) throw new Error(NOT_FOUND.toString());
+          resolve(pictureWord);
+        })
+        .catch((err) => {
+          reject(err);
         });
     });
   }
