@@ -2,7 +2,7 @@ package com.projet.clientleger.data.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.projet.clientleger.data.enum.FriendStatus
+import com.projet.clientleger.data.enumData.FriendStatus
 
 class FriendSimplified() : Parcelable{
     lateinit var friendId: String

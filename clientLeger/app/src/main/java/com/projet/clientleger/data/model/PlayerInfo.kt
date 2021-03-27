@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class PlayerInfo(val teamNumber: Int, val playerName: String, val accountId: String) : Parcelable
+data class PlayerInfo(val teamNumber: Int, val playerName: String, val accountId: String, val avatar: String) : Parcelable

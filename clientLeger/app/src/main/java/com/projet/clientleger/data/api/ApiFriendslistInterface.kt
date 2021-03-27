@@ -2,8 +2,6 @@ package com.projet.clientleger.data.api
 
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
-import com.projet.clientleger.data.enum.FriendRequestDecision
-import com.projet.clientleger.data.model.Friend
 import com.projet.clientleger.data.model.Friendslist
 import retrofit2.Response
 import retrofit2.http.*

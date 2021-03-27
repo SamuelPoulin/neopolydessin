@@ -6,8 +6,7 @@ import com.projet.clientleger.data.api.ApiFriendslistInterface
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
 import com.projet.clientleger.data.api.service.FriendslistSocketService
-import com.projet.clientleger.data.enum.FriendRequestDecision
-import com.projet.clientleger.data.model.Friend
+import com.projet.clientleger.data.enumData.FriendRequestDecision
 import com.projet.clientleger.data.model.Friendslist
 import javax.inject.Inject
 

@@ -8,8 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.enum.FriendStatus
-import com.projet.clientleger.data.model.Friend
+import com.projet.clientleger.data.enumData.FriendStatus
 import com.projet.clientleger.data.model.FriendSimplified
 
 class FriendsAdapter(private val friends: List<FriendSimplified>,

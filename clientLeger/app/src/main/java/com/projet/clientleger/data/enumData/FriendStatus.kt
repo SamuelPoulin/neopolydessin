@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.enum
+package com.projet.clientleger.data.enumData
 
 enum class FriendStatus {
     ACCEPTED,

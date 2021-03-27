@@ -33,18 +33,24 @@ class SessionManager @Inject constructor(
         const val ERROR_MESSAGE = "errorMessage"
         const val SESSION_EXPIRED = "Session expirée"
     }
+    private var username: String? = null
     private var userPrefs: SharedPreferences =
             context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
 
-    fun saveCreds(accessToken: String, refreshToken: String) {
+    fun saveCreds(accessToken: String, refreshToken: String, username: String) {
+        this.username = username
         userPrefs.edit {
             putString(ACCESS_TOKEN, accessToken)
             putString(REFRESH_TOKEN, refreshToken)
             apply()
         }
         tokenInterceptor.setAccessToken(accessToken)
+    }
+
+    fun getUsername(): String{
+        return username ?: "unknowned_user"
     }
 
     fun clearCred(){
