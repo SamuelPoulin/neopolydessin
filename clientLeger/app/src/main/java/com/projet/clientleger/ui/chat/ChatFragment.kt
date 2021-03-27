@@ -2,6 +2,7 @@ package com.projet.clientleger.ui.chat
 
 import android.os.Bundle
 import android.text.Html
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +50,9 @@ class ChatFragment @Inject constructor() : Fragment() {
     }*/
     val vm: ChatViewModel by viewModels()
     private var binding: FragmentChatBinding? = null
+    var baseHeight: Int = -1
+    var screenSize: Int = -1
+    var baseWidth: Int = -1
 
     companion object {
         fun newInstance() = ChatFragment()
@@ -57,12 +61,40 @@ class ChatFragment @Inject constructor() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        screenSize = displayMetrics.widthPixels
+        baseWidth = screenSize/2
         setFragmentResultListener("isGuessing"){ requestKey, bundle ->
             isGuessing(bundle["boolean"] as Boolean)
+        }
+        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
+            resize(bundle["height"] as Int)
         }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             (bundle["friend"] as FriendSimplified).username
             // TODO chat openned from friendslists
+        }
+    }
+
+    private fun resize(height: Int){
+        if(baseHeight < 0)
+            baseHeight = binding!!.root.height
+        if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
+            val params = binding!!.root.layoutParams
+            params.height = height
+            //params.width = screenSize
+            binding!!.root.requestLayout()
+            rvMessages.adapter?.notifyDataSetChanged()
+            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+
+        } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
+            val params = binding!!.root.layoutParams
+            params.height = baseHeight
+            //params.width = baseWidth
+            binding!!.root.requestLayout()
+            rvMessages.adapter?.notifyDataSetChanged()
+            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
         }
     }
 
@@ -95,6 +127,9 @@ class ChatFragment @Inject constructor() : Fragment() {
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
         rvMessages.adapter = adapter
+//        val params = binding!!.root.layoutParams
+//        params.width = baseWidth
+//        binding!!.root.layoutParams = params
     }
 
     /*private fun sendButton() {

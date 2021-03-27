@@ -28,7 +28,7 @@
         <activity
             android:name=".ui.game.view.GameActivity"
             android:label="@string/title_activity_game"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.connexion.view.ConnexionActivity"

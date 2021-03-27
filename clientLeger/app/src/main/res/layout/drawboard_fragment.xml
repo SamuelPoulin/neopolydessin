@@ -28,12 +28,23 @@
             android:id="@+id/drawingBoard"
             android:layout_margin="3dp"/>
     </FrameLayout>
+    <com.google.android.material.slider.Slider
+        android:id="@+id/strokeWidthSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/drawingBoardContainer"
+        android:value="@{vm.DEFAULT_STROKE}"
+        android:valueFrom="@{vm.MIN_STROKE}"
+        android:valueTo="@{vm.MAX_STROKE}"/>
     <FrameLayout
         android:id="@+id/toolPreviewContainer"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/tool_preview_background"
-        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_margin="5dp">
         <com.projet.clientleger.ui.drawboard.ToolPreviewView
@@ -48,38 +59,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="undo"
-        app:layout_constraintLeft_toRightOf="@id/toolPreviewContainer"
-        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
     <Button
         android:id="@+id/redoBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="redo"
-        app:layout_constraintLeft_toRightOf="@id/undoBtn"
-        app:layout_constraintBottom_toTopOf="@id/strokeWidthSlider"/>
-    <com.google.android.material.slider.Slider
-        android:id="@+id/strokeWidthSlider"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintWidth_percent="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:value="@{vm.DEFAULT_STROKE}"
-        android:valueFrom="@{vm.MIN_STROKE}"
-        android:valueTo="@{vm.MAX_STROKE}"/>
+        app:layout_constraintTop_toBottomOf="@+id/undoBtn"/>
     <Button
         android:id="@+id/colorPickerBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Color"
-        app:layout_constraintLeft_toRightOf="@id/strokeWidthSlider"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/redoBtn"/>
     <Button
         android:id="@+id/eraserBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Eraser"
-        app:layout_constraintLeft_toRightOf="@id/colorPickerBtn"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/colorPickerBtn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
