@@ -44,29 +44,43 @@ class ConnexionRepositoryTest {
     }
 
     @Test
-    fun registerAccount_errorServer(){
-        val connectionModel = ConnectionModel(username = "error_server")
-        runBlocking { assert(!connectionRepo.connectAccount(connectionModel).isSucessful) }
+    fun connectAccount_ServeError(){
+        val connectionModel = ConnectionModel(username = "internal_error")
+        runBlocking {
+            val response = connectionRepo.connectAccount(connectionModel)
+            assert(!response.isSucessful)
+            assert(response.message.contains("serveur"))
+        }
     }
 
     @Test
-    fun registerAccount_errorRequest(){
-        val connectionModel = ConnectionModel(username = "invalid")
-        runBlocking { assert(!connectionRepo.connectAccount(connectionModel).isSucessful) }
+    fun connectAccount_NotFound(){
+        val connectionModel = ConnectionModel(username = "http_not_found")
+        runBlocking {
+            val response = connectionRepo.connectAccount(connectionModel)
+            assert(!response.isSucessful)
+            assert(response.message.contains("invalide"))
+        }
     }
 
     @Test
-    fun registerAccount_unknownError(){
+    fun connectAccount_UnknownError(){
         val connectionModel = ConnectionModel(username = "unknown")
-        runBlocking { assert(!connectionRepo.connectAccount(connectionModel).isSucessful) }
+        runBlocking {
+            val response = connectionRepo.connectAccount(connectionModel)
+            assert(!response.isSucessful)
+            assert(response.message.contains("inconnue"))
+        }
     }
 
     @Test
-    fun registerAccount_success(){
-        val connectionModel = ConnectionModel()
-        var response: RegisterResponse
-        runBlocking { response = connectionRepo.connectAccount(connectionModel) }
-        assert(response.isSucessful && response.accessToken.isNotEmpty() && response.refreshToken.isNotEmpty())
+    fun connectAccount_Success(){
+        val connectionModel = ConnectionModel(username = "http_ok")
+        runBlocking {
+            val response = connectionRepo.connectAccount(connectionModel)
+            assert(response.isSucessful)
+            assert(response.accessToken.isNotEmpty())
+            assert(response.refreshToken.isNotEmpty())
+        }
     }
-
 }
