@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessResponse, PlayerStatus } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
@@ -53,17 +53,18 @@ export class LobbyClassique extends Lobby {
 
     super.bindLobbyEndPoints(socket);
 
-    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
+    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: GuessResponse) => void) => {
       const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
       if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
-        if (word === this.wordToGuess) {
+        /* if (word === this.wordToGuess) {
           this.teams[guesserValues.teamNumber].currentScore++;
           callback(true);
         }
         else {
           callback(false);
-        }
+        }*/
+
       }
     });
 

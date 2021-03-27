@@ -32,6 +32,12 @@ export enum GameType {
   SPRINT_COOP = 'sprintCoop'
 }
 
+export enum GuessResponse {
+  CORRECT = 'correct',
+  CLOSE = 'close',
+  WRONG = 'wrong'
+}
+
 export enum Difficulty {
   EASY = 'easy',
   INTERMEDIATE = 'intermediate',
