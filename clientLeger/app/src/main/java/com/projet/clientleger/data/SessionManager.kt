@@ -50,7 +50,7 @@ class SessionManager @Inject constructor(
     }
 
     fun getUsername(): String{
-        return username ?: "unknowned_user"
+        return username ?: "unknown_user"
     }
 
     fun clearCred(){
