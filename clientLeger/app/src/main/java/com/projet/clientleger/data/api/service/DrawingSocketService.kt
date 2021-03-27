@@ -1,6 +1,6 @@
 package com.projet.clientleger.data.api.service
 
-import com.projet.clientleger.data.enum.DrawingSocketEndpoints
+import com.projet.clientleger.data.endpoint.DrawingSocketEndpoints
 import com.projet.clientleger.data.model.*
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
@@ -82,7 +82,7 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
     }
 
     fun receiveEndPath() : Observable<Coordinate>{
-        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_END_PATH.endpoint){res ->
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_END_PATH.endpoint){ res ->
             Json.decodeFromString(Coordinate.serializer(), res[0].toString())
         }
     }

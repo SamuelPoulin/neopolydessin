@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,60 +5,17 @@ import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
+import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
-import { PlayerInfo } from '../../common/communication/player-info';
 import { Coord } from './commands/path';
 
-export interface LobbyInfo {
-  lobbyId: string;
-  lobbyName: string;
-  ownerUsername: string;
-  nbPlayerInLobby: number;
-  gameType: GameType;
-}
-
-export interface Player {
-  accountId: string;
-  username: string;
-  avatarId: string;
-  playerStatus: PlayerStatus;
+export interface ServerPlayer extends Player {
   socket: Socket;
-  teamNumber: number;
-}
-
-export interface PlayerRole {
-  playerName: string;
-  playerStatus: PlayerStatus;
-}
-
-export enum GameType {
-  CLASSIC = 'classic',
-  SPRINT_SOLO = 'sprintSolo',
-  SPRINT_COOP = 'sprintCoop'
-}
-
-export enum Difficulty {
-  EASY = 'easy',
-  INTERMEDIATE = 'intermediate',
-  HARD = 'hard'
-}
-
-export enum PlayerStatus {
-  DRAWER = 'active',
-  GUESSER = 'guesser',
-  PASSIVE = 'passive'
-}
-
-export enum CurrentGameState {
-  LOBBY = 'lobby',
-  IN_GAME = 'game',
-  DRAWING = 'draw',
-  REPLY = 'reply',
-  GAME_OVER = 'over'
 }
 
 const DEFAULT_TEAM_SIZE = 4;
@@ -92,11 +48,11 @@ export abstract class Lobby {
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
-  protected players: Player[];
+  protected players: ServerPlayer[];
   protected teams: {
     teamNumber: number;
     currentScore: number;
-    playersInTeam: Player[];
+    playersInTeam: ServerPlayer[];
   }[];
 
   constructor(
@@ -111,7 +67,7 @@ export abstract class Lobby {
     this.io = io;
     this.ownerAccountId = accountId;
     this.databaseService.getAccountById(accountId).then((account) => {
-      this.ownerUsername =  account.documents.username;
+      this.ownerUsername = account.documents.username;
     });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
@@ -149,32 +105,7 @@ export abstract class Lobby {
     };
   }
 
-  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
-    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
-      await this.databaseService.getAccountById(accountIdPlayer).then((account) => {
-        const playerName = account.documents.username;
-        if (account.documents.avatar) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const playerAvatar = (account.documents.avatar as any)._id;
-          const player: Player = {
-            accountId: accountIdPlayer,
-            username: playerName,
-            avatarId: playerAvatar,
-            playerStatus: status,
-            socket: socketPlayer,
-            teamNumber: 0
-          };
-
-          this.players.push(player);
-          this.teams[0].playersInTeam.push(player);
-          socketPlayer.join(this.lobbyId);
-          this.bindLobbyEndPoints(socketPlayer);
-        }
-      });
-    }
-  }
-
-  getPlayerAddedInfo(socket: Socket): PlayerInfo  | undefined{
+  getPlayerAddedInfo(socket: Socket): PlayerInfo | undefined {
     const player = this.findPlayerBySocket(socket);
     if (player) {
       return {
@@ -194,8 +125,10 @@ export abstract class Lobby {
       if (teamIndex > -1) {
         this.teams[this.players[index].teamNumber].playersInTeam.splice(teamIndex, 1);
       }
+      const username = this.players[index].username;
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      socket.to(this.lobbyId).broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, username, Date.now());
       if (this.players.length === 0) {
         this.endGame();
       }
@@ -208,47 +141,44 @@ export abstract class Lobby {
     }
   }
 
-  isActivePlayer(socket: Socket): boolean {
-    const playerInfo = this.findPlayerBySocket(socket);
-    if (playerInfo) {
-      return playerInfo.playerStatus === PlayerStatus.DRAWER;
-    } else {
-      return false;
-    }
-  }
-
-  setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
-    const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
-    if (senderAccountId === this.ownerAccountId) {
-      this.privateLobby = newPrivacySetting;
-    }
-  }
-
-  endGame(): void {
-    this.currentGameState = CurrentGameState.GAME_OVER;
-    this.io.in(this.lobbyId).emit(SocketMessages.END_GAME);
-    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
-  }
-
   findPlayerById(accountId: string): Player | undefined {
     return this.players.find((player) => player.accountId === accountId);
-  }
-
-  findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => player.socket === socket);
   }
 
   lobbyHasRoom(): boolean {
     return this.players.length < this.size;
   }
 
-  validateMessageLength(msg: Message): boolean {
-    return msg.content.length <= this.MAX_LENGTH_MSG;
+  protected async addPlayerToTeam(playerId: string, playerStatus: PlayerStatus, socket: Socket, teamNumber: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.databaseService.getAccountById(playerId)
+        .then((account) => {
+          const playerName = account.documents.username;
+          const player: ServerPlayer = {
+            accountId: playerId,
+            username: playerName,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
+            playerStatus,
+            socket,
+            teamNumber
+          };
+          this.players.push(player);
+          this.teams[teamNumber].playersInTeam.push(player);
+          socket.join(this.lobbyId);
+          socket.to(this.lobbyId)
+            .broadcast
+            .emit(SocketMessages.PLAYER_CONNECTION, this.getPlayerAddedInfo(socket), Date.now());
+          this.io.to(socket.id).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 
-  bindLobbyEndPoints(socket: Socket) {
-
-    // bind other lobby relevant endpoints here <----- StartGame and such
+  protected bindLobbyEndPoints(socket: Socket) {
 
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket)) {
@@ -310,9 +240,9 @@ export abstract class Lobby {
       }
     });
 
-    socket.on(SocketMessages.SET_GAME_PRIVACY, (privacySetting: boolean) => {
+    socket.on(SocketLobby.CHANGE_PRIVACY_SETTING, (privacySetting: boolean) => {
       this.setPrivacySetting(socket.id, privacySetting);
-      this.io.in(this.lobbyId).emit(SocketMessages.EMIT_NEW_PRIVACY_SETTING, this.privateLobby);
+      this.io.in(this.lobbyId).emit(SocketLobby.CHANGED_PRIVACY_SETTING, this.privateLobby);
     });
 
     socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: Message) => {
@@ -321,10 +251,10 @@ export abstract class Lobby {
         if (player) {
           const messageWithUsername: ChatMessage = {
             content: sentMsg.content,
-            timestamp: sentMsg.timestamp,
+            timestamp: Date.now(),
             senderUsername: player.username
           };
-          socket.to(this.lobbyId).broadcast.emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
+          this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
         }
       }
       else {
@@ -332,9 +262,16 @@ export abstract class Lobby {
       }
     });
 
+    socket.on(SocketLobby.LEAVE_LOBBY, () => {
+      const playerId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      if (playerId) {
+        this.removePlayer(playerId, socket);
+      }
+    });
+
   }
 
-  unbindLobbyEndPoints(socket: Socket) {
+  protected unbindLobbyEndPoints(socket: Socket) {
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
@@ -342,9 +279,42 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.ERASE_ID_BC);
     socket.removeAllListeners(SocketDrawing.ADD_PATH);
     socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
-    socket.removeAllListeners(SocketMessages.SET_GAME_PRIVACY);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
-    socket.removeAllListeners(SocketMessages.PLAYER_GUESS);
-    socket.removeAllListeners(SocketMessages.START_GAME_SERVER);
+    socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
+    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
+    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
+
+  protected findPlayerBySocket(socket: Socket): Player | undefined {
+    return this.players.find((player) => player.socket.id === socket.id);
+  }
+
+  protected endGame(): void {
+    this.currentGameState = CurrentGameState.GAME_OVER;
+    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME);
+    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+  }
+
+  private isActivePlayer(socket: Socket): boolean {
+    const playerInfo = this.findPlayerBySocket(socket);
+    if (playerInfo) {
+      return playerInfo.playerStatus === PlayerStatus.DRAWER;
+    } else {
+      return false;
+    }
+  }
+
+  private setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
+    const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
+    if (senderAccountId === this.ownerAccountId) {
+      this.privateLobby = newPrivacySetting;
+    }
+  }
+
+  private validateMessageLength(msg: Message): boolean {
+    return msg.content.length <= this.MAX_LENGTH_MSG;
+  }
+
+  abstract addPlayer(playerId: string, status: PlayerStatus, socket: Socket): void;
+
 }

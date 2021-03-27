@@ -38,8 +38,8 @@ import { NumericPropertyInputComponent } from './inputs/property-inputs/numeric-
 import { TagInputComponent } from './inputs/tag-input/tag-input.component';
 import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.component';
 import { UsernameInputComponent } from './inputs/username-input/username-input.component';
-import { PasswordInputComponent } from './inputs/password-input/password-input.component';
 import { NameInputComponent } from './inputs/name-input/name-input.component';
+import { PasswordInputComponent } from './inputs/password-input/password-input.component';
 
 @NgModule({
   imports: [

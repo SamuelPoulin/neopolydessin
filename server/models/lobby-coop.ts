@@ -1,9 +1,10 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
-import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, Lobby, PlayerStatus, PlayerRole } from './lobby';
+import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole } from '../../common/communication/lobby';
+import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
+import { Lobby } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
@@ -26,15 +27,18 @@ export class LobbyCoop extends Lobby {
     this.timeLeftSeconds = 60;
   }
 
-  async addPlayer(accountIdPlayer: string, status: PlayerStatus, socketPlayer: Socket) {
-    if (!this.findPlayerById(accountIdPlayer) && this.lobbyHasRoom()) {
-      this.bindLobbyCoopEndPoints(socketPlayer);
-    }
-    super.addPlayer(accountIdPlayer, status, socketPlayer);
+  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
+    this.addPlayerToTeam(playerId, status, socket, 0)
+      .then(() => {
+        this.bindLobbyEndPoints(socket);
+      })
+      .catch((err) => {
+        console.error(`There was an error when adding ${playerId} : ${err}`);
+      });
   }
 
-  bindLobbyCoopEndPoints(socket: Socket) {
-    socket.on(SocketMessages.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
+  protected bindLobbyEndPoints(socket: Socket) {
+    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
       const guesserValues = this.findPlayerBySocket(socket);
       if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
         if (word === this.wordToGuess) {
@@ -58,21 +62,27 @@ export class LobbyCoop extends Lobby {
       }
     });
 
-    socket.on(SocketMessages.START_GAME_SERVER, () => {
+    socket.on(SocketLobby.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (senderAccountId === this.ownerAccountId) {
         const roleArray: PlayerRole[] = [];
         this.players.forEach((player) => {
-          roleArray.push({playerName: player.username, playerStatus: PlayerStatus.GUESSER});
+          roleArray.push({ playerName: player.username, playerStatus: PlayerStatus.GUESSER });
         });
-        this.io.in(this.lobbyId).emit(SocketMessages.START_GAME_CLIENT, roleArray);
+        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
         this.currentGameState = CurrentGameState.IN_GAME;
         this.startRoundTimer();
       }
     });
   }
 
-  startRoundTimer() {
+  protected unbindLobbyEndPoints(socket: Socket) {
+    super.unbindLobbyEndPoints(socket);
+    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
+    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
+  }
+
+  private startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
     this.sendStartTimeToClient();
@@ -85,20 +95,20 @@ export class LobbyCoop extends Lobby {
     }, this.MS_PER_SEC);
   }
 
-  timeRunOut() {
+  private timeRunOut() {
     clearInterval(this.clockTimeout);
     console.log('game over');
     this.endGame();
   }
 
-  addTimeOnCorrectGuess() {
+  private addTimeOnCorrectGuess() {
     const timeCorrectGuess = 30000;
-    const endTime = new Date(Date.now() +  this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess);
-    this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, endTime);
+    const endTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, endTime);
   }
 
-  sendStartTimeToClient() {
-    const gameStartTime = new Date(Date.now() +  this.timeLeftSeconds * this.MS_PER_SEC);
-    this.io.in(this.lobbyId).emit(SocketMessages.SET_TIME, gameStartTime);
+  private sendStartTimeToClient() {
+    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
   }
 }

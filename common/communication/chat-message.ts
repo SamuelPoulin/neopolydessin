@@ -1,8 +1,11 @@
 export interface Message {
   content: string;
-  timestamp: number;
 }
 
-export interface ChatMessage extends Message {
+export interface SystemMessage extends Message {
+  timestamp: number;
+} 
+
+export interface ChatMessage extends SystemMessage {
   senderUsername: string;
 }

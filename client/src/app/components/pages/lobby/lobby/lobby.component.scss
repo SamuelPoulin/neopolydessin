@@ -1,0 +1,132 @@
+@use 'src/assets/menuButtons';
+
+#lobby-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 100%;
+  height: 100vh;
+  
+  background-color: #FBFBFB;
+}
+
+#menu-container {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+
+  background-color: #FBFBFB;
+}
+
+#content-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+}
+
+#options-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#players-container {
+  display: flex;
+  flex-direction: column;
+
+  padding: 25px 0px 50px 50px;
+  width: 340px;
+
+  background-color: white;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.05);
+  border-radius: 25px;
+}
+
+#options-gamemode {
+  color: #2F2F2F;
+  font-size: 32px;
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+#options-gamemode-container {
+  display: flex;
+  align-items: center;
+}
+
+#start-button {
+  color: white;
+  background-color: #04D800;
+}
+
+#start-button-icon {
+  color: white;
+}
+
+.players-title {
+  color: #2F2F2F;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.team-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+}
+
+.player-container {
+  display: flex;
+
+  padding: 5px 0px;
+
+  border-left: 2px solid blue;
+}
+
+.player-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 35px;
+  height: 35px;
+  margin: 0px 5px;
+
+  font-size: 20px;
+  color: white;
+  border-radius: 100%;
+  background-color: cyan;
+}
+
+.player-username {
+  color: #2F2F2F;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.gamemode-icon {
+  color: #2F2F2F;
+}
+
+.gamemode-icon-flipped {
+  transform: scaleX(-1);
+}
+
+.avatar2 {
+  background-color: red;
+}
+
+.avatar3 {
+  background-color: green;
+}
+
+.avatar4 {
+  background-color: purple;
+}
