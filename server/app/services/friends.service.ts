@@ -31,22 +31,17 @@ export class FriendsService {
 
   async getFriendsOfUser(id: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
-      accountModel.findOne({ _id: id })
-        .populate('friends.friendId', 'username')
-        .then((doc: Account) => {
-          if (!doc) throw Error(NOT_FOUND.toString());
-          const response: FriendsList = {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            friends: doc.friends.map((friend: any) => {
-              return {
-                friendId: friend.friendId ? friend.friendId._id : null,
-                username: friend.friendId ? friend.friendId.username : null,
-                status: friend.status,
-                received: friend.received,
-              };
-            }),
-          };
-          resolve({ statusCode: OK, documents: response });
+      accountModel.getFriends(id)
+        .then(async (doc: FriendsList) => {
+          if (!doc[0]) throw new Error(NOT_FOUND.toString());
+          return accountModel.populate(doc, { path: 'friends.friendId', select: ['username', 'avatar'] });
+        })
+        .then((result) => {
+          let friendList: FriendsList = result[0];
+          if (this.emptyFriendList(result[0])) {
+            friendList = { friends: [] };
+          }
+          resolve({ statusCode: OK, documents: friendList });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -166,4 +161,9 @@ export class FriendsService {
         });
     });
   }
+
+  private emptyFriendList(list: FriendsList): boolean {
+    return list.friends.length === 1 && !list.friends[0].friendId && !list.friends[0].status;
+  }
+
 }

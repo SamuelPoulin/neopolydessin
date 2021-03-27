@@ -14,6 +14,10 @@ import { FriendsController } from './controllers/friends.controller';
 import { FriendsService } from './services/friends.service';
 import { LoggedIn } from './middlewares/logged-in';
 import { SocketIdService } from './services/socket-id.service';
+import { AvatarController } from './controllers/avatar.controller';
+import { AvatarService } from './services/avatar.service';
+import { PictureWordController } from './controllers/picture-word.controller';
+import { PictureWordService } from './services/picture-word.service';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {
   const container: Container = new Container();
@@ -28,7 +32,11 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.FriendsController).to(FriendsController);
   container.bind(Types.FriendsService).to(FriendsService);
   container.bind(Types.LoggedIn).to(LoggedIn);
-  container.bind(Types.SocketIdService).to(SocketIdService);
+  container.bind(Types.SocketIdService).to(SocketIdService).inSingletonScope();
+  container.bind(Types.AvatarController).to(AvatarController);
+  container.bind(Types.AvatarService).to(AvatarService);
+  container.bind(Types.PictureWordController).to(PictureWordController);
+  container.bind(Types.PictureWordService).to(PictureWordService);
 
   return container;
 };

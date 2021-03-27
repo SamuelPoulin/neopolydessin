@@ -28,7 +28,7 @@ open class RegisterRepository @Inject constructor(private val sessionManager: Se
                 ""
             )
             HttpsURLConnection.HTTP_OK -> {
-                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken)
+                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken, registerModel.username!!)
                 RegisterResponse(
                     true,
                     "",

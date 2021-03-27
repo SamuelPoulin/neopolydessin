@@ -10,6 +10,7 @@ import javax.inject.Inject
 class FakeRegisterRepository @Inject constructor(sessionManager: SessionManager ,apiRegisterInterface: ApiRegisterInterface) : RegisterRepository(
         sessionManager,apiRegisterInterface
 ) {
+
     override suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse {
         return if (registerModel.username == "invalid") {
             RegisterResponse(false, "", "", "")

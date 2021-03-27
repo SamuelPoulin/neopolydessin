@@ -7,7 +7,11 @@ import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.service.LobbySocketService
+import com.projet.clientleger.data.api.service.DrawingSocketService
+import com.projet.clientleger.data.api.service.FriendslistSocketService
 import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,8 +48,9 @@ object ApiModule {
         okHttp: OkHttpClient,
         gson: Gson
     ): Retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.SERVER_URL)
-        .client(okHttp)
+            .baseUrl(BuildConfig.SERVER_URL)
+            //.baseUrl("http://10.0.2.2:3205")
+            .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
@@ -55,5 +60,21 @@ object ApiModule {
 
     @Provides
     @Singleton
+    fun provideDrawingCommandService(): DrawingCommandsService = DrawingCommandsService()
+
+    @Provides
+    @Singleton
     fun provideSocketService(): SocketService = SocketService()
+
+    @Provides
+    @Singleton
+    fun provideDrawingSocketService(socketService: SocketService): DrawingSocketService = DrawingSocketService(socketService)
+
+    @Provides
+    @Singleton
+    fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)
+
+    @Provides
+    @Singleton
+    fun provideLobbySocketService(socketService:SocketService): LobbySocketService = LobbySocketService(socketService)
 }

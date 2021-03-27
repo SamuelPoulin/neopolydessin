@@ -1,12 +1,9 @@
 package com.projet.clientleger.connexion
 
-import android.content.Context
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.ApiConnectionInterface
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.model.*
-import okhttp3.ResponseBody
 import retrofit2.Response
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
@@ -17,7 +14,7 @@ class FakeSessionManager @Inject constructor(
         tokenInterceptor:TokenInterceptor,
         apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager(null, tokenInterceptor, apiSessionManagerInterface){
 
-    override fun saveCreds(accessToken: String, refreshToken: String){}
+    override fun saveCreds(accessToken: String, refreshToken: String, username: String) {}
     override fun updateAccessToken(accessToken: String){}
     override fun getAccessToken(): String {
         return ""
@@ -26,8 +23,7 @@ class FakeSessionManager @Inject constructor(
         return ""
     }
 
-    override suspend fun refreshAccessToken(): AccessTokenResponse {
-        return AccessTokenResponse(true,"","")
+    override suspend fun refreshAccessToken() {
     }
     override suspend fun <S,T> request(toSend: S, callback: KSuspendFunction1<S, Response<T>>): Response<T>{
         var res = callback.invoke(toSend)

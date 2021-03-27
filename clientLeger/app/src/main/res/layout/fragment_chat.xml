@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="vm"
+            type="com.projet.clientleger.ui.chat.ChatViewModel" />
+    </data>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,8 +17,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMessages"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/chatSendBox" />
+        android:layout_height="wrap_content"
+        android:layout_above="@id/chatSendBox"/>
     <!--    <androidx.core.widget.NestedScrollView-->
     <!--        android:id="@+id/scrollbar"-->
     <!--        android:layout_width="fill_parent"-->
@@ -46,14 +52,27 @@
         android:layout_margin="20dp"
         android:elevation="15dp">
 
+        <ImageButton
+            android:id="@+id/guessingToggleBtn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintDimensionRatio="1:1"
+            android:background="@drawable/ic_lightbulb"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/chatBox"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
         <EditText
             android:id="@+id/chatBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
-            android:layout_weight="0.8"
+            android:layout_weight="0.5"
             android:background="@android:color/transparent"
-            app:layout_constraintLeft_toLeftOf="parent"
+            android:text="@={vm.messageContentLiveData}"
+            app:layout_constraintLeft_toRightOf="@id/guessingToggleBtn"
             app:layout_constraintRight_toLeftOf="@id/sendButton"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
@@ -69,3 +88,4 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>
+</layout>

@@ -2,16 +2,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
-import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
 import { of } from 'rxjs';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
-import { CreateDrawingModalComponent } from 'src/app/components/pages/home/create-drawing-modal/create-drawing-modal.component';
-import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
-import { mouseDown } from 'src/app/models/tools/creator-tools/stroke-tools/stroke-tool.spec';
+import { mouseDown } from '@models/tools/creator-tools/pen-tool/pen-tool.spec';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { EditorService } from 'src/app/services/editor.service';
@@ -59,7 +56,7 @@ describe('EditorComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule, SharedModule, ToolbarModule],
-      declarations: [DrawingSurfaceComponent, UserGuideModalComponent, EditorComponent, GridComponent, CreateDrawingModalComponent],
+      declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
       providers: [
         EditorService,
         {
@@ -67,9 +64,7 @@ describe('EditorComponent', () => {
           useValue: modalDialogServiceSpy,
         },
       ],
-    })
-      .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [CreateDrawingModalComponent, UserGuideModalComponent] } })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -111,7 +106,7 @@ describe('EditorComponent', () => {
       }
     }
 
-    const tool: ToolImpl = new ToolImpl({} as EditorService, 'toolMock');
+    const tool: ToolImpl = new ToolImpl(TestBed.inject(EditorService), 'toolMock');
     component.editorService.tools.set('toolMock' as ToolType, tool);
 
     component.currentToolType = 'toolMock' as ToolType;

@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "types": ["mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "potrace" : ["types/potrace"]
+    },
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -9,6 +13,7 @@
     "outDir": "out",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "esModuleInterop" : true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noFallthroughCasesInSwitch": true,

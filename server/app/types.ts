@@ -11,4 +11,9 @@ export default {
   FriendsService: Symbol('FriendsService'),
   LoggedIn: Symbol('LoggedIn'),
   SocketIdService: Symbol('SocketIdService'),
+  AvatarController: Symbol('AvatarController'),
+  AvatarService: Symbol('AvatarService'),
+  PictureWordController: Symbol('PictureWordController'),
+  PictureWordService: Symbol('PictureWordService'),
+
 };

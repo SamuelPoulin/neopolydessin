@@ -1,5 +1,6 @@
 package com.projet.clientleger.connexion
 
+import androidx.core.text.set
 import androidx.test.ext.junit.rules.activityScenarioRule
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
@@ -25,5 +26,19 @@ class ConnexionActivityUnitTest {
     var activityScenarioRule = activityScenarioRule<ConnexionActivity>()
 
     @Test
-    fun onCreate_ButtonsListener
+    fun onCreate_ButtonsListener(){
+        activityScenarioRule.scenario.onActivity {
+            assert(it.binding.connectBtn.hasOnClickListeners())
+            assert(it.binding.forgottenPasswordBtn.hasOnClickListeners())
+            assert(it.binding.createAccountBtn.hasOnClickListeners())
+        }
+    }
+
+    @Test
+    fun connectBtn_validRequest(){
+        activityScenarioRule.scenario.onActivity {
+            //it.binding.connectionUsername.text.set("http_ok")
+            it.binding.connectBtn.callOnClick()
+        }
+    }
 }

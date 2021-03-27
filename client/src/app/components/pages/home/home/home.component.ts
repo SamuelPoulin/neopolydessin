@@ -1,8 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
-import { EditorParams } from '@components/pages/editor/editor/editor-params';
 import { HomeKeyboardListener } from '@components/pages/home/home/home-keyboard-listener';
-import { LocalSaveService } from '@services/localsave.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 
@@ -17,7 +15,7 @@ export class HomeComponent {
   guideModalType: ModalType;
   private readonly keyboardListener: HomeKeyboardListener;
 
-  constructor(private router: Router, private dialog: ModalDialogService, private localSaveService: LocalSaveService) {
+  constructor(private router: Router, private dialog: ModalDialogService) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
     this.guideModalType = ModalType.GUIDE;
@@ -28,12 +26,8 @@ export class HomeComponent {
     this.dialog.openByName(link);
   }
 
-  openPage(nextLink: string): void {
-    this.router.navigate([nextLink]);
-  }
-
-  openGallery(): void {
-    this.dialog.openByName(ModalType.GALLERY);
+  openPage(link: string): void {
+    this.router.navigate([link]);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -41,17 +35,7 @@ export class HomeComponent {
     this.keyboardListener.handle(event);
   }
 
-  continueDrawing(): void {
-    const params: EditorParams = {
-      width: this.localSaveService.drawing.width.toString(),
-      height: this.localSaveService.drawing.height.toString(),
-      color: this.localSaveService.drawing.color,
-      id: LocalSaveService.LOCAL_DRAWING_ID,
-    };
-    this.router.navigate(['/'], { skipLocationChange: true }).then(async () => this.router.navigate(['edit', params]));
-  }
-
-  get isDrawingNull(): boolean {
-    return this.localSaveService.drawing == null;
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }

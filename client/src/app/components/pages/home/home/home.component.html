@@ -1,21 +1,31 @@
-<div id="main-container">
+<div id="home-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <div id="menu-container">
+    <app-status-bar></app-status-bar>
     <div id="menu-container-title">
-      <h1>Polydessin</h1>
+      <img src="assets/icon.png">
+      <div>PolyDessin</div>
     </div>
-    
     <div id="menu-container-buttons">
-      <button id="btn-create" mat-raised-button (click)="openModal()">Nouveau dessin</button>
-      <button id="btn-gallery" mat-raised-button (click)="openGallery()">Galerie</button>
-      <button id="btn-guide" mat-raised-button (click)="openModal(guideModalType)">Guide utilisateur</button>
-
-      <button mat-raised-button *ngIf="previousDrawings; else noPreviousDrawings">
-        Continuer mon dessin
+      <button mat-flat-button class="menu-button menu-main-button" routerLink="lobby">
+        <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
+        Créer une partie privée
       </button>
-      <ng-template #noPreviousDrawings>
-        <button mat-raised-button [disabled]="isDrawingNull" (click)="continueDrawing()">Continuer mon
-          dessin</button>
-        </ng-template>
-      </div>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
+        Rejoindre une partie
+      </button>
+      <button mat-flat-button class="menu-button menu-main-button" routerLink="browser">
+        <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
+        Liste des parties
+      </button>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
+        Mot-image
+      </button>
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">help</mat-icon>
+        Guide utilisateur
+      </button>
     </div>
   </div>
+</div>
