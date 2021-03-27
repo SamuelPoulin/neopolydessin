@@ -18,4 +18,7 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun createGame(gameMode:GameType,difficulty:Difficulty,isPrivate:Boolean){
         mainmenuRepository.createGame(gameMode,difficulty,isPrivate)
     }
+    fun getUsername():String{
+        return mainmenuRepository.getUsername()
+    }
 }

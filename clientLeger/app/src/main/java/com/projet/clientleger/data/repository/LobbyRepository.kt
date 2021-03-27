@@ -11,7 +11,7 @@ import com.projet.clientleger.data.model.LobbyList
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
-class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService) {
+class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService, private val sessionManager: SessionManager) {
     fun receivedPlayersInfo(): Observable<String> {
         return lobbySocketService.receivePlayersInfo()
     }
@@ -29,6 +29,9 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun startGame(){
         lobbySocketService.startGame()
+    }
+    fun getUsername(): String{
+        return sessionManager.getUsername()
     }
 
     fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{

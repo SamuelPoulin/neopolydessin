@@ -56,7 +56,7 @@ class LobbyActivity : AppCompatActivity() {
         playersView.add(binding.player3Name)
         playersView.add(binding.player4Name)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
-        val username = intent.getSerializableExtra("username")
+        val username = vm.getUsername()
         //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
         binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
         binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
@@ -121,6 +121,8 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun startGame(){
         vm.startGame()
+        val intent = Intent(this,GameActivity::class.java)
+        startActivity(intent)
     }
     private fun goToMainMenu(){
         val intent = Intent(this, MainmenuActivity::class.java)

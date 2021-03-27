@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 class ConnexionActivity : AppCompatActivity() {
     private val vm: ConnexionViewModel by viewModels()
     lateinit var binding: ConnexionActivityBinding
-    private var username:String = "baseName"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ConnexionActivityBinding.inflate(layoutInflater)
@@ -48,7 +47,6 @@ class ConnexionActivity : AppCompatActivity() {
             val res = vm.connectAccount(binding.connectionUsername.text.toString(),binding.connectionPassword.text.toString())
             binding.connectionPassword.text.clear()
             if (res.isSucessful) {
-                username = binding.connectionUsername.text.toString()
                 binding.connectionUsername.text.clear()
                 goToMainMenu()
             } else {
@@ -68,9 +66,7 @@ class ConnexionActivity : AppCompatActivity() {
         startActivity(intent)
     }
     private fun goToMainMenu(){
-        val intent = Intent(this, MainmenuActivity::class.java).apply {
-            putExtra("username", username)
-        }
+        val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }
 }
