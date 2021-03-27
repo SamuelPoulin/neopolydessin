@@ -20,6 +20,7 @@ import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.comp
 })
 export class EditorComponent implements OnInit, AfterViewInit {
   private static readonly SECOND: number = 1000;
+  private readonly twoMinutes: number = 120;
 
   @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
@@ -57,7 +58,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
     this.team1 = ['samuelpoulin', 'masuelmoulin'];
     this.team2 = ['mortsel', 'guiboy'];
-    this.gameEnd = Date.now() + 1000 * 60 * 2;
+    this.gameEnd = Date.now() + EditorComponent.SECOND * this.twoMinutes;
 
     this.startCount();
   }
