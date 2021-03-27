@@ -1,4 +1,4 @@
-<div id="toolbar-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
+<div id="toolbar-container" [style.top]="electronContainer && '90px'" [style.height]="electronContainer && 'calc(100vh - 90px)'">
   <div id="toolbar-top-buttons">
     <icon-button *ngFor='let tool of toolTypeKeys' id='{{toolButtonId(tool)}}' [tooltipName]="toolbarNames.get(tool)"
       iconName="{{toolbarIcons.get(tool)}}" [selected]="currentToolType === tool" (click)="selectTool(tool)">

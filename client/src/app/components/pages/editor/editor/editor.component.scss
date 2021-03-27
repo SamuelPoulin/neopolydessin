@@ -23,6 +23,11 @@ mat-spinner{
   left: 50%;
 }
 
+app-chat {
+  display: flex;
+  min-width: 400px;
+}
+
 #editor-game-area {
   display: flex;
 
@@ -51,6 +56,18 @@ mat-spinner{
 
   margin-left: 50px;
   margin-top: 25px;
+}
+
+#game-area-teams {
+  display: flex;
+  flex-direction: column;
+}
+
+#game-area-teams-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: center;
 }
 
 #game-area-timer {
