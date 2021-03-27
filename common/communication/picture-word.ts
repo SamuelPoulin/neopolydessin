@@ -5,8 +5,8 @@ import { Difficulty } from './lobby';
 export interface PictureWordDrawing {
     word: string,
     drawnPaths: {
-        brushinfo: BrushInfo
-        coords: { x: number, y: number }[]
+        brushInfo: BrushInfo
+        path: { x: number, y: number }[]
         id: string
     }[],
     hints: string[],
