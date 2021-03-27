@@ -4,13 +4,13 @@
     <div id="content-container">
       <div id="server-browser-table-container">
         <table mat-table id="server-browser-table" [dataSource]="dataSource">
-          <ng-container matColumnDef="lobbyId">
-            <th mat-header-cell *matHeaderCellDef> Lobby Id </th>
-            <td mat-cell *matCellDef="let lobby"> {{lobby.lobbyId}} </td>
+          <ng-container matColumnDef="lobbyName">
+            <th mat-header-cell *matHeaderCellDef> Lobby Name </th>
+            <td mat-cell *matCellDef="let lobby"> {{lobby.lobbyName}} </td>
           </ng-container>
           <ng-container matColumnDef="playerInfo">
             <th mat-header-cell *matHeaderCellDef> Players </th>
-            <td mat-cell *matCellDef="let lobby"> {{lobby.playerInfo}} </td>
+            <td mat-cell *matCellDef="let lobby">Soon</td>
           </ng-container>
           <ng-container matColumnDef="gameType">
             <th mat-header-cell *matHeaderCellDef> Gamemode </th>

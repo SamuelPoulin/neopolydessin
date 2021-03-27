@@ -153,4 +153,8 @@ export class ToolbarComponent {
   get color(): Color {
     return this.editorService.colorsService.getColor(this.selectedColor);
   }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
+  }
 }

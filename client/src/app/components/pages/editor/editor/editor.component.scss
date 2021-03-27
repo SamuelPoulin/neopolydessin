@@ -1,5 +1,5 @@
 #editor-container {
-  background-color: rgb(73, 70, 66);
+  background-color: #FBFBFB;
   position: absolute;
   top: 0;
   left: 0;
@@ -8,20 +8,63 @@
 }
 
 app-drawing-surface {
-  position: absolute;
-  left: 60px;
-  top: 0;
+  position: relative;
 }
 
 app-grid{
   position: absolute;
-  margin: 4px;
-  top: 4px;
-  left: 4px;
+  top: 0;
+  left: 0;
   pointer-events: none;
 }
 
 mat-spinner{
   top: 50%;
   left: 50%;
+}
+
+#editor-game-area {
+  display: flex;
+
+  margin-left: 60px;
+  width: calc(100% - 60px);
+  height: calc(100% - 60px);
+}
+
+#game-area-player {
+  display: flex;
+  margin: 25px 0px 15px 0px;
+}
+
+#game-area-player-text {
+  font-size: 24px;
+}
+
+#game-area-player-name {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+#game-area-infos {
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 50px;
+  margin-top: 25px;
+}
+
+#game-area-timer {
+  display: flex;
+  align-items: center;
+
+  font-size: 20px;
+
+  mat-icon, #game-area-timer-value {
+    font-size: 50px;
+    color: #2f2f2f
+  }
+}
+
+app-gamemode-title {
+  margin-bottom: 25px;
 }
