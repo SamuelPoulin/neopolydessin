@@ -1,8 +1,11 @@
 package com.projet.clientleger.ui.game.view
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +23,10 @@ import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import kotlinx.coroutines.launch
 import kotlin.Exception
-
+const val MILLIS_IN_SEC:Long = 1000
+const val TIME_ALMOST_UP:Int= 15000
+const val TWO_DIGITS:Int = 10
+const val SEC_IN_MIN:Int = 60
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity() {
 
@@ -43,6 +49,7 @@ class GameActivity : AppCompatActivity() {
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
         //setSubscriptions()
+
     }
     private fun setSubscriptions(){
         vm.receiveKeyWord()
@@ -63,11 +70,30 @@ class GameActivity : AppCompatActivity() {
             .subscribe { timer ->
                 lifecycleScope.launch {
                     println("Timer de $timer reçu")
-                    startTimer(timer)
+                    setTimer()
                 }
             }
     }
-    private fun startTimer(timer:Long){
-        //TODO
+    private fun setTimer(timeInMilis:Long){
+        val timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
+            @SuppressLint("SetTextI18n")
+            override fun onTick(millisUntilFinished:Long){
+                if(millisUntilFinished <= TIME_ALMOST_UP){
+                    binding.timer.setTextColor(Color.RED)
+                }
+                val secRemaining = (((millisUntilFinished / MILLIS_IN_SEC)) % SEC_IN_MIN).toInt()
+                val minRemaining:Int = (((millisUntilFinished / MILLIS_IN_SEC) - secRemaining) / SEC_IN_MIN).toInt()
+                if(secRemaining < TWO_DIGITS){
+                    binding.timer.text = "$minRemaining:0$secRemaining"
+                }
+                else{
+                    binding.timer.text = "$minRemaining:$secRemaining"
+                }
+            }
+            override fun onFinish(){
+
+            }
+        }
+        timer.start()
     }
 }
