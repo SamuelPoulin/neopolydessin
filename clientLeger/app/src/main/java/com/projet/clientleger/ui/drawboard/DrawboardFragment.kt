@@ -10,14 +10,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.slider.Slider
-import com.projet.clientleger.data.enum.DrawTool
+import com.projet.clientleger.data.enumData.DrawTool
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.reflect.KFunction1
 
 
 @AndroidEntryPoint

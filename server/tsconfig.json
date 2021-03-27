@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "types": ["mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "potrace" : ["types/potrace"]
+    },
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",

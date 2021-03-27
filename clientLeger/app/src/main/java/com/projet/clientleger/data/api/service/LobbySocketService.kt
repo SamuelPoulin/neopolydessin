@@ -1,21 +1,14 @@
 package com.projet.clientleger.data.api.service
 
-import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
-import com.projet.clientleger.data.enum.LobbySocketEndpoints
+import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
-import com.projet.clientleger.data.model.MessageChat
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
-import io.socket.client.IO
-import org.json.JSONObject
-import io.socket.client.Socket
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import org.json.JSONArray
-import java.net.URISyntaxException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +16,7 @@ import javax.inject.Singleton
 class LobbySocketService @Inject constructor(private val socketService: SocketService) {
 
     fun createGame(gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean) {
-        socketService.socket.emit("CreateLobby", "",gameMode.value, difficulty.value, isPrivate)
+        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, "",gameMode.value, difficulty.value, isPrivate)
     }
     //deja dans le lobby, un joueur rejoins le lobby
     fun receivePlayersInfo(): Observable<String> {

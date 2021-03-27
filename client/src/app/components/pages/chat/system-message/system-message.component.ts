@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { UserService } from '@services/user.service';
 import { format } from 'date-fns';
-import { Message } from '../../../../../../../common/communication/chat-message';
+import { SystemMessage } from '../../../../../../../common/communication/chat-message';
 
 @Component({
   selector: 'system-message',
@@ -9,7 +9,7 @@ import { Message } from '../../../../../../../common/communication/chat-message'
   styleUrls: ['./system-message.component.scss'],
 })
 export class SystemMessageComponent {
-  @Input() message: Message;
+  @Input() message: SystemMessage;
 
   constructor(public userService: UserService) {
     this.message = { content: '', timestamp: Date.now() };
