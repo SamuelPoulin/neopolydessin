@@ -10,6 +10,19 @@ import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { EditorService } from './editor.service';
 import { Path } from '@models/shapes/path';
+import { Injectable } from '@angular/core';
+import { ColorsService } from './colors.service';
+import { SocketService } from './socket-service.service';
+import { MockSocketService } from './socket-service.service.spec';
+import { MockGameService } from './game.service.spec';
+import { GameService } from './game.service';
+
+@Injectable()
+export class MockEditorService extends EditorService {
+  constructor() {
+    super(new ColorsService(), MockSocketService, MockGameService);
+  }
+}
 
 describe('EditorService', () => {
   let service: EditorService;
@@ -20,6 +33,10 @@ describe('EditorService', () => {
     TestBed.configureTestingModule({
       imports: [SharedModule],
       declarations: [DrawingSurfaceComponent],
+      providers: [
+        { provide: SocketService, useValue: MockSocketService },
+        { provide: GameService, useValue: MockGameService },
+      ],
     }).compileComponents();
   });
 

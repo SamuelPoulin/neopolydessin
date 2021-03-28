@@ -18,9 +18,15 @@
       </div>
         <div id="game-area-timer">
           <mat-icon [inline]="true">timer</mat-icon>
-          <div id="game-area-timer-value">0:15</div>
+          <div id="game-area-timer-value">{{timeLeft}}</div>
         </div>
     </div>
-    <div id="game-area-teams">Équipes et liste de joueurs</div>
+    <div id="game-area-teams-container">
+      <div id="game-area-teams">
+        <app-team [team]="team1" name="Équipe 1"></app-team>
+        <app-team [team]="team2" name="Équipe 2" ennemy></app-team>
+      </div>
+    </div>
+    <app-chat></app-chat>
   </div>
 </div>

@@ -1,12 +1,13 @@
 <div id="chat-container">
-  <div id="chat-header" [ngStyle]="electronContainer && {'top': '30px'}">
+  <div id="chat-header">
     <img id="chat-logo" src="assets/chat.png" />
-    <h1>Chat</h1>
+    <h1 id="chat-text">Chat</h1>
   </div>
-  <div id="chat-messages" [ngStyle]="electronContainer && {'padding-top': '120px'}">
+  <div id="chat-messages">
     <ng-container *ngFor="let message of messages">
       <ng-container *ngIf="!isSystem(message)">
-        <chat-message [message]="message" [ngStyle]="{'align-self': message.user === userService.username && 'flex-end'}"></chat-message>
+        <chat-message [message]="message"
+          [ngStyle]="{'align-self': message.user === userService.username && 'flex-end'}"></chat-message>
       </ng-container>
       <ng-container *ngIf="isSystem(message)">
         <system-message [message]="message"></system-message>

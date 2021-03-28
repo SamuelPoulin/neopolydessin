@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
-import { Router } from '@angular/router';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
 
 import { Tool } from '@tools/tool';
@@ -48,7 +47,7 @@ export class ToolbarComponent {
   readonly toolbarIcons: Map<ToolType | string, string>;
   readonly toolbarNames: Map<ToolType | string, string>;
 
-  constructor(private router: Router, public editorService: EditorService) {
+  constructor(public editorService: EditorService) {
     this.stepThickness = ToolbarComponent.SLIDER_STEP;
     this.editorBackgroundChanged = new EventEmitter<Color>();
     this.selectedColor = SelectedColorType.primary;
@@ -110,10 +109,6 @@ export class ToolbarComponent {
   editGrid(): void {
     this.toolbarType = ToolbarType.grid;
     this.open();
-  }
-
-  navigate(path: string): void {
-    this.router.navigate([path]);
   }
 
   updateBackground(color: Color): void {
