@@ -26,7 +26,7 @@ export class AvatarService {
     return new Promise<Response<string>>((resolve, reject) => {
       avatarModel.findById(new ObjectId(avatarId))
         .then(async (avatar: Avatar) => {
-          if (!avatar.filePath) throw new Error(NOT_FOUND.toString());
+          if (!avatar || !avatar.filePath) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: avatar.filePath });
         })
         .catch((err) => {
