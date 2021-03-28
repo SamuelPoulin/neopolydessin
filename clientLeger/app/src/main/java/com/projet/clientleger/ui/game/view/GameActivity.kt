@@ -16,12 +16,15 @@ import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.PlayerRole
+import com.projet.clientleger.data.api.model.PlayerStatus
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import kotlinx.coroutines.launch
+import java.sql.Date
+import java.time.LocalDateTime
 import kotlin.Exception
 const val MILLIS_IN_SEC:Long = 1000
 const val TIME_ALMOST_UP:Int= 15000
@@ -34,6 +37,7 @@ class GameActivity : AppCompatActivity() {
     lateinit var binding: ActivityGameBinding
     private var currentKeyWord : String = ""
     private var currentRoles: Array<PlayerRole> = arrayOf()
+    private var clientRole:PlayerRole = PlayerRole("", PlayerStatus.PASSIVE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +52,7 @@ class GameActivity : AppCompatActivity() {
             supportFragmentManager.setFragmentResult("keyboardEvent", bundleOf("height" to heightDiff))
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
+        clientRole.playerName = vm.getUsername()
         //setSubscriptions()
 
     }
@@ -64,15 +69,36 @@ class GameActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     println("Roles reçus : $roles")
                     currentRoles = roles
+                    applyRoles()
                 }
             }
         vm.receiveTimer()
             .subscribe { timer ->
                 lifecycleScope.launch {
                     println("Timer de $timer reçu")
-                    setTimer()
+                    val timeInMillis:Long = findTimeLeft(timer)
+                    setTimer(timeInMillis)
                 }
             }
+    }
+    private fun getFrenchRole(status:PlayerStatus):String{
+        return when (status){
+            PlayerStatus.DRAWER -> "Dessinateur"
+            PlayerStatus.GUESSER -> "Devineur"
+            else -> "Passif"
+        }
+    }
+    private fun applyRoles(){
+        for(player in currentRoles){
+            if(clientRole.playerName == player.playerName){
+                clientRole.playerStatus = player.playerStatus
+            }
+        }
+        val frenchRole:String = getFrenchRole(clientRole.playerStatus)
+        binding.role.text = "Votre rôle : $frenchRole"
+    }
+    private fun findTimeLeft(finishDate:Long):Long{
+        return finishDate - System.currentTimeMillis()
     }
     private fun setTimer(timeInMilis:Long){
         val timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){

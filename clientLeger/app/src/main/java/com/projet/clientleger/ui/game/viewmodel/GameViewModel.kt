@@ -18,5 +18,8 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun receiveKeyWord(): Observable<String> {
         return gameRepository.receiveKeyWord()
     }
+    fun getUsername(): String{
+        return gameRepository.getUsername()
+    }
 
 }

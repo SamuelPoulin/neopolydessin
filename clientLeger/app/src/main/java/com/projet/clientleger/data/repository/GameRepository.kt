@@ -1,11 +1,12 @@
 package com.projet.clientleger.data.repository
 
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.service.GameSocketService
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
-open class GameRepository @Inject constructor(private val gameSocketService: GameSocketService) {
+open class GameRepository @Inject constructor(private val gameSocketService: GameSocketService, private val sessionManager: SessionManager) {
     fun receiveTimer():Observable<Long>{
         return  gameSocketService.receiveTimer()
     }
@@ -14,5 +15,8 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     }
     fun receiveKeyWord():Observable<String>{
         return gameSocketService.receiveKeyWord()
+    }
+    fun getUsername():String{
+        return sessionManager.getUsername()
     }
 }

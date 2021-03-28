@@ -51,7 +51,7 @@
                 app:layout_constraintLeft_toRightOf="@id/timerText"
                 app:layout_constraintBottom_toBottomOf="parent" />
             <TextView
-                android:id="@+id/difficulty"
+                android:id="@+id/role"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Votre rôle : devin !"
