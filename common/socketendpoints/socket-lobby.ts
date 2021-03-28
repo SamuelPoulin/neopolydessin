@@ -15,5 +15,10 @@ export enum SocketLobby {
     PLAYER_GUESS = 'guess',
 
     END_GAME = 'endGame',
-    SET_TIME = 'setTime'
+    SET_TIME = 'setTime',
+
+    SEND_ROLES = 'sendRoles',
+    SEND_WORD = 'sendWordToDraw',
+
+    COOP_GUESS_RESPONSE = 'coopGuessResponse'
 }

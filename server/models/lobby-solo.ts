@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
+import { PictureWordService } from 'app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
 import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole } from '../../common/communication/lobby';
@@ -16,13 +17,14 @@ export class LobbySolo extends Lobby {
   constructor(
     socketIdService: SocketIdService,
     databaseService: DatabaseService,
+    pictureWordService: PictureWordService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
+    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
     this.size = this.SOLO_TEAM_SIZE;
     this.gameType = GameType.SPRINT_SOLO;
     this.guessLeft = 3;

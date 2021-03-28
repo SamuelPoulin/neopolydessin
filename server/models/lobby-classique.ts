@@ -1,9 +1,11 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
+import { PictureWordService } from 'app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, GuessResponse, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessResponse, PlayerStatus } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
+import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby } from './lobby';
 
 
@@ -14,13 +16,14 @@ export class LobbyClassique extends Lobby {
 
   constructor(socketIdService: SocketIdService,
     databaseService: DatabaseService,
+    pictureWordService: PictureWordService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
+    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
     this.timeLeftSeconds = 30;
@@ -53,18 +56,34 @@ export class LobbyClassique extends Lobby {
 
     super.bindLobbyEndPoints(socket);
 
-    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: GuessResponse) => void) => {
+    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: GuessMessage) => void) => {
       const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
       if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
-        /* if (word === this.wordToGuess) {
-          this.teams[guesserValues.teamNumber].currentScore++;
-          callback(true);
+        const distance = levenshtein(word, this.wordToGuess);
+        let guessStat;
+        switch (distance) {
+          case 0: {
+            guessStat = GuessResponse.CORRECT;
+            this.teams[guesserValues.teamNumber].currentScore++;
+            break;
+          }
+          case 1:
+          case 2: {
+            guessStat = GuessResponse.CLOSE;
+            break;
+          }
+          default: {
+            guessStat = GuessResponse.WRONG;
+            break;
+          }
         }
-        else {
-          callback(false);
-        }*/
-
+        const guessReturn: GuessMessage = {
+          content: word,
+          timestamp: Date.now(),
+          guessStatus: guessStat
+        };
+        callback(guessReturn);
       }
     });
 

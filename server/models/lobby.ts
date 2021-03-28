@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { PictureWordService } from 'app/services/picture-word.service';
 import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
@@ -58,6 +59,7 @@ export abstract class Lobby {
   constructor(
     @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
     @inject(Types.DatabaseService) protected databaseService: DatabaseService,
+    @inject(Types.PictureWordService) protected pictureWordService: PictureWordService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,

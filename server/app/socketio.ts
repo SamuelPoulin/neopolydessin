@@ -21,6 +21,7 @@ import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 import { Observable } from './utils/observable';
+import { PictureWordService } from './services/picture-word.service';
 
 @injectable()
 export class SocketIo {
@@ -41,7 +42,8 @@ export class SocketIo {
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
-    @inject(Types.DatabaseService) private databaseService: DatabaseService
+    @inject(Types.DatabaseService) private databaseService: DatabaseService,
+    @inject(Types.PictureWordService) protected pictureWordService: PictureWordService,
   ) { }
 
   init(server: http.Server): void {
@@ -104,17 +106,17 @@ export class SocketIo {
           if (playerId) {
             switch (gametype) {
               case GameType.CLASSIC: {
-                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_SOLO: {
-                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_COOP: {
-                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }

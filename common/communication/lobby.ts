@@ -26,6 +26,17 @@ export interface PlayerRole {
   playerStatus: PlayerStatus;
 }
 
+export interface GuessMessage {
+  content: string,
+  timestamp: number,
+  guessStatus: GuessResponse
+}
+
+export interface GuessMessageCoop extends GuessMessage {
+  nbGuessLeft: number,
+  guesserName: string
+}
+
 export enum GameType {
   CLASSIC = 'classic',
   SPRINT_SOLO = 'sprintSolo',
