@@ -6,9 +6,9 @@ import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { FriendsList } from '../models/schemas/account';
+import { Friend, FriendsList } from '../models/schemas/account';
 import { Lobby } from '../models/lobby';
-import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import { SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
@@ -21,6 +21,13 @@ import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 import { Observable } from './utils/observable';
+
+export enum FriendsListEvent {
+  userConnected = 'userConn',
+  userDisconnected = 'userDisconn',
+  userUploadAvatar = 'uploadAvatar',
+  userUpdatedAccount = 'updateAcc',
+}
 
 @injectable()
 export class SocketIo {
@@ -62,6 +69,24 @@ export class SocketIo {
       if (index > -1) {
         this.lobbyList.splice(index, 1);
       }
+    });
+
+    DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { accountId?: string; friends: Friend[]; event: FriendsListEvent }) => {
+      let userFriends = obj.friends;
+      if (obj.accountId) {
+        const account = await this.databaseService.getAccountById(obj.accountId);
+        userFriends = account.documents.friends;
+      }
+      userFriends.forEach((friend) => {
+        const socketId = this.socketIdService.GetSocketIdOfAccountId(friend.friendId as string);
+        if (socketId) {
+          if (obj.event === FriendsListEvent.userUploadAvatar) {
+            this.io.to(socketId).emit(SocketFriendListNotifications.INVALIDATE_AVATAR, obj.accountId);
+          } else {
+            this.io.to(socketId).emit(SocketFriendListNotifications.UPDATE);
+          }
+        }
+      });
     });
   }
 

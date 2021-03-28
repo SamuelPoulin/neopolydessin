@@ -1,6 +1,7 @@
 import { NOT_FOUND, OK } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
+import { FriendsListEvent } from '../socketio';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import { DatabaseService, Response } from './database.service';
 interface AvatarId {
@@ -14,6 +15,11 @@ export class AvatarService {
     return new Promise<Response<AvatarId>>((resolve, reject) => {
       avatarModel.uploadAvatarForUser(accountId, filePath)
         .then((result: Avatar) => {
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            accountId,
+            friends: [],
+            event: FriendsListEvent.userUploadAvatar
+          });
           resolve({ statusCode: OK, documents: { id: result._id.toHexString() } });
         })
         .catch((err) => {
