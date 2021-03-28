@@ -1,13 +1,12 @@
 /* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
-import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
+import { EditorModule } from '@components/pages/editor/editor.module';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
-import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
 import { SharedModule } from '@components/shared/shared.module';
 import { Path } from '@models/shapes/path';
 import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { Coordinate } from '@utils/math/coordinate';
 import { PenTool } from './pen-tool';
 
@@ -59,15 +58,14 @@ export const mouseLeave = (): MouseEvent => {
   } as MouseEvent;
 };
 
-describe('StrokeTool', () => {
+describe('PenTool', () => {
   let penToolMock: PenTool;
   let fixture: ComponentFixture<EditorComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditorComponent, DrawingSurfaceComponent, GridComponent],
-      imports: [SharedModule, RouterTestingModule, ToolbarModule],
-      providers: [EditorService],
+      imports: [SharedModule, RouterTestingModule, EditorModule],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
   }));
 
@@ -76,6 +74,7 @@ describe('StrokeTool', () => {
     fixture.detectChanges();
     penToolMock = new PenToolMock(fixture.componentInstance.editorService);
   });
+
   it('should create', () => {
     expect(penToolMock).toBeTruthy();
   });
