@@ -1,11 +1,14 @@
+/* eslint-disable max-lines */
 import bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
+import { Observable } from '../utils/observable';
+import { FriendsListEvent } from '../socketio';
 import { login } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
-import accountModel, { Account } from '../../models/schemas/account';
+import accountModel, { Account, Friend } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
@@ -34,6 +37,8 @@ export interface LoginTokens {
 
 @injectable()
 export class DatabaseService {
+
+  static UPDATE_FRIEND_LIST: Observable<{ accountId?: string; friends: Friend[]; event: FriendsListEvent }> = new Observable();
 
   static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
@@ -215,10 +220,11 @@ export class DatabaseService {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
-
+      let friends: Friend[];
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
+          friends = account.friends;
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
@@ -236,6 +242,10 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            friends,
+            event: FriendsListEvent.userConnected
+          });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -278,8 +288,15 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel
         .findOneAndDelete({ token: refreshToken })
-        .then((doc: Refresh) => {
+        .then(async (doc: Refresh) => {
           if (!doc) throw Error(NOT_FOUND.toString());
+          return this.getAccountById(doc.accountId);
+        })
+        .then((account) => {
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            friends: account.documents.friends,
+            event: FriendsListEvent.userDisconnected,
+          });
           resolve(true);
         })
         .catch((err: Error) => {
@@ -309,6 +326,10 @@ export class DatabaseService {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            friends: account.friends,
+            event: FriendsListEvent.userUpdatedAccount
+          });
           resolve({ statusCode: OK, documents: account });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -336,6 +357,10 @@ export class DatabaseService {
         })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            friends: doc.friends,
+            event: FriendsListEvent.userUpdatedAccount
+          });
           resolve({ statusCode: OK, documents: doc });
         })
         .catch((err: Error | ErrorMsg) => {
