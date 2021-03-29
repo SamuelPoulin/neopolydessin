@@ -32,6 +32,7 @@ export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
   readonly MS_PER_SEC: number = 1000;
+  readonly TIME_ADD_CORRECT_GUESS: number = 30;
 
   lobbyId: string;
   gameType: GameType;

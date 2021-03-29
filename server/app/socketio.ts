@@ -43,7 +43,7 @@ export class SocketIo {
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
     @inject(Types.DatabaseService) private databaseService: DatabaseService,
-    @inject(Types.PictureWordService) protected pictureWordService: PictureWordService,
+    @inject(Types.PictureWordService) private pictureWordService: PictureWordService,
   ) { }
 
   init(server: http.Server): void {

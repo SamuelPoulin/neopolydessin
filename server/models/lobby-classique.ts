@@ -3,8 +3,15 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-// eslint-disable-next-line max-len
-import { CurrentGameState, Difficulty, GameType, GuessMessageClassique, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  GuessMessageClassique,
+  GuessResponse,
+  PlayerRole,
+  PlayerStatus
+} from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby, ServerPlayer } from './lobby';
@@ -13,9 +20,12 @@ import { Lobby, ServerPlayer } from './lobby';
 @injectable()
 export class LobbyClassique extends Lobby {
 
+  private readonly START_GAME_TIME_LEFT: number = 30;
+  private readonly REPLY_TIME: number = 10;
   private clockTimeout: NodeJS.Timeout;
   private teamDrawing: number;
   private playerDrawing: number;
+  private drawerPlayer: ServerPlayer;
 
   constructor(socketIdService: SocketIdService,
     databaseService: DatabaseService,
@@ -29,7 +39,7 @@ export class LobbyClassique extends Lobby {
     super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
-    this.timeLeftSeconds = 30;
+    this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.teamDrawing = 0;
     this.playerDrawing = 0;
   }
@@ -96,7 +106,7 @@ export class LobbyClassique extends Lobby {
             guessStatus: guessStat,
             guesserName: player.username
           };
-          this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_RESPONSE, guessReturn);
+          this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
         }
       }
     });
@@ -126,11 +136,8 @@ export class LobbyClassique extends Lobby {
     this.setRoles();
     console.log('Word to guess before await: ' + this.wordToGuess);
     this.pictureWordService.getRandomWord().then((wordStructure) => {
-      const drawerPlayer = this.findDrawer();
       this.wordToGuess = wordStructure.word;
-      if (drawerPlayer) {
-        this.io.to(drawerPlayer.socket.id).emit(SocketLobby.SEND_WORD, wordStructure.word);
-      }
+      this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
       console.log('Word to guess in await: ' + this.wordToGuess);
     });
     console.log('Word to guess after await: ' + this.wordToGuess);
@@ -138,7 +145,7 @@ export class LobbyClassique extends Lobby {
     clearInterval(this.clockTimeout);
 
     this.currentGameState = CurrentGameState.DRAWING;
-    this.timeLeftSeconds = 30;
+    this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.startTimerGuessToClient();
 
     this.clockTimeout = setInterval(() => {
@@ -163,7 +170,7 @@ export class LobbyClassique extends Lobby {
     this.setReplyRoles();
 
     this.currentGameState = CurrentGameState.REPLY;
-    this.timeLeftSeconds = 10;
+    this.timeLeftSeconds = this.REPLY_TIME;
     this.startTimerReplyToClient();
 
     this.clockTimeout = setInterval(() => {
@@ -189,7 +196,7 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerReplyToClient() {
-    const replyTimeSeconds = 10;
+    const replyTimeSeconds = this.REPLY_TIME;
     const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
   }
@@ -202,50 +209,35 @@ export class LobbyClassique extends Lobby {
       team.playersInTeam.forEach((player, indexPlayer) => {
         if (indexTeamDrawing === indexTeam) {
           const botPlayer = this.findBotPlayerInTeam(indexTeam);
+          let shouldBeDrawer;
           if (botPlayer) {
-            if (indexPlayer === botPlayer) {
-              roleArray.push({
-                playerName: player.username,
-                playerStatus: PlayerStatus.DRAWER
-              });
-              player.playerStatus = PlayerStatus.DRAWER;
-            }
-            else {
-              roleArray.push({
-                playerName: player.username,
-                playerStatus: PlayerStatus.GUESSER
-              });
-              player.playerStatus = PlayerStatus.GUESSER;
-            }
+            shouldBeDrawer = indexPlayer === botPlayer;
           }
           else {
-            if (indexPlayer === indexPlayerDrawing) {
-              roleArray.push({
-                playerName: player.username,
-                playerStatus: PlayerStatus.DRAWER
-              });
-              player.playerStatus = PlayerStatus.DRAWER;
-            }
-            else {
-              roleArray.push({
-                playerName: player.username,
-                playerStatus: PlayerStatus.GUESSER
-              });
-              player.playerStatus = PlayerStatus.GUESSER;
-            }
+            shouldBeDrawer = indexPlayer === indexPlayerDrawing;
+          }
+          if (shouldBeDrawer) {
+            player.playerStatus = PlayerStatus.DRAWER;
+            this.drawerPlayer = player;
+          }
+          else {
+            player.playerStatus = PlayerStatus.GUESSER;
           }
         }
         else {
-          roleArray.push({
-            playerName: player.username,
-            playerStatus: PlayerStatus.PASSIVE
-          });
           player.playerStatus = PlayerStatus.PASSIVE;
         }
       });
     });
 
-    this.io.in(this.lobbyId).emit(SocketLobby.SEND_ROLES, roleArray);
+    this.players.forEach((player) => {
+      roleArray.push({
+        playerName: player.username,
+        playerStatus: player.playerStatus
+      });
+    });
+
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, roleArray);
   }
 
   private setReplyRoles() {
@@ -270,7 +262,7 @@ export class LobbyClassique extends Lobby {
       });
     });
 
-    this.io.in(this.lobbyId).emit(SocketLobby.SEND_ROLES, roleArray);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, roleArray);
   }
 
   private findBotPlayerInTeam(teamIndex: number): number | undefined {

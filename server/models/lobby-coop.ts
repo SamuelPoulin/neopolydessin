@@ -4,14 +4,22 @@ import { levenshtein } from '../app/utils/levenshtein-distance';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-// eslint-disable-next-line max-len
-import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole, GuessResponse, GuessMessageCoop } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  PlayerStatus,
+  PlayerRole,
+  GuessResponse,
+  GuessMessageCoop
+} from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
 
+  private readonly NB_GUESS: number = 5;
   private guessLeft: number;
   private clockTimeout: NodeJS.Timeout;
 
@@ -26,7 +34,7 @@ export class LobbyCoop extends Lobby {
     lobbyName: string
   ) {
     super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
-    this.guessLeft = 5;
+    this.guessLeft = this.NB_GUESS;
     this.gameType = GameType.SPRINT_COOP;
     this.timeLeftSeconds = 60;
   }
@@ -51,7 +59,7 @@ export class LobbyCoop extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[0].currentScore++;
-            this.timeLeftSeconds += 30;
+            this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
             this.addTimeOnCorrectGuess();
             break;
           }
@@ -68,7 +76,7 @@ export class LobbyCoop extends Lobby {
               });
               console.log('Word to guess after await: ' + this.wordToGuess);
               // EMIT NEW DRAWING BY BOT
-              this.guessLeft = 5;
+              this.guessLeft = this.NB_GUESS;
             }
             break;
           }
@@ -84,7 +92,7 @@ export class LobbyCoop extends Lobby {
               });
               console.log('Word to guess after await: ' + this.wordToGuess);
               // EMIT NEW DRAWING BY BOT
-              this.guessLeft = 5;
+              this.guessLeft = this.NB_GUESS;
             }
             break;
           }
@@ -99,7 +107,7 @@ export class LobbyCoop extends Lobby {
             nbGuessLeft: this.guessLeft,
             guesserName: player.username
           };
-          this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_RESPONSE, guessReturn);
+          this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_BROADCAST, guessReturn);
         }
       }
     });
