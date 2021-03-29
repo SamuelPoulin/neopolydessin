@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
-import { SocketService } from '@services/socket-service.service';
+import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
-import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
@@ -13,59 +11,20 @@ import { ChatMessage, Message } from '../../../../../../../common/communication/
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent {
   private static MAX_CHARACTER_COUNT: number;
-  messageSubscription: Subscription;
-  playerConnectionSubscription: Subscription;
-  playerDisconnectionSubscription: Subscription;
 
-  messages: Message[] = [];
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
-  constructor(
-    private socketService: SocketService,
-    private router: Router,
-    private snackBar: MatSnackBar,
-    public userService: UserService,
-    public dialog: MatDialog,
-  ) {
-    if (!this.userService.username) this.router.navigate(['login']);
-
+  constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
-  }
-
-  ngOnInit(): void {
-    this.subscribe();
-  }
-
-  subscribe(): void {
-    this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
-      this.messages.push(message);
-      this.scrollToBottom();
-    });
-
-    this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
-      this.messages.push(message);
-      this.scrollToBottom();
-    });
-
-    this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
-      this.messages.push(message);
-      this.scrollToBottom();
-    });
   }
 
   sendMessage(): void {
     if (this.inputValue.replace(/ /g, '')) {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
-        this.socketService.sendMessage({
-          content: this.inputValue,
-        });
-        /* this.messages.push({
-          content: this.inputValue,
-          timestamp: Date.now(),
-        } as ChatMessage);*/
+        this.chatService.sendMessage(this.inputValue);
         this.inputValue = '';
         this.scrollToBottom();
       } else {

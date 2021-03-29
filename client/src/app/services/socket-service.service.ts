@@ -60,6 +60,12 @@ export class SocketService {
     });
   }
 
+  receivePrivateMessage(): Observable<ChatMessage> {
+    return new Observable<ChatMessage>((msgObs) => {
+      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
+    });
+  }
+
   receivePlayerConnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((msgObs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>

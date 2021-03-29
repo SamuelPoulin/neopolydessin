@@ -3,8 +3,9 @@
     <img id="chat-logo" src="assets/chat.png" />
     <h1 id="chat-text">Chat</h1>
   </div>
+  <app-chat-tabs></app-chat-tabs>
   <div id="chat-messages">
-    <ng-container *ngFor="let message of messages">
+    <ng-container *ngFor="let message of chatService.messages">
       <ng-container *ngIf="!isSystem(message)">
         <chat-message [message]="message"
           [ngStyle]="{'align-self': message.user === userService.username && 'flex-end'}"></chat-message>
