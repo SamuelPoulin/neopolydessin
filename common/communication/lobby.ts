@@ -12,6 +12,7 @@ export interface Player {
   avatarId: string;
   playerStatus: PlayerStatus;
   teamNumber: number;
+  isBot: boolean
 }
 
 export interface PlayerInfo {
@@ -26,10 +27,31 @@ export interface PlayerRole {
   playerStatus: PlayerStatus;
 }
 
+export interface GuessMessage {
+  content: string,
+  timestamp: number,
+  guessStatus: GuessResponse
+}
+
+export interface GuessMessageCoop extends GuessMessage {
+  nbGuessLeft: number,
+  guesserName: string
+}
+
+export interface GuessMessageClassique extends GuessMessage {
+  guesserName: string
+}
+
 export enum GameType {
   CLASSIC = 'classic',
   SPRINT_SOLO = 'sprintSolo',
   SPRINT_COOP = 'sprintCoop'
+}
+
+export enum GuessResponse {
+  CORRECT = 'correct',
+  CLOSE = 'close',
+  WRONG = 'wrong'
 }
 
 export enum Difficulty {

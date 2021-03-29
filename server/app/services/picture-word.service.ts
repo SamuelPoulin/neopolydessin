@@ -5,25 +5,36 @@ import potrace from 'potrace';
 import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
 import pictureWordModel, { PictureWord } from '../../models/schemas/picture-word-pair';
 import { DatabaseService, Response } from './database.service';
+
+const PICTURE_WORD_PATH: string = '/var/www/Polydessin/picture';
 @injectable()
 export class PictureWordService {
 
-  readonly PICTURE_WORD_PATH: string = 'var/www/Polydessin/picture';
+  private picturePath: string;
 
-  async uploadPicture(body: PictureWordPicture): Promise<Response<void>> {
-    return new Promise<Response<void>>((resolve, reject) => {
+  constructor() {
+    this.picturePath = PICTURE_WORD_PATH;
+  }
+
+  setPicturePath(path: string) {
+    this.picturePath = path;
+    this.checkForPictureFolder();
+  }
+
+  async uploadPicture(body: PictureWordPicture): Promise<Response<string>> {
+    return new Promise<Response<string>>((resolve, reject) => {
       const toSave = new pictureWordModel(body);
       const uploadedPicture: Buffer = Buffer.from(body.picture);
       this.posterizePromise(uploadedPicture, body.color)
         .then(async (svg) => {
           return this.writeSVG(toSave.id, svg);
         })
-        .then(async (path) => {
-          toSave.uploadedPicturePath = path;
+        .then(async (newPath) => {
+          toSave.uploadedPicturePath = newPath;
           return toSave.save();
         })
         .then((picture) => {
-          resolve({ statusCode: OK, documents: undefined });
+          resolve({ statusCode: OK, documents: picture.id });
         })
         .catch((err) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -64,7 +75,7 @@ export class PictureWordService {
 
   async writeSVG(fileName: string, svg: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      const filePath = `${this.PICTURE_WORD_PATH}/${fileName}.svg`;
+      const filePath = `${this.picturePath}/${fileName}.svg`;
       fs.writeFile(filePath, svg, {}, (err) => {
         if (err) reject('failed to store picture');
         resolve(filePath);
@@ -73,11 +84,23 @@ export class PictureWordService {
   }
 
   async posterizePromise(picture: Buffer, color: string): Promise<string> {
-    return new Promise<string>((reject, resolve) => {
+    return new Promise<string>((resolve, reject) => {
       potrace.posterize(picture, { color }, (err, result) => {
         if (err) throw new Error(INTERNAL_SERVER_ERROR.toString());
         resolve(result);
       });
     });
   }
+
+  private checkForPictureFolder(): void {
+    if (!fs.existsSync(this.picturePath)) {
+      try {
+        fs.mkdirSync(this.picturePath, { recursive: true });
+      }
+      catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
 }

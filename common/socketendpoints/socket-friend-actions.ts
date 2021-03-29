@@ -4,3 +4,8 @@ export enum SocketFriendActions {
     FRIEND_REQUEST_REFUSED = 'friendRequestRefused',
     UPDATE = 'updateFriendList'
 }
+
+export enum SocketFriendListNotifications {
+    UPDATE = 'fetchFriendList',
+    INVALIDATE_AVATAR = 'invalidateAvatar'
+}
