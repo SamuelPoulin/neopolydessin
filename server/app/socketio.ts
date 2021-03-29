@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
 import { Message } from '../../common/communication/chat-message';
-import { PrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Friend, FriendsList } from '../models/schemas/account';
@@ -159,9 +159,15 @@ export class SocketIo {
           if (socketOfFriend) {
             const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
             if (senderAccountId) {
-              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId).then((result) => {
+              const timestamp = Date.now();
+              const msgToSend: ReceivedPrivateMessage = {
+                content: sentMsg.content,
+                senderAccountId,
+                timestamp,
+              };
+              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, timestamp).then((result) => {
                 if (result.nModified === 0) throw new Error('couldn\'t update history');
-                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg, senderAccountId);
+                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
               }).catch((err) => {
                 console.log(err);
               });

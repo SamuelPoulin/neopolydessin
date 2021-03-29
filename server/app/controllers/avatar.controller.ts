@@ -114,7 +114,7 @@ export class AvatarController {
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.avatarService.getAvatar(req.params.id)
           .then((response) => {
-            res.status(response.statusCode).sendFile(path.resolve(response.documents));
+            res.status(response.statusCode).sendFile(response.documents);
           })
           .catch((err: ErrorMsg) => {
             res.status(err.statusCode).json(err.message);
