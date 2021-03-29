@@ -3,16 +3,19 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from 'app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessResponse, PlayerStatus } from '../../common/communication/lobby';
+// eslint-disable-next-line max-len
+import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
-import { Lobby } from './lobby';
+import { Lobby, ServerPlayer } from './lobby';
 
 
 @injectable()
 export class LobbyClassique extends Lobby {
 
   private clockTimeout: NodeJS.Timeout;
+  private teamDrawing: number;
+  private playerDrawing: number;
 
   constructor(socketIdService: SocketIdService,
     databaseService: DatabaseService,
@@ -27,6 +30,8 @@ export class LobbyClassique extends Lobby {
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
     this.timeLeftSeconds = 30;
+    this.teamDrawing = 0;
+    this.playerDrawing = 0;
   }
 
   addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
@@ -66,15 +71,20 @@ export class LobbyClassique extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[guesserValues.teamNumber].currentScore++;
+            this.playerDrawing++;
+            this.teamDrawing++;
+            this.startRoundTimer();
             break;
           }
           case 1:
           case 2: {
             guessStat = GuessResponse.CLOSE;
+            this.startReply();
             break;
           }
           default: {
             guessStat = GuessResponse.WRONG;
+            this.startReply();
             break;
           }
         }
@@ -109,15 +119,30 @@ export class LobbyClassique extends Lobby {
     // SEND ROLES TO CLIENT
     // SEND WORD TO DRAWER
     // START TIMER AND SEND TIME TO CLIENT
+    this.setRoles();
+    console.log('Word to guess before await: ' + this.wordToGuess);
+    this.pictureWordService.getRandomWord().then((wordStructure) => {
+      const drawerPlayer = this.findDrawer();
+      this.wordToGuess = wordStructure.word;
+      if (drawerPlayer) {
+        this.io.to(drawerPlayer.socket.id).emit(SocketLobby.SEND_WORD, wordStructure.word);
+      }
+      console.log('Word to guess in await: ' + this.wordToGuess);
+    });
+    console.log('Word to guess after await: ' + this.wordToGuess);
+
     clearInterval(this.clockTimeout);
+
     this.currentGameState = CurrentGameState.DRAWING;
     this.timeLeftSeconds = 30;
     this.startTimerGuessToClient();
+
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
       console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.endRoundTimer();
+        this.startReply();
       }
     }, this.MS_PER_SEC);
   }
@@ -125,15 +150,18 @@ export class LobbyClassique extends Lobby {
   private endRoundTimer() {
     clearInterval(this.clockTimeout);
     console.log('Guess over');
-    this.startReply();
   }
 
   private startReply() {
     // SEND REPLY PHASE TO CLIENTS WITH ROLES (GUESS-GUESS / PASSIVE-PASSIVE)
     // SEND TIME TO CLIENT (10 SECONDS)
+    clearInterval(this.clockTimeout);
+    this.setReplyRoles();
+
     this.currentGameState = CurrentGameState.REPLY;
     this.timeLeftSeconds = 10;
     this.startTimerReplyToClient();
+
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
       console.log(this.timeLeftSeconds);
@@ -146,6 +174,8 @@ export class LobbyClassique extends Lobby {
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
     console.log('Reply over');
+    this.playerDrawing++;
+    this.teamDrawing++;
     this.startRoundTimer();
   }
 
@@ -158,5 +188,104 @@ export class LobbyClassique extends Lobby {
     const replyTimeSeconds = 10;
     const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
+  }
+
+  private setRoles() {
+    const roleArray: PlayerRole[] = [];
+    const indexTeamDrawing = this.teamDrawing % 2;
+    const indexPlayerDrawing = this.playerDrawing % 2;
+    this.teams.forEach((team, indexTeam) => {
+      team.playersInTeam.forEach((player, indexPlayer) => {
+        if (indexTeamDrawing === indexTeam) {
+          const botPlayer = this.findBotPlayerInTeam(indexTeam);
+          if (botPlayer) {
+            if (indexPlayer === botPlayer) {
+              roleArray.push({
+                playerName: player.username,
+                playerStatus: PlayerStatus.DRAWER
+              });
+              player.playerStatus = PlayerStatus.DRAWER;
+            }
+            else {
+              roleArray.push({
+                playerName: player.username,
+                playerStatus: PlayerStatus.GUESSER
+              });
+              player.playerStatus = PlayerStatus.GUESSER;
+            }
+          }
+          else {
+            if (indexPlayer === indexPlayerDrawing) {
+              roleArray.push({
+                playerName: player.username,
+                playerStatus: PlayerStatus.DRAWER
+              });
+              player.playerStatus = PlayerStatus.DRAWER;
+            }
+            else {
+              roleArray.push({
+                playerName: player.username,
+                playerStatus: PlayerStatus.GUESSER
+              });
+              player.playerStatus = PlayerStatus.GUESSER;
+            }
+          }
+        }
+        else {
+          roleArray.push({
+            playerName: player.username,
+            playerStatus: PlayerStatus.PASSIVE
+          });
+          player.playerStatus = PlayerStatus.PASSIVE;
+        }
+      });
+    });
+
+    this.io.in(this.lobbyId).emit(SocketLobby.SEND_ROLES, roleArray);
+  }
+
+  private setReplyRoles() {
+    const roleArray: PlayerRole[] = [];
+    const indexTeamDrawing = this.teamDrawing % 2;
+    this.teams.forEach((team, indexTeam) => {
+      team.playersInTeam.forEach((player, indexPlayer) => {
+        if (indexTeamDrawing === indexTeam) {
+          roleArray.push({
+            playerName: player.username,
+            playerStatus: PlayerStatus.PASSIVE
+          });
+          player.playerStatus = PlayerStatus.PASSIVE;
+        }
+        else {
+          roleArray.push({
+            playerName: player.username,
+            playerStatus: PlayerStatus.GUESSER
+          });
+          player.playerStatus = PlayerStatus.GUESSER;
+        }
+      });
+    });
+
+    this.io.in(this.lobbyId).emit(SocketLobby.SEND_ROLES, roleArray);
+  }
+
+  private findBotPlayerInTeam(teamIndex: number): number | undefined {
+    let indexBotPlayer;
+    this.teams[teamIndex].playersInTeam.forEach((player, index) => {
+      if (player.isBot) { // player.isBot
+        indexBotPlayer = index;
+      }
+    });
+    return indexBotPlayer;
+  }
+
+  private findDrawer(): ServerPlayer | undefined {
+    let drawer;
+    this.players.forEach((player) => {
+      if (player.playerStatus === PlayerStatus.DRAWER) {
+        drawer = player;
+      }
+    });
+    return drawer;
   }
 }

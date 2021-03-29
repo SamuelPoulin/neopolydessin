@@ -12,6 +12,7 @@ export interface Player {
   avatarId: string;
   playerStatus: PlayerStatus;
   teamNumber: number;
+  isBot: boolean
 }
 
 export interface PlayerInfo {

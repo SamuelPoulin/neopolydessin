@@ -5,7 +5,7 @@ import { PictureWordService } from 'app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
 // eslint-disable-next-line max-len
-import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole, GuessResponse, GuessMessage, GuessMessageCoop } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole, GuessResponse, GuessMessageCoop } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 

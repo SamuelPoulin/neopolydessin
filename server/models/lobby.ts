@@ -163,7 +163,8 @@ export abstract class Lobby {
             avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
             playerStatus,
             socket,
-            teamNumber
+            teamNumber,
+            isBot: false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);
