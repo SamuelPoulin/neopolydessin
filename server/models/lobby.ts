@@ -165,7 +165,8 @@ export abstract class Lobby {
             playerStatus,
             socket,
             teamNumber,
-            isBot: false
+            isBot: false,
+            finishedLoading: false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);
@@ -287,6 +288,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
+    socket.removeAllListeners(SocketLobby.LOADING_OVER);
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {

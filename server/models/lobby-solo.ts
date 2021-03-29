@@ -78,6 +78,15 @@ export class LobbySolo extends Lobby {
         });
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
         this.currentGameState = CurrentGameState.IN_GAME;
+      }
+    });
+
+    socket.on(SocketLobby.LOADING_OVER, () => {
+      const playerDoneLoading = this.findPlayerBySocket(socket);
+      if (playerDoneLoading) {
+        playerDoneLoading.finishedLoading = true;
+      }
+      if (this.players.every((player) => player.finishedLoading)) {
         this.startRoundTimer();
       }
     });
