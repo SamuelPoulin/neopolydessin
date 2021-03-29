@@ -17,7 +17,7 @@ export interface Messages extends Document {
 
 interface MessagesModel extends Model<Messages> {
   findHistory: (id: string, otherId: string, page: number, limit: number) => Query<MessageHistory | null, Messages>;
-  addMessageToHistory: (msg: PrivateMessage, senderId: string) => Query<UpdateOneQueryResult, Messages>;
+  addMessageToHistory: (msg: PrivateMessage, senderId: string, timestamp: number) => Query<UpdateOneQueryResult, Messages>;
   removeHistory: (id: string, otherId: string) => Query<Messages | null, Messages>;
   removeHistoryOfAccount: (id: string) => Query<Messages | null, Messages>;
 }
@@ -63,14 +63,14 @@ messagesSchema.statics.findHistory = (id: string, otherId: string, page: number,
     .skip(skips).limit(limit);
 };
 
-messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage, senderId: string) => {
+messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage, senderId: string, timestamp: number) => {
   return messagesHistoryModel.updateOne(findMessagesQuery(senderId, msg.receiverAccountId),
     {
       $push: {
         messages: {
           senderAccountId: senderId,
           content: msg.content,
-          timestamp: Date.now(),
+          timestamp,
         }
       }
     }
