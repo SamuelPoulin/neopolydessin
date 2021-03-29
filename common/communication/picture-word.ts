@@ -11,7 +11,7 @@ export interface PictureWordDrawing {
     }[],
     hints: string[],
     difficulty: Difficulty,
-    drawMoode: DrawMode
+    drawMode: DrawMode
 }
 
 export interface PictureWordPicture {
@@ -20,5 +20,5 @@ export interface PictureWordPicture {
     color: string,
     hints: string[],
     difficulty: Difficulty,
-    drawMoode: DrawMode
+    drawMode: DrawMode
 }

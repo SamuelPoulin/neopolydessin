@@ -51,7 +51,7 @@ describe('Picture word service', () => {
                 'in a sentence'
             ],
             difficulty: Difficulty.EASY,
-            drawMoode: DrawMode.CONVENTIONAL
+            drawMode: DrawMode.CONVENTIONAL
         }
 
         let producedSVGPath: string;
@@ -86,7 +86,7 @@ describe('Picture word service', () => {
                 'in a sentence'
             ],
             difficulty: Difficulty.EASY,
-            drawMoode: DrawMode.CONVENTIONAL
+            drawMode: DrawMode.CONVENTIONAL
         }
 
         service.uploadDrawing(pwd)
