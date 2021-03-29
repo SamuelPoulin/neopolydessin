@@ -259,38 +259,23 @@ describe('Database Service', () => {
   });
 
   it('getAccountsInfo should return correctly', (done: Mocha.Done) => {
-    const otherAccountInfo = {
-      firstName: 'name',
-      lastName: 'lname',
-      username: 'username1',
-      email: 'email@email1.email',
-      password: 'monkey123',
-      passwordConfirm: 'monkey123'
-    }
-    const ids: string[] = [];
+    let id: string;
     databaseService.createAccount(accountInfo)
       .then((tokens) => {
         const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY as string) as object;
-        ids.push(decodedJwt['_id']);
-        return databaseService.createAccount(otherAccountInfo);
-      })
-      .then((tokens) => {
-        const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY as string) as object;
-        ids.push(decodedJwt['_id']);
-        return databaseService.getAccountsInfo(ids);
+        id = decodedJwt['_id'];
+        return databaseService.getPublicAccount(id);
       })
       .then((infos) => {
-        expect(infos.documents[0].accountId).to.equal(ids[0]);
-        expect(infos.documents[0].username).to.equal('username');
-        expect(infos.documents[1].accountId).to.equal(ids[1]);
-        expect(infos.documents[1].username).to.equal('username1');
+        expect(infos.documents.accountId).to.equal(id);
+        expect(infos.documents.username).to.equal('username');
         done();
       })
   });
 
   it('getAccountsInfo should return correctly', (done: Mocha.Done) => {
-    const ids: string[] = [];
-    databaseService.getAccountsInfo(ids)
+    const ids: string = '123456789012345678901234'
+    databaseService.getPublicAccount(ids)
       .catch((err: ErrorMsg) => {
         expect(err.statusCode).to.equal(httpStatus.NOT_FOUND);
         done();

@@ -1,3 +1,5 @@
+import path from 'path';
+import fs from 'fs';
 import { NOT_FOUND, OK } from 'http-status-codes';
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
@@ -34,7 +36,9 @@ export class AvatarService {
       avatarModel.findById(new ObjectId(avatarId))
         .then(async (avatar: Avatar) => {
           if (!avatar || !avatar.filePath) throw new Error(NOT_FOUND.toString());
-          resolve({ statusCode: OK, documents: avatar.filePath });
+          const resolvedPath = path.resolve(avatar.filePath);
+          if (!fs.existsSync(resolvedPath)) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: resolvedPath });
         })
         .catch((err) => {
           reject(DatabaseService.rejectErrorMessage(err));
