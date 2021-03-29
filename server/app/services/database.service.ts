@@ -114,23 +114,26 @@ export class DatabaseService {
     });
   }
 
-  async getAccountsInfo(ids: string[]): Promise<Response<AccountInfo[]>> {
-    return new Promise<Response<AccountInfo[]>>((resolve, reject) => {
-      accountModel.getUsersInfo(ids)
-        .then((accounts: Account[]) => {
-          if (accounts.length === 0) throw new Error(NOT_FOUND.toString());
-          const userInfos: AccountInfo[] = accounts.map((account) => {
-            return {
+  async getPublicAccount(id: string): Promise<Response<AccountInfo>> {
+    return new Promise<Response<AccountInfo>>((resolve, reject) => {
+      console.log(id);
+      try {
+        accountModel.findById(new ObjectId(id))
+          .then((account: Account) => {
+            if (!account) throw new Error(NOT_FOUND.toString());
+            const publicAccount: AccountInfo = {
               accountId: account._id.toHexString(),
               username: account.username,
               avatar: account.avatar
             };
+            resolve({ statusCode: OK, documents: publicAccount });
+          })
+          .catch((err: Error) => {
+            reject(DatabaseService.rejectErrorMessage(err));
           });
-          resolve({ statusCode: OK, documents: userInfos });
-        })
-        .catch((err: Error) => {
-          reject(DatabaseService.rejectErrorMessage(err));
-        });
+      } catch {
+        reject(DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString())));
+      }
     });
   }
 

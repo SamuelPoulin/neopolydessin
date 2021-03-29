@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
 import { Message } from '../../common/communication/chat-message';
-import { PrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Friend, FriendsList } from '../models/schemas/account';
@@ -21,6 +21,7 @@ import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 import { Observable } from './utils/observable';
+import { PictureWordService } from './services/picture-word.service';
 import { AvatarService } from './services/avatar.service';
 
 export enum FriendsListEvent {
@@ -49,7 +50,8 @@ export class SocketIo {
 
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
-    @inject(Types.DatabaseService) private databaseService: DatabaseService
+    @inject(Types.DatabaseService) private databaseService: DatabaseService,
+    @inject(Types.PictureWordService) private pictureWordService: PictureWordService,
   ) { }
 
   init(server: http.Server): void {
@@ -131,17 +133,17 @@ export class SocketIo {
           if (playerId) {
             switch (gametype) {
               case GameType.CLASSIC: {
-                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_SOLO: {
-                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_COOP: {
-                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.io,
+                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
                   playerId, difficulty, privacySetting, lobbyName);
                 break;
               }
@@ -159,9 +161,15 @@ export class SocketIo {
           if (socketOfFriend) {
             const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
             if (senderAccountId) {
-              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId).then((result) => {
+              const timestamp = Date.now();
+              const msgToSend: ReceivedPrivateMessage = {
+                content: sentMsg.content,
+                senderAccountId,
+                timestamp,
+              };
+              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, timestamp).then((result) => {
                 if (result.nModified === 0) throw new Error('couldn\'t update history');
-                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, sentMsg, senderAccountId);
+                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
               }).catch((err) => {
                 console.log(err);
               });
