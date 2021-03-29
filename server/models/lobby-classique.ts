@@ -274,14 +274,4 @@ export class LobbyClassique extends Lobby {
     });
     return indexBotPlayer;
   }
-
-  private findDrawer(): ServerPlayer | undefined {
-    let drawer;
-    this.players.forEach((player) => {
-      if (player.playerStatus === PlayerStatus.DRAWER) {
-        drawer = player;
-      }
-    });
-    return drawer;
-  }
 }
