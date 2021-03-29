@@ -38,6 +38,10 @@ export interface GuessMessageCoop extends GuessMessage {
   guesserName: string
 }
 
+export interface GuessMessageClassique extends GuessMessage {
+  guesserName: string
+}
+
 export enum GameType {
   CLASSIC = 'classic',
   SPRINT_SOLO = 'sprintSolo',

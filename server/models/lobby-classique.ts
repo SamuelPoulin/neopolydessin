@@ -4,7 +4,7 @@ import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
 // eslint-disable-next-line max-len
-import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessMessageClassique, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby, ServerPlayer } from './lobby';
@@ -61,7 +61,7 @@ export class LobbyClassique extends Lobby {
 
     super.bindLobbyEndPoints(socket);
 
-    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: GuessMessage) => void) => {
+    socket.on(SocketLobby.PLAYER_GUESS, (word: string) => {
       const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
       if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
@@ -88,12 +88,16 @@ export class LobbyClassique extends Lobby {
             break;
           }
         }
-        const guessReturn: GuessMessage = {
-          content: word,
-          timestamp: Date.now(),
-          guessStatus: guessStat
-        };
-        callback(guessReturn);
+        const player = this.findPlayerBySocket(socket);
+        if (player) {
+          const guessReturn: GuessMessageClassique = {
+            content: word,
+            timestamp: Date.now(),
+            guessStatus: guessStat,
+            guesserName: player.username
+          };
+          this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_RESPONSE, guessReturn);
+        }
       }
     });
 
