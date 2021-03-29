@@ -333,6 +333,6 @@ export abstract class Lobby {
 
   abstract addPlayer(playerId: string, status: PlayerStatus, socket: Socket): void;
 
-  abstract startRoundTimer(): void;
+  protected abstract startRoundTimer(): void;
 
 }
