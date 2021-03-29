@@ -21,6 +21,7 @@ import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
 import Types from './types';
 import { Observable } from './utils/observable';
+import { AvatarService } from './services/avatar.service';
 
 export enum FriendsListEvent {
   userConnected = 'userConn',
@@ -71,20 +72,21 @@ export class SocketIo {
       }
     });
 
-    DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { accountId?: string; friends: Friend[]; event: FriendsListEvent }) => {
-      let userFriends = obj.friends;
-      if (obj.accountId) {
-        const account = await this.databaseService.getAccountById(obj.accountId);
-        userFriends = account.documents.friends;
-      }
-      userFriends.forEach((friend) => {
+    DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { friends: Friend[]; event: FriendsListEvent }) => {
+      obj.friends.forEach((friend) => {
         const socketId = this.socketIdService.GetSocketIdOfAccountId(friend.friendId as string);
         if (socketId) {
-          if (obj.event === FriendsListEvent.userUploadAvatar) {
-            this.io.to(socketId).emit(SocketFriendListNotifications.INVALIDATE_AVATAR, obj.accountId);
-          } else {
-            this.io.to(socketId).emit(SocketFriendListNotifications.UPDATE);
-          }
+          this.io.to(socketId).emit(SocketFriendListNotifications.UPDATE);
+        }
+      });
+    });
+
+    AvatarService.USER_UPDATED_AVATAR.subscribe(async (obj: { accountId: string; avatarId: string }) => {
+      const account = await this.databaseService.getAccountById(obj.accountId);
+      account.documents.friends.forEach((friend) => {
+        const socketId = this.socketIdService.GetSocketIdOfAccountId(friend.friendId as string);
+        if (socketId) {
+          this.io.to(socketId).emit(SocketFriendListNotifications.INVALIDATE_AVATAR, obj.accountId, obj.avatarId);
         }
       });
     });

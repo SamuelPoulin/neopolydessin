@@ -242,7 +242,10 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({ friends, event: FriendsListEvent.userConnected });
+          DatabaseService.UPDATE_FRIEND_LIST.notify({
+            friends,
+            event: FriendsListEvent.userConnected
+          });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -285,11 +288,13 @@ export class DatabaseService {
     return new Promise<boolean>((resolve, reject) => {
       refreshModel
         .findOneAndDelete({ token: refreshToken })
-        .then((doc: Refresh) => {
+        .then(async (doc: Refresh) => {
           if (!doc) throw Error(NOT_FOUND.toString());
+          return this.getAccountById(doc.accountId);
+        })
+        .then((account) => {
           DatabaseService.UPDATE_FRIEND_LIST.notify({
-            accountId: doc.accountId,
-            friends: [],
+            friends: account.documents.friends,
             event: FriendsListEvent.userDisconnected,
           });
           resolve(true);
