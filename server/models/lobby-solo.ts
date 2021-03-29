@@ -88,7 +88,7 @@ export class LobbySolo extends Lobby {
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
-  private startRoundTimer() {
+  protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
     this.sendStartTimeToClient();

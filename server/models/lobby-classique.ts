@@ -127,7 +127,7 @@ export class LobbyClassique extends Lobby {
   }
 
 
-  private startRoundTimer() {
+  protected startRoundTimer() {
     // DECIDE ROLES
     // SEND ROLES TO CLIENT
     // SEND WORD TO DRAWER
