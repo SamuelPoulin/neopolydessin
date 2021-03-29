@@ -4,7 +4,7 @@ import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
 // eslint-disable-next-line max-len
-import { CurrentGameState, Difficulty, GameType, GuessMessage, GuessMessageClassique, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessMessageClassique, GuessResponse, PlayerRole, PlayerStatus } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby, ServerPlayer } from './lobby';
