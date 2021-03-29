@@ -267,6 +267,16 @@ export abstract class Lobby {
       }
     });
 
+    socket.on(SocketLobby.LOADING_OVER, () => {
+      const playerDoneLoading = this.findPlayerBySocket(socket);
+      if (playerDoneLoading) {
+        playerDoneLoading.finishedLoading = true;
+      }
+      if (this.players.every((player) => player.finishedLoading)) {
+        this.startRoundTimer();
+      }
+    });
+
     socket.on(SocketLobby.LEAVE_LOBBY, () => {
       const playerId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (playerId) {
@@ -322,5 +332,7 @@ export abstract class Lobby {
   }
 
   abstract addPlayer(playerId: string, status: PlayerStatus, socket: Socket): void;
+
+  abstract startRoundTimer(): void;
 
 }

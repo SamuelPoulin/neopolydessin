@@ -118,16 +118,6 @@ export class LobbyClassique extends Lobby {
         this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
-
-    socket.on(SocketLobby.LOADING_OVER, () => {
-      const playerDoneLoading = this.findPlayerBySocket(socket);
-      if (playerDoneLoading) {
-        playerDoneLoading.finishedLoading = true;
-      }
-      if (this.players.every((player) => player.finishedLoading)) {
-        this.startRoundTimer();
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
