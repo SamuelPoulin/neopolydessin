@@ -29,6 +29,7 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+    // todo - remove
     return new Observable<LobbyInfo[]>((msgObs) => {
       setInterval(() => {
         this.dummyLobbies().then((lobbies) => {
@@ -39,6 +40,7 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   async dummyLobbies(): Promise<LobbyInfo[]> {
+    // todo - remove
     return new Promise<LobbyInfo[]>((resolve, reject) => {
       resolve([]);
     });
@@ -46,6 +48,7 @@ export class ServerBrowserComponent implements OnInit {
 
   joinLobby(lobbyId: string): void {
     this.router.navigate([`/lobby/${lobbyId}`]);
+    this.socketService.joinLobby(lobbyId); // todo - move to lobby component?
   }
 
   get showEmptyMessage(): boolean {
