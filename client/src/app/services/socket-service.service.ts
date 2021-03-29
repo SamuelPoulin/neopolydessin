@@ -103,7 +103,8 @@ export class SocketService {
   getPlayerJoined(): Observable<string> {
     return new Observable<string>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: string) => {
-        obs.next(player);
+        // todo - use new format
+        obs.next(player.toString());
       });
     });
   }

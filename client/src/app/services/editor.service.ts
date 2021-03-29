@@ -101,7 +101,7 @@ export class EditorService {
       });
       this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
         const shape = new Path(undefined, data.id + 1);
-        shape.primaryColor = Color.hex(data.brush.color.slice(1));
+        shape.primaryColor = Color.ahex(data.brush.color.slice(1));
         shape.strokeWidth = data.brush.strokeWidth;
         data.path.forEach((coord: Coordinate) => {
           shape.addPoint(coord);

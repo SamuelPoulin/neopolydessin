@@ -27,11 +27,12 @@ export class PenTool extends CreatorTool {
 
   protected startShape(coord: Coordinate = this.mousePosition): void {
     super.startShape(coord);
+    this.shape.addPoint(coord);
   }
 
   initListeners(): void {
     this.editorService.socketService.receiveStartPath().subscribe((pathData: { coord: Coordinate; brush: BrushInfo }) => {
-      this.editorService.colorsService.primaryColor = Color.hex(pathData.brush.color.slice(1));
+      this.editorService.colorsService.primaryColor = Color.ahex(pathData.brush.color.slice(1));
       this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth;
       this.startShape(pathData.coord);
       this.shape.updateProperties();
@@ -53,7 +54,7 @@ export class PenTool extends CreatorTool {
         this.startShape();
         this.editorService.socketService.sendStartPath(
           this.mousePosition,
-          this.editorService.colorsService.primaryColor.hexString,
+          this.editorService.colorsService.primaryColor.ahexString,
           this.toolProperties.strokeWidth.value,
         );
       }
