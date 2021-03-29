@@ -27,21 +27,26 @@ export class AvatarController {
 
   uploadPicture: Multer;
 
-  avatarPath: string;
+  private avatarPath: string;
 
   constructor(
     @inject(Types.AvatarService) private avatarService: AvatarService,
     @inject(Types.LoggedIn) private loggedIn: LoggedIn,
   ) {
-    this.checkForAvatarFolder();
+    this.avatarPath = AVATAR_PATH;
     this.setupPictureStorage();
     this.configureRouter();
   }
 
+  setAvatarPath(avatarPath: string) {
+    this.avatarPath = avatarPath;
+    this.checkForAvatarFolder();
+  }
+
   private checkForAvatarFolder(): void {
-    if (!fs.existsSync(AVATAR_PATH)) {
+    if (!fs.existsSync(this.avatarPath)) {
       try {
-        fs.mkdirSync(AVATAR_PATH, { recursive: true });
+        fs.mkdirSync(this.avatarPath, { recursive: true });
       }
       catch (e) {
         console.error(e);
@@ -52,12 +57,12 @@ export class AvatarController {
   private setupPictureStorage(): void {
     this.pictureStorage = diskStorage({
       destination: (req, file, cb) => {
-        cb(null, AVATAR_PATH);
+        cb(null, this.avatarPath);
       },
       filename: (req, file, cb) => {
         // remove already existing file if there are any.
         // With this, one user can only have one uploaded avatar at a time.
-        const filePath = `${AVATAR_PATH}/${req.params._id}`;
+        const filePath = `${this.avatarPath}/${req.params._id}`;
         if (fs.existsSync(`${filePath}.png`)) {
           fs.unlinkSync(`${filePath}.png`);
         }
@@ -66,7 +71,7 @@ export class AvatarController {
         }
 
         const fileName: string = `${req.params._id}${path.extname(file.originalname)}`;
-        req.params.filePath = `${AVATAR_PATH}/${fileName}`;
+        req.params.filePath = `${this.avatarPath}/${fileName}`;
         cb(null, fileName);
       }
     });
@@ -109,7 +114,7 @@ export class AvatarController {
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         this.avatarService.getAvatar(req.params.id)
           .then((response) => {
-            res.status(response.statusCode).sendFile(response.documents);
+            res.status(response.statusCode).sendFile(path.resolve(response.documents));
           })
           .catch((err: ErrorMsg) => {
             res.status(err.statusCode).json(err.message);

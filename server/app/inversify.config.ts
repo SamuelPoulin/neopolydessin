@@ -33,7 +33,7 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.FriendsService).to(FriendsService);
   container.bind(Types.LoggedIn).to(LoggedIn);
   container.bind(Types.SocketIdService).to(SocketIdService).inSingletonScope();
-  container.bind(Types.AvatarController).to(AvatarController);
+  container.bind(Types.AvatarController).to(AvatarController).inSingletonScope();
   container.bind(Types.AvatarService).to(AvatarService);
   container.bind(Types.PictureWordController).to(PictureWordController);
   container.bind(Types.PictureWordService).to(PictureWordService);
