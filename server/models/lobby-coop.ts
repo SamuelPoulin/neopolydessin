@@ -1,28 +1,40 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
+import { levenshtein } from '../app/utils/levenshtein-distance';
+import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  PlayerStatus,
+  PlayerRole,
+  GuessResponse,
+  GuessMessageCoop
+} from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
 
+  private readonly NB_GUESS: number = 5;
   private guessLeft: number;
   private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,
     databaseService: DatabaseService,
+    pictureWordService: PictureWordService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, io, accountId, difficulty, privateGame, lobbyName);
-    this.guessLeft = 5;
+    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
+    this.guessLeft = this.NB_GUESS;
     this.gameType = GameType.SPRINT_COOP;
     this.timeLeftSeconds = 60;
   }
@@ -38,26 +50,64 @@ export class LobbyCoop extends Lobby {
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
-    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
+    socket.on(SocketLobby.PLAYER_GUESS, async (word: string) => {
       const guesserValues = this.findPlayerBySocket(socket);
       if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
-        if (word === this.wordToGuess) {
-          this.teams[0].currentScore++;
-          this.timeLeftSeconds += 30;
-          this.addTimeOnCorrectGuess();
-          // EMIT NEW TIME
-          // SELECT NEW WORD
-          // EMIT NEW DRAWING BY BOT
-          callback(true);
-        }
-        else {
-          this.guessLeft--;
-          if (this.guessLeft === 0) {
-            // SELECT NEW WORD
-            // EMIT NEW DRAWING BY BOT
-            this.guessLeft = 5;
+        const distance = levenshtein(word, this.wordToGuess);
+        let guessStat;
+        switch (distance) {
+          case 0: {
+            guessStat = GuessResponse.CORRECT;
+            this.teams[0].currentScore++;
+            this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
+            this.addTimeOnCorrectGuess();
+            break;
           }
-          callback(false);
+          case 1:
+          case 2: {
+            guessStat = GuessResponse.CLOSE;
+            this.guessLeft--;
+            if (this.guessLeft === 0) {
+              // SELECT NEW WORD
+              console.log('Word to guess before await: ' + this.wordToGuess);
+              await this.pictureWordService.getRandomWord().then((wordStructure) => {
+                this.wordToGuess = wordStructure.word;
+                console.log('Word to guess in await: ' + this.wordToGuess);
+              });
+              console.log('Word to guess after await: ' + this.wordToGuess);
+              // EMIT NEW DRAWING BY BOT
+              this.guessLeft = this.NB_GUESS;
+            }
+            break;
+          }
+          default: {
+            guessStat = GuessResponse.WRONG;
+            this.guessLeft--;
+            if (this.guessLeft === 0) {
+              // SELECT NEW WORD
+              console.log('Word to guess before await: ' + this.wordToGuess);
+              await this.pictureWordService.getRandomWord().then((wordStructure) => {
+                this.wordToGuess = wordStructure.word;
+                console.log('Word to guess in await: ' + this.wordToGuess);
+              });
+              console.log('Word to guess after await: ' + this.wordToGuess);
+              // EMIT NEW DRAWING BY BOT
+              this.guessLeft = this.NB_GUESS;
+            }
+            break;
+          }
+        }
+        console.log('Before response');
+        const player = this.findPlayerBySocket(socket);
+        if (player) {
+          const guessReturn: GuessMessageCoop = {
+            content: word,
+            timestamp: Date.now(),
+            guessStatus: guessStat,
+            nbGuessLeft: this.guessLeft,
+            guesserName: player.username
+          };
+          this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_BROADCAST, guessReturn);
         }
       }
     });
