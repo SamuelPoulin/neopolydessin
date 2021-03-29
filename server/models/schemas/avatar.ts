@@ -45,7 +45,7 @@ avatarSchema.statics.addAvatarDocument = async (accountId: string) => {
 };
 
 avatarSchema.statics.removeAvatar = (accountId: string) => {
-  return avatarModel.remove({ accountId });
+  return avatarModel.deleteOne({ accountId });
 };
 
 const avatarModel = model<Avatar, AvatarModel>('Avatar', avatarSchema);

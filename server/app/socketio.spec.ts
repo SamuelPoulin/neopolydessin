@@ -297,7 +297,6 @@ describe('Socketio', () => {
                         content: 'eyo what up',
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
-                    testClient.socket.close();
                 })
                 return createClient(otherAccountInfo);
             })
@@ -316,7 +315,8 @@ describe('Socketio', () => {
                         .then((history) => {
                             expect(history.statusCode).to.equal(OK);
                             expect(history.documents.messages).to.be.lengthOf(2);
-                            testClient.socket.close();
+                            clients[0].close();
+                            clients[1].close();
                         })
                 });
 
