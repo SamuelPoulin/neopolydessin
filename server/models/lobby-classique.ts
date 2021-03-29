@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { Server, Socket } from 'socket.io';
-import { PictureWordService } from 'app/services/picture-word.service';
+import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
 // eslint-disable-next-line max-len
