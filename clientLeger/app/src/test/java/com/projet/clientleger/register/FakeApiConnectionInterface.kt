@@ -1,6 +1,6 @@
 package com.projet.clientleger.register
 
-import com.projet.clientleger.data.api.ApiConnectionInterface
+import com.projet.clientleger.data.api.http.ApiConnectionInterface
 import com.projet.clientleger.data.api.model.ConnectionModel
 import com.projet.clientleger.data.api.model.RegisterDataResponse
 import retrofit2.Response

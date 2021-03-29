@@ -1,7 +1,7 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.ApiRegisterInterface
+import com.projet.clientleger.data.api.http.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponse
 import javax.inject.Inject

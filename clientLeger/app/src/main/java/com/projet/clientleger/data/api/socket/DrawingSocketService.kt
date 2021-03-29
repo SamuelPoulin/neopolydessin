@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.endpoint.DrawingSocketEndpoints
 import com.projet.clientleger.data.model.*

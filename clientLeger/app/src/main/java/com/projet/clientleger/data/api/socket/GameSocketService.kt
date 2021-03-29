@@ -1,12 +1,8 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.PlayerRole
-import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
-import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
-import com.projet.clientleger.data.model.chat.MessageChat
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import javax.inject.Inject

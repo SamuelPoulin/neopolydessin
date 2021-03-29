@@ -1,14 +1,9 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.BuildConfig
-import com.projet.clientleger.data.model.chat.Message
-import com.projet.clientleger.data.model.chat.MessageChat
 import io.reactivex.rxjava3.core.Observable
-import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.client.Socket
-import kotlinx.serialization.json.Json
-import org.json.JSONObject
 import java.net.URISyntaxException
 import javax.inject.Inject
 import javax.inject.Singleton

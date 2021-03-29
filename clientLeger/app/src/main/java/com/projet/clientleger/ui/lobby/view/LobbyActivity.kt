@@ -6,11 +6,12 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.model.PlayerRole
+import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
@@ -25,7 +26,7 @@ class LobbyActivity : AppCompatActivity() {
     private val vm: LobbyViewModel by viewModels()
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
-    private val playersView = ArrayList<TextView>()
+    private val playersView = ArrayList<ConstraintLayout>()
     private var rolesList = ArrayList<PlayerRole>()
 
     private fun setSubscriptions() {
@@ -35,6 +36,10 @@ class LobbyActivity : AppCompatActivity() {
                         addPlayerToGame(username.toString())
                     }
                 }
+
+        vm.receiveLobbyInfo().subscribe{
+            it.
+        }
 
         vm.receiveStartGame().subscribe{
             lifecycleScope.launch {
@@ -51,10 +56,10 @@ class LobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupButtons()
-        playersView.add(binding.player1Name)
-        playersView.add(binding.player2Name)
-        playersView.add(binding.player3Name)
-        playersView.add(binding.player4Name)
+        playersView.add(binding.player1)
+        playersView.add(binding.player2)
+        playersView.add(binding.player3)
+        playersView.add(binding.player4)
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         val username = vm.getUsername()
         //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
@@ -135,26 +140,11 @@ class LobbyActivity : AppCompatActivity() {
     private fun kickPlayer(playerIndex:Int){
 
     }
-    private fun addPlayerToGame(name:String){
+    private fun addPlayerToGame(info: Player){
         playerCount++
-        when(playerCount){
-            1->{
-                binding.player1Name.text = name
-                binding.removePlayer1Button.isEnabled = true
-            }
-            2->{
-                binding.player2Name.text = name
-                binding.removePlayer2Button.isEnabled = true
-            }
-            3->{
-                binding.player3Name.text = name
-                binding.removePlayer3Button.isEnabled = true
-            }
-            4->{
-                binding.player4Name.text = name
-                binding.removePlayer4Button.isEnabled = true
-            }
-        }
+        val textView = playersView[playerCount].findViewWithTag<TextView>("playerView")
+        textView.text = info.playerName
+        textView.isEnabled = true
     }
     private fun disableRemoveButtonWithIndex(index:Int){
         when(index){

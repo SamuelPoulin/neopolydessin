@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.api
+package com.projet.clientleger.data.api.http
 
 object ApiErrorMessages {
     const val SERVER_ERROR = "Erreur du serveur"

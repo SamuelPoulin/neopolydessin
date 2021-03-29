@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
@@ -6,6 +6,7 @@ import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.api.model.lobby.Player
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
@@ -29,7 +30,6 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         return Observable.create{
             emitter -> socketService.socket.emit("GetListLobby",gameMode.value, difficulty.value, Ack{ res ->
             val jsonList = res[0] as JSONArray
-            println(jsonList)
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){
                 list.add(Json.decodeFromString(LobbyInfo.serializer(), jsonList.get(i).toString()))
@@ -39,9 +39,13 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         }
     }
 
-    fun receiveJoinedLobbyInfo() : Observable<LobbyInfo>{
-        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { res ->
-            Json.decodeFromString(LobbyInfo.serializer(), res[0].toString())
+    fun receiveJoinedLobbyInfo() : Observable<ArrayList<Player>>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
+            val list = ArrayList<Player>()
+            val jsonList = players as JSONArray
+            for(i in 0 until jsonList.length())
+                list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
+            list
         }
     }
 
