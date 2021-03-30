@@ -9,9 +9,9 @@ import { SocketMessages } from '../../../../common/socketendpoints/socket-messag
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../../../common/communication/brush-info';
 import { PlayerInfo } from '../../../../common/communication/player-info';
-import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
+import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
-import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
+import { Difficulty, GameType, GuessMessage, GuessMessageCoop, LobbyInfo, Player } from '../../../../common/communication/lobby';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 import { UserService } from './user.service';
@@ -60,6 +60,13 @@ export class SocketService {
     });
   }
 
+  receiveGuess(): Observable<GuessMessage> {
+    return new Observable<GuessMessage>((msgObs) => {
+      this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
+      this.socket.on(SocketLobby.COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
+    });
+  }
+
   receivePrivateMessage(): Observable<ChatMessage> {
     return new Observable<ChatMessage>((msgObs) => {
       this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
@@ -97,8 +104,16 @@ export class SocketService {
     });
   }
 
-  sendMessage(message: Message): void {
-    this.socket.emit(SocketMessages.SEND_MESSAGE, message);
+  sendMessage(message: string): void {
+    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message });
+  }
+
+  sendGuess(guess: string) {
+    this.socket.emit(SocketLobby.PLAYER_GUESS, guess);
+  }
+
+  sendReady() {
+    this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
   async createLobby(name: string): Promise<string> {

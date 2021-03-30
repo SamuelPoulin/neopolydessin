@@ -48,7 +48,7 @@ export class HomeComponent {
 
   createLobby(): void {
     this.gameService.isDrawer = true;
-    this.socketService.createLobby('client-lourd');
+    this.socketService.createLobby('client-tres-lourd');
     this.router.navigate(['lobby']);
   }
 }

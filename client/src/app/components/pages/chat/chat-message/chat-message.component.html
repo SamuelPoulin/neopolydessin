@@ -1,5 +1,44 @@
 <div class="chat-message" [ngClass]="{'chat-message-user': message.senderUsername === 'user'}">
     <div class="chat-message-author">{{ message.senderUsername }}</div>
-    <div class="chat-message-content" [ngClass]="{'chat-message-content-user': message.senderUsername  === userService.username}">{{ message.content }}</div>
+    <ng-container [ngSwitch]="guessStatus">
+        <ng-container *ngSwitchCase="guessResponse.CORRECT">
+            <div class="chat-message-guess chat-message-correct-guess">
+                <div class="chat-message-guess-icon-container">
+                    <mat-icon>check_circle_outline</mat-icon>
+                </div>
+                <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
+                    message.content }}</div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="guessResponse.CLOSE">
+            <div class="chat-message-guess chat-message-close-guess">
+                <div class="chat-message-guess-icon-container">
+                    <mat-icon>error_outline</mat-icon>
+                </div>
+                <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
+                    message.content }}</div>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="guessResponse.WRONG">
+            <div class="chat-message-guess chat-message-wrong-guess">
+                <ng-container *ngIf="!foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>highlight_off</mat-icon>
+                    </div>
+                </ng-container>
+                <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
+                    message.content }}</div>
+                <ng-container *ngIf="foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>highlight_off</mat-icon>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
+                message.content }}</div>
+        </ng-container>
+    </ng-container>
     <div class="chat-message-timestamp">{{ timestamp }}</div>
 </div>

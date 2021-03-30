@@ -10,6 +10,7 @@ export class ChatService {
   private static GAME_ROOM_NAME: string = 'Partie';
 
   messageSubscription: Subscription;
+  guessSubscription: Subscription;
   privateMessageSubscription: Subscription;
   playerConnectionSubscription: Subscription;
   playerDisconnectionSubscription: Subscription;
@@ -19,9 +20,6 @@ export class ChatService {
 
   constructor(private socketService: SocketService) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, type: ChatRoomType.GAME, messages: [] });
-    this.rooms.push({ name: 'samuelpoulin', type: ChatRoomType.PRIVATE, messages: [] });
-    this.rooms.push({ name: 'simonmalouin', type: ChatRoomType.PRIVATE, messages: [] });
-    this.rooms.push({ name: 'masuelmoulin', type: ChatRoomType.PRIVATE, messages: [] });
     this.currentRoomIndex = 0;
 
     this.initSubscriptions();
@@ -29,6 +27,13 @@ export class ChatService {
 
   initSubscriptions() {
     this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
+      const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+      if (roomIndex > -1) {
+        this.rooms[roomIndex].messages.push(message);
+      }
+    });
+
+    this.guessSubscription = this.socketService.receiveGuess().subscribe((message) => {
       const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
       if (roomIndex > -1) {
         this.rooms[roomIndex].messages.push(message);
@@ -53,7 +58,11 @@ export class ChatService {
   }
 
   sendMessage(text: string) {
-    this.socketService.sendMessage({ content: text });
+    this.socketService.sendMessage(text);
+  }
+
+  sendGuess(text: string) {
+    this.socketService.sendGuess(text);
   }
 
   closeRoom(roomName: string) {

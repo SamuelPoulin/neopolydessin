@@ -145,4 +145,8 @@ export class EditorService {
     }
     return matchingShapes.length ? matchingShapes[0] : undefined;
   }
+
+  setReady() {
+    this.socketService.sendReady();
+  }
 }

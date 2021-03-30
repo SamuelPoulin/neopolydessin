@@ -70,6 +70,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
       this.surfaceColor = params.color ? Color.hex(params.color) : this.surfaceColor;
       this.drawingId = params.id;
     });
+    this.editorService.setReady();
   }
 
   ngAfterViewInit(): void {

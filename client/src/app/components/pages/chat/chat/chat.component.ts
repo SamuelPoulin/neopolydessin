@@ -14,25 +14,41 @@ import { ChatMessage, Message } from '../../../../../../../common/communication/
 export class ChatComponent {
   private static MAX_CHARACTER_COUNT: number;
 
+  readonly correctColor: string = '#38B000';
+  readonly iconColor: string = '#2196f3';
+
   inputValue: string = '';
   emojiMartOpen: boolean = false;
+  guessing: boolean = false;
 
   constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
   }
 
   sendMessage(): void {
+    if (this.inputValid) {
+      if (this.guessing) {
+        this.chatService.sendGuess(this.inputValue);
+      } else {
+        this.chatService.sendMessage(this.inputValue);
+      }
+      this.inputValue = '';
+      this.scrollToBottom();
+    }
+  }
+
+  get inputValid(): boolean {
     if (this.inputValue.replace(/ /g, '')) {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
-        this.chatService.sendMessage(this.inputValue);
-        this.inputValue = '';
-        this.scrollToBottom();
+        return true;
       } else {
         this.sendNotification('Le message ne doit pas dépasser 200 caractères.');
       }
     } else {
       this.sendNotification('Le message est vide.');
     }
+
+    return false;
   }
 
   scrollToBottom(): void {
@@ -51,6 +67,10 @@ export class ChatComponent {
 
   toggleEmojiMart(): void {
     this.emojiMartOpen = !this.emojiMartOpen;
+  }
+
+  toggleGuessMode(): void {
+    this.guessing = !this.guessing;
   }
 
   addEmoji(e: EmojiEvent) {
