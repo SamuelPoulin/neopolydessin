@@ -1,6 +1,7 @@
 package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.PlayerRole
+import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
@@ -13,18 +14,19 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
             timer as Long
         }
     }
-    fun receiveRoles():Observable<Array<PlayerRole>>{
+    fun receiveRoles():Observable<ArrayList<Player>>{
         return Observable.create {
             socketService.receiveFromSocket(GameSocketEndPoints.SEND_ROLES.value) { res ->
-                val jsonList =res[0] as JSONArray
-                val list = ArrayList<PlayerRole>()
+                val jsonList = res[0] as JSONArray
+                val list = ArrayList<Player>()
                 for(i in 0 until jsonList.length()){
-                    list.add(Json.decodeFromString(PlayerRole.serializer(), jsonList.get(i).toString()))
+                    list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
                 }
+                it.onNext(list)
             }
         }
-
     }
+
     fun receiveKeyWord():Observable<String>{
         return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_WORD_GUESS.value){ (word) ->
             word as String
