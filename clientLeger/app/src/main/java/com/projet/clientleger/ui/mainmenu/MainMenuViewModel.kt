@@ -15,7 +15,10 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun connectSocket(accessToken: String){
         mainmenuRepository.connectSocket(accessToken)
     }
-    fun createGame(gameMode:GameType,difficulty:Difficulty,isPrivate:Boolean){
-        mainmenuRepository.createGame(gameMode,difficulty,isPrivate)
+    fun createGame(lobbyName:String, gameMode:GameType,difficulty:Difficulty,isPrivate:Boolean){
+        mainmenuRepository.createGame(lobbyName, gameMode,difficulty,isPrivate)
+    }
+    fun getUsername():String{
+        return mainmenuRepository.getUsername()
     }
 }

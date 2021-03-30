@@ -21,7 +21,6 @@ import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
-import com.projet.clientleger.ui.game.GameActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -117,10 +116,9 @@ class MainmenuActivity : AppCompatActivity() {
         setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            var username:String = intent.getStringExtra("username").toString()
-            val gameInfo = GameCreationInfosModel(username, selectedGameMode.value, selectedDifficulty.value, false)
+            val gameInfo = GameCreationInfosModel(vm.getUsername(), selectedGameMode.value, selectedDifficulty.value, false)
             if(isCreating){
-                vm.createGame(selectedGameMode , selectedDifficulty, false)
+                vm.createGame(dialog.gameName.text.toString(), selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
                 }

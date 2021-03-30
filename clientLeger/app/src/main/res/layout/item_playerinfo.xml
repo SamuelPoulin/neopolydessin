@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/drawboard_background">
+    <TextView
+        android:id="@+id/username"
+        android:tag="playerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PlayerName"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/teal_700"
+        android:layout_margin="10dp"/>
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        />
+    <Button
+        android:id="@+id/removePlayerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/remove_player_button_text"
+        android:textSize="15sp"
+        android:layout_margin="10dp"/>
+</LinearLayout>

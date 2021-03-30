@@ -1,8 +1,7 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.service.ChatSocketService
-import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.api.socket.ChatSocketService
 import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
 import com.projet.clientleger.data.model.chat.MessageGuess

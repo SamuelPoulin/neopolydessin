@@ -30,11 +30,10 @@ private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobby
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        //viewHolder.lobbyLinearLayout.setTag(lobbyList[position].lobbyid.toInt())
-        //viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
-        //viewHolder.gameOwnerTextView.text = lobbyList[position].lobbyOwner
+        viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
+        viewHolder.gameOwnerTextView.text = lobbyList[position].ownerUsername
         viewHolder.gameModeTextView.text = lobbyList[position].gameType
-        viewHolder.gameCapacityTextView.text = "4"
+        viewHolder.gameCapacityTextView.text = lobbyList[position].playerInfo.size.toString()
         viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
     }
     override fun getItemCount(): Int {

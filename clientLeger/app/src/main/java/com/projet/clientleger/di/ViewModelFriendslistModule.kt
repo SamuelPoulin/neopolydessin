@@ -1,9 +1,8 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.ApiFriendslistInterface
-import com.projet.clientleger.data.api.service.FriendslistSocketService
-import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.api.http.ApiFriendslistInterface
+import com.projet.clientleger.data.api.socket.FriendslistSocketService
 import com.projet.clientleger.data.repository.FriendslistRepository
 import dagger.Module
 import dagger.Provides
