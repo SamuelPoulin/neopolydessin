@@ -1,13 +1,11 @@
 package com.projet.clientleger.data.repository
 
-import android.accounts.Account
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
-import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.account.AccountInfo
@@ -51,8 +49,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
                 val list = ArrayList<PlayerInfo>()
                 for(player in it){
                     var avatar: Bitmap? = null
-                    if(player.avatar != null){
-                        val res = sessionManager.request(player.avatar, apiAvatarInterface::getAvatar)
+                    if(player.avatarId!= null){
+                        val res = sessionManager.request(player.avatarId, apiAvatarInterface::getAvatar)
                         if(res.code() == HttpsURLConnection.HTTP_OK){
                             avatar = BitmapFactory.decodeStream(res.body()!!.byteStream())
                         }

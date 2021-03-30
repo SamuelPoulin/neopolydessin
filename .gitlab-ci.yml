@@ -70,6 +70,8 @@ build_electron_prod:
 
 test_server:
     stage: test
+    except:
+        - develop
     needs:
         - build_server
     dependencies:
@@ -82,6 +84,7 @@ test_server:
 test_electron_dev:
     stage: test
     except:
+        - develop
         - master
     needs:
         - build_electron_dev

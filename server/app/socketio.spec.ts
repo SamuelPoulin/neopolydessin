@@ -13,7 +13,7 @@ import { accountInfo } from './services/database.service.spec';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, Player } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -25,6 +25,8 @@ import { NOT_FOUND, OK } from 'http-status-codes';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
+import { PictureWordService } from './services/picture-word.service';
+import { DrawMode } from '../../common/communication/draw-mode';
 
 export const accountInfo3: Register = {
     firstName: 'a',
@@ -40,6 +42,7 @@ describe('Socketio', () => {
     let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
     let friendService: FriendsService;
+    let pictureWordService: PictureWordService;
     let server: Server;
     let socketIo: SocketIo;
     let managers: Manager[];
@@ -66,6 +69,7 @@ describe('Socketio', () => {
         await testingContainer().then((instance) => {
             databaseService = instance[0].get<DatabaseService>(Types.DatabaseService);
             friendService = instance[0].get<FriendsService>(Types.FriendsService);
+            pictureWordService = instance[0].get<PictureWordService>(Types.PictureWordService);
             server = instance[0].get<Server>(Types.Server);
             socketIo = instance[0].get<SocketIo>(Types.Socketio);
 
@@ -139,6 +143,13 @@ describe('Socketio', () => {
     })
 
     it('clients should be able to receive path information', (done: Mocha.Done) => {
+        pictureWordService.uploadDrawing({
+            word: 'TestWord1',
+            drawnPaths: [],
+            hints: ['Clue1', 'Clue2', 'Clue3'],
+            difficulty: Difficulty.EASY,
+            drawMode: DrawMode.CONVENTIONAL
+        });
         testDoneWhenAllClientsAreDisconnected(done);
         createClient(accountInfo)
             .then((testClient) => {
@@ -162,6 +173,14 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                });
+
+                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                    testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
+
+                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                     testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
@@ -176,6 +195,10 @@ describe('Socketio', () => {
                     });
                 });
 
+                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                    testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
+
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
@@ -189,13 +212,20 @@ describe('Socketio', () => {
 
                 testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
+                    testClient.socket.emit(SocketLobby.END_GAME);
                     testClient.socket.close();
-
                 });
             })
     })
 
     it('multiple lobbies should work correctly', (done: Mocha.Done) => {
+        pictureWordService.uploadDrawing({
+            word: 'TestWord2',
+            drawnPaths: [],
+            hints: ['Clue1', 'Clue2', 'Clue3'],
+            difficulty: Difficulty.EASY,
+            drawMode: DrawMode.CONVENTIONAL
+        });
         testDoneWhenAllClientsAreDisconnected(done);
         createClient(accountInfo)
             .then((testClient) => {
@@ -209,8 +239,16 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 })
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                    testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
+
+                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
+
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
                 })
                 return createClient(otherAccountInfo);
             })
@@ -220,6 +258,14 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.close();
                 })
+
+                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                })
+
+                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                    testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
 
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
@@ -236,9 +282,14 @@ describe('Socketio', () => {
 
                 });
 
+                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                    testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
+
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    testClient.socket.emit(SocketLobby.END_GAME);
                     testClient.socket.close();
                 })
             });

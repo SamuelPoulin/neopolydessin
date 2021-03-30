@@ -1,11 +1,8 @@
 package com.projet.clientleger.ui.lobby.viewmodel
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.data.api.model.PlayerRole
-import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

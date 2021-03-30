@@ -1,15 +1,11 @@
 package com.projet.clientleger.data.api.socket
 
-import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
-import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.api.model.lobby.Player
-import com.projet.clientleger.data.model.account.AccountInfo
-import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
