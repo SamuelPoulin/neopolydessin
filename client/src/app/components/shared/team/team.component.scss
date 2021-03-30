@@ -1,0 +1,34 @@
+.players-title {
+  color: #2F2F2F;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.team-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+}
+
+.player-avatar {
+  margin: 0px 5px;
+}
+
+.player-username {
+  color: #2F2F2F;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.ennemy-container {
+  border-left: 2px solid red;
+}
+
+.player-container {
+  display: flex;
+
+  padding: 5px 0px;
+
+  border-left: 2px solid blue;
+}

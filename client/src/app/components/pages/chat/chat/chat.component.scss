@@ -1,6 +1,9 @@
 #chat-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   background-color: #f8f8f8;
 }
 
@@ -9,25 +12,27 @@
   flex-direction: column;
   justify-content: flex-start;
 
-  padding-bottom: 125px;
-  padding-top: 90px;
+  height: 100%;
+  overflow-y: scroll;
+  margin-bottom: 100px;
 }
 
 #chat-header {
-  position: fixed;
-  top: 0;
-
   display: flex;
   justify-content: flex-start;
   align-items: center;
 
-  height: 75px;
+  min-height: 75px;
   width: 100%;
 
-  background-color: white;
+  background-color: #2f2f2f;
   box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.05);
 
   font-size: 12px;
+}
+
+#chat-text {
+  color: white;
 }
 
 chat-message {
@@ -90,7 +95,7 @@ system-message {
 }
 
 #chat-writer {
-  position: fixed;
+  position: absolute;
   bottom: 25px;
   left: 5%;
   border-radius: 10px;

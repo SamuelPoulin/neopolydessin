@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
+import { format } from 'date-fns';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
@@ -18,6 +19,9 @@ import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.comp
   styleUrls: ['./editor.component.scss'],
 })
 export class EditorComponent implements OnInit, AfterViewInit {
+  private static readonly SECOND: number = 1000;
+  private readonly twoMinutes: number = 120;
+
   @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
@@ -33,6 +37,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
   drawing: Drawing;
   modalTypes: typeof ModalType;
 
+  team1: string[];
+  team2: string[];
+  gameEnd: number;
+  timeRemaining: number;
+
   constructor(
     private route: ActivatedRoute,
     public editorService: EditorService,
@@ -46,6 +55,12 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.keyboardListener = new EditorKeyboardListener(this);
 
     this.currentToolType = ToolType.Pen;
+
+    this.team1 = ['samuelpoulin', 'masuelmoulin'];
+    this.team2 = ['mortsel', 'guiboy'];
+    this.gameEnd = Date.now() + EditorComponent.SECOND * this.twoMinutes;
+
+    this.startCount();
   }
 
   ngOnInit(): void {
@@ -59,6 +74,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.editorService.resetDrawing();
+    this.editorService.initListeners();
     this.editorService.view = this.drawingSurface;
     if (this.drawingId) {
       this.editorService.importDrawingById(this.drawingId, this.apiService);
@@ -98,6 +114,14 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
+  startCount(): void {
+    this.timeRemaining = this.getTimeLeft();
+
+    setInterval(() => {
+      this.timeRemaining = this.getTimeLeft();
+    }, EditorComponent.SECOND);
+  }
+
   setToolbarState(opened: boolean): void {
     if (opened) {
       this.toolbar.open();
@@ -123,6 +147,14 @@ export class EditorComponent implements OnInit, AfterViewInit {
     if (this.currentTool) {
       this.currentTool.onSelect();
     }
+  }
+
+  get timeLeft(): string {
+    return format(new Date(this.timeRemaining), 'mm:ss');
+  }
+
+  getTimeLeft(): number {
+    return this.gameEnd - Date.now();
   }
 
   get loading(): boolean {

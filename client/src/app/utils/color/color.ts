@@ -18,6 +18,8 @@ export class Color implements ColorComponents {
   static BLACK: Color = Color.rgb();
   static TRANSPARENT: Color = Color.rgb(0, 0, 0, 0);
 
+  static readonly MAX_255: number = 255;
+
   /**
    * red component 0..1
    */
@@ -155,6 +157,19 @@ export class Color implements ColorComponents {
     return Color.rgb255(r, g, b, a);
   }
 
+  /**
+   * Creates a color from a + hex string
+   */
+  static ahex(hexString: string): Color {
+    const a = parseInt(hexString.substr(0, 2), 16);
+    const r = parseInt(hexString.substr(2, 2), 16);
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    const g = parseInt(hexString.substr(4, 2), 16);
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    const b = parseInt(hexString.substr(6, 2), 16);
+    return Color.rgb255(r, g, b, a / this.MAX_255);
+  }
+
   /* private static methods to get HSL components from RGB*/
 
   /**
@@ -251,6 +266,14 @@ export class Color implements ColorComponents {
     return `${r}${g}${b}`;
   }
 
+  get ahex(): string {
+    const a = MathUtils.toHex(this.a255, 2);
+    const r = MathUtils.toHex(this.r255, 2);
+    const g = MathUtils.toHex(this.g255, 2);
+    const b = MathUtils.toHex(this.b255, 2);
+    return `${a}${r}${g}${b}`;
+  }
+
   get negative(): Color {
     return Color.rgb(1 - this.r, 1 - this.g, 1 - this.b);
   }
@@ -260,6 +283,13 @@ export class Color implements ColorComponents {
    */
   get hexString(): string {
     return '#' + this.hex;
+  }
+
+  /**
+   * Get ahex string `#FFFFFFFF`
+   */
+  get ahexString(): string {
+    return '#' + this.ahex;
   }
 
   /**
@@ -297,6 +327,11 @@ export class Color implements ColorComponents {
   get b255(): number {
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return Math.round(this.b * 255);
+  }
+
+  get a255(): number {
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    return Math.round(this.a * 255);
   }
 
   get rHex(): string {

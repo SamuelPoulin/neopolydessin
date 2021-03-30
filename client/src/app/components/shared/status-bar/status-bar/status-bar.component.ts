@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '@services/user.service';
-import randomColor from 'randomcolor';
 
 @Component({
   selector: 'app-status-bar',
@@ -13,14 +12,10 @@ export class StatusBarComponent {
   @Input() back: boolean;
   @Input() previousPage: string;
 
-  avatarColor: string;
   username: string;
-  firstLetter: string;
 
   constructor(private router: Router, private userService: UserService) {
     this.username = this.userService.username;
-    this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
-    this.firstLetter = this.username ? this.username[0].toUpperCase() : '';
   }
 
   navigateBack() {
