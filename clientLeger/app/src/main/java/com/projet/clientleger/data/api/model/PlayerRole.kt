@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class PlayerRole(var playerName:String, var playerStatus:PlayerStatus):Parcelable
+data class PlayerRole(var playerName:String, var playerStatus:String):Parcelable

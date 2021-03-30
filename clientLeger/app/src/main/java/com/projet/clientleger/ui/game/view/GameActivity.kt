@@ -44,7 +44,7 @@ class GameActivity : AppCompatActivity() {
     lateinit var binding: ActivityGameBinding
     private var currentKeyWord : String = ""
     private var currentRoles: Array<PlayerRole> = arrayOf()
-    private var clientRole:PlayerRole = PlayerRole("", PlayerStatus.PASSIVE)
+    private var clientRole:PlayerRole = PlayerRole("", "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,8 +101,8 @@ class GameActivity : AppCompatActivity() {
                 clientRole.playerStatus = player.playerStatus
             }
         }
-        val frenchRole:String = getFrenchRole(clientRole.playerStatus)
-        binding.role.text = "Votre rôle : $frenchRole"
+        //val frenchRole:String = getFrenchRole(clientRole.playerStatus)
+        binding.role.text = "Votre rôle : ${clientRole.playerStatus}"
     }
     private fun findTimeLeft(finishDate:Long):Long{
         return finishDate - System.currentTimeMillis()

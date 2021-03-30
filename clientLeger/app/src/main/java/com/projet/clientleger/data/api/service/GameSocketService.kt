@@ -21,10 +21,11 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
     }
     fun receiveRoles():Observable<Array<PlayerRole>>{
         return Observable.create {
-            socketService.receiveFromSocket(GameSocketEndPoints.SEND_ROLES.value) { res ->
+            socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_ROLES.value) { res ->
                 val jsonList =res[0] as JSONArray
                 val list = ArrayList<PlayerRole>()
                 for(i in 0 until jsonList.length()){
+                    println(i)
                     list.add(Json.decodeFromString(PlayerRole.serializer(), jsonList.get(i).toString()))
                 }
             }

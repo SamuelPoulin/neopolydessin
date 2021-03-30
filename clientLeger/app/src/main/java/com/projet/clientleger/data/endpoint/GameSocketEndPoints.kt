@@ -4,6 +4,6 @@ enum class GameSocketEndPoints(val value:String) {
     PLAYER_GUESS("guess"),
     RECEIVE_WORD_GUESS("updateWordToDraw"),
     SET_TIME("setTime"),
-    SEND_ROLES("updateRoles"),
+    RECEIVE_ROLES("updateRoles"),
     PLAYER_READY("loadingOver")
 }
