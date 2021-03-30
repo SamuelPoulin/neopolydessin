@@ -1,11 +1,15 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
@@ -16,20 +20,30 @@ import javax.inject.Singleton
 @Singleton
 class LobbySocketService @Inject constructor(private val socketService: SocketService) {
 
-    fun createGame(gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean) {
-        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, "",gameMode.value, difficulty.value, isPrivate)
+    fun createGame(lobbyName: String, gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean) {
+        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, lobbyName,gameMode.value, difficulty.value, isPrivate)
     }
     //deja dans le lobby, un joueur rejoins le lobby
-    fun receivePlayersInfo(): Observable<String> {
-        return socketService.receiveFromSocket("PlayerConnected"){received ->
-            received[0].toString()
+    fun receivePlayerJoin(): Observable<Player> {
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_PLAYER_JOIN.value){(received) ->
+            Json.decodeFromString(Player.serializer(), received.toString())
         }
     }
+
+    fun receivePlayerLeave(): Observable<String>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_PLAYER_LEAVE.value){(username, timestamp) ->
+            username as String
+        }
+    }
+
+    fun leaveLobby(){
+        socketService.socket.emit(LobbySocketEndpoints.LEAVE_LOBBY.value)
+    }
+
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return Observable.create{
             emitter -> socketService.socket.emit("getListLobby",gameMode.value, difficulty.value, Ack{ res ->
             val jsonList = res[0] as JSONArray
-            println(jsonList)
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){
                 list.add(Json.decodeFromString(LobbyInfo.serializer(), jsonList.get(i).toString()))
@@ -39,9 +53,15 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         }
     }
 
-    fun receiveJoinedLobbyInfo() : Observable<LobbyInfo>{
-        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { res ->
-            Json.decodeFromString(LobbyInfo.serializer(), res[0].toString())
+    fun receiveJoinedLobbyInfo() : Observable<ArrayList<Player>>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
+            println("players received")
+            val list = ArrayList<Player>()
+            val jsonList = players as JSONArray
+            for(i in 0 until jsonList.length())
+                list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
+            println(list)
+            list
         }
     }
 
@@ -52,6 +72,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun startGame(){
         socketService.socket.emit(LobbySocketEndpoints.START_GAME.value)
     }
+
 
     fun receiveStartGame() : Observable<String>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {""}

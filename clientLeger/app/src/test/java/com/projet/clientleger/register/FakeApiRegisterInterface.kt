@@ -1,6 +1,6 @@
 package com.projet.clientleger.register
 
-import com.projet.clientleger.data.api.ApiRegisterInterface
+import com.projet.clientleger.data.api.http.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterDataResponse
 import com.projet.clientleger.data.api.model.RegisterModel
 import okhttp3.ResponseBody

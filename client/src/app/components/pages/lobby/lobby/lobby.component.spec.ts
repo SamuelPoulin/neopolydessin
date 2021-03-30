@@ -3,6 +3,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { LobbyComponent } from './lobby.component';
 import { StatusBarModule } from '../../../shared/status-bar/status-bar.module';
 import { RouterTestingModule } from '@angular/router/testing';
+import { ChatModule } from '@components/pages/chat/chat.module';
 
 describe('LobbyComponent', () => {
   let component: LobbyComponent;
@@ -10,7 +11,7 @@ describe('LobbyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule, StatusBarModule, RouterTestingModule],
+      imports: [SharedModule, StatusBarModule, RouterTestingModule, ChatModule],
       declarations: [LobbyComponent],
     }).compileComponents();
   });

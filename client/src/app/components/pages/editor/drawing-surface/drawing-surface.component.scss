@@ -1,13 +1,11 @@
 @import "../../../../../assets/globalTheme";
 
 svg {
-  margin: 4px;
   background-color: white;
-  box-shadow: $offsetShadow;
-  position: absolute;
-  top: 4px;
-  left: 4px;
+  border-radius: 5px;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.05);
 }
+
 #svgGrid {
   pointer-events: none;
   background-color: transparent;

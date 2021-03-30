@@ -1,8 +1,10 @@
 import { PenToolProperties } from '@models/tool-properties/creator-tool-properties/pen-tool-properties';
 import { EditorService } from '@services/editor.service';
 import { Coordinate } from '@utils/math/coordinate';
+import { Color } from '@utils/color/color';
 import { Path } from '../../../shapes/path';
 import { CreatorTool } from '../creator-tool';
+import { BrushInfo } from '../../../../../../../common/communication/brush-info';
 
 export class PenTool extends CreatorTool {
   shape: Path;
@@ -25,19 +27,24 @@ export class PenTool extends CreatorTool {
 
   protected startShape(coord: Coordinate = this.mousePosition): void {
     super.startShape(coord);
+    this.shape.addPoint(coord);
   }
 
   initListeners(): void {
-    this.editorService.socketService.receiveStartPath().subscribe((coord: Coordinate) => {
-      this.startShape(coord);
+    // todo - move to editor?
+    this.editorService.socketService.receiveStartPath().subscribe((pathData: { coord: Coordinate; brush: BrushInfo }) => {
+      this.editorService.colorsService.primaryColor = Color.ahex(pathData.brush.color.slice(1));
+      this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
+      this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
+      this.shape.updateProperties();
     });
 
     this.editorService.socketService.receiveUpdatePath().subscribe((coord: Coordinate) => {
-      this.shape.addPoint(coord);
+      this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
     });
 
     this.editorService.socketService.receiveEndPath().subscribe((coord: Coordinate) => {
-      this.shape.addPoint(coord);
+      this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
       this.applyShape();
     });
   }
@@ -47,9 +54,9 @@ export class PenTool extends CreatorTool {
       if (!this.isActive) {
         this.startShape();
         this.editorService.socketService.sendStartPath(
-          this.mousePosition,
-          this.editorService.colorsService.primaryColor.hexString,
-          this.toolProperties.strokeWidth.value,
+          this.mousePosition.scale(this.editorService.scalingToServer),
+          this.editorService.colorsService.primaryColor.ahexString,
+          this.toolProperties.strokeWidth.value * this.editorService.scalingToServer,
         );
       }
     };
@@ -57,14 +64,14 @@ export class PenTool extends CreatorTool {
     this.handleMouseMove = () => {
       if (this.isActive) {
         this.shape.addPoint(this.mousePosition);
-        this.editorService.socketService.sendUpdatePath(this.mousePosition);
+        this.editorService.socketService.sendUpdatePath(this.mousePosition.scale(this.editorService.scalingToServer));
       }
     };
 
     this.handleMouseUp = () => {
       if (this.isActive) {
         this.applyShape();
-        this.editorService.socketService.sendEndPath(this.mousePosition);
+        this.editorService.socketService.sendEndPath(this.mousePosition.scale(this.editorService.scalingToServer));
       }
     };
 

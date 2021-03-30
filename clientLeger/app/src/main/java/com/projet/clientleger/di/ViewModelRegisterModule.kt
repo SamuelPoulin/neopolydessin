@@ -1,7 +1,7 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.ApiRegisterInterface
+import com.projet.clientleger.data.api.http.ApiRegisterInterface
 import com.projet.clientleger.data.repository.RegisterRepository
 import dagger.Module
 import dagger.Provides

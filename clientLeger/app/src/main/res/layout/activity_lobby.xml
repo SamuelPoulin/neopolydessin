@@ -1,379 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
-            name="viewmodel"
-            type="com.projet.clientleger.ui.register.viewmodel.RegisterViewModel" />
+            name="vm"
+            type="com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel" />
     </data>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/lightblue"
-        android:elevation="4dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/friendslist_menu">
-    </androidx.appcompat.widget.Toolbar>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/gamemodeBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/round_corner_outlined"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        >
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:src="@mipmap/polydessin_icon_round"
-            app:layout_constraintWidth_percent="0.1"
-            app:layout_constraintHeight_percent="1"
-            app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="@string/logo" />
-
-        <TextView
-            android:id="@+id/gamemode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/game_mode_base_text"
-            android:textColor="@color/black"
-            android:textSize="40sp"
-            android:textStyle="bold"
-            app:layout_constraintLeft_toRightOf="@id/logo"
-            app:layout_constraintBottom_toBottomOf="parent" />
-        <TextView
-            android:id="@+id/difficulty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/difficulty"
-            android:textColor="@color/black"
-            android:textSize="40sp"
-            android:textStyle="bold"
-            app:layout_constraintLeft_toRightOf="@id/gamemode"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginLeft="40dp"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/teams"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
-        app:layout_constraintBottom_toTopOf="@id/buttonPanel"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHeight_percent="0.4">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@drawable/round_corner_outlined"
-        app:layout_constraintWidth_percent="0.5"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent">
-    <TextView
-        android:id="@+id/teamLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/team_1_base_name"
-        android:textColor="@color/black"
-        android:textSize="60sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        app:layout_constraintHeight_percent="0.1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        tools:context=".ui.lobby.view.LobbyActivity">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.7"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@+id/teamLabel"
-            app:layout_constraintBottom_toBottomOf="parent">
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                app:layout_constraintWidth_percent="0.5"
-                android:orientation="vertical"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent">
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/player1"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintWidth_percent="0.5"
-                    app:layout_constraintHeight_percent="0.7"
-                    android:background="@drawable/round_button"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-                    <TextView
-                        android:id="@+id/player1Name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/player1_base_name"
-                        android:textSize="30sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/teal_700"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
-                    <Button
-                        android:id="@+id/removePlayer1Button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remove_player_button_text"
-                        android:textSize="15sp"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/lightblue"
+            android:elevation="4dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/friendslist_menu"/>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                app:layout_constraintWidth_percent="0.5"
-                android:orientation="vertical"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/player2"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintWidth_percent="0.5"
-                    app:layout_constraintHeight_percent="0.7"
-                    android:background="@drawable/round_button"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-                    <TextView
-                        android:id="@+id/player2Name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/player2_base_name"
-                        android:textSize="30sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/teal_700"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
-                    <Button
-                        android:id="@+id/removePlayer2Button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remove_player_button_text"
-                        android:textSize="15sp"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:id="@+id/gamemodeBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:background="@drawable/round_corner_outlined"
-            app:layout_constraintWidth_percent="0.5"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-            <TextView
-                android:id="@+id/teamLabel2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/team_2_base_name"
-                android:textColor="@color/black"
-                android:textSize="60sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                app:layout_constraintHeight_percent="0.1"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.7"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/teamLabel2"
-                app:layout_constraintBottom_toBottomOf="parent">
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintWidth_percent="0.5"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent">
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/player3"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintWidth_percent="0.5"
-                        app:layout_constraintHeight_percent="0.7"
-                        android:background="@drawable/round_button"
-                        android:orientation="vertical"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent">
-                        <TextView
-                            android:id="@+id/player3Name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/player3_base_name"
-                            android:textSize="30sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/teal_700"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"/>
-                        <Button
-                            android:id="@+id/removePlayer3Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remove_player_button_text"
-                            android:textSize="15sp"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                android:contentDescription="@string/logo"
+                android:src="@mipmap/polydessin_icon_round"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                android:padding="5dp"/>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    app:layout_constraintWidth_percent="0.5"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/player4"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        app:layout_constraintWidth_percent="0.5"
-                        app:layout_constraintHeight_percent="0.7"
-                        android:background="@drawable/round_button"
-                        android:orientation="vertical"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent">
-                        <TextView
-                            android:id="@+id/player4Name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/player4_base_name"
-                            android:textSize="30sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/teal_700"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"/>
-                        <Button
-                            android:id="@+id/removePlayer4Button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/remove_player_button_text"
-                            android:textSize="15sp"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/buttonPanel"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintHeight_percent="0.4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent">
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_constraintWidth_percent="0.5"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <TextView
+                android:id="@+id/gamemode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:text="@string/game_mode_base_text"
+                android:textColor="@color/black"
+                android:textSize="40sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/logo" />
+
+            <TextView
+                android:id="@+id/difficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:text="@string/difficulty"
+                android:textColor="@color/black"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/gamemode" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/teamContainer1"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/round_corner_outlined"
+                app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
+                app:layout_constraintBottom_toTopOf="@id/buttonPanel"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
+                app:layout_constraintWidth_percent="0.5">
 
-                <Button
-                    android:id="@+id/startGameButton"
+                <TextView
+                    android:id="@+id/teamLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/team_1_base_name"
+                    android:textColor="@color/black"
+                    android:textSize="60sp"
+                    android:textStyle="bold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/teamContent1"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/teamContent1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="100dp"
-                    android:text="@string/start_game_button_text"
-                    android:textSize="40sp"
-                    />
-
-                <Button
-                    android:id="@+id/exitGame"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="52dp"
-                    android:text="@string/exit_game_button_text"
-                    android:textSize="40sp"
+                    app:layout_constraintTop_toBottomOf="@+id/teamLabel"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/startGameButton"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/teamContainer2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/round_corner_outlined"
+                app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
+                app:layout_constraintBottom_toTopOf="@id/buttonPanel"
+                app:layout_constraintLeft_toRightOf="@id/teamContainer1"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintWidth_percent="0.5">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/chat_root"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:name="com.projet.clientleger.ui.chat.ChatFragment"
+                <TextView
+                    android:id="@+id/teamLabel2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/team_2_base_name"
+                    android:textColor="@color/black"
+                    android:textSize="60sp"
+                    android:textStyle="bold"
+                    app:layout_constraintHeight_percent="0.1"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/teamContent2"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/teamContent2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/teamLabel2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/buttonPanel"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.5" />
+            app:layout_constraintHeight_percent="0.4"
+            app:layout_constraintLeft_toLeftOf="parent">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <Button
+                        android:id="@+id/startGameButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/start_game_button_text"
+                        android:textSize="40sp"
+                        app:layout_constraintBottom_toTopOf="@id/exitGame"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <Button
+                        android:id="@+id/exitGame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="52dp"
+                        android:text="@string/exit_game_button_text"
+                        android:textSize="40sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/startGameButton" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--            <androidx.fragment.app.FragmentContainerView-->
+<!--                android:id="@+id/chat_root"-->
+<!--                android:name="com.projet.clientleger.ui.chat.ChatFragment"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintWidth_percent="0.5" />-->
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

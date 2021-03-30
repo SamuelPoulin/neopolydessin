@@ -6,11 +6,11 @@ import com.google.gson.GsonBuilder
 import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
-import com.projet.clientleger.data.api.ApiSessionManagerInterface
-import com.projet.clientleger.data.api.service.LobbySocketService
-import com.projet.clientleger.data.api.service.DrawingSocketService
-import com.projet.clientleger.data.api.service.FriendslistSocketService
-import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.socket.LobbySocketService
+import com.projet.clientleger.data.api.socket.DrawingSocketService
+import com.projet.clientleger.data.api.socket.FriendslistSocketService
+import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides

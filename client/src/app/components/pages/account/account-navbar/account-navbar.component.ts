@@ -1,7 +1,6 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
 import { UserService } from '@services/user.service';
-import randomColor from 'randomcolor';
 
 @Component({
   selector: 'app-account-navbar',
@@ -11,29 +10,23 @@ import randomColor from 'randomcolor';
 export class AccountNavbarComponent {
   static IS_SCREEN_BIG: boolean;
 
-  avatarColor: string;
-  avatarLetter: string;
   closed: boolean;
   matcher: MediaQueryList;
 
   firstName: string;
   lastName: string;
   username: string;
-  firstLetter: string;
 
   constructor(private mediaMatcher: MediaMatcher, private userService: UserService) {
     this.firstName = 'Samuel';
     this.lastName = 'Poulin';
     this.username = this.userService.username;
-    this.firstLetter = this.username ? this.username[0].toUpperCase() : '';
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
     AccountNavbarComponent.IS_SCREEN_BIG = this.matcher.matches;
 
     this.closed = true;
-
-    this.avatarColor = randomColor({ seed: this.username, luminosity: 'bright' });
   }
 
   screenChanged(event: MediaQueryListEvent) {
