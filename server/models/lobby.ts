@@ -159,7 +159,8 @@ export abstract class Lobby {
             playerRole,
             socket,
             teamNumber,
-            isBot: false
+            isBot: false,
+            finishedLoading: false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);
@@ -262,6 +263,16 @@ export abstract class Lobby {
       }
     });
 
+    socket.on(SocketLobby.LOADING_OVER, () => {
+      const playerDoneLoading = this.findPlayerBySocket(socket);
+      if (playerDoneLoading) {
+        playerDoneLoading.finishedLoading = true;
+      }
+      if (this.players.every((player) => player.finishedLoading)) {
+        this.startRoundTimer();
+      }
+    });
+
     socket.on(SocketLobby.LEAVE_LOBBY, () => {
       const playerId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (playerId) {
@@ -283,6 +294,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
+    socket.removeAllListeners(SocketLobby.LOADING_OVER);
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {
@@ -316,5 +328,7 @@ export abstract class Lobby {
   }
 
   abstract addPlayer(playerId: string, role: PlayerRole, socket: Socket): void;
+
+  protected abstract startRoundTimer(): void;
 
 }

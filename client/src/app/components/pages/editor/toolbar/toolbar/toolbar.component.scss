@@ -6,8 +6,8 @@
   justify-content: space-between;
   position: fixed;
   width: 60px;
-  height: calc(100vh - 30px);
-  background-color: $primary;
+  height: calc(100vh - 60px);
+  background-color: #2f2f2f;
   z-index: 1000;
 }
 
@@ -21,7 +21,7 @@
 
 #toolbar-bottom-buttons{
   padding-bottom: 10px;
-  background-color: $secondary;
+  background-color: rgb(53, 53, 53);
 }
 
 #toolbar-middle-buttons {
@@ -45,7 +45,7 @@
 }
 
 #toolbar-primary-color {
-  border: 1px solid $accent;
+  border: 1px solid #2F2F2F;
   height: 35px;
   width: 35px;
   z-index: 1000;
@@ -55,7 +55,7 @@
 }
 
 #toolbar-secondary-color {
-  border: 1px solid $accent;
+  border: 1px solid #2F2F2F;
   height: 35px;
   width: 35px;
   z-index: 500;
@@ -79,12 +79,19 @@ mat-drawer-container {
 }
 
 mat-drawer {
-  box-shadow: $elevationShadow;
-  background-color: $primaryDark;
+  background-color: #2f2f2f;
 }
 
 mat-drawer-content {
   margin: 0 !important;
+
+  ::ng-deep mat-label > label {
+    color: white;
+  }
+
+  ::ng-deep mat-form-field {
+    color: white;
+  }
 }
 
 .toolbar-tool-section {
@@ -109,7 +116,7 @@ mat-drawer-content {
 .toolbar-option-section {
   display: flex;
   align-self: flex-start;
-  color: $accent;
+  color: white;
   margin-bottom: 25px;
 }
 

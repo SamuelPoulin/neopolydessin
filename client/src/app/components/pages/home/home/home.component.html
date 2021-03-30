@@ -6,11 +6,11 @@
       <div>PolyDessin</div>
     </div>
     <div id="menu-container-buttons">
-      <button mat-flat-button class="menu-button menu-main-button" routerLink="lobby">
+      <button mat-flat-button class="menu-button menu-main-button" (click)="createLobby()">
         <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
         Créer une partie privée
       </button>
-      <button mat-flat-button class="menu-button menu-main-button">
+      <button mat-flat-button class="menu-button menu-main-button" disabled>
         <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
         Rejoindre une partie
       </button>
@@ -18,13 +18,9 @@
         <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
         Liste des parties
       </button>
-      <button mat-flat-button class="menu-button menu-main-button">
+      <button mat-flat-button class="menu-button menu-main-button" disabled>
         <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
         Mot-image
-      </button>
-      <button mat-flat-button class="menu-button menu-main-button">
-        <mat-icon class="menu-button-icon menu-button-main-icon">help</mat-icon>
-        Guide utilisateur
       </button>
     </div>
   </div>

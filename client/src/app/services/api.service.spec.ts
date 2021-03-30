@@ -9,6 +9,14 @@ import { Drawing } from '@models/drawing';
 import { of } from 'rxjs';
 import { APIService } from './api.service';
 
+export const MockAPIService = jasmine.createSpyObj('APIService', {
+  login: Promise.resolve(),
+  refreshToken: Promise.resolve(),
+  register: Promise.resolve(),
+  handleResponse: null,
+  handleError: null,
+});
+
 describe('APIService', () => {
   let apiService: APIService;
   let httpTestingController: HttpTestingController;

@@ -6,6 +6,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { ColorHistoryComponent } from 'src/app/components/shared/color-picker/color-history/color-history.component';
 import { AlphaComponent } from 'src/app/components/shared/color-picker/color-strip/alpha/alpha.component';
 import { ColorLightnessComponent } from 'src/app/components/shared/color-picker/color-strip/color-lightness/color-lightness.component';
@@ -14,6 +17,7 @@ import { HexInputComponent } from 'src/app/components/shared/inputs/hex-input/he
 import { NumberInputComponent } from 'src/app/components/shared/inputs/number-input/number-input.component';
 import { ColorsService } from 'src/app/services/colors.service';
 import { Color } from 'src/app/utils/color/color';
+import { SharedModule } from '../shared.module';
 
 import { ColorPickerComponent } from './color-picker.component';
 import Spy = jasmine.Spy;
@@ -26,7 +30,15 @@ describe('ColorPickerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [BrowserAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+      imports: [
+        SharedModule,
+        RouterTestingModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+      ],
       declarations: [
         ColorPickerComponent,
         ColorLightnessComponent,
@@ -36,6 +48,7 @@ describe('ColorPickerComponent', () => {
         CustomInputComponent,
         HexInputComponent,
       ],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
   }));
 

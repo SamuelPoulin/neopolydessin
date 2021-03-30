@@ -85,6 +85,10 @@ export class Coordinate {
     return Math.atan2(c1.y - c2.y, c1.x - c2.x);
   }
 
+  scale(factor: number): Coordinate {
+    return new Coordinate(this.x * factor, this.y * factor);
+  }
+
   rotate(angle: number, center: Coordinate): Coordinate {
     // todo - test
     angle = -MathUtils.toRad(angle);

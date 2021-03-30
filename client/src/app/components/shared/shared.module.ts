@@ -40,6 +40,9 @@ import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.co
 import { UsernameInputComponent } from './inputs/username-input/username-input.component';
 import { NameInputComponent } from './inputs/name-input/name-input.component';
 import { PasswordInputComponent } from './inputs/password-input/password-input.component';
+import { GamemodeTitleComponent } from './gamemode-title/gamemode-title.component';
+import { AvatarComponent } from './avatar/avatar.component';
+import { TeamComponent } from './team/team.component';
 
 @NgModule({
   imports: [
@@ -86,6 +89,9 @@ import { PasswordInputComponent } from './inputs/password-input/password-input.c
     EnumPropertyInputComponent,
     IconButtonComponent,
     PasswordInputComponent,
+    GamemodeTitleComponent,
+    AvatarComponent,
+    TeamComponent,
   ],
   exports: [
     AbstractModalComponent,
@@ -122,6 +128,9 @@ import { PasswordInputComponent } from './inputs/password-input/password-input.c
     EnumPropertyInputComponent,
     IconButtonComponent,
     PasswordInputComponent,
+    GamemodeTitleComponent,
+    AvatarComponent,
+    TeamComponent,
   ],
 })
 export class SharedModule {}

@@ -1,17 +1,18 @@
 /* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
-import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { keyDown } from '@components/pages/editor/editor/editor.component.spec';
-import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
 import { SharedModule } from '@components/shared/shared.module';
+import { APIService } from '@services/api.service';
+import { MockAPIService } from '@services/api.service.spec';
 import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
 import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
+import { EditorModule } from '../editor.module';
 
 describe('EditorKeyboardListener', () => {
   let component: EditorComponent;
@@ -19,9 +20,11 @@ describe('EditorKeyboardListener', () => {
   let keyboardListener: KeyboardListenerService;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule, SharedModule, ToolbarModule],
-      declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
-      providers: [EditorService],
+      imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
+      providers: [
+        { provide: EditorService, useClass: MockEditorService },
+        { provide: APIService, useValue: MockAPIService },
+      ],
     }).compileComponents();
   }));
 

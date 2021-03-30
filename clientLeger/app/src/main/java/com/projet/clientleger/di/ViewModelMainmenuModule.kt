@@ -1,8 +1,9 @@
 package com.projet.clientleger.di
 
-import com.projet.clientleger.data.api.ApiMainmenuInterface
-import com.projet.clientleger.data.api.service.LobbySocketService
-import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.http.ApiMainmenuInterface
+import com.projet.clientleger.data.api.socket.LobbySocketService
+import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.repository.MainmenuRepository
 import dagger.Module
 import dagger.Provides
@@ -16,5 +17,5 @@ object ViewModelMainmenuModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(apiMainmenuInterface: ApiMainmenuInterface, socketService: SocketService, lobbySocketService: LobbySocketService) = MainmenuRepository(socketService, apiMainmenuInterface, lobbySocketService)
+    fun provideRepo(apiMainmenuInterface: ApiMainmenuInterface, socketService: SocketService, lobbySocketService: LobbySocketService, sessionManager: SessionManager) = MainmenuRepository(socketService, apiMainmenuInterface, lobbySocketService, sessionManager)
 }
