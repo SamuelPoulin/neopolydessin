@@ -11,7 +11,7 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -106,7 +106,7 @@ export abstract class Lobby {
       accountId: serverPlayer.accountId,
       username: serverPlayer.username,
       avatarId: serverPlayer.avatarId,
-      playerStatus: serverPlayer.playerStatus,
+      playerRole: serverPlayer.playerRole,
       teamNumber: serverPlayer.teamNumber,
       isBot: serverPlayer.isBot,
     };
@@ -145,7 +145,8 @@ export abstract class Lobby {
     return this.players.length < this.size;
   }
 
-  protected async addPlayerToTeam(playerId: string, playerStatus: PlayerStatus, socket: Socket, teamNumber: number): Promise<void> {
+  // todo remove playerRole sometime
+  protected async addPlayerToTeam(playerId: string, playerRole: PlayerRole, socket: Socket, teamNumber: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.databaseService.getAccountById(playerId)
         .then((account) => {
@@ -155,7 +156,7 @@ export abstract class Lobby {
             username: playerName,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
-            playerStatus,
+            playerRole,
             socket,
             teamNumber,
             isBot: false
@@ -297,7 +298,7 @@ export abstract class Lobby {
   private isActivePlayer(socket: Socket): boolean {
     const playerInfo = this.findPlayerBySocket(socket);
     if (playerInfo) {
-      return playerInfo.playerStatus === PlayerStatus.DRAWER;
+      return playerInfo.playerRole === PlayerRole.DRAWER;
     } else {
       return false;
     }
@@ -314,6 +315,6 @@ export abstract class Lobby {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
-  abstract addPlayer(playerId: string, status: PlayerStatus, socket: Socket): void;
+  abstract addPlayer(playerId: string, role: PlayerRole, socket: Socket): void;
 
 }

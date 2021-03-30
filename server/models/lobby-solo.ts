@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, PlayerRole } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
@@ -31,8 +31,8 @@ export class LobbySolo extends Lobby {
     this.privateLobby = true;
   }
 
-  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
-    this.addPlayerToTeam(playerId, status, socket, 0)
+  addPlayer(playerId: string, role: PlayerRole, socket: Socket) {
+    this.addPlayerToTeam(playerId, role, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
@@ -47,7 +47,7 @@ export class LobbySolo extends Lobby {
 
     socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
       const guesserValues = this.findPlayerBySocket(socket);
-      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         if (word === this.wordToGuess) {
           this.teams[0].currentScore++;
           this.timeLeftSeconds += 30;
@@ -72,11 +72,8 @@ export class LobbySolo extends Lobby {
     socket.on(SocketLobby.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (senderAccountId === this.ownerAccountId) {
-        const roleArray: PlayerRole[] = [];
-        this.players.forEach((player) => {
-          roleArray.push({ playerName: player.username, playerStatus: PlayerStatus.GUESSER });
-        });
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
+        this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
         this.currentGameState = CurrentGameState.IN_GAME;
         this.startRoundTimer();
       }
