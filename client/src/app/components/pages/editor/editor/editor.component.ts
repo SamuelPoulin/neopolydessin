@@ -75,6 +75,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.editorService.resetDrawing();
+    this.editorService.initListeners();
     this.editorService.view = this.drawingSurface;
     if (this.drawingId) {
       this.editorService.importDrawingById(this.drawingId, this.apiService);

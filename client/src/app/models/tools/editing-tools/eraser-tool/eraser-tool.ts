@@ -30,7 +30,6 @@ export class EraserTool extends Tool {
 
   private erase(shape: BaseShape | undefined): void {
     if (shape) {
-      this.editorService.socketService.sendRemovePath(shape.id - 1); // todo - conform to server standard
       this.editorService.removeShapeFromView(shape);
       this.removedShapes.push(shape);
       this.colorData = undefined;

@@ -1,8 +1,7 @@
 /* tslint:disable:no-string-literal no-magic-numbers */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EditorModule } from '@components/pages/editor/editor.module';
-import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { SharedModule } from '@components/shared/shared.module';
 import { Path } from '@models/shapes/path';
 import { EditorService } from '@services/editor.service';
@@ -15,7 +14,7 @@ export class PenToolMock extends PenTool {
     super(editorService);
   }
 
-  createShape(): Path {
+  createShape(c: Coordinate): Path {
     return new Path(new Coordinate());
   }
 }
@@ -60,19 +59,19 @@ export const mouseLeave = (): MouseEvent => {
 
 describe('PenTool', () => {
   let penToolMock: PenTool;
-  let fixture: ComponentFixture<EditorComponent>;
+  let coordinate = new Coordinate(0, 0);
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [SharedModule, RouterTestingModule, EditorModule],
       providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditorComponent);
-    fixture.detectChanges();
-    penToolMock = new PenToolMock(fixture.componentInstance.editorService);
+    const editor = TestBed.inject(EditorService);
+    editor.gameService.isDrawer = true;
+    penToolMock = new PenToolMock(editor);
   });
 
   it('should create', () => {
@@ -86,49 +85,48 @@ describe('PenTool', () => {
     expect(penToolMock.shape).toEqual(path);
   });
 
-  // todo - enable when server
-  /*it('should set active and initialize path on mouse down', () => {
-    const addShapeSpy = spyOn(strokeToolMock, 'addShape');
-    strokeToolMock.handleMouseEvent(mouseDown(new Coordinate(100, 100)));
+  it('should set active and initialize path on mouse down', () => {
+    const addShapeSpy = spyOn(penToolMock, 'addShape');
+    penToolMock.handleMouseEvent(mouseDown(new Coordinate(100, 100)));
     expect(addShapeSpy).toHaveBeenCalled();
-    expect(strokeToolMock['isActive']).toEqual(true);
+    expect(penToolMock['isActive']).toEqual(true);
   });
 
   it('should apply shape on mouseup and mouseleave if tool is active', () => {
-    strokeToolMock['shape'] = strokeToolMock.createShape();
-    strokeToolMock['isActive'] = true;
-    const applyShapeSpy = spyOn(strokeToolMock, 'applyShape');
-    strokeToolMock.handleMouseEvent(mouseUp());
+    penToolMock['shape'] = penToolMock.createShape(coordinate);
+    penToolMock['isActive'] = true;
+    const applyShapeSpy = spyOn(penToolMock, 'applyShape');
+    penToolMock.handleMouseEvent(mouseUp());
 
-    strokeToolMock['isActive'] = true;
-    strokeToolMock.handleMouseEvent(mouseLeave());
+    penToolMock['isActive'] = true;
+    penToolMock.handleMouseEvent(mouseLeave());
 
     expect(applyShapeSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should add point to shape on mousemove', () => {
-    strokeToolMock['shape'] = strokeToolMock.createShape();
-    strokeToolMock['isActive'] = true;
-    const addPointSpy = spyOn(strokeToolMock.shape, 'addPoint');
+    penToolMock['shape'] = penToolMock.createShape(coordinate);
+    penToolMock['isActive'] = true;
+    const addPointSpy = spyOn(penToolMock.shape, 'addPoint');
     const coord = new Coordinate(1, 2);
 
-    strokeToolMock.handleMouseEvent(mouseMove(coord));
+    penToolMock.handleMouseEvent(mouseMove(coord));
 
     expect(addPointSpy).toHaveBeenCalledWith(coord);
   });
 
   it('should ignore mouseup mouseleave mousemove if tool is not active', () => {
-    strokeToolMock['shape'] = strokeToolMock.createShape();
-    strokeToolMock['isActive'] = true;
-    const applyShapeSpy = spyOn(strokeToolMock, 'applyShape');
-    const addPointSpy = spyOn(strokeToolMock.shape, 'addPoint');
-    strokeToolMock['isActive'] = false;
+    penToolMock['shape'] = penToolMock.createShape(coordinate);
+    penToolMock['isActive'] = true;
+    const applyShapeSpy = spyOn(penToolMock, 'applyShape');
+    const addPointSpy = spyOn(penToolMock.shape, 'addPoint');
+    penToolMock['isActive'] = false;
 
-    strokeToolMock.handleMouseEvent(mouseMove());
-    strokeToolMock.handleMouseEvent(mouseLeave());
-    strokeToolMock.handleMouseEvent(mouseUp());
+    penToolMock.handleMouseEvent(mouseMove());
+    penToolMock.handleMouseEvent(mouseLeave());
+    penToolMock.handleMouseEvent(mouseUp());
 
     expect(addPointSpy).not.toHaveBeenCalled();
     expect(applyShapeSpy).not.toHaveBeenCalled();
-  });*/
+  });
 });

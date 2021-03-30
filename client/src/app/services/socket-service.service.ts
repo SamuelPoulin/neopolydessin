@@ -4,7 +4,6 @@ import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Path } from '@models/shapes/path';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../../../common/communication/brush-info';
@@ -125,7 +124,8 @@ export class SocketService {
   getPlayerJoined(): Observable<string> {
     return new Observable<string>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: string) => {
-        obs.next(player);
+        // todo - use new format
+        obs.next(player.toString());
       });
     });
   }
@@ -166,10 +166,10 @@ export class SocketService {
     });
   }
 
-  receiveAddPath(): Observable<Path> {
-    return new Observable<Path>((obs) => {
-      this.socket.on(SocketDrawing.ADD_PATH_BC, (path: Path) => {
-        obs.next(path);
+  receiveAddPath(): Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }> {
+    return new Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }>((obs) => {
+      this.socket.on(SocketDrawing.ADD_PATH_BC, (id: number, path: Coordinate[], brush: BrushInfo) => {
+        obs.next({ id, path, brush });
       });
     });
   }
@@ -194,8 +194,8 @@ export class SocketService {
     this.socket.emit(SocketDrawing.END_PATH, coord);
   }
 
-  sendAddPath(path: Path): void {
-    this.socket.emit(SocketDrawing.ADD_PATH, path);
+  sendAddPath(id: number): void {
+    this.socket.emit(SocketDrawing.ADD_PATH, id);
   }
 
   sendRemovePath(id: number): void {
