@@ -15,6 +15,7 @@ import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
+import com.projet.clientleger.utils.BitmapConversion
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -77,15 +78,7 @@ open class SessionManager @Inject constructor(
             apiAvatarInterface.getAvatar(info.avatar._id).enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                     val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
-                    val roundedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-                    val shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
-                    val paint = Paint()
-                    val canvas = Canvas(roundedBitmap)
-                    paint.isAntiAlias = true
-                    paint.shader = shader
-                    println("${bitmap.width} and ${bitmap.height}")
-                    val rect = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
-                    canvas.drawRoundRect(rect, bitmap.width.toFloat(), bitmap.width.toFloat(), paint)
+                    val roundedBitmap = BitmapConversion.toRoundedBitmap(bitmap)
                     accountInfo = info.toAccountInfo(roundedBitmap)
                 }
 

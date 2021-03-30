@@ -24,7 +24,6 @@ import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_lobby.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -67,6 +66,7 @@ class LobbyActivity : AppCompatActivity() {
             rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer)
 
             vm.teams[i].observe(this){
+                println("Rv updates: $it")
                 teams[i].clear()
                 teams[i].addAll(it)
                 rvTeams[i].adapter?.notifyDataSetChanged()
@@ -81,7 +81,7 @@ class LobbyActivity : AppCompatActivity() {
         //addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
         if(gameInfo.gameCreator != username){
-            startGameButton.visibility = View.INVISIBLE
+            binding.startGameButton.visibility = View.INVISIBLE
         } else{
             vm.setUserInfo()
         }

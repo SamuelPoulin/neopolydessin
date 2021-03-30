@@ -29,6 +29,8 @@ class TeamAdapter(private val players: List<PlayerInfo>,
         holder.usernameTextView.text = players[position].username
         holder.avatarView.setImageBitmap(players[position].avatar)
         holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(players[position]) }
+        if(players[position].username.isEmpty())
+            holder.removePlayerBtn.visibility = View.INVISIBLE
     }
 
     override fun getItemCount(): Int {
