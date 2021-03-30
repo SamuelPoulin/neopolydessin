@@ -105,7 +105,7 @@ export class LobbyCoop extends Lobby {
             timestamp: Date.now(),
             guessStatus: guessStat,
             nbGuessLeft: this.guessLeft,
-            guesserName: player.username
+            senderUsername: player.username
           };
           this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_BROADCAST, guessReturn);
         }
@@ -121,7 +121,6 @@ export class LobbyCoop extends Lobby {
         });
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
         this.currentGameState = CurrentGameState.IN_GAME;
-        this.startRoundTimer();
       }
     });
   }
@@ -132,7 +131,7 @@ export class LobbyCoop extends Lobby {
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
-  private startRoundTimer() {
+  protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
     this.sendStartTimeToClient();
@@ -153,12 +152,12 @@ export class LobbyCoop extends Lobby {
 
   private addTimeOnCorrectGuess() {
     const timeCorrectGuess = 30000;
-    const endTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess);
+    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, endTime);
   }
 
   private sendStartTimeToClient() {
-    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
+    const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
   }
 }

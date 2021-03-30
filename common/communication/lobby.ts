@@ -1,3 +1,5 @@
+import { ChatMessage } from "./chat-message";
+
 export interface LobbyInfo {
   lobbyId: string;
   lobbyName: string;
@@ -12,7 +14,8 @@ export interface Player {
   avatarId: string;
   playerStatus: PlayerStatus;
   teamNumber: number;
-  isBot: boolean
+  isBot: boolean;
+  finishedLoading: boolean;
 }
 
 export interface PlayerInfo {
@@ -27,19 +30,12 @@ export interface PlayerRole {
   playerStatus: PlayerStatus;
 }
 
-export interface GuessMessage {
-  content: string,
-  timestamp: number,
+export interface GuessMessage extends ChatMessage {
   guessStatus: GuessResponse
 }
 
 export interface GuessMessageCoop extends GuessMessage {
   nbGuessLeft: number,
-  guesserName: string
-}
-
-export interface GuessMessageClassique extends GuessMessage {
-  guesserName: string
 }
 
 export enum GameType {
