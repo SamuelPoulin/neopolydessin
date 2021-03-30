@@ -285,6 +285,7 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
+                    testClient.socket.emit(SocketLobby.END_GAME);
                     testClient.socket.close();
                 })
             });
