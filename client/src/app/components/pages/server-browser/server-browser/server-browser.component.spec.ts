@@ -3,6 +3,9 @@ import { SharedModule } from '../../../shared/shared.module';
 import { StatusBarModule } from '../../../shared/status-bar/status-bar.module';
 import { ServerBrowserComponent } from './server-browser.component';
 import { RouterTestingModule } from '@angular/router/testing';
+import { ServerBrowserModule } from '../server-browser.module';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 
 describe('BrowserComponent', () => {
   let component: ServerBrowserComponent;
@@ -10,8 +13,8 @@ describe('BrowserComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule, StatusBarModule, RouterTestingModule],
-      declarations: [ServerBrowserComponent],
+      imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, StatusBarModule, ServerBrowserModule],
+      providers: [{ provide: SocketService, useValue: MockSocketService }],
     }).compileComponents();
   });
 

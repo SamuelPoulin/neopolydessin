@@ -1,4 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 
 import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
 import { GridComponent } from './grid.component';
@@ -10,6 +12,7 @@ describe('GridComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [GridComponent],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
   }));
 
