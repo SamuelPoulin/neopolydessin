@@ -27,11 +27,36 @@ private const val MESSAGE_CONTENT_ERROR: String =
 
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
+
+    /*private var messages: ArrayList<IMessage> = ArrayList()
+    private lateinit var username: String
+
+    @Inject
+    lateinit var socketService: SocketService
+
+    fun setSubscriptions() {
+        socketService.receiveMessage()
+            .subscribe { message ->
+                addMessage(message)
+            }
+        socketService.receivePlayerConnection().subscribe { message ->
+            message.content = "${message.content} a rejoint la discussion"
+            addMessage(message)
+        }
+        socketService.receivePlayerDisconnection().subscribe { message ->
+            message.content = "${message.content} a quitté la discussion"
+            addMessage(message)
+        }
+    }*/
     val vm: ChatViewModel by viewModels()
     private var binding: FragmentChatBinding? = null
     var baseHeight: Int = -1
     var screenSize: Int = -1
     var baseWidth: Int = -1
+
+    companion object {
+        fun newInstance() = ChatFragment()
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +132,20 @@ class ChatFragment @Inject constructor() : Fragment() {
 //        binding!!.root.layoutParams = params
     }
 
+    /*private fun sendButton() {
+        val text: String = (chatBox.text).toString()
+        val adjustedText: String = formatMessageContent(text)
+        if (isMessageValidFormat(adjustedText)) {
+            addMessage(MessageChat(adjustedText, System.currentTimeMillis(),username))
+            socketService.sendMessage(
+                    adjustedText,
+                    System.currentTimeMillis()
+            )
+        } else {
+            showErrorToast(MESSAGE_CONTENT_ERROR)
+        }
+        chatBox.text?.clear()
+    }*/
     private fun sendMessage() {
         vm.sendMessage()
 

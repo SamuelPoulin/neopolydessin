@@ -1,6 +1,6 @@
 package com.projet.clientleger.data.repository
 
-import com.projet.clientleger.data.api.service.DrawingSocketService
+import com.projet.clientleger.data.api.socket.DrawingSocketService
 import com.projet.clientleger.data.model.*
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject

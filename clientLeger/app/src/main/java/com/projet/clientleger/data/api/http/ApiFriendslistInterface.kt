@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.api
+package com.projet.clientleger.data.api.http
 
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
