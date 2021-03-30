@@ -1,5 +1,6 @@
 package com.projet.clientleger.data.repository
 
+import android.accounts.Account
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
@@ -9,6 +10,7 @@ import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
@@ -56,5 +58,9 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
         return lobbySocketService.receiveStartGame()
+    }
+
+    fun getUserInfo(): AccountInfo{
+        return sessionManager.getAccountInfo()
     }
 }

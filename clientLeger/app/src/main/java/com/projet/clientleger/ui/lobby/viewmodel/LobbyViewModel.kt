@@ -1,5 +1,7 @@
 package com.projet.clientleger.ui.lobby.viewmodel
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.api.model.PlayerRole
@@ -12,7 +14,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
-    val players: Array<PlayerInfo> = arrayOf(PlayerInfo(), PlayerInfo(), PlayerInfo(), PlayerInfo())
     val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
             arrayOf(MutableLiveData(ArrayList()),
             MutableLiveData(ArrayList()))
@@ -38,6 +39,16 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         return lobbyRepository.getUsername()
     }
 
+    fun fillTeams(defaultImage: Bitmap){
+        for(team in teams){
+            for (i in 0 until 2) {
+                team.value!!.add(PlayerInfo(avatar = defaultImage))
+            }
+        }
+        teams[0].postValue(teams[0].value!!)
+        teams[1].postValue(teams[1].value!!)
+    }
+
     private fun updatePlayers(list: ArrayList<PlayerInfo>){
         teams[0].value!!.clear()
         teams[1].value!!.clear()
@@ -50,5 +61,11 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         }
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)
+    }
+
+    fun setUserInfo(){
+        val info = lobbyRepository.getUserInfo()
+        teams[0].value!![0] = PlayerInfo(0, info.username, info.accountId, info.avatar)
+        teams[0].postValue(teams[0].value!!)
     }
 }

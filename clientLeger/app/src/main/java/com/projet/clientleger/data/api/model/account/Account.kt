@@ -21,7 +21,7 @@ data class Account(val _id: String,
                    val logins: Logins,
                    val __v: Int){
     fun toAccountInfo(avatarBitMap: Bitmap): AccountInfo{
-        return AccountInfo(firstName,
+        return AccountInfo(_id, firstName,
             lastName,
             username,
             email,

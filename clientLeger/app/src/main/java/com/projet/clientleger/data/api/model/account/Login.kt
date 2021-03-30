@@ -8,7 +8,6 @@ import java.util.*
 @Serializable
 data class Login(val _id: String, val start: String, val end: String?){
     fun toLoginInfo(): LoginInfo{
-        println("$start pis $end")
         var endDate: Date? = null
         if(end != null)
             endDate = DateFormatter.stringToDate(end)

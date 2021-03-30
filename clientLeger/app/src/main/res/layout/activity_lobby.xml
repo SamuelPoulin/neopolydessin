@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -11,7 +12,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:context=".ui.lobby.view.LobbyActivity">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -38,11 +40,11 @@
                 android:layout_height="0dp"
                 android:contentDescription="@string/logo"
                 android:src="@mipmap/polydessin_icon_round"
-                app:layout_constraintHeight_percent="1"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.1" />
+                app:layout_constraintDimensionRatio="1:1"
+                android:padding="5dp"/>
 
             <TextView
                 android:id="@+id/gamemode"
@@ -93,7 +95,7 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/teamContent1"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@+id/teamLabel"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -110,7 +112,8 @@
                 app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
                 app:layout_constraintBottom_toTopOf="@id/buttonPanel"
                 app:layout_constraintLeft_toRightOf="@id/teamContainer1"
-                app:layout_constraintRight_toRightOf="parent">
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintWidth_percent="0.5">
 
                 <TextView
                     android:id="@+id/teamLabel2"
@@ -127,7 +130,7 @@
                     app:layout_constraintBottom_toTopOf="@id/teamContent2"/>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/teamContent2"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/teamLabel2"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -179,14 +182,14 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/chat_root"
-                android:name="com.projet.clientleger.ui.chat.ChatFragment"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.5" />
+<!--            <androidx.fragment.app.FragmentContainerView-->
+<!--                android:id="@+id/chat_root"-->
+<!--                android:name="com.projet.clientleger.ui.chat.ChatFragment"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintWidth_percent="0.5" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

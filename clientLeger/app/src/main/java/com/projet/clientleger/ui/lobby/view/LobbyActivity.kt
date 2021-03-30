@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.lobby.view
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -18,8 +19,10 @@ import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
+import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
+import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_lobby.*
 import kotlinx.coroutines.launch
@@ -61,6 +64,7 @@ class LobbyActivity : AppCompatActivity() {
             val manager = LinearLayoutManager(this)
             manager.orientation = RecyclerView.HORIZONTAL
             rvTeams[i].layoutManager = manager
+            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer)
 
             vm.teams[i].observe(this){
                 teams[i].clear()
@@ -68,6 +72,7 @@ class LobbyActivity : AppCompatActivity() {
                 rvTeams[i].adapter?.notifyDataSetChanged()
             }
         }
+        vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         val username = vm.getUsername()
         //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
@@ -77,16 +82,18 @@ class LobbyActivity : AppCompatActivity() {
         setSubscriptions()
         if(gameInfo.gameCreator != username){
             startGameButton.visibility = View.INVISIBLE
+        } else{
+            vm.setUserInfo()
         }
 
-        val fragment :ChatFragment = ChatFragment.newInstance()
-
-        if(savedInstanceState == null){
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.chat_root,fragment,"chat_fragment")
-                .commit()
-        }
+//        val fragment :ChatFragment = ChatFragment.newInstance()
+//
+//        if(savedInstanceState == null){
+//            supportFragmentManager
+//                .beginTransaction()
+//                .add(R.id.chat_root,fragment,"chat_fragment")
+//                .commit()
+//        }
     }
     private fun getFrenchGameMode(englishMode:String):String{
         when(englishMode){
@@ -145,8 +152,8 @@ class LobbyActivity : AppCompatActivity() {
     private fun <T> goToActivity(java: Class<T>) {
         startActivity(Intent(this, java))
     }
-    private fun kickPlayer(playerIndex:Int){
-
+    private fun kickPlayer(player:PlayerInfo){
+        println("kic: ${player.username}")
     }
     private fun addPlayerToGame(info: Player){
         playerCount++

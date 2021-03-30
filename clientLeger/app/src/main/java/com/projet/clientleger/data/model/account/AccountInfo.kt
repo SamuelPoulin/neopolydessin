@@ -6,7 +6,8 @@ import java.nio.Buffer
 import java.util.*
 import kotlin.collections.ArrayList
 
-data class AccountInfo(val firstName: String = "",
+data class AccountInfo(val accountId: String = "",
+                       val firstName: String = "",
                        val lastName: String = "",
                        val username: String = "",
                        val email: String = "",
