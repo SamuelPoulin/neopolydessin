@@ -20,7 +20,6 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -53,7 +52,6 @@ object ApiModule {
             //.baseUrl("http://10.0.2.2:3205")
             .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
-            .addConverterFactory(ScalarsConverterFactory.create())
         .build()
 
     @Provides
@@ -75,10 +73,6 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)
-
-    @Provides
-    @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
 
     @Provides
     @Singleton

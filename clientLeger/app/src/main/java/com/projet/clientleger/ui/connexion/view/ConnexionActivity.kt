@@ -55,9 +55,11 @@ class ConnexionActivity : AppCompatActivity() {
             binding.connectBtn.isEnabled = true
         }
     }
+
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
+
     private fun forgottenPasswordBtn(){
         //TODO: bouton de récupération de mot de passe non-implémenté
     }

@@ -7,8 +7,7 @@ import com.projet.clientleger.data.api.model.RegisterResponse
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
-open class ConnectionRepository @Inject constructor(private val sessionManager: SessionManager, private val apiConnectionInterface: ApiConnectionInterface){
-
+open class ConnectionRepository @Inject constructor(private val sessionManager: SessionManager,private val apiConnectionInterface: ApiConnectionInterface){
     open suspend fun connectAccount(connectionModel: ConnectionModel): RegisterResponse{
         val res = apiConnectionInterface.login(connectionModel)
         return when (res.code()){
@@ -19,7 +18,7 @@ open class ConnectionRepository @Inject constructor(private val sessionManager: 
                     ""
             )
             HttpsURLConnection.HTTP_OK -> {
-                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken, connectionModel.username!!)
+                sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken)
                 RegisterResponse(
                     true,
                     "",

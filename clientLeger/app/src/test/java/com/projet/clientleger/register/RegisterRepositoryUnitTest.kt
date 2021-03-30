@@ -1,5 +1,7 @@
 package com.projet.clientleger.register
 
+
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponse
@@ -27,12 +29,15 @@ class RegisterRepositoryUnitTest {
     @Inject
     lateinit var apiRegisterInterface: ApiRegisterInterface
 
+    @Inject
+    lateinit var sessionManager:SessionManager
+
     private lateinit var registerRepo: RegisterRepository
 
     @Before
     fun setUp(){
         hiltRule.inject()
-        registerRepo = RegisterRepository(apiRegisterInterface)
+        registerRepo = RegisterRepository(sessionManager ,apiRegisterInterface)
     }
 
     @Test
