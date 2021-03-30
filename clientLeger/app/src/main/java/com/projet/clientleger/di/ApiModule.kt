@@ -76,9 +76,5 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context, tokenInterceptor: TokenInterceptor, apiSessionManagerInterface: ApiSessionManagerInterface):SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface)
-
-    @Provides
-    @Singleton
     fun provideLobbySocketService(socketService:SocketService): LobbySocketService = LobbySocketService(socketService)
 }
