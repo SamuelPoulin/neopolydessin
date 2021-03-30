@@ -142,8 +142,9 @@ export abstract class Lobby {
       const username = this.players[index].username;
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      socket.leave(this.lobbyId);
       socket.to(this.lobbyId).broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, username, Date.now());
-      if (this.players.length === 0) {
+      if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
         this.endGame();
       }
       else {
