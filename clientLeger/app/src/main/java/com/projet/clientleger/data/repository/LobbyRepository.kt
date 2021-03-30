@@ -19,11 +19,30 @@ import javax.net.ssl.HttpsURLConnection
 class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService,
                                           private val sessionManager: SessionManager,
                                           private val apiAvatarInterface: ApiAvatarInterface) {
-    fun receivedPlayersInfo(): Observable<String> {
-        return lobbySocketService.receivePlayersInfo()
+    fun receivePlayerJoin(): Observable<PlayerInfo> {
+        return Observable.create { emitter ->
+            lobbySocketService.receivePlayerJoin().subscribe{
+                var avatar: Bitmap? = null
+                if(it.avatar != null){
+                    val resAvatar = sessionManager.request(it.avatar, apiAvatarInterface::getAvatar)
+                    if(resAvatar.code() == HttpsURLConnection.HTTP_OK)
+                        avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
+                }
+                emitter.onNext(it.toPlayerInfo(avatar))
+            }
+        }
     }
+
+    fun receivePlayerLeave(): Observable<String>{
+        return lobbySocketService.receivePlayerLeave()
+    }
+
     fun receivedAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return lobbySocketService.receiveAllLobbies(gameMode,difficulty)
+    }
+
+    fun leaveLobby(){
+        lobbySocketService.leaveLobby()
     }
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
@@ -31,11 +50,11 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
                 for(player in it){
-                    val avatar: Bitmap? = null
+                    var avatar: Bitmap? = null
                     if(player.avatar != null){
                         val res = sessionManager.request(player.avatar, apiAvatarInterface::getAvatar)
                         if(res.code() == HttpsURLConnection.HTTP_OK){
-                            BitmapFactory.decodeStream(res.body()!!.byteStream())
+                            avatar = BitmapFactory.decodeStream(res.body()!!.byteStream())
                         }
                     }
                     list.add(player.toPlayerInfo(avatar))

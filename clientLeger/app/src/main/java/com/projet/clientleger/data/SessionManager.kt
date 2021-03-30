@@ -174,6 +174,7 @@ open class SessionManager @Inject constructor(
             bundle.putString(ERROR_MESSAGE, errorMessage)
         }
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context?.startActivity(intent, bundle)
     }
 }

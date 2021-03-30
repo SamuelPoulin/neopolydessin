@@ -12,8 +12,8 @@ class MainmenuRepository @Inject constructor(private val socketService: SocketSe
     fun connectSocket(accessToken: String){
         socketService.connect(accessToken)
     }
-    fun createGame(gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean){
-        lobbySocketService.createGame(gameMode,difficulty,isPrivate)
+    fun createGame(lobbyName: String, gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean){
+        lobbySocketService.createGame(lobbyName, gameMode,difficulty,isPrivate)
     }
     fun getUsername():String{
         return sessionManager.getUsername()

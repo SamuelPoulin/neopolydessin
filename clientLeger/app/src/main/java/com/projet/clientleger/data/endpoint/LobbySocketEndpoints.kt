@@ -6,4 +6,7 @@ enum class LobbySocketEndpoints(val value: String) {
     JOIN_LOBBY("joinLobby"),
     START_GAME("StartGameFromLobbyToServer"),
     RECEIVE_START_GAME("StartGameFromServerToClient"),
+    LEAVE_LOBBY("leaveLobby"),
+    RECEIVE_PLAYER_JOIN("PlayerConnected"),
+    RECEIVE_PLAYER_LEAVE("PlayerDisconnected")
 }

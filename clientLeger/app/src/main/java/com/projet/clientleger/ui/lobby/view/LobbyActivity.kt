@@ -47,7 +47,6 @@ class LobbyActivity : AppCompatActivity() {
         vm.receiveStartGame().subscribe{
             lifecycleScope.launch {
                 rolesList = it
-                println(rolesList)
                 goToActivity(GameActivity::class.java)
             }
         }
@@ -66,7 +65,6 @@ class LobbyActivity : AppCompatActivity() {
             rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer)
 
             vm.teams[i].observe(this){
-                println("Rv updates: $it")
                 teams[i].clear()
                 teams[i].addAll(it)
                 rvTeams[i].adapter?.notifyDataSetChanged()
@@ -123,6 +121,7 @@ class LobbyActivity : AppCompatActivity() {
             startGame()
         }
         binding.exitGame.setOnClickListener {
+            vm.leaveLobby()
             goToMainMenu()
         }
 //        binding.removePlayer1Button.setOnClickListener {
