@@ -15,12 +15,6 @@ export interface Player {
   isBot: boolean
 }
 
-export interface PlayerInfo {
-  teamNumber: number
-  playerName: string
-  accountId: string
-  avatar: string
-}
 
 export interface PlayerRole {
   playerName: string;

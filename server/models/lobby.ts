@@ -11,7 +11,7 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerStatus } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -85,17 +85,10 @@ export abstract class Lobby {
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
   }
 
-  toLobbyInfo(): PlayerInfo[] {
-    const playerInfoList: PlayerInfo[] = [];
-    this.players.forEach((player) => {
-      playerInfoList.push({
-        teamNumber: player.teamNumber,
-        playerName: player.username,
-        accountId: player.accountId,
-        avatar: player.avatarId
-      });
+  toLobbyInfo(): Player[] {
+    return this.players.map((player) => {
+      return this.serverPlayerToPlayer(player);
     });
-    return playerInfoList;
   }
 
   getLobbySummary(): LobbyInfo {
@@ -108,17 +101,15 @@ export abstract class Lobby {
     };
   }
 
-  getPlayerAddedInfo(socket: Socket): PlayerInfo | undefined {
-    const player = this.findPlayerBySocket(socket);
-    if (player) {
-      return {
-        teamNumber: player.teamNumber,
-        playerName: player.username,
-        accountId: player.accountId,
-        avatar: player.avatarId
-      };
-    }
-    return;
+  serverPlayerToPlayer(serverPlayer: ServerPlayer): Player {
+    return {
+      accountId: serverPlayer.accountId,
+      username: serverPlayer.username,
+      avatarId: serverPlayer.avatarId,
+      playerStatus: serverPlayer.playerStatus,
+      teamNumber: serverPlayer.teamNumber,
+      isBot: serverPlayer.isBot,
+    };
   }
 
   removePlayer(accountId: string, socket: Socket) {
@@ -128,10 +119,12 @@ export abstract class Lobby {
       if (teamIndex > -1) {
         this.teams[this.players[index].teamNumber].playersInTeam.splice(teamIndex, 1);
       }
-      const username = this.players[index].username;
+      const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
-      socket.to(this.lobbyId).broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, username, Date.now());
+      socket.to(this.lobbyId)
+        .broadcast
+        .emit(SocketMessages.PLAYER_DISCONNECTION, this.serverPlayerToPlayer(removedPlayer), Date.now());
       if (this.players.length === 0) {
         this.endGame();
       }
@@ -172,7 +165,7 @@ export abstract class Lobby {
           socket.join(this.lobbyId);
           socket.to(this.lobbyId)
             .broadcast
-            .emit(SocketMessages.PLAYER_CONNECTION, this.getPlayerAddedInfo(socket), Date.now());
+            .emit(SocketMessages.PLAYER_CONNECTION, this.serverPlayerToPlayer(player), Date.now());
           this.io
             .in(this.lobbyId)
             .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
