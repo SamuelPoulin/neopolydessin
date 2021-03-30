@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +12,7 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole, TeamScore } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -43,6 +44,7 @@ export abstract class Lobby {
   protected io: Server;
   protected ownerAccountId: string;
   protected ownerUsername: string;
+  protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
   protected wordToGuess: string;
@@ -123,13 +125,14 @@ export abstract class Lobby {
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      socket.leave(this.lobbyId);
       socket.to(this.lobbyId)
         .broadcast
         .emit(SocketMessages.PLAYER_DISCONNECTION, this.serverPlayerToPlayer(removedPlayer), Date.now());
       this.io
         .in(this.lobbyId)
         .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
-      if (this.players.length === 0) {
+      if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
         this.endGame();
       }
       else {
@@ -186,7 +189,7 @@ export abstract class Lobby {
   protected bindLobbyEndPoints(socket: Socket) {
 
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
-      if (this.isActivePlayer(socket)) {
+      if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.startPath(startPoint, brushInfo)
           .then((startedPath) => {
             this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startedPath.id, startPoint, startedPath.brushInfo);
@@ -198,7 +201,7 @@ export abstract class Lobby {
     });
 
     socket.on(SocketDrawing.UPDATE_PATH, (updateCoord: Coord) => {
-      if (this.isActivePlayer(socket)) {
+      if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.updatePath(updateCoord)
           .then(() => {
             this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, updateCoord);
@@ -210,7 +213,7 @@ export abstract class Lobby {
     });
 
     socket.on(SocketDrawing.END_PATH, (endPoint: Coord) => {
-      if (this.isActivePlayer(socket)) {
+      if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.endPath(endPoint)
           .then(() => {
             this.io.in(this.lobbyId).emit(SocketDrawing.END_PATH_BC, endPoint);
@@ -222,7 +225,7 @@ export abstract class Lobby {
     });
 
     socket.on(SocketDrawing.ERASE_ID, (id: number) => {
-      if (this.isActivePlayer(socket)) {
+      if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.erase(id)
           .then(() => {
             this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_ID_BC, id);
@@ -234,7 +237,7 @@ export abstract class Lobby {
     });
 
     socket.on(SocketDrawing.ADD_PATH, (id: number) => {
-      if (this.isActivePlayer(socket)) {
+      if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.addPath(id)
           .then((addedPath) => {
             this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.path, addedPath.brushInfo);
@@ -307,8 +310,24 @@ export abstract class Lobby {
 
   protected endGame(): void {
     this.currentGameState = CurrentGameState.GAME_OVER;
+    clearInterval(this.clockTimeout);
     this.io.in(this.lobbyId).emit(SocketLobby.END_GAME);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+  }
+
+  protected getTeamsScoreArray(): TeamScore[] {
+    const teamScoreArray: TeamScore[] = [];
+    this.teams.forEach((team) => {
+      teamScoreArray.push({
+        teamNumber: team.teamNumber,
+        score: team.currentScore
+      });
+    });
+    return teamScoreArray;
+  }
+
+  private gameIsInDrawPhase(): boolean {
+    return this.currentGameState === CurrentGameState.DRAWING;
   }
 
   private isActivePlayer(socket: Socket): boolean {

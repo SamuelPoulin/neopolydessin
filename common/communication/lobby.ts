@@ -18,6 +18,11 @@ export interface Player {
   finishedLoading: boolean;
 }
 
+export interface TeamScore {
+  teamNumber: number,
+  score: number
+}
+
 export interface GuessMessage extends ChatMessage {
   guessStatus: GuessResponse
 }

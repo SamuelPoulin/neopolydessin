@@ -19,9 +19,9 @@ import { Lobby, ServerPlayer } from './lobby';
 @injectable()
 export class LobbyClassique extends Lobby {
 
+  protected clockTimeout: NodeJS.Timeout;
   private readonly START_GAME_TIME_LEFT: number = 30;
   private readonly REPLY_TIME: number = 10;
-  private clockTimeout: NodeJS.Timeout;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
@@ -190,13 +190,13 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerGuessToClient() {
-    const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
+    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
-    const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
+    const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
   }
 
