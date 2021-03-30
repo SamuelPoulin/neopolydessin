@@ -12,7 +12,6 @@ export class LobbySolo extends Lobby {
 
   private readonly SOLO_TEAM_SIZE: number = 2;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,

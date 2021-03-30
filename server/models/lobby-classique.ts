@@ -22,7 +22,6 @@ export class LobbyClassique extends Lobby {
 
   private readonly START_GAME_TIME_LEFT: number = 30;
   private readonly REPLY_TIME: number = 10;
-  private clockTimeout: NodeJS.Timeout;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
@@ -81,6 +80,7 @@ export class LobbyClassique extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[guesserValues.teamNumber].currentScore++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.playerDrawing++;
             this.teamDrawing++;
             this.startRoundTimer();

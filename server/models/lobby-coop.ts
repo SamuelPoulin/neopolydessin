@@ -21,7 +21,6 @@ export class LobbyCoop extends Lobby {
 
   private readonly NB_GUESS: number = 5;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,
@@ -59,6 +58,7 @@ export class LobbyCoop extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[0].currentScore++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
             this.addTimeOnCorrectGuess();
             break;
