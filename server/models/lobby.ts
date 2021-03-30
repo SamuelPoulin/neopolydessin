@@ -174,7 +174,9 @@ export abstract class Lobby {
           socket.to(this.lobbyId)
             .broadcast
             .emit(SocketMessages.PLAYER_CONNECTION, this.getPlayerAddedInfo(socket), Date.now());
-          this.io.to(socket.id).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+          this.io
+            .in(this.lobbyId)
+            .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
           resolve();
         })
         .catch((err) => {
