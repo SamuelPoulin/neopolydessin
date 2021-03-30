@@ -4,15 +4,7 @@ import { levenshtein } from '../app/utils/levenshtein-distance';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import {
-  CurrentGameState,
-  Difficulty,
-  GameType,
-  PlayerStatus,
-  PlayerRole,
-  GuessResponse,
-  GuessMessageCoop
-} from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, PlayerRole, GuessResponse, GuessMessageCoop } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
@@ -21,7 +13,6 @@ export class LobbyCoop extends Lobby {
 
   private readonly NB_GUESS: number = 5;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,
@@ -39,8 +30,8 @@ export class LobbyCoop extends Lobby {
     this.timeLeftSeconds = 60;
   }
 
-  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
-    this.addPlayerToTeam(playerId, status, socket, 0)
+  addPlayer(playerId: string, role: PlayerRole, socket: Socket) {
+    this.addPlayerToTeam(playerId, role, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
@@ -52,13 +43,14 @@ export class LobbyCoop extends Lobby {
   protected bindLobbyEndPoints(socket: Socket) {
     socket.on(SocketLobby.PLAYER_GUESS, async (word: string) => {
       const guesserValues = this.findPlayerBySocket(socket);
-      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         const distance = levenshtein(word, this.wordToGuess);
         let guessStat;
         switch (distance) {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[0].currentScore++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
             this.addTimeOnCorrectGuess();
             break;
@@ -115,11 +107,8 @@ export class LobbyCoop extends Lobby {
     socket.on(SocketLobby.START_GAME_SERVER, () => {
       const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       if (senderAccountId === this.ownerAccountId) {
-        const roleArray: PlayerRole[] = [];
-        this.players.forEach((player) => {
-          roleArray.push({ playerName: player.username, playerStatus: PlayerStatus.GUESSER });
-        });
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
+        this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
         this.currentGameState = CurrentGameState.IN_GAME;
       }
     });
