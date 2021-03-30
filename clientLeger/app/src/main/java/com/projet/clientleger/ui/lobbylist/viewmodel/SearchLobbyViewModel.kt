@@ -5,6 +5,7 @@ import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,7 +17,7 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
         return lobbyRepository.receivedAllLobbies(gameMode, difficulty)
     }
 
-    fun receiveJoinedLobbyInfo() : Observable<LobbyInfo>{
+    fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
         return lobbyRepository.receiveJoinedLobbyInfo()
     }
 

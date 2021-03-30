@@ -8,10 +8,13 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
@@ -28,18 +31,16 @@ class LobbyActivity : AppCompatActivity() {
     private var playerCount:Int = 0
     private val playersView = ArrayList<ConstraintLayout>()
     private var rolesList = ArrayList<PlayerRole>()
+    private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
+    private lateinit var rvTeams: Array<RecyclerView>
 
     private fun setSubscriptions() {
-        vm.receivePlayersInfo()
-                .subscribe { username ->
-                    lifecycleScope.launch {
-                        addPlayerToGame(username.toString())
-                    }
-                }
-
-        vm.receiveLobbyInfo().subscribe{
-            it.
-        }
+//        vm.receivePlayersInfo()
+//                .subscribe { username ->
+//                    lifecycleScope.launch {
+//                        addPlayerToGame(username.toString())
+//                    }
+//                }
 
         vm.receiveStartGame().subscribe{
             lifecycleScope.launch {
@@ -54,18 +55,25 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupButtons()
-        playersView.add(binding.player1)
-        playersView.add(binding.player2)
-        playersView.add(binding.player3)
-        playersView.add(binding.player4)
+        rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
+        for(i in rvTeams.indices){
+            val manager = LinearLayoutManager(this)
+            manager.orientation = RecyclerView.HORIZONTAL
+            rvTeams[i].layoutManager = manager
+
+            vm.teams[i].observe(this){
+                teams[i].clear()
+                teams[i].addAll(it)
+                rvTeams[i].adapter?.notifyDataSetChanged()
+            }
+        }
         val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
         val username = vm.getUsername()
         //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
         binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
         binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
-        addPlayerToGame(gameInfo.gameCreator)
+        //addPlayerToGame(gameInfo.gameCreator)
         setSubscriptions()
         if(gameInfo.gameCreator != username){
             startGameButton.visibility = View.INVISIBLE
@@ -110,18 +118,18 @@ class LobbyActivity : AppCompatActivity() {
         binding.exitGame.setOnClickListener {
             goToMainMenu()
         }
-        binding.removePlayer1Button.setOnClickListener {
-            kickPlayer(1)
-        }
-        binding.removePlayer2Button.setOnClickListener {
-            kickPlayer(2)
-        }
-        binding.removePlayer3Button.setOnClickListener {
-            kickPlayer(3)
-        }
-        binding.removePlayer4Button.setOnClickListener {
-            kickPlayer(4)
-        }
+//        binding.removePlayer1Button.setOnClickListener {
+//            kickPlayer(1)
+//        }
+//        binding.removePlayer2Button.setOnClickListener {
+//            kickPlayer(2)
+//        }
+//        binding.removePlayer3Button.setOnClickListener {
+//            kickPlayer(3)
+//        }
+//        binding.removePlayer4Button.setOnClickListener {
+//            kickPlayer(4)
+//        }
         disableAllRemoveButtons()
     }
     private fun startGame(){
@@ -148,16 +156,16 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun disableRemoveButtonWithIndex(index:Int){
         when(index){
-            1-> binding.removePlayer1Button.isEnabled = false
-            2-> binding.removePlayer2Button.isEnabled = false
-            3-> binding.removePlayer3Button.isEnabled = false
-            4-> binding.removePlayer4Button.isEnabled = false
+//            1-> binding.removePlayer1Button.isEnabled = false
+//            2-> binding.removePlayer2Button.isEnabled = false
+//            3-> binding.removePlayer3Button.isEnabled = false
+//            4-> binding.removePlayer4Button.isEnabled = false
         }
     }
     private fun disableAllRemoveButtons(){
-        binding.removePlayer1Button.isEnabled = false
-        binding.removePlayer2Button.isEnabled = false
-        binding.removePlayer3Button.isEnabled = false
-        binding.removePlayer4Button.isEnabled = false
+//        binding.removePlayer1Button.isEnabled = false
+//        binding.removePlayer2Button.isEnabled = false
+//        binding.removePlayer3Button.isEnabled = false
+//        binding.removePlayer4Button.isEnabled = false
     }
 }

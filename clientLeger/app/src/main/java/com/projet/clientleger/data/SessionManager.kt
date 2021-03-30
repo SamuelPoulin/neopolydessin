@@ -9,6 +9,7 @@ import androidx.core.content.edit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.http.ApiErrorMessages
 import com.projet.clientleger.data.api.TokenInterceptor
+import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.model.account.Account
@@ -22,6 +23,7 @@ import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.HttpsURLConnection
+import kotlin.reflect.KFunction
 import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KSuspendFunction1
 
@@ -33,7 +35,8 @@ private const val REFRESH_TOKEN = "refreshToken"
 open class SessionManager @Inject constructor(
         private val context: Context?,
         private val tokenInterceptor: TokenInterceptor,
-        private val apiSessionManagerInterface: ApiSessionManagerInterface
+        private val apiSessionManagerInterface: ApiSessionManagerInterface,
+        private val apiAvatarInterface: ApiAvatarInterface
 ) {
     companion object{
         const val ERROR_MESSAGE = "errorMessage"
@@ -70,7 +73,7 @@ open class SessionManager @Inject constructor(
 
     private fun saveAccountInfo(info: Account?){
         if (info != null) {
-            apiSessionManagerInterface.getAvatar(info.avatar._id).enqueue(object: Callback<ResponseBody>{
+            apiAvatarInterface.getAvatar(info.avatar._id).enqueue(object: Callback<ResponseBody>{
                 override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                     val bitMap = BitmapFactory.decodeStream(response.body()!!.byteStream())
                     accountInfo = info.toAccountInfo(bitMap)
@@ -146,6 +149,18 @@ open class SessionManager @Inject constructor(
         }
         return res
     }
+
+    open fun <S, T> request(toSend: S, callBack: KFunction<Call<T>>): Response<T>{
+        var res = callBack.call(toSend).execute()
+        if(res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN){
+            scope.launch {
+                refreshAccessToken()
+            }
+            res = callBack.call(toSend).execute()
+        }
+        return res
+    }
+
 
     fun logout(errorMessage: String?){
         tokenInterceptor.clearToken()

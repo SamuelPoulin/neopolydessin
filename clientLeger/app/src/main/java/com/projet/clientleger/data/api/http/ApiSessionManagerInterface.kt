@@ -18,6 +18,4 @@ interface ApiSessionManagerInterface {
     @GET("api/database/account")
     suspend fun getAccountInfo(): Response<Account>
 
-    @GET("api/avatar/{id}")
-    fun getAvatar(@Path("id") id: String): Call<ResponseBody>
 }

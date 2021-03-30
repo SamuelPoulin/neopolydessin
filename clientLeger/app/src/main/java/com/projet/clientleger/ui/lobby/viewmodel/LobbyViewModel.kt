@@ -1,9 +1,10 @@
 package com.projet.clientleger.ui.lobby.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -11,7 +12,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
-    val players: Array<Player> = arrayOf(Player(), Player(), Player(), Player())
+    val players: Array<PlayerInfo> = arrayOf(PlayerInfo(), PlayerInfo(), PlayerInfo(), PlayerInfo())
+    val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
+            arrayOf(MutableLiveData(ArrayList()),
+            MutableLiveData(ArrayList()))
+
+    init {
+        lobbyRepository.receiveJoinedLobbyInfo().subscribe{
+            updatePlayers(it)
+        }
+    }
 
     fun receivePlayersInfo(): Observable<String> {
         return lobbyRepository.receivedPlayersInfo()
@@ -28,7 +38,17 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         return lobbyRepository.getUsername()
     }
 
-    fun receiveLobbyInfo(): Observable<LobbyInfo> {
-        return lobbyRepository.receiveJoinedLobbyInfo()
+    private fun updatePlayers(list: ArrayList<PlayerInfo>){
+        teams[0].value!!.clear()
+        teams[1].value!!.clear()
+        for(i in 0 until list.size){
+            teams[list[i].teamNumber].value!!.add(list[i])
+        }
+        for(team in teams){
+            for(i in 1 downTo team.value!!.size)
+                team.value!!.add(PlayerInfo())
+        }
+        teams[0].postValue(teams[0].value!!)
+        teams[1].postValue(teams[1].value!!)
     }
 }
