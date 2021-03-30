@@ -2,6 +2,11 @@
 import { Command } from './command';
 import { CommandReceiver } from './command-receiver';
 
+export class MockCommandReceiver {
+  undo(): void {}
+  redo(): void {}
+}
+
 export class MockCommand implements Command {
   execute(): void {
     return;

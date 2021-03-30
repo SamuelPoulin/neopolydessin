@@ -13,6 +13,7 @@ import { Color } from '@utils/color/color';
 import { EditorUtils } from '@utils/color/editor-utils';
 import { Coordinate } from '@utils/math/coordinate';
 import createSpyObj = jasmine.createSpyObj;
+import { MockEditorService } from '@services/editor.service.spec';
 
 describe('EraserTool', () => {
   let eraser: EraserTool;
@@ -23,7 +24,7 @@ describe('EraserTool', () => {
     TestBed.configureTestingModule({
       imports: [SharedModule],
       declarations: [DrawingSurfaceComponent],
-      providers: [EditorService],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
 
     eraser = new EraserTool(TestBed.inject(EditorService));

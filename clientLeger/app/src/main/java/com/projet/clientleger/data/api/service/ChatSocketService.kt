@@ -22,7 +22,9 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
 
     fun receivePlayerConnection(): Observable<MessageSystem>{
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value){ (playerInfo, timestamp) ->
-            MessageSystem((playerInfo as PlayerInfo).playerName, timestamp as Long)
+            println(playerInfo)
+            val info = Json.decodeFromString(PlayerInfo.serializer(), playerInfo.toString())
+            MessageSystem(info.playerName, timestamp as Long)
         }
     }
 

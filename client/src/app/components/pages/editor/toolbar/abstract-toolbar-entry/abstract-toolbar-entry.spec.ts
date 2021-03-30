@@ -9,6 +9,7 @@ import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { EditorService } from 'src/app/services/editor.service';
 import { Directive } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MockEditorService } from '@services/editor.service.spec';
 
 @Directive()
 export class AbstractToolbarEntryMock extends AbstractToolbarEntryDirective<CreatorToolProperties> {
@@ -26,6 +27,9 @@ describe('AbstractToolbarEntry', () => {
   } as ToolProperties;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
+    });
     editorService = TestBed.inject(EditorService);
     editorService.tools.set(type, { toolProperties } as Tool);
     toolbarEntry = new AbstractToolbarEntryMock(editorService);

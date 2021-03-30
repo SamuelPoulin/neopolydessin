@@ -8,8 +8,8 @@ function initWindow() {
   appWindow = new BrowserWindow({
     // fullscreen: true,
     icon: url.format(path.join(__dirname, "/resources/icon.png")),
-    height: 800,
-    width: 1000,
+    height: 900,
+    width: 1300,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

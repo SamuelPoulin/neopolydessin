@@ -3,8 +3,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StatusBarModule } from '@components/shared/status-bar/status-bar.module';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
-// import { ModalType } from 'src/app/services/modal/modal-type.enum';
 import { SharedModule } from '../../../shared/shared.module';
 
 import { HomeComponent } from './home.component';
@@ -21,6 +22,7 @@ describe('HomeComponent', () => {
       imports: [SharedModule, RouterTestingModule, StatusBarModule],
       declarations: [HomeComponent],
       providers: [
+        { provide: SocketService, useValue: MockSocketService },
         {
           provide: ModalDialogService,
           useValue: modalDialogServiceSpy,

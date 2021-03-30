@@ -8,7 +8,6 @@ import androidx.core.content.edit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.ApiErrorMessages
 import com.projet.clientleger.data.api.TokenInterceptor
-import com.projet.clientleger.data.api.model.AccessTokenResponse
 import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.ApiSessionManagerInterface
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
@@ -24,8 +23,9 @@ private const val ACCESS_TOKEN = "accessToken"
 private const val REFRESH_TOKEN = "refreshToken"
 
 @Singleton
-class SessionManager @Inject constructor(
-        private val context: Context,
+
+open class SessionManager @Inject constructor(
+        private val context: Context?,
         private val tokenInterceptor: TokenInterceptor,
         private val apiSessionManagerInterface: ApiSessionManagerInterface
 ) {
@@ -34,14 +34,20 @@ class SessionManager @Inject constructor(
         const val SESSION_EXPIRED = "Session expirée"
     }
     private var username: String? = null
-    private var userPrefs: SharedPreferences =
-            context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
+    private var userPrefs: SharedPreferences? =
+            context?.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
+    init {
+        if(context != null){
+            userPrefs = context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
+        }
+    }
 
-    fun saveCreds(accessToken: String, refreshToken: String, username: String) {
+
+    open fun saveCreds(accessToken: String, refreshToken: String, username: String) {
         this.username = username
-        userPrefs.edit {
+        userPrefs?.edit {
             putString(ACCESS_TOKEN, accessToken)
             putString(REFRESH_TOKEN, refreshToken)
             apply()
@@ -54,31 +60,32 @@ class SessionManager @Inject constructor(
     }
 
     fun clearCred(){
-        userPrefs.edit{
+        userPrefs?.edit{
             clear()
             apply()
         }
     }
 
-    fun updateAccessToken(accessToken: String) {
-        userPrefs.edit {
+    open fun updateAccessToken(accessToken: String) {
+        userPrefs?.edit {
             putString(ACCESS_TOKEN, accessToken)
             apply()
         }
         tokenInterceptor.setAccessToken(accessToken)
     }
 
-    fun getAccessToken(): String {
-        return userPrefs.getString(ACCESS_TOKEN, "")!!
+    open fun getAccessToken(): String {
+        return userPrefs?.getString(ACCESS_TOKEN, "")!!
     }
 
-    fun getRefreshToken(): String {
-        return userPrefs.getString(REFRESH_TOKEN, "")!!
+    open fun getRefreshToken(): String {
+        return userPrefs?.getString(REFRESH_TOKEN, "")!!
     }
 
-    suspend fun refreshAccessToken() {
-        val res = apiSessionManagerInterface.refreshToken(RefreshTokenModel(getRefreshToken()))
-        when (res.code()) {
+
+    open suspend fun refreshAccessToken() {
+        val res = apiSessionManagerInterface.refreshToken( RefreshTokenModel(getRefreshToken()) )
+        return when(res.code()){
             HttpsURLConnection.HTTP_OK -> {
                 updateAccessToken(res.body()!!.accessToken)
             }
@@ -89,7 +96,7 @@ class SessionManager @Inject constructor(
         }
     }
 
-    suspend fun <S, T> request(toSend: S, callback: KSuspendFunction1<S, Response<T>>): Response<T> {
+    open suspend fun <S,T> request(toSend: S, callback: KSuspendFunction1<S,Response<T>>): Response<T>{
         var res = callback.invoke(toSend)
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
@@ -98,7 +105,8 @@ class SessionManager @Inject constructor(
         return res
     }
 
-    suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T> {
+
+    open suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T>{
         var res = callback.invoke()
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
@@ -116,6 +124,6 @@ class SessionManager @Inject constructor(
             bundle.putString(ERROR_MESSAGE, errorMessage)
         }
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        context.startActivity(intent, bundle)
+        context?.startActivity(intent, bundle)
     }
 }
