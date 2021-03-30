@@ -44,7 +44,7 @@ class GameActivity : AppCompatActivity() {
     lateinit var binding: ActivityGameBinding
     private var currentKeyWord : String = ""
     private var currentRoles: Array<PlayerRole> = arrayOf()
-    private var clientRole:PlayerRole = PlayerRole("", PlayerStatus.PASSIVE)
+    private var clientRole:PlayerRole = PlayerRole("", PlayerStatus.PASSIVE.value)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +59,7 @@ class GameActivity : AppCompatActivity() {
             supportFragmentManager.setFragmentResult("keyboardEvent", bundleOf("height" to heightDiff))
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
-        clientRole.playerName = vm.getUsername()
+        clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
         vm.onPlayerReady()
     }

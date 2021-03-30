@@ -13,6 +13,7 @@ import javax.inject.Inject
 class GameViewModel @Inject constructor(private val gameRepository: GameRepository): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
     private var currentRoleLiveData: MutableLiveData<>
+    val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
 
@@ -20,16 +21,13 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun receiveTimer(): Observable<Long> {
         return gameRepository.receiveTimer()
     }
-    fun receiveRoles(): Observable<Array<PlayerRole>> {
+    fun receiveRoles(): Observable<ArrayList<PlayerRole>> {
         return gameRepository.receiveRoles().subscribe{ roles ->
 
         }
     }
     fun receiveKeyWord(): Observable<String> {
         return gameRepository.receiveKeyWord()
-    }
-    fun getUsername(): String{
-        return gameRepository.getUsername()
     }
     fun onPlayerReady(){
         gameRepository.onPlayerReady()
