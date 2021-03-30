@@ -108,6 +108,7 @@ export abstract class Lobby {
       avatarId: serverPlayer.avatarId,
       playerRole: serverPlayer.playerRole,
       teamNumber: serverPlayer.teamNumber,
+      finishedLoading: serverPlayer.finishedLoading,
       isBot: serverPlayer.isBot,
     };
   }
@@ -125,6 +126,9 @@ export abstract class Lobby {
       socket.to(this.lobbyId)
         .broadcast
         .emit(SocketMessages.PLAYER_DISCONNECTION, this.serverPlayerToPlayer(removedPlayer), Date.now());
+      this.io
+        .in(this.lobbyId)
+        .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
       if (this.players.length === 0) {
         this.endGame();
       }
