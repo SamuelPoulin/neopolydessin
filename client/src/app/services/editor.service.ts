@@ -22,6 +22,7 @@ import { SocketService } from './socket-service.service';
   providedIn: 'root',
 })
 export class EditorService {
+  private static readonly SERVER_RESOLUTION: number = 1000;
   readonly tools: Map<ToolType, Tool>;
   readonly shapes: BaseShape[];
   private shapesBuffer: BaseShape[];
@@ -37,6 +38,14 @@ export class EditorService {
 
   get commandReceiver(): CommandReceiver {
     return this._commandReceiver;
+  }
+
+  get scalingToClient(): number {
+    return this.view ? this.view.width / EditorService.SERVER_RESOLUTION : 1;
+  }
+
+  get scalingToServer(): number {
+    return this.view ? EditorService.SERVER_RESOLUTION / this.view.width : 1;
   }
 
   constructor(public colorsService: ColorsService, public socketService: SocketService, public gameService: GameService) {
@@ -102,9 +111,9 @@ export class EditorService {
       this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
         const shape = new Path(undefined, data.id + 1);
         shape.primaryColor = Color.ahex(data.brush.color.slice(1));
-        shape.strokeWidth = data.brush.strokeWidth;
+        shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
         data.path.forEach((coord: Coordinate) => {
-          shape.addPoint(coord);
+          shape.addPoint(Coordinate.copy(coord).scale(this.scalingToClient));
         });
         this.shapes.push(shape);
         this.view.addShape(shape);
