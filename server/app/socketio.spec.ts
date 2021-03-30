@@ -13,7 +13,7 @@ import { accountInfo } from './services/database.service.spec';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, Player } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -178,10 +178,13 @@ describe('Socketio', () => {
 
                 testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
                     testClient.socket.emit(SocketLobby.LOADING_OVER);
+                });
+
+                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                     testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
-                });
+                })
 
                 return createClient(otherAccountInfo);
             })
@@ -189,7 +192,6 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                        //testClient.socket.emit(SocketLobby.LOADING_OVER);
                     });
                 });
 
@@ -212,7 +214,6 @@ describe('Socketio', () => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
                     testClient.socket.emit(SocketLobby.END_GAME);
                     testClient.socket.close();
-
                 });
             })
     })
@@ -240,8 +241,11 @@ describe('Socketio', () => {
 
                 testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
                     testClient.socket.emit(SocketLobby.LOADING_OVER);
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                 });
+
+                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
+                })
 
                 testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
                     testClient.socket.emit(SocketLobby.START_GAME_SERVER);
