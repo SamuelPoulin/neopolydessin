@@ -105,7 +105,7 @@ export class LobbyCoop extends Lobby {
             timestamp: Date.now(),
             guessStatus: guessStat,
             nbGuessLeft: this.guessLeft,
-            guesserName: player.username
+            senderUsername: player.username
           };
           this.io.in(this.lobbyId).emit(SocketLobby.COOP_GUESS_BROADCAST, guessReturn);
         }

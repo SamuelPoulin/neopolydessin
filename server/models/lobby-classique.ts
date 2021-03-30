@@ -7,7 +7,7 @@ import {
   CurrentGameState,
   Difficulty,
   GameType,
-  GuessMessageClassique,
+  GuessMessage,
   GuessResponse,
   PlayerRole,
   PlayerStatus
@@ -100,11 +100,11 @@ export class LobbyClassique extends Lobby {
         }
         const player = this.findPlayerBySocket(socket);
         if (player) {
-          const guessReturn: GuessMessageClassique = {
+          const guessReturn: GuessMessage = {
             content: word,
             timestamp: Date.now(),
             guessStatus: guessStat,
-            guesserName: player.username
+            senderUsername: player.username
           };
           this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
         }

@@ -27,7 +27,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     }
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return Observable.create{
-            emitter -> socketService.socket.emit("GetListLobby",gameMode.value, difficulty.value, Ack{ res ->
+            emitter -> socketService.socket.emit("getListLobby",gameMode.value, difficulty.value, Ack{ res ->
             val jsonList = res[0] as JSONArray
             println(jsonList)
             val list = ArrayList<LobbyInfo>()
