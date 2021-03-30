@@ -1,4 +1,4 @@
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import { describe, beforeEach } from 'mocha';
 import 'chai-http';
 chai.use(require('chai-http'));
@@ -7,20 +7,23 @@ import express from 'express';
 import { testingContainer } from '../../test/test-utils';
 import { Application } from '../app';
 import Types from '../types';
-import { AvatarController, AVATAR_PATH } from './avatar.controller';
+import { AvatarController } from './avatar.controller';
 import { DatabaseService } from '../services/database.service';
 import * as jwtVerify from '../middlewares/jwt-verify';
-import { AvatarService } from '../services/avatar.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
 import fs from 'fs';
+import { connectMS, disconnectMS } from '../services/database.service.spec';
+import MongoMemoryServer from 'mongodb-memory-server-core';
+import avatarModel from '../../models/schemas/avatar';
 
 describe('AvatarController', () => {
+
+    const avatarPath = 'test/avatar';
     let avatarController: AvatarController;
     let application: Application;
     let jwtVerifyStub: any;
     let checkLoggedInStub: any;
-    let uploadAvatarStub: any;
-    let getAvatarStub: any;
+    let mongoMs: MongoMemoryServer;
 
     before(() => {
         jwtVerifyStub = sinon.stub(jwtVerify, 'jwtVerify');
@@ -31,17 +34,15 @@ describe('AvatarController', () => {
             });
     })
 
-    beforeEach((done: Mocha.Done) => {
+    beforeEach(async () => {
         testingContainer().then((instance) => {
             checkLoggedInStub = instance[1].stub(DatabaseService.prototype, 'checkIfLoggedIn')
             checkLoggedInStub.resolves(true);
-
-            uploadAvatarStub = instance[1].stub(AvatarService.prototype, 'upload');
-            getAvatarStub = instance[1].stub(AvatarService.prototype, 'getAvatar');
             application = instance[0].get<Application>(Types.Application);
             avatarController = instance[0].get<AvatarController>(Types.AvatarController);
-            done();
+            avatarController.setAvatarPath(avatarPath);
         });
+        mongoMs = await connectMS();
     });
 
     after(() => {
@@ -49,12 +50,11 @@ describe('AvatarController', () => {
     });
 
     afterEach(async () => {
-        uploadAvatarStub.restore();
-        getAvatarStub.restore();
-        if (fs.existsSync(`${AVATAR_PATH}/1.png`)) {
-            console.log('exists');
-            fs.unlinkSync(`${AVATAR_PATH}/1.png`);
+        if (fs.existsSync(`${avatarPath}/1.png`)) {
+            fs.unlinkSync(`${avatarPath}/1.png`);
+            fs.rmdirSync(avatarPath);
         }
+        await disconnectMS(mongoMs);
     });
 
     it('should instanciate correctly', () => {
@@ -62,48 +62,46 @@ describe('AvatarController', () => {
     });
 
     it('should call upload when POST /api/avatar/upload is used', (done: Mocha.Done) => {
-        uploadAvatarStub.resolves({ statusCode: OK, documents: { id: 'someId' } })
+        // simulate account creation
+        avatarModel.addAvatarDocument('1');
         chai
             .request(application.app)
             .post('/api/avatar/upload')
             .set('content-type', 'multipart/form-data')
             .attach('file', 'test/icon.png', 'icon.png')
-            .then(() => {
-                chai.expect(uploadAvatarStub.called).to.equal(true);
+            .end((err, res) => {
+                expect(res.body.id).to.exist;
                 done();
             });
     });
 
     it('get with id should return picture correctly', (done: Mocha.Done) => {
-        uploadAvatarStub.resolves({ statusCode: OK, documents: { id: 'someId' } })
-        getAvatarStub.resolves({ statusCode: OK, documents: `${AVATAR_PATH}/1.png` })
-
+        // simulate account creation
+        avatarModel.addAvatarDocument('1');
         chai
             .request(application.app)
             .post('/api/avatar/upload')
             .set('content-type', 'multipart/form-data')
             .attach('file', 'test/icon.png', 'icon.png')
-            .then(() => {
-                chai.expect(uploadAvatarStub.called).to.equal(true);
+            .end((err, res) => {
+                const avatarId = res.body.id;
                 chai.request(application.app)
-                    .get('/api/avatar/1')
-                    .end((err, res) => {
-                        chai.expect(getAvatarStub.called).to.equal(true);
+                    .get(`/api/avatar/${avatarId}`)
+                    .then((res) => {
                         chai.expect(res.status).to.be.equal(OK);
+                        chai.expect(res.body).to.be.instanceof(Buffer);
                         done();
                     });
             });
-
-
     });
 
     it('get with id should return 404 if avatar with given id doesn\'t exist', (done: Mocha.Done) => {
-        getAvatarStub.rejects({ statusCode: NOT_FOUND, message: 'not found' });
+        // simulate account creation
+        avatarModel.addAvatarDocument('1');
         chai
             .request(application.app)
-            .get('/api/avatar/1')
+            .get('/api/avatar/123456789012345678901234')
             .end((err, res) => {
-                chai.expect(getAvatarStub.called).to.equal(true);
                 chai.expect(res.status).to.be.equal(NOT_FOUND);
                 done();
             });

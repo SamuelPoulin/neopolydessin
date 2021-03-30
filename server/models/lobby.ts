@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { PictureWordService } from '../app/services/picture-word.service';
 import { DrawingService } from '../app/services/drawing.service';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../common/communication/brush-info';
@@ -31,6 +32,7 @@ export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
   readonly MS_PER_SEC: number = 1000;
+  readonly TIME_ADD_CORRECT_GUESS: number = 30;
 
   lobbyId: string;
   gameType: GameType;
@@ -58,6 +60,7 @@ export abstract class Lobby {
   constructor(
     @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
     @inject(Types.DatabaseService) protected databaseService: DatabaseService,
+    @inject(Types.PictureWordService) protected pictureWordService: PictureWordService,
     io: Server,
     accountId: string,
     difficulty: Difficulty,
@@ -161,7 +164,8 @@ export abstract class Lobby {
             avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
             playerStatus,
             socket,
-            teamNumber
+            teamNumber,
+            isBot: false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);

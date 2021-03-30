@@ -19,7 +19,7 @@ import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
-import { PrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
 import { FriendsService } from './services/friends.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
 import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
@@ -288,16 +288,14 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId2);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     expect(msg.content).to.equal('bonjourhi');
-                    expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(senderId).to.equal(accountId2);
+                    expect(msg.senderAccountId).to.equal(accountId2);
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId2,
                         content: 'eyo what up',
                     }
                     testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
-                    testClient.socket.close();
                 })
                 return createClient(otherAccountInfo);
             })
@@ -308,15 +306,15 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     expect(msg.content).to.equal('eyo what up');
-                    expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(senderId).to.equal(accountId);
+                    expect(msg.senderAccountId).to.equal(accountId);
                     friendService.getMessageHistory(accountId, accountId2, 1, 5)
                         .then((history) => {
                             expect(history.statusCode).to.equal(OK);
                             expect(history.documents.messages).to.be.lengthOf(2);
-                            testClient.socket.close();
+                            clients[0].close();
+                            clients[1].close();
                         })
                 });
 
@@ -342,10 +340,9 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId2);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     expect(msg.content).to.equal('bonjourhi');
-                    expect(msg.receiverAccountId).to.equal(testClient.accountId);
-                    expect(senderId).to.equal(accountId2);
+                    expect(msg.senderAccountId).to.equal(accountId2);
                     friendService.unfriend(accountId, accountId2);
                     testClient.socket.close();
                 })
@@ -389,7 +386,7 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId3);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     testClient.socket.close();
                 })
                 return createClient(otherAccountInfo);
@@ -401,7 +398,7 @@ describe('Socketio', () => {
                     friendService.acceptFriendship(testClient.accountId, accountId3);
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     const otherMsg: PrivateMessage = {
                         receiverAccountId: accountId3,
                         content: 'eyo what up',
@@ -436,10 +433,9 @@ describe('Socketio', () => {
                     }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage, senderId: string) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
                     clients[1].close();
-                    expect(msg.receiverAccountId).to.be.equal(testClient.accountId);
-                    expect(senderId).to.be.equal(accountId2);
+                    expect(msg.senderAccountId).to.be.equal(accountId2);
                     friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
                         .then((history) => {
                             expect(history.documents.messages).to.be.lengthOf(2);
