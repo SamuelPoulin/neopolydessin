@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { inject, injectable } from 'inversify';
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +12,16 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerInfo, PlayerStatus, TeamScore } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  LobbyInfo,
+  Player,
+  PlayerInfo,
+  PlayerStatus,
+  TeamScore
+} from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -43,6 +53,7 @@ export abstract class Lobby {
   protected io: Server;
   protected ownerAccountId: string;
   protected ownerUsername: string;
+  protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
   protected wordToGuess: string;
@@ -307,6 +318,7 @@ export abstract class Lobby {
 
   protected endGame(): void {
     this.currentGameState = CurrentGameState.GAME_OVER;
+    clearInterval(this.clockTimeout);
     this.io.in(this.lobbyId).emit(SocketLobby.END_GAME);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }

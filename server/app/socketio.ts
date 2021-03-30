@@ -148,7 +148,7 @@ export class SocketIo {
                 break;
               }
             }
-            lobby.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+            lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
             this.lobbyList.push(lobby);
           } else {
             console.error('player doesn\'t exist');

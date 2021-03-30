@@ -21,7 +21,6 @@ export class LobbyCoop extends Lobby {
 
   private readonly NB_GUESS: number = 5;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,

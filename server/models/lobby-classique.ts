@@ -22,7 +22,6 @@ export class LobbyClassique extends Lobby {
 
   private readonly START_GAME_TIME_LEFT: number = 30;
   private readonly REPLY_TIME: number = 10;
-  private clockTimeout: NodeJS.Timeout;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
