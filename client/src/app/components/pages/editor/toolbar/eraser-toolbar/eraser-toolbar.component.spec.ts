@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedModule } from '@components/shared/shared.module';
 import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 
 import { EraserToolbarComponent } from 'src/app/components/pages/editor/toolbar/eraser-toolbar/eraser-toolbar.component';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
@@ -13,7 +14,7 @@ describe('EraserToolbarComponent', () => {
     TestBed.configureTestingModule({
       imports: [SharedModule],
       declarations: [EraserToolbarComponent],
-      providers: [EditorService],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
   }));
 

@@ -22,6 +22,7 @@ export class APIService {
   private static API_EMAIL_ROUTE: string;
   private static API_AUTH_ROUTE: string;
   private static API_LOGIN_ROUTE: string;
+  private static API_REFRESH_ROUTE: string;
   private static API_REGISTER_ROUTE: string;
 
   constructor(private http: HttpClient, private notification: MatSnackBar, private localSaveService: LocalSaveService) {
@@ -32,6 +33,7 @@ export class APIService {
     APIService.API_DRAWING_ROUTE = '/drawing';
     APIService.API_AUTH_ROUTE = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth';
     APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
+    APIService.API_REFRESH_ROUTE = APIService.API_AUTH_ROUTE + '/refresh';
     APIService.API_REGISTER_ROUTE = APIService.API_AUTH_ROUTE + '/register';
   }
 
@@ -42,6 +44,15 @@ export class APIService {
       .then((reply: { accessToken: string; refreshToken: string }) => {
         this.localSaveService.accessToken = reply.accessToken;
         this.localSaveService.refreshToken = reply.refreshToken;
+      });
+  }
+
+  async refreshToken(refreshToken: string) {
+    return this.http
+      .post(APIService.API_REFRESH_ROUTE, { refreshToken })
+      .toPromise()
+      .then((reply: { accessToken: string }) => {
+        this.localSaveService.accessToken = reply.accessToken;
       });
   }
 

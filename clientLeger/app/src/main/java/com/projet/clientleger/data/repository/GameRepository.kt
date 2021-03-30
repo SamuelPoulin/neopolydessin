@@ -2,7 +2,7 @@ package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.PlayerRole
-import com.projet.clientleger.data.api.service.GameSocketService
+import com.projet.clientleger.data.api.socket.GameSocketService
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 

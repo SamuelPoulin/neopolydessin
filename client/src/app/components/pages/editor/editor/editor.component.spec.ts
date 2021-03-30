@@ -19,6 +19,11 @@ import { SharedModule } from '../../../shared/shared.module';
 import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.component';
 import { EditorComponent } from './editor.component';
 import createSpyObj = jasmine.createSpyObj;
+import { ChatModule } from '@components/pages/chat/chat.module';
+import { StatusBarModule } from '@components/shared/status-bar/status-bar.module';
+import { MockEditorService } from '@services/editor.service.spec';
+import { UserService } from '@services/user.service';
+import { MockUserService } from '@services/user.service.spec';
 
 export const keyDown = (key: string, shiftKey: boolean = false, ctrlKey: boolean = false, altKey: boolean = false): KeyboardEvent => {
   return {
@@ -55,10 +60,17 @@ describe('EditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule, SharedModule, ToolbarModule],
+      imports: [
+        RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]),
+        SharedModule,
+        ToolbarModule,
+        ChatModule,
+        StatusBarModule,
+      ],
       declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
       providers: [
-        EditorService,
+        { provide: EditorService, useClass: MockEditorService },
+        { provide: UserService, useValue: MockUserService },
         {
           provide: ModalDialogService,
           useValue: modalDialogServiceSpy,

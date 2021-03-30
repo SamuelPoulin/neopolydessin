@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.api
+package com.projet.clientleger.data.api.http
 
 import retrofit2.Retrofit
 import javax.inject.Inject

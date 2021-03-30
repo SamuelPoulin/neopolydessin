@@ -1,8 +1,7 @@
-package com.projet.clientleger.data.api.service
+package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
-import com.projet.clientleger.data.enumData.GuessStatus
-import com.projet.clientleger.data.model.PlayerInfo
+import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
 import com.projet.clientleger.data.model.chat.MessageGuess
@@ -22,8 +21,7 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
 
     fun receivePlayerConnection(): Observable<MessageSystem>{
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value){ (playerInfo, timestamp) ->
-            println(playerInfo)
-            val info = Json.decodeFromString(PlayerInfo.serializer(), playerInfo.toString())
+            val info = Json.decodeFromString(Player.serializer(), playerInfo.toString())
             MessageSystem(info.playerName, timestamp as Long)
         }
     }

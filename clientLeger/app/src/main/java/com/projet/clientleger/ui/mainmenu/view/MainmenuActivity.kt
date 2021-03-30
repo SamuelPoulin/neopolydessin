@@ -118,7 +118,7 @@ class MainmenuActivity : AppCompatActivity() {
         dialogView.actionBtn.setOnClickListener {
             val gameInfo = GameCreationInfosModel(vm.getUsername(), selectedGameMode.value, selectedDifficulty.value, false)
             if(isCreating){
-                vm.createGame(selectedGameMode , selectedDifficulty, false)
+                vm.createGame(dialog.gameName.text.toString(), selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
                 }

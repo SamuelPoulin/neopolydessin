@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from '@services/socket-service.service';
 import { Router } from '@angular/router';
 import { UserService } from '@services/user.service';
-import { GameService } from '@services/game.service';
+import randomColor from 'randomcolor';
 
 @Component({
   selector: 'app-lobby',
@@ -12,40 +12,33 @@ import { GameService } from '@services/game.service';
   styleUrls: ['./lobby.component.scss'],
 })
 export class LobbyComponent implements AfterViewInit {
-  gamemode: string = 'classique';
-  inviteCode: string = 'dWA1gV';
-  playersTeam1: string[] = new Array<string>();
-  playersTeam2: string[] = new Array<string>();
+  inviteCode: string = 'Bientôt';
+  playersTeam1: string[] = [];
+  playersTeam2: string[] = [];
 
   constructor(
     private clipboard: Clipboard,
     private snackBar: MatSnackBar,
     private socketService: SocketService,
     private router: Router,
-    private gameService: GameService,
     userService: UserService,
   ) {
     this.playersTeam1.push(userService.username);
-  }
-
-  get gamemodeName(): string {
-    switch (this.gamemode) {
-      case 'classique':
-        return 'Classique';
-      case 'coop':
-        return 'Co-op';
-      default:
-        return '';
-    }
   }
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
   }
 
+  firstLetter(username: string): string {
+    return username ? username[0].toUpperCase() : '';
+  }
+
+  avatarColor(username: string): string {
+    return randomColor({ seed: username, luminosity: 'bright' });
+  }
+
   ngAfterViewInit(): void {
-    this.gameService.isDrawer = true;
-    this.socketService.createLobby('client-lourd'); // todo - host only must create lobby;
     this.socketService.getPlayerJoined().subscribe((player) => {
       this.playersTeam2.push(player);
     });

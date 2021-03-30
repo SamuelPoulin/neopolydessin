@@ -1,7 +1,6 @@
 package com.projet.clientleger.di
 
-import com.projet.clientleger.data.api.service.DrawingSocketService
-import com.projet.clientleger.data.api.service.SocketService
+import com.projet.clientleger.data.api.socket.DrawingSocketService
 import com.projet.clientleger.data.repository.DrawboardRepository
 import dagger.Module
 import dagger.Provides

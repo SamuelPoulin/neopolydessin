@@ -78,11 +78,7 @@ export class ChatComponent implements OnInit {
 
   scrollToBottom(): void {
     setTimeout(() => {
-      if (this.electronContainer) {
-        this.electronContainer.scrollTop = this.electronContainer.scrollHeight;
-      } else {
-        window.scrollTo(0, document.body.scrollHeight);
-      }
+      document.querySelector('#chat-messages')?.scrollTo(0, document.body.scrollHeight);
     });
   }
 

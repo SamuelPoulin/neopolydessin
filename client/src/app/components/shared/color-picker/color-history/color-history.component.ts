@@ -11,7 +11,7 @@ import { Color } from 'src/app/utils/color/color';
 export class ColorHistoryComponent {
   @Output() colorSelectedEvent: EventEmitter<Color>;
 
-  constructor(private editorService: EditorService) {
+  constructor(public editorService: EditorService) {
     this.colorSelectedEvent = new EventEmitter<Color>();
   }
 
