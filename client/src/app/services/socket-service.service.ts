@@ -7,7 +7,6 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../../../common/communication/brush-info';
-import { PlayerInfo } from '../../../../common/communication/player-info';
 import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
 import { Difficulty, GameType, GuessMessage, GuessMessageCoop, LobbyInfo, Player } from '../../../../common/communication/lobby';
@@ -86,10 +85,10 @@ export class SocketService {
 
   receivePlayerConnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: Player, timeStamp: number) =>
         msgObs.next({
           timestamp: timeStamp,
-          content: `${playerInfo.playerName} a rejoint la discussion.`,
+          content: `${playerInfo.username} a rejoint la discussion.`,
         }),
       );
     });
@@ -137,9 +136,9 @@ export class SocketService {
     });
   }
 
-  getPlayerJoined(): Observable<PlayerInfo> {
-    return new Observable<PlayerInfo>((obs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: PlayerInfo) => {
+  getPlayerJoined(): Observable<Player> {
+    return new Observable<Player>((obs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: Player) => {
         // todo - use new format
         obs.next(player);
       });

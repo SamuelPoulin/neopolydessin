@@ -12,22 +12,15 @@ export interface Player {
   accountId: string;
   username: string;
   avatarId: string;
-  playerStatus: PlayerStatus;
+  playerRole: PlayerRole;
   teamNumber: number;
   isBot: boolean;
   finishedLoading: boolean;
 }
 
-export interface PlayerInfo {
-  teamNumber: number
-  playerName: string
-  accountId: string
-  avatar: string
-}
-
-export interface PlayerRole {
-  playerName: string;
-  playerStatus: PlayerStatus;
+export interface TeamScore {
+  teamNumber: number,
+  score: number
 }
 
 export interface GuessMessage extends ChatMessage {
@@ -56,7 +49,7 @@ export enum Difficulty {
   HARD = 'hard'
 }
 
-export enum PlayerStatus {
+export enum PlayerRole {
   DRAWER = 'active',
   GUESSER = 'guesser',
   PASSIVE = 'passive'

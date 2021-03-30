@@ -9,8 +9,7 @@ import {
   GameType,
   GuessMessage,
   GuessResponse,
-  PlayerRole,
-  PlayerStatus
+  PlayerRole
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
@@ -20,14 +19,15 @@ import { Lobby, ServerPlayer } from './lobby';
 @injectable()
 export class LobbyClassique extends Lobby {
 
+  protected clockTimeout: NodeJS.Timeout;
   private readonly START_GAME_TIME_LEFT: number = 30;
   private readonly REPLY_TIME: number = 10;
-  private clockTimeout: NodeJS.Timeout;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
 
-  constructor(socketIdService: SocketIdService,
+  constructor(
+    socketIdService: SocketIdService,
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
@@ -44,7 +44,7 @@ export class LobbyClassique extends Lobby {
     this.playerDrawing = 0;
   }
 
-  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
+  addPlayer(playerId: string, status: PlayerRole, socket: Socket) {
     const teamNumber = (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) ? 0 : 1;
     this.addPlayerToTeam(playerId, status, socket, teamNumber)
       .then(() => {
@@ -55,7 +55,7 @@ export class LobbyClassique extends Lobby {
       });
   }
 
-  changeTeam(accountId: string, socket: Socket, teamNumber: number) {
+  changeTeam(accountId: string, teamNumber: number) {
     const index = this.players.findIndex((player) => player.accountId === accountId);
     if (index < -1 && this.teams[teamNumber].playersInTeam.length < (this.size / 2)) {
       const oldTeamIndex = this.teams[this.players[index].teamNumber].playersInTeam.findIndex((player) => player.accountId === accountId);
@@ -74,7 +74,7 @@ export class LobbyClassique extends Lobby {
     socket.on(SocketLobby.PLAYER_GUESS, (word: string) => {
       const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
       const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
-      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         const distance = levenshtein(word, this.wordToGuess);
         let guessStat;
         switch (distance) {
@@ -190,18 +190,17 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerGuessToClient() {
-    const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
+    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
-    const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
+    const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
   }
 
   private setRoles() {
-    const roleArray: PlayerRole[] = [];
     const indexTeamDrawing = this.teamDrawing % 2;
     const indexPlayerDrawing = this.playerDrawing % 2;
     this.teams.forEach((team, indexTeam) => {
@@ -216,58 +215,40 @@ export class LobbyClassique extends Lobby {
             shouldBeDrawer = indexPlayer === indexPlayerDrawing;
           }
           if (shouldBeDrawer) {
-            player.playerStatus = PlayerStatus.DRAWER;
+            player.playerRole = PlayerRole.DRAWER;
             this.drawerPlayer = player;
           }
           else {
-            player.playerStatus = PlayerStatus.GUESSER;
+            player.playerRole = PlayerRole.GUESSER;
           }
         }
         else {
-          player.playerStatus = PlayerStatus.PASSIVE;
+          player.playerRole = PlayerRole.PASSIVE;
         }
       });
     });
-
-    this.players.forEach((player) => {
-      roleArray.push({
-        playerName: player.username,
-        playerStatus: player.playerStatus
-      });
-    });
-
-    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, roleArray);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
   private setReplyRoles() {
-    const roleArray: PlayerRole[] = [];
     const indexTeamDrawing = this.teamDrawing % 2;
     this.teams.forEach((team, indexTeam) => {
       team.playersInTeam.forEach((player, indexPlayer) => {
         if (indexTeamDrawing === indexTeam) {
-          roleArray.push({
-            playerName: player.username,
-            playerStatus: PlayerStatus.PASSIVE
-          });
-          player.playerStatus = PlayerStatus.PASSIVE;
+          player.playerRole = PlayerRole.PASSIVE;
         }
         else {
-          roleArray.push({
-            playerName: player.username,
-            playerStatus: PlayerStatus.GUESSER
-          });
-          player.playerStatus = PlayerStatus.GUESSER;
+          player.playerRole = PlayerRole.GUESSER;
         }
       });
     });
-
-    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, roleArray);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
   private findBotPlayerInTeam(teamIndex: number): number | undefined {
     let indexBotPlayer;
     this.teams[teamIndex].playersInTeam.forEach((player, index) => {
-      if (player.isBot) { // player.isBot
+      if (player.isBot) {
         indexBotPlayer = index;
       }
     });

@@ -2,10 +2,10 @@ package com.projet.clientleger.data.repository
 
 import io.reactivex.rxjava3.core.Observable
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.ApiFriendslistInterface
+import com.projet.clientleger.data.api.http.ApiFriendslistInterface
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
-import com.projet.clientleger.data.api.service.FriendslistSocketService
+import com.projet.clientleger.data.api.socket.FriendslistSocketService
 import com.projet.clientleger.data.enumData.FriendRequestDecision
 import com.projet.clientleger.data.model.Friendslist
 import javax.inject.Inject
