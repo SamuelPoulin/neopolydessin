@@ -53,15 +53,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.START_GAME.value)
     }
 
-    fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
-        return Observable.create {
-            socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) { res ->
-                val jsonList =res[0] as JSONArray
-                val list = ArrayList<PlayerRole>()
-                for(i in 0 until jsonList.length()){
-                    list.add(Json.decodeFromString(PlayerRole.serializer(), jsonList.get(i).toString()))
-                }
-            }
-        }
+    fun receiveStartGame() : Observable<String>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {""}
     }
 }

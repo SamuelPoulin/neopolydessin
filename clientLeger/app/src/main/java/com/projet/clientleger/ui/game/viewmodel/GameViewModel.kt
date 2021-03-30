@@ -21,5 +21,8 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun getUsername(): String{
         return gameRepository.getUsername()
     }
+    fun onPlayerReady(){
+        gameRepository.onPlayerReady()
+    }
 
 }

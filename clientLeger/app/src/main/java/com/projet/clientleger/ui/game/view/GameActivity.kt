@@ -22,10 +22,17 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.utils.DateFormatter
 import kotlinx.coroutines.launch
 import java.sql.Date
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.util.*
 import kotlin.Exception
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
+
 const val MILLIS_IN_SEC:Long = 1000
 const val TIME_ALMOST_UP:Int= 15000
 const val TWO_DIGITS:Int = 10
@@ -53,8 +60,8 @@ class GameActivity : AppCompatActivity() {
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
         clientRole.playerName = vm.getUsername()
-        //setSubscriptions()
-
+        setSubscriptions()
+        vm.onPlayerReady()
     }
     private fun setSubscriptions(){
         vm.receiveKeyWord()
@@ -106,6 +113,9 @@ class GameActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){
                     binding.timer.setTextColor(Color.RED)
+                }
+                else{
+                    binding.timer.setTextColor(Color.GREEN)
                 }
                 val secRemaining = (((millisUntilFinished / MILLIS_IN_SEC)) % SEC_IN_MIN).toInt()
                 val minRemaining:Int = (((millisUntilFinished / MILLIS_IN_SEC) - secRemaining) / SEC_IN_MIN).toInt()

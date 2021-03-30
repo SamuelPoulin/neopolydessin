@@ -34,7 +34,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return sessionManager.getUsername()
     }
 
-    fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
+    fun receiveStartGame():Observable<String>{
         return lobbySocketService.receiveStartGame()
     }
 }

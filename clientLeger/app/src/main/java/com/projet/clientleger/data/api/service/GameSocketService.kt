@@ -4,11 +4,13 @@ import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
+import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 
 class GameSocketService @Inject constructor(private val socketService: SocketService) {
@@ -30,8 +32,11 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
 
     }
     fun receiveKeyWord():Observable<String>{
-        return socketService.receiveFromSocket(GameSocketEndPoints.PLAYER_GUESS.value){ (word) ->
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_WORD_GUESS.value){ (word) ->
             word as String
         }
+    }
+    fun onPlayerReady(){
+        socketService.socket.emit(GameSocketEndPoints.PLAYER_READY.value)
     }
 }

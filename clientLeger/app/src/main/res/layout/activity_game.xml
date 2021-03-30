@@ -44,7 +44,7 @@
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
+                android:text="@string/timer_over"
                 android:textColor="@color/green"
                 android:textSize="35sp"
                 android:textStyle="bold"

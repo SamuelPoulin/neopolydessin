@@ -26,7 +26,6 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
     private val playersView = ArrayList<TextView>()
-    private var rolesList = ArrayList<PlayerRole>()
 
     private fun setSubscriptions() {
         vm.receivePlayersInfo()
@@ -38,8 +37,6 @@ class LobbyActivity : AppCompatActivity() {
 
         vm.receiveStartGame().subscribe{
             lifecycleScope.launch {
-                rolesList = it
-                println(rolesList)
                 goToActivity(GameActivity::class.java)
             }
         }
@@ -121,8 +118,6 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun startGame(){
         vm.startGame()
-        val intent = Intent(this,GameActivity::class.java)
-        startActivity(intent)
     }
     private fun goToMainMenu(){
         val intent = Intent(this, MainmenuActivity::class.java)

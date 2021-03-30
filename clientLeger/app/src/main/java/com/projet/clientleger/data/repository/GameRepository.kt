@@ -19,4 +19,7 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun getUsername():String{
         return sessionManager.getUsername()
     }
+    fun onPlayerReady(){
+        gameSocketService.onPlayerReady()
+    }
 }
