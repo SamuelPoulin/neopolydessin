@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 
 import { ChatTabComponent } from './chat-tab.component';
 
@@ -9,6 +11,7 @@ describe('ChatTabComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ChatTabComponent],
+      providers: [{ provide: ChatService, useValue: MockChatService }],
     }).compileComponents();
   });
 
