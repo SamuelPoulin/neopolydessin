@@ -116,7 +116,6 @@ export class LobbyClassique extends Lobby {
       if (senderAccountId === this.ownerAccountId) {
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT);
         this.currentGameState = CurrentGameState.IN_GAME;
-        this.startRoundTimer();
       }
     });
   }
@@ -128,7 +127,7 @@ export class LobbyClassique extends Lobby {
   }
 
 
-  private startRoundTimer() {
+  protected startRoundTimer() {
     // DECIDE ROLES
     // SEND ROLES TO CLIENT
     // SEND WORD TO DRAWER
@@ -191,13 +190,13 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerGuessToClient() {
-    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
+    const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
-    const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
+    const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
   }
 

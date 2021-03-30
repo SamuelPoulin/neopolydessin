@@ -13,6 +13,7 @@ export enum SocketLobby {
     START_GAME_CLIENT = 'StartGameFromServerToClient',
 
     PLAYER_GUESS = 'guess',
+    LOADING_OVER = 'loadingOver',
 
     END_GAME = 'endGame',
     SET_TIME = 'setTime',
