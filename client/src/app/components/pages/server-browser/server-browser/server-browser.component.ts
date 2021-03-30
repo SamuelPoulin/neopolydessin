@@ -49,7 +49,6 @@ export class ServerBrowserComponent implements OnInit {
   joinLobby(lobbyId: string): void {
     this.socketService.joinLobby(lobbyId);
     this.router.navigate([`/lobby/${lobbyId}`]);
-    this.socketService.joinLobby(lobbyId); // todo - move to lobby component?
   }
 
   get showEmptyMessage(): boolean {

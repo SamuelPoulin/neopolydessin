@@ -59,6 +59,12 @@ export class SocketService {
     });
   }
 
+  receiveGameEnd(): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.on(SocketLobby.END_GAME, () => obs.next(true));
+    });
+  }
+
   receiveGuess(): Observable<GuessMessage> {
     return new Observable<GuessMessage>((msgObs) => {
       this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
@@ -72,6 +78,12 @@ export class SocketService {
     });
   }
 
+  receiveNextTimestamp(): Observable<number> {
+    return new Observable<number>((obs) => {
+      this.socket.on(SocketLobby.SET_TIME, (timestamp: number) => obs.next(timestamp));
+    });
+  }
+
   receivePlayerConnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((msgObs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>
@@ -81,6 +93,10 @@ export class SocketService {
         }),
       );
     });
+  }
+
+  leaveLobby(): void {
+    this.socket.emit(SocketLobby.LEAVE_LOBBY);
   }
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
@@ -121,19 +137,19 @@ export class SocketService {
     });
   }
 
-  getPlayerJoined(): Observable<string> {
-    return new Observable<string>((obs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: string) => {
+  getPlayerJoined(): Observable<PlayerInfo> {
+    return new Observable<PlayerInfo>((obs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: PlayerInfo) => {
         // todo - use new format
-        obs.next(player.toString());
+        obs.next(player);
       });
     });
   }
 
-  getLobbyInfo(): Observable<Player> {
-    return new Observable<Player>((obs) => {
-      this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (player: Player) => {
-        obs.next(player);
+  getLobbyInfo(): Observable<Player[]> {
+    return new Observable<Player[]>((obs) => {
+      this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+        obs.next(players);
       });
     });
   }

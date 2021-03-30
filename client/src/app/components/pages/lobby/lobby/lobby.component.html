@@ -14,8 +14,8 @@
         </button>
       </div>
       <div id="players-container">
-        <app-team [team]="playersTeam1" name="Équipe 1"></app-team>
-        <app-team [team]="playersTeam2" name="Équipe 2" ennemy></app-team>
+        <app-team [team]="gameService.teams[0]" name="Équipe 1"></app-team>
+        <app-team [team]="gameService.teams[1]" name="Équipe 2" ennemy></app-team>
       </div>
     </div>
   </div>

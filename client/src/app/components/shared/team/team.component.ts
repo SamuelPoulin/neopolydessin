@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Player } from '../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-team',
@@ -6,7 +7,7 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./team.component.scss'],
 })
 export class TeamComponent {
-  @Input() team: string[];
+  @Input() team: Player[];
   @Input() name: string;
   @Input() ennemy: boolean;
 
