@@ -87,6 +87,15 @@ export abstract class Lobby {
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
   }
 
+  changeOwner(socket: Socket): void {
+    const newOwner = this.findPlayerBySocket(socket);
+    if (newOwner) {
+      newOwner.isOwner = true;
+      this.ownerAccountId = newOwner.accountId;
+      this.ownerUsername = newOwner.username;
+    }
+  }
+
   toLobbyInfo(): Player[] {
     return this.players.map((player) => {
       return this.serverPlayerToPlayer(player);
@@ -112,6 +121,7 @@ export abstract class Lobby {
       teamNumber: serverPlayer.teamNumber,
       finishedLoading: serverPlayer.finishedLoading,
       isBot: serverPlayer.isBot,
+      isOwner: serverPlayer.isOwner
     };
   }
 
@@ -125,6 +135,11 @@ export abstract class Lobby {
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      if (accountId === this.ownerAccountId) {
+        this.ownerAccountId = this.players[0].accountId;
+        this.ownerUsername = this.players[0].username;
+        this.players[0].isOwner = true;
+      }
       socket.leave(this.lobbyId);
       socket.to(this.lobbyId)
         .broadcast
@@ -134,12 +149,6 @@ export abstract class Lobby {
         .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
       if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
         this.endGame();
-      }
-      else {
-        if (accountId === this.ownerAccountId) {
-          this.ownerAccountId = this.players[0].accountId;
-          this.ownerUsername = this.players[0].username;
-        }
       }
     }
   }
@@ -167,7 +176,8 @@ export abstract class Lobby {
             socket,
             teamNumber,
             isBot: false,
-            finishedLoading: false
+            finishedLoading: false,
+            isOwner: false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);

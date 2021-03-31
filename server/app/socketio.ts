@@ -149,6 +149,7 @@ export class SocketIo {
               }
             }
             lobby.addPlayer(playerId, PlayerRole.DRAWER, socket);
+            lobby.changeOwner(socket);
             this.lobbyList.push(lobby);
           } else {
             console.error('player doesn\'t exist');
