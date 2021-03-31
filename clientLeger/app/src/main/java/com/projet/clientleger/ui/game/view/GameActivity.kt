@@ -51,14 +51,10 @@ class GameActivity : AppCompatActivity() {
         vm.activeWord.observe(this){
             println("Nouveau Mot : $it")
         }
-        vm.receiveTimer()
-            .subscribe { timer ->
-                lifecycleScope.launch {
-                    println("Timer de $timer reçu")
-                    val timeInMillis:Long = findTimeLeft(timer)
-                    setTimer(timeInMillis)
-                }
-            }
+        vm.activeTimer.observe(this){
+            println("Nouveau timer recu : $it")
+            setTimer(it)
+        }
     }
     /*private fun getFrenchRole(status:PlayerStatus):String{
         return when (status){
@@ -67,9 +63,6 @@ class GameActivity : AppCompatActivity() {
             else -> "Passif"
         }
     }*/
-    private fun findTimeLeft(finishDate:Long):Long{
-        return finishDate - System.currentTimeMillis()
-    }
     private fun setTimer(timeInMilis:Long){
         val timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
             @SuppressLint("SetTextI18n")

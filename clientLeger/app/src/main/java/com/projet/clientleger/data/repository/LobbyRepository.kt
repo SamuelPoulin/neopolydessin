@@ -21,8 +21,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return Observable.create { emitter ->
             lobbySocketService.receivePlayerJoin().subscribe{
                 var avatar: Bitmap? = null
-                if(it.avatar != null){
-                    val resAvatar = sessionManager.request(it.avatar, apiAvatarInterface::getAvatar)
+                if(it.avatarId != null){
+                    val resAvatar = sessionManager.request(it.avatarId, apiAvatarInterface::getAvatar)
                     if(resAvatar.code() == HttpsURLConnection.HTTP_OK)
                         avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
                 }

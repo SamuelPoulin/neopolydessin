@@ -147,12 +147,12 @@ class LobbyActivity : AppCompatActivity() {
     private fun kickPlayer(player:PlayerInfo){
         println("kic: ${player.username}")
     }
-    private fun addPlayerToGame(info: Player){
+    /*private fun addPlayerToGame(info: Player){
         playerCount++
         val textView = playersView[playerCount].findViewWithTag<TextView>("playerView")
         textView.text = info.playerName
         textView.isEnabled = true
-    }
+    }*/
     private fun disableRemoveButtonWithIndex(index:Int){
         when(index){
 //            1-> binding.removePlayer1Button.isEnabled = false

@@ -3,6 +3,7 @@ package com.projet.clientleger.data.repository
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.api.socket.GameSocketService
 import com.projet.clientleger.data.model.account.AccountInfo
@@ -12,7 +13,7 @@ import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
 open class GameRepository @Inject constructor(private val gameSocketService: GameSocketService, private val sessionManager: SessionManager) {
-    fun receiveTimer():Observable<Long>{
+    fun receiveTimer():Observable<Timer>{
         return  gameSocketService.receiveTimer()
     }
     fun receiveRoles():Observable<ArrayList<PlayerInfo>>{

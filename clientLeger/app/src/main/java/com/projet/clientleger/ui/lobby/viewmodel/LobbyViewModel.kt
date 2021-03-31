@@ -112,7 +112,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun setUserInfo(){
         val info = lobbyRepository.getUserInfo()
-        val playerInfo = PlayerInfo(0, info.username, info.accountId, info.avatar)
+        val playerInfo = PlayerInfo(info.accountId,info.username,info.avatar,teamNumber = 0)
         realPlayerTeams[0].add(playerInfo)
         teams[0].value!![0] = playerInfo
         teams[0].postValue(teams[0].value!!)

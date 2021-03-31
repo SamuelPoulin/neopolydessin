@@ -3,6 +3,7 @@ package com.projet.clientleger.ui.game.viewmodel
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.account.AccountInfo
@@ -26,18 +27,12 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
         updateCurrentRole(it)
         }
         gameRepository.receiveKeyWord().subscribe{activeWord.postValue(it)}
-        //gameRepository.receiveTimer().subscribe(activeTimer.postValue(it))
-
+        gameRepository.receiveTimer().subscribe{
+            val timer = System.currentTimeMillis() - it.serverTime + it.timestamp
+            activeTimer.postValue(findTimeLeft(timer)) }
     }
-    fun receiveTimer(): Observable<Long> {
-        return gameRepository.receiveTimer()
-    }
-    /*fun receiveRoles(): Observable<ArrayList<Player>> {
-        return gameRepository.receiveRoles().subscribe{ roles ->
-        }
-    }*/
-    fun receiveKeyWord(): Observable<String> {
-        return gameRepository.receiveKeyWord()
+    private fun findTimeLeft(finishTime:Long):Long{
+        return finishTime - System.currentTimeMillis()
     }
     fun onPlayerReady(){
         gameRepository.onPlayerReady()
