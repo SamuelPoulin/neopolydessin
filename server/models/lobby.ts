@@ -180,7 +180,7 @@ export abstract class Lobby {
       .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
   }
 
-  protected emitJoinInfo(player: ServerPlayer, socket: Socket): void {
+  protected emitJoinInfo(player: Entity, socket: Socket): void {
     socket.to(this.lobbyId).broadcast
       .emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
     this.io.in(this.lobbyId)
@@ -189,28 +189,31 @@ export abstract class Lobby {
 
   protected bindLobbyEndPoints(socket: Socket) {
 
-    // socket.on(SocketLobby.ADD_BOT, () => {
-    //   const bot: ServerPlayer = {
-    //     // accountId: playerId,
-    //     username: playerName,
-    //     // avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
-    //     playerRole: PlayerRole.PASSIVE,
-    //     // socket,
-    //     teamNumber,
-    //     isBot: true,
-    //     finishedLoading: false,
-    //     isOwner: this.players.length === 0 ? true : false
-    //   };
-    //   this.players.push(player);
-    //   this.teams[teamNumber].playersInTeam.push(player);
-    //   socket.join(this.lobbyId);
-    //   this.emitJoinInfo(player, socket);
+    socket.on(SocketLobby.ADD_BOT, (teamNumber: number) => {
+      const owner = this.getLobbyOwner();
+      if (owner && owner.socket.id === socket.id) {
+        const bot: Entity = {
+          username: 'bob',
+          playerRole: PlayerRole.PASSIVE,
+          teamNumber,
+          isBot: true,
+          isOwner: false
+        };
+        this.players.push(bot);
+        this.emitJoinInfo(bot, socket);
+      }
+    });
 
-    // });
-
-    // socket.on(SocketLobby.REMOVE_BOT, () => {
-
-    // });
+    socket.on(SocketLobby.REMOVE_BOT, (username: string) => {
+      const owner = this.getLobbyOwner();
+      if (owner && owner.socket.id === socket.id) {
+        const indexOfBotToRemove = this.players.findIndex((player) => player.isBot && player.username === username);
+        if (indexOfBotToRemove > -1) {
+          const removedBot = this.players.splice(indexOfBotToRemove, 1)[0];
+          this.emitLeaveInfo(removedBot, socket);
+        }
+      }
+    });
 
     socket.on(SocketLobby.START_GAME_SERVER, () => {
       const owner = this.getLobbyOwner();

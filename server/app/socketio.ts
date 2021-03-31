@@ -130,7 +130,6 @@ export class SocketIo {
         async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
           let lobby: Lobby;
           const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-          console.log(playerId);
           if (playerId) {
             switch (gametype) {
               case GameType.CLASSIC: {
