@@ -36,8 +36,8 @@ export class UserService {
   async fetchAvatar(): Promise<void> {
     return new Promise<void>((resolve) => {
       this.apiService.getAccount().then((account) => {
+        // eslint-disable-next-line
         this.apiService.getAvatarById(account.avatar._id).then((blob: any) => {
-          // eslint-disable-line
           this._avatarBlob = blob;
           resolve();
         });
