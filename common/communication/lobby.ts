@@ -18,6 +18,11 @@ export interface Player {
   finishedLoading: boolean;
 }
 
+export interface TimeInfo {
+  serverTime: number;
+  timestamp: number;
+}
+
 export interface TeamScore {
   teamNumber: number,
   score: number
