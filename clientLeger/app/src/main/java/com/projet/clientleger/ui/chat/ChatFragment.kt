@@ -28,31 +28,12 @@ private const val MESSAGE_CONTENT_ERROR: String =
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
 
-    /*private var messages: ArrayList<IMessage> = ArrayList()
-    private lateinit var username: String
-
-    @Inject
-    lateinit var socketService: SocketService
-
-    fun setSubscriptions() {
-        socketService.receiveMessage()
-            .subscribe { message ->
-                addMessage(message)
-            }
-        socketService.receivePlayerConnection().subscribe { message ->
-            message.content = "${message.content} a rejoint la discussion"
-            addMessage(message)
-        }
-        socketService.receivePlayerDisconnection().subscribe { message ->
-            message.content = "${message.content} a quitté la discussion"
-            addMessage(message)
-        }
-    }*/
     val vm: ChatViewModel by viewModels()
     private var binding: FragmentChatBinding? = null
     var baseHeight: Int = -1
     var screenSize: Int = -1
     var baseWidth: Int = -1
+    var isGuessing: Boolean = false
 
     companion object {
         fun newInstance() = ChatFragment()
@@ -66,7 +47,9 @@ class ChatFragment @Inject constructor() : Fragment() {
         screenSize = displayMetrics.widthPixels
         baseWidth = screenSize/2
         setFragmentResultListener("isGuessing"){ requestKey, bundle ->
-            isGuessing(bundle["boolean"] as Boolean)
+            isGuessing = bundle["boolean"] as Boolean
+            updateGuessing()
+            println("isGuessing: ${bundle["boolean"] as Boolean}")
         }
         setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
             resize(bundle["height"] as Int)
@@ -83,7 +66,6 @@ class ChatFragment @Inject constructor() : Fragment() {
         if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
             val params = binding!!.root.layoutParams
             params.height = height
-            //params.width = screenSize
             binding!!.root.requestLayout()
             rvMessages.adapter?.notifyDataSetChanged()
             rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
@@ -91,7 +73,6 @@ class ChatFragment @Inject constructor() : Fragment() {
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
-            //params.width = baseWidth
             binding!!.root.requestLayout()
             rvMessages.adapter?.notifyDataSetChanged()
             rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
@@ -127,25 +108,8 @@ class ChatFragment @Inject constructor() : Fragment() {
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
         rvMessages.adapter = adapter
-//        val params = binding!!.root.layoutParams
-//        params.width = baseWidth
-//        binding!!.root.layoutParams = params
     }
 
-    /*private fun sendButton() {
-        val text: String = (chatBox.text).toString()
-        val adjustedText: String = formatMessageContent(text)
-        if (isMessageValidFormat(adjustedText)) {
-            addMessage(MessageChat(adjustedText, System.currentTimeMillis(),username))
-            socketService.sendMessage(
-                    adjustedText,
-                    System.currentTimeMillis()
-            )
-        } else {
-            showErrorToast(MESSAGE_CONTENT_ERROR)
-        }
-        chatBox.text?.clear()
-    }*/
     private fun sendMessage() {
         vm.sendMessage()
 
@@ -158,6 +122,9 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun toggleSendMode(){
+        if(!isGuessing)
+            return
+
         vm.toggleSendMode()
         if(vm.sendingModeIsGuessing) {
             binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_guessing_input_background)
@@ -183,13 +150,14 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
     }
 
-    fun isGuessing(isGuessing: Boolean){
+    private fun updateGuessing(){
         if(isGuessing){
             binding!!.guessingToggleBtn.visibility = View.VISIBLE
         }
         else{
             binding!!.guessingToggleBtn.visibility = View.GONE
+            if(vm.sendingModeIsGuessing)
+                vm.toggleSendMode()
         }
-
     }
 }

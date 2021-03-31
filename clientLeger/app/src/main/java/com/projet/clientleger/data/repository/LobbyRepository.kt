@@ -1,13 +1,11 @@
 package com.projet.clientleger.data.repository
 
-import android.accounts.Account
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
-import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.account.AccountInfo
@@ -23,8 +21,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return Observable.create { emitter ->
             lobbySocketService.receivePlayerJoin().subscribe{
                 var avatar: Bitmap? = null
-                if(it.avatar != null){
-                    val resAvatar = sessionManager.request(it.avatar, apiAvatarInterface::getAvatar)
+                if(it.avatarId != null){
+                    val resAvatar = sessionManager.request(it.avatarId, apiAvatarInterface::getAvatar)
                     if(resAvatar.code() == HttpsURLConnection.HTTP_OK)
                         avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
                 }
@@ -49,16 +47,18 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return Observable.create { emitter ->
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
+                println(it)
                 for(player in it){
                     var avatar: Bitmap? = null
-                    if(player.avatar != null){
-                        val res = sessionManager.request(player.avatar, apiAvatarInterface::getAvatar)
+                    if(player.avatarId!= null){
+                        val res = sessionManager.request(player.avatarId, apiAvatarInterface::getAvatar)
                         if(res.code() == HttpsURLConnection.HTTP_OK){
                             avatar = BitmapFactory.decodeStream(res.body()!!.byteStream())
                         }
                     }
                     list.add(player.toPlayerInfo(avatar))
                 }
+                println("emit next: $list")
                 emitter.onNext(list)
             }
         }
@@ -75,7 +75,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return sessionManager.getUsername()
     }
 
-    fun receiveStartGame() : Observable<ArrayList<PlayerRole>>{
+    fun receiveStartGame():Observable<String>{
         return lobbySocketService.receiveStartGame()
     }
 
