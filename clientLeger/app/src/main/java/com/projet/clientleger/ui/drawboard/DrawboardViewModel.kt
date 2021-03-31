@@ -55,6 +55,12 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
+    fun boardwipe(){
+        paths.value!!.clear()
+        paths.postValue(paths.value)
+        drawingCommandsService.clear()
+    }
+
     fun switchCurrentTool(tool:String){
         when(tool){
             "eraser" -> currentTool = DrawTool.ERASER
