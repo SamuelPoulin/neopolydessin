@@ -9,4 +9,5 @@ data class PlayerInfo(val accountId: String = "",
                       val playerRole: PlayerRole = PlayerRole.PASSIVE,
                       val teamNumber: Int = 0,
                       val isBot: Boolean = false,
+                      val isOwner: Boolean = false,
                       val finishedLoading: Boolean = false)

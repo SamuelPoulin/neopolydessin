@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
@@ -46,6 +47,8 @@ class GameActivity : AppCompatActivity() {
     private fun setSubscriptions(){
         vm.currentRoleLiveData.observe(this){
             println("Nouveau Role : $it")
+            supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to (it == PlayerRole.GUESSER)))
+            supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
             binding.role.text = it.value
         }
         vm.activeWord.observe(this){
