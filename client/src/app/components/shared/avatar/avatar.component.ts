@@ -38,8 +38,8 @@ export class AvatarComponent implements OnInit {
       }
     }
     if (this.avatarId) {
+      // eslint-disable-next-line
       this.apiService.getAvatarById(this.avatarId).then((blob: any) => {
-        // eslint-disable-line
         this.url = URL.createObjectURL(blob);
       });
     }
