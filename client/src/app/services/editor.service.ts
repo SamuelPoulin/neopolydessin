@@ -112,13 +112,13 @@ export class EditorService {
 
     if (!this.gameService.canDraw) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
-        const shape = this.findShapeById(id + 1); // todo - conform to server standard?
+        const shape = this.findShapeById(id, true);
         if (shape) {
           this.removeShape(shape);
         }
       });
       this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
-        const shape = new Path(undefined, data.id + 1);
+        const shape = new Path();
         shape.primaryColor = Color.ahex(data.brush.color.slice(1));
         shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
         data.path.forEach((coord: Coordinate) => {
@@ -173,7 +173,7 @@ export class EditorService {
   }
 
   removeShapeFromView(shape: BaseShape): void {
-    this.socketService.sendRemovePath(shape.id - 1); // todo - conform to server standard
+    this.socketService.sendRemovePath(shape.serverId);
     this.view.removeShape(shape);
   }
 
@@ -185,8 +185,13 @@ export class EditorService {
     }
   }
 
-  findShapeById(id: number): BaseShape | undefined {
-    const matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+  findShapeById(id: number, useServerID: boolean = false): BaseShape | undefined {
+    let matchingShapes;
+    if (useServerID) {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.serverId === id);
+    } else {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+    }
     if (matchingShapes.length > 1) {
       throw ShapeError.idCollision();
     }

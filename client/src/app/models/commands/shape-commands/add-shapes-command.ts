@@ -4,9 +4,12 @@ export class AddShapesCommand extends ShapesCommand {
   execute(): void {
     this.editorService.addShapeToBuffer(this.shapes);
     this.editorService.applyShapesBuffer();
-    this.shapes.forEach((shape) => {
-      this.editorService.socketService.sendAddPath(shape.id - 1); // todo - conform to server standard
-    });
+    if (this.editorService.gameService.canDraw) {
+      // todo - move to function
+      this.shapes.forEach((shape) => {
+        this.editorService.socketService.sendAddPath(shape.serverId);
+      });
+    }
   }
 
   undo(): void {
