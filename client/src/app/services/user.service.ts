@@ -9,7 +9,7 @@ import { LocalSaveService } from './localsave.service';
 export class UserService {
   private _username: string = '';
   private _loggedIn: boolean = false;
-  private _avatarBlob: string = '';
+  private _avatarBlob: Blob;
 
   constructor(private localSaveService: LocalSaveService, private router: Router, private apiService: APIService) {}
 
@@ -36,11 +36,13 @@ export class UserService {
   async fetchAvatar(): Promise<void> {
     return new Promise<void>((resolve) => {
       this.apiService.getAccount().then((account) => {
-        // eslint-disable-next-line
-        this.apiService.getAvatarById(account.avatar._id).then((blob: any) => {
-          this._avatarBlob = blob;
-          resolve();
-        });
+        if (account.avatar) {
+          // eslint-disable-next-line
+          this.apiService.getAvatarById(account.avatar._id).then((blob: any) => {
+            this._avatarBlob = blob;
+            resolve();
+          });
+        }
       });
     });
   }
@@ -49,7 +51,7 @@ export class UserService {
     return this._username;
   }
 
-  get avatarBlob(): string {
+  get avatarBlob(): Blob {
     return this._avatarBlob;
   }
 

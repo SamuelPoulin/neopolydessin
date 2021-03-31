@@ -9,6 +9,8 @@ import { MockAPIService } from '@services/api.service.spec';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
+import { UserService } from '@services/user.service';
+import { MockUserService } from '@services/user.service.spec';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
 import { EditorModule } from '../editor.module';
@@ -23,6 +25,7 @@ describe('EditorKeyboardListener', () => {
       providers: [
         { provide: EditorService, useClass: MockEditorService },
         { provide: APIService, useValue: MockAPIService },
+        { provide: UserService, useValue: MockUserService },
       ],
     }).compileComponents();
   }));

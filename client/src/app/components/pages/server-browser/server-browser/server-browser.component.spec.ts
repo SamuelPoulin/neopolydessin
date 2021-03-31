@@ -6,6 +6,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ServerBrowserModule } from '../server-browser.module';
 import { SocketService } from '@services/socket-service.service';
 import { MockSocketService } from '@services/socket-service.service.spec';
+import { UserService } from '@services/user.service';
+import { MockUserService } from '@services/user.service.spec';
 
 describe('BrowserComponent', () => {
   let component: ServerBrowserComponent;
@@ -14,7 +16,10 @@ describe('BrowserComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, StatusBarModule, ServerBrowserModule],
-      providers: [{ provide: SocketService, useValue: MockSocketService }],
+      providers: [
+        { provide: SocketService, useValue: MockSocketService },
+        { provide: UserService, useValue: MockUserService },
+      ],
     }).compileComponents();
     fixture = TestBed.createComponent(ServerBrowserComponent);
     component = fixture.componentInstance;

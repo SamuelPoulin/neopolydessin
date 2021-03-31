@@ -28,19 +28,39 @@ export class AvatarComponent implements OnInit {
   ngOnInit() {
     this.color = randomColor({ seed: this.username, luminosity: 'bright' });
 
+    const reader = new FileReader();
     if (this.mainUser !== undefined) {
       if (this.userService.avatarBlob) {
-        this.url = URL.createObjectURL(this.userService.avatarBlob);
+        reader.readAsDataURL(this.userService.avatarBlob);
+        reader.onloadend = () => {
+          if (reader.result) {
+            this.url = reader.result.toString();
+          }
+        };
       } else {
         this.userService.fetchAvatar().then(() => {
-          this.url = URL.createObjectURL(this.userService.avatarBlob);
+          if (this.userService.avatarBlob) {
+            reader.readAsDataURL(this.userService.avatarBlob);
+            reader.onloadend = () => {
+              if (reader.result) {
+                this.url = reader.result.toString();
+              }
+            };
+          }
         });
       }
     }
     if (this.avatarId) {
       // eslint-disable-next-line
       this.apiService.getAvatarById(this.avatarId).then((blob: any) => {
-        this.url = URL.createObjectURL(blob);
+        if (blob) {
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => {
+            if (reader.result) {
+              this.url = reader.result.toString();
+            }
+          };
+        }
       });
     }
   }
