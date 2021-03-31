@@ -86,24 +86,11 @@
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> activity.showGameDialog(false)}"
                 android:text="@string/joinGame"
-                app:layout_constraintBottom_toTopOf="@+id/lobbyListBtn"
+                app:layout_constraintBottom_toTopOf="@+id/picwordBtn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/createGameBtn"
                 app:layout_constraintVertical_bias="0.2"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintWidth_percent="0.5" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/lobbyListBtn"
-                style="@style/MenuBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/lobbyList"
-                app:layout_constraintBottom_toTopOf="@id/picwordBtn"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/joinGamebtn"
                 app:layout_constraintVertical_chainStyle="packed"
                 app:layout_constraintWidth_percent="0.5" />
 
@@ -116,7 +103,7 @@
                 app:layout_constraintBottom_toTopOf="@id/userGuideBtn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lobbyListBtn"
+                app:layout_constraintTop_toBottomOf="@+id/joinGamebtn"
                 app:layout_constraintVertical_chainStyle="packed"
                 app:layout_constraintWidth_percent="0.5" />
 

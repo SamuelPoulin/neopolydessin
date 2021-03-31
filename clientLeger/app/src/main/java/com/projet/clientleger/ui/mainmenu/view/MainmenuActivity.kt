@@ -55,10 +55,6 @@ class MainmenuActivity : AppCompatActivity() {
             true
         }
 
-        binding.lobbyListBtn.setOnClickListener {
-            openLobbyList()
-        }
-
         vm.connectSocket(getSharedPreferences(
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
@@ -72,12 +68,6 @@ class MainmenuActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
-    }
-    private fun openLobbyList(){
-        val intent = Intent(this, SearchLobbyActivity::class.java).apply {
-            putExtra("username", intent.getStringExtra("username").toString())
-        }
-        startActivity(intent)
     }
 
     fun toggleFriendslist() {
@@ -130,6 +120,9 @@ class MainmenuActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             }
+        }
+        dialogView.cancelButton.setOnClickListener {
+            dialog.dismiss()
         }
     }
     private fun setupGamemodeSpinner(dialogView:View){
