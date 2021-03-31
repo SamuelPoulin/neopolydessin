@@ -13,6 +13,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import com.google.android.material.slider.Slider
+import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.DrawTool
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.Coordinate
@@ -72,9 +73,18 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     private fun setupBtnClickListeners(){
         binding!!.colorPickerBtn.setOnClickListener { pickColor() }
-        binding!!.eraserBtn.setOnClickListener { changeTool() }
+        binding!!.eraserBtn.setOnClickListener {
+            changeTool("eraser")
+            binding!!.pencilBtn.setImageResource(R.drawable.ic_pencil)
+            binding!!.eraserBtn.setImageResource(R.drawable.ic_delete_green)}
+        binding!!.pencilBtn.setOnClickListener { changeTool("pencil")
+        binding!!.eraserBtn.setImageResource(R.drawable.ic_delete)
+        binding!!.pencilBtn.setImageResource(R.drawable.ic_pencil_green)}
         binding!!.undoBtn.setOnClickListener { vm.undo() }
         binding!!.redoBtn.setOnClickListener { vm.redo() }
+
+        binding!!.undoBtn.isEnabled = false
+        binding!!.redoBtn.isEnabled = false
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -131,9 +141,8 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         })
         builder.show()
     }
-
-    private fun changeTool(){
-        vm.switchCurrentTool()
+    private fun changeTool(tool:String){
+        vm.switchCurrentTool(tool)
         updateSliderProperties()
         binding!!.toolPreview.changeTool(vm.currentTool, vm.getCurrentToolWidth())
         Toast.makeText(requireContext(), vm.currentTool.value, Toast.LENGTH_SHORT).show()
