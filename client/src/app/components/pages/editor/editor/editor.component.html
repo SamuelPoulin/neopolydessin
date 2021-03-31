@@ -13,8 +13,8 @@
         <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
       </app-drawing-surface>
       <div id="game-area-player">
-        <div id="game-area-player-text">C'est le tour à&nbsp;</div>
-        <div id="game-area-player-name">samuelpoulin</div>
+        <div id="game-area-player-text">{{hint}}&nbsp;</div>
+        <div id="game-area-player-name">{{gameService.wordToDraw}}</div>
       </div>
         <div id="game-area-timer">
           <mat-icon [inline]="true">timer</mat-icon>

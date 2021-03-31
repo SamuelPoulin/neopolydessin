@@ -1,7 +1,10 @@
 <div class="team-container">
   <div class="players-title">{{name}}</div>
-  <div *ngFor="let player of team" class="player-container ennemy-container" [style.border-left]="ennemy !== undefined && '2px solid red'">
-    <app-avatar class="player-avatar" [username]="player.playerName" size="35" fontSize="20"></app-avatar>
-    <div class="player-username">{{player.playerName}}</div>
+  <div *ngFor="let player of team" class="player-container ennemy-container"
+    [style.border-left]="ennemy !== undefined && '2px solid red'">
+    <app-avatar class="player-avatar" [username]="player.username" size="35" fontSize="20"></app-avatar>
+    <div class="player-username">{{player.username}}</div>
+    <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.DRAWER">brush</mat-icon>
+    <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.GUESSER">help</mat-icon>
   </div>
 </div>

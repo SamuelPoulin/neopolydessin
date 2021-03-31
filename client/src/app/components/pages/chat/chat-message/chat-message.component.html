@@ -3,20 +3,34 @@
     <ng-container [ngSwitch]="guessStatus">
         <ng-container *ngSwitchCase="guessResponse.CORRECT">
             <div class="chat-message-guess chat-message-correct-guess">
-                <div class="chat-message-guess-icon-container">
-                    <mat-icon>check_circle_outline</mat-icon>
-                </div>
+                <ng-container *ngIf="!foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>check_circle_outline</mat-icon>
+                    </div>
+                </ng-container>
                 <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
                     message.content }}</div>
+                <ng-container *ngIf="foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>check_circle_outline</mat-icon>
+                    </div>
+                </ng-container>
             </div>
         </ng-container>
         <ng-container *ngSwitchCase="guessResponse.CLOSE">
             <div class="chat-message-guess chat-message-close-guess">
-                <div class="chat-message-guess-icon-container">
-                    <mat-icon>error_outline</mat-icon>
-                </div>
+                <ng-container *ngIf="!foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>error_outline</mat-icon>
+                    </div>
+                </ng-container>
                 <div class="chat-message-content" [ngClass]="{'chat-message-content-user': !foreign}">{{
                     message.content }}</div>
+                <ng-container *ngIf="foreign">
+                    <div class="chat-message-guess-icon-container">
+                        <mat-icon>error_outline</mat-icon>
+                    </div>
+                </ng-container>
             </div>
         </ng-container>
         <ng-container *ngSwitchCase="guessResponse.WRONG">

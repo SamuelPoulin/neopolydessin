@@ -1,8 +1,8 @@
 import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { HomeKeyboardListener } from '@components/pages/home/home/home-keyboard-listener';
-import { GameService } from '@services/game.service';
 import { SocketService } from '@services/socket-service.service';
+import { UserService } from '@services/user.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 
@@ -21,7 +21,7 @@ export class HomeComponent {
     private router: Router,
     private dialog: ModalDialogService,
     private socketService: SocketService,
-    private gameService: GameService,
+    private userService: UserService,
   ) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
@@ -47,8 +47,7 @@ export class HomeComponent {
   }
 
   createLobby(): void {
-    this.gameService.isDrawer = true;
-    this.socketService.createLobby('client-tres-lourd');
+    this.socketService.createLobby('Partie de ' + this.userService.username);
     this.router.navigate(['lobby']);
   }
 }

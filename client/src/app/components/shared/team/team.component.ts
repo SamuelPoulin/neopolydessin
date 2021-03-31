@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Player } from '../../../../../../common/communication/lobby';
+import { Player, PlayerRole } from '../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-team',
@@ -14,5 +14,9 @@ export class TeamComponent {
   constructor() {
     this.team = [];
     this.name = '';
+  }
+
+  get playerRole() {
+    return PlayerRole;
   }
 }

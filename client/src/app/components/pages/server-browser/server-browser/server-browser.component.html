@@ -10,11 +10,11 @@
           </ng-container>
           <ng-container matColumnDef="playerInfo">
             <th mat-header-cell *matHeaderCellDef> Players </th>
-            <td mat-cell *matCellDef="let lobby">Soon</td>
+            <td mat-cell *matCellDef="let lobby">{{lobby.nbPlayerInLobby}}/4</td>
           </ng-container>
           <ng-container matColumnDef="gameType">
             <th mat-header-cell *matHeaderCellDef> Gamemode </th>
-            <td mat-cell *matCellDef="let lobby"> {{lobby.gameType}} </td>
+            <td mat-cell *matCellDef="let lobby"> {{getGameTypeName(lobby.gameType)}} </td>
           </ng-container>
           <ng-container matColumnDef="joinButton">
             <th mat-header-cell *matHeaderCellDef></th>

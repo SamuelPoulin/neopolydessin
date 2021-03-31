@@ -52,8 +52,12 @@ export class EditorService {
     this._commandReceiver = new CommandReceiver();
 
     this.tools = new Map<ToolType, Tool>();
-    this.initTools();
+
     this.initListeners();
+    this.gameService.roleChanged.subscribe(() => {
+      // this.resetDrawing();
+      this.initListeners();
+    });
 
     this.shapesBuffer = new Array<BaseShape>();
     this.shapes = new Array<BaseShape>();
@@ -96,12 +100,14 @@ export class EditorService {
   }
 
   initListeners(): void {
+    this.initTools();
+
     if (this.removePathSubscription) {
       this.removePathSubscription.unsubscribe();
       this.addPathSubscription.unsubscribe();
     }
 
-    if (!this.gameService.isDrawer) {
+    if (!this.gameService.canDraw) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
         const shape = this.findShapeById(id + 1); // todo - conform to server standard?
         if (shape) {

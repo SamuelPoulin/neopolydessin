@@ -80,6 +80,13 @@ export class ChatService {
     }
   }
 
+  resetGameMessages() {
+    const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+    if (roomIndex > -1) {
+      this.rooms[roomIndex].messages = [];
+    }
+  }
+
   get messages() {
     if (this.rooms[this.currentRoomIndex]) {
       return this.rooms[this.currentRoomIndex].messages;

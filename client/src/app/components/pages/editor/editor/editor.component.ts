@@ -134,6 +134,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
     return format(new Date(this.gameService.getTimeLeft()), 'mm:ss');
   }
 
+  get hint(): string {
+    return this.gameService.wordToDraw ? 'Le mot à dessiner est' : '';
+  }
+
   get loading(): boolean {
     return this.editorService.loading;
   }

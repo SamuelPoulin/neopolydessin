@@ -9,7 +9,7 @@ import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing
 import { BrushInfo } from '../../../../common/communication/brush-info';
 import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
-import { Difficulty, GameType, GuessMessage, GuessMessageCoop, LobbyInfo, Player } from '../../../../common/communication/lobby';
+import { Difficulty, GameType, GuessMessage, GuessMessageCoop, LobbyInfo, Player, TimeInfo } from '../../../../common/communication/lobby';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 import { UserService } from './user.service';
@@ -58,9 +58,21 @@ export class SocketService {
     });
   }
 
+  receiveWord(): Observable<string> {
+    return new Observable<string>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_WORD_TO_DRAW, (word: string) => obs.next(word));
+    });
+  }
+
   receiveGameEnd(): Observable<boolean> {
     return new Observable<boolean>((obs) => {
       this.socket.on(SocketLobby.END_GAME, () => obs.next(true));
+    });
+  }
+
+  receiveGameStart(): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.on(SocketLobby.START_GAME_CLIENT, () => obs.next(true));
     });
   }
 
@@ -77,9 +89,9 @@ export class SocketService {
     });
   }
 
-  receiveNextTimestamp(): Observable<number> {
-    return new Observable<number>((obs) => {
-      this.socket.on(SocketLobby.SET_TIME, (timestamp: number) => obs.next(timestamp));
+  receiveNextTimestamp(): Observable<TimeInfo> {
+    return new Observable<TimeInfo>((obs) => {
+      this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));
     });
   }
 
@@ -148,6 +160,14 @@ export class SocketService {
   getLobbyInfo(): Observable<Player[]> {
     return new Observable<Player[]>((obs) => {
       this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+        obs.next(players);
+      });
+    });
+  }
+
+  receiveRoles(): Observable<Player[]> {
+    return new Observable<Player[]>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
         obs.next(players);
       });
     });

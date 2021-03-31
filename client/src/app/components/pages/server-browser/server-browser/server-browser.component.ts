@@ -23,6 +23,7 @@ export class ServerBrowserComponent implements OnInit {
 
   ngOnInit() {
     this.socketService.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
+      console.log(lobbies);
       this.dataSource.data = lobbies;
       this.lobbyCount = lobbies.length;
     });
@@ -49,6 +50,17 @@ export class ServerBrowserComponent implements OnInit {
   joinLobby(lobbyId: string): void {
     this.socketService.joinLobby(lobbyId);
     this.router.navigate([`/lobby/${lobbyId}`]);
+  }
+
+  getGameTypeName(gameType: GameType) {
+    switch (gameType) {
+      case GameType.CLASSIC:
+        return 'Classique';
+      case GameType.SPRINT_COOP:
+        return 'Co-op';
+      default:
+        return '';
+    }
   }
 
   get showEmptyMessage(): boolean {
