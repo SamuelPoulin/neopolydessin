@@ -35,9 +35,9 @@
                 android:id="@+id/timerIcon"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:src="@drawable/download"
+                android:src="@drawable/ic_timer_green"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHeight_percent="0.9"
+                app:layout_constraintHeight_percent="1"
                 app:layout_constraintLeft_toRightOf="@id/logo"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintWidth_percent="0.1" />

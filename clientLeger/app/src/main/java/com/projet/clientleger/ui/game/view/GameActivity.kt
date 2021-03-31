@@ -3,12 +3,15 @@ package com.projet.clientleger.ui.game.view
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.Rect
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,7 +57,14 @@ class GameActivity : AppCompatActivity() {
         }
         vm.activeWord.observe(this){
             println("Nouveau Mot : $it")
-            binding.wordGuess.text = "Mot : $it"
+            if(vm.currentRoleLiveData.value == PlayerRole.DRAWER){
+                binding.wordGuess.text = "Mot : ${vm.activeWord.value}"
+                binding.wordGuess.visibility = View.VISIBLE
+            }
+            else{
+                binding.wordGuess.visibility = View.INVISIBLE
+                binding.wordGuess.text = ""
+            }
         }
         vm.activeTimer.observe(this){
             println("Nouveau timer recu : $it")
@@ -74,9 +84,11 @@ class GameActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){
                     binding.timer.setTextColor(Color.RED)
+                    binding.timerIcon.setImageResource(R.drawable.ic_timer_red)
                 }
                 else{
                     binding.timer.setTextColor(Color.GREEN)
+                    binding.timerIcon.setImageResource(R.drawable.ic_timer_green)
                 }
                 val secRemaining = (((millisUntilFinished / MILLIS_IN_SEC)) % SEC_IN_MIN).toInt()
                 val minRemaining:Int = (((millisUntilFinished / MILLIS_IN_SEC) - secRemaining) / SEC_IN_MIN).toInt()
