@@ -31,14 +31,14 @@ export class LobbyClassique extends Lobby {
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
+    super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
+    this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.teamDrawing = 0;
     this.playerDrawing = 0;
@@ -65,6 +65,10 @@ export class LobbyClassique extends Lobby {
       this.players[index].teamNumber = teamNumber;
       this.teams[teamNumber].playersInTeam.push(this.players[index]);
     }
+  }
+
+  protected startGame(): void {
+    this.startRoundTimer();
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
@@ -110,20 +114,11 @@ export class LobbyClassique extends Lobby {
         }
       }
     });
-
-    socket.on(SocketLobby.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT);
-        this.currentGameState = CurrentGameState.IN_GAME;
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
     super.unbindLobbyEndPoints(socket);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
 
@@ -133,13 +128,10 @@ export class LobbyClassique extends Lobby {
     // SEND WORD TO DRAWER
     // START TIMER AND SEND TIME TO CLIENT
     this.setRoles();
-    console.log('Word to guess before await: ' + this.wordToGuess);
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
       this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
-      console.log('Word to guess in await: ' + this.wordToGuess);
     });
-    console.log('Word to guess after await: ' + this.wordToGuess);
 
     clearInterval(this.clockTimeout);
 
@@ -149,7 +141,6 @@ export class LobbyClassique extends Lobby {
 
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.endRoundTimer();
         this.startReply();
@@ -159,7 +150,6 @@ export class LobbyClassique extends Lobby {
 
   private endRoundTimer() {
     clearInterval(this.clockTimeout);
-    console.log('Guess over');
   }
 
   private startReply() {
@@ -174,7 +164,6 @@ export class LobbyClassique extends Lobby {
 
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.endReplyTimer();
       }
@@ -183,7 +172,6 @@ export class LobbyClassique extends Lobby {
 
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
-    console.log('Reply over');
     this.playerDrawing++;
     this.teamDrawing++;
     this.startRoundTimer();
@@ -191,13 +179,13 @@ export class LobbyClassique extends Lobby {
 
   private startTimerGuessToClient() {
     const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: gameStartTime});
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: gameStartTime });
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
     const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: timerValue});
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: timerValue });
   }
 
   private setRoles() {
