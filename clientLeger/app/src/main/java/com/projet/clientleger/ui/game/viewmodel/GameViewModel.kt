@@ -23,13 +23,18 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
-        gameRepository.receiveRoles().subscribe{ playersLiveData.postValue(it)
-        updateCurrentRole(it)
+
+        gameRepository.receiveRoles().subscribe{
+            playersLiveData.postValue(it)
+            updateCurrentRole(it)
         }
+
         gameRepository.receiveKeyWord().subscribe{activeWord.postValue(it)}
+
         gameRepository.receiveTimer().subscribe{
             val timer = System.currentTimeMillis() - it.serverTime + it.timestamp
             activeTimer.postValue(findTimeLeft(timer)) }
+
     }
     private fun findTimeLeft(finishTime:Long):Long{
         return finishTime - System.currentTimeMillis()
