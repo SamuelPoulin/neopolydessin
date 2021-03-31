@@ -3,6 +3,7 @@ package com.projet.clientleger.data.api.socket
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
@@ -16,16 +17,15 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         }
     }
     fun receiveRoles():Observable<ArrayList<Player>>{
-        return Observable.create {
-            socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_ROLES.value) { res ->
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_ROLES.value) { res ->
                 println("Roles recu dans Socket: ${res.toString()}")
                 val jsonList = res[0] as JSONArray
                 val list = ArrayList<Player>()
                 for(i in 0 until jsonList.length()){
-                    list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
+                    val player = Json.decodeFromString(Player.serializer(), jsonList.get(i).toString())
+                    list.add(player)
                 }
-                it.onNext(list)
-            }
+            list
         }
     }
 
