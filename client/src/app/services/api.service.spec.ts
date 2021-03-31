@@ -15,6 +15,7 @@ export const MockAPIService = jasmine.createSpyObj('APIService', {
   register: Promise.resolve(),
   handleResponse: null,
   handleError: null,
+  getAccount: Promise.resolve(),
 });
 
 describe('APIService', () => {

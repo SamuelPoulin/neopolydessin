@@ -2,6 +2,7 @@ import { PenToolProperties } from '@models/tool-properties/creator-tool-properti
 import { EditorService } from '@services/editor.service';
 import { Coordinate } from '@utils/math/coordinate';
 import { Color } from '@utils/color/color';
+import { take } from 'rxjs/operators';
 import { Path } from '../../../shapes/path';
 import { CreatorTool } from '../creator-tool';
 import { BrushInfo } from '../../../../../../../common/communication/brush-info';
@@ -32,7 +33,7 @@ export class PenTool extends CreatorTool {
 
   initListeners(): void {
     // todo - move to editor?
-    this.editorService.socketService.receiveStartPath().subscribe((pathData: { coord: Coordinate; brush: BrushInfo }) => {
+    this.editorService.socketService.receiveStartPath().subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
       this.editorService.colorsService.primaryColor = Color.ahex(pathData.brush.color.slice(1));
       this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
       this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
@@ -58,6 +59,13 @@ export class PenTool extends CreatorTool {
           this.editorService.colorsService.primaryColor.ahexString,
           this.toolProperties.strokeWidth.value * this.editorService.scalingToServer,
         );
+        this.editorService.socketService
+          .receiveStartPath()
+          .pipe(take(1))
+          .subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
+            console.log('received' + pathData.id);
+            this.shape.serverId = pathData.id;
+          });
       }
     };
 

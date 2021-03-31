@@ -1,30 +1,21 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SocketService } from '@services/socket-service.service';
 import { Router } from '@angular/router';
-import { UserService } from '@services/user.service';
 import randomColor from 'randomcolor';
+import { GameService } from '@services/game.service';
+import { Player } from '../../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss'],
 })
-export class LobbyComponent implements AfterViewInit {
+export class LobbyComponent {
   inviteCode: string = 'Bientôt';
-  playersTeam1: string[] = [];
-  playersTeam2: string[] = [];
+  teams: Player[][];
 
-  constructor(
-    private clipboard: Clipboard,
-    private snackBar: MatSnackBar,
-    private socketService: SocketService,
-    private router: Router,
-    userService: UserService,
-  ) {
-    this.playersTeam1.push(userService.username);
-  }
+  constructor(private clipboard: Clipboard, private snackBar: MatSnackBar, public gameService: GameService, private router: Router) {}
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
@@ -38,12 +29,6 @@ export class LobbyComponent implements AfterViewInit {
     return randomColor({ seed: username, luminosity: 'bright' });
   }
 
-  ngAfterViewInit(): void {
-    this.socketService.getPlayerJoined().subscribe((player) => {
-      this.playersTeam2.push(player);
-    });
-  }
-
   copyInviteCode(): void {
     this.clipboard.copy(this.inviteCode);
     this.snackBar.open("Code d'invitation copié.", 'Ok', {
@@ -54,7 +39,7 @@ export class LobbyComponent implements AfterViewInit {
   }
 
   startGame(): void {
-    this.socketService.startGame();
+    this.gameService.startGame();
     this.router.navigate(['edit']);
   }
 }

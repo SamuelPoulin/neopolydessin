@@ -17,7 +17,7 @@ export class AccountNavbarComponent {
   lastName: string;
   username: string;
 
-  constructor(private mediaMatcher: MediaMatcher, private userService: UserService) {
+  constructor(private mediaMatcher: MediaMatcher, public userService: UserService) {
     this.firstName = 'Samuel';
     this.lastName = 'Poulin';
     this.username = this.userService.username;
