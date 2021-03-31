@@ -22,6 +22,13 @@ export class DrawingService {
     return this.id++;
   }
 
+  resetDrawing(): void {
+    this.currentPath = undefined;
+    this.paths = [];
+    this.erasedPaths = [];
+    this.id = 0;
+  }
+
   async startPath(startPoint: Coord, brush: BrushInfo): Promise<Path> {
     return new Promise<Path>((resolve, reject) => {
       if (!this.currentPath) {

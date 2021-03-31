@@ -9,7 +9,8 @@ import {
   GameType,
   GuessMessage,
   GuessResponse,
-  PlayerRole
+  PlayerRole,
+  ReasonEndGame
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
@@ -21,7 +22,8 @@ export class LobbyClassique extends Lobby {
 
   protected clockTimeout: NodeJS.Timeout;
   private readonly START_GAME_TIME_LEFT: number = 30;
-  private readonly REPLY_TIME: number = 10;
+  private readonly REPLY_TIME: number = 15;
+  private readonly END_SCORE: number = 5;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
@@ -86,6 +88,9 @@ export class LobbyClassique extends Lobby {
             guessStat = GuessResponse.CORRECT;
             this.teams[guesserValues.teamNumber].currentScore++;
             this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
+            if (this.teams[guesserValues.teamNumber].currentScore === this.END_SCORE) {
+              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+            }
             this.playerDrawing++;
             this.teamDrawing++;
             this.startRoundTimer();
@@ -122,13 +127,13 @@ export class LobbyClassique extends Lobby {
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
   }
 
-
   protected startRoundTimer() {
     // DECIDE ROLES
     // SEND ROLES TO CLIENT
     // SEND WORD TO DRAWER
     // START TIMER AND SEND TIME TO CLIENT
     this.setRoles();
+    this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
       this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
