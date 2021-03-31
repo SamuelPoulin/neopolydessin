@@ -15,6 +15,7 @@ export interface Player {
   playerRole: PlayerRole;
   teamNumber: number;
   isBot: boolean;
+  isOwner: boolean;
   finishedLoading: boolean;
 }
 
@@ -41,6 +42,12 @@ export enum GuessResponse {
   CORRECT = 'correct',
   CLOSE = 'close',
   WRONG = 'wrong'
+}
+
+export enum ReasonEndGame {
+  PLAYER_DISCONNECT = 'playerDisconnected',
+  WINNING_SCORE_REACHED = 'winningScoreReached',
+  TIME_RUN_OUT = 'timeRunOut'
 }
 
 export enum Difficulty {

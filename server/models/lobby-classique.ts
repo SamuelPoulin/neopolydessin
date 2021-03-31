@@ -9,7 +9,8 @@ import {
   GameType,
   GuessMessage,
   GuessResponse,
-  PlayerRole
+  PlayerRole,
+  ReasonEndGame
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
@@ -21,7 +22,8 @@ export class LobbyClassique extends Lobby {
 
   protected clockTimeout: NodeJS.Timeout;
   private readonly START_GAME_TIME_LEFT: number = 30;
-  private readonly REPLY_TIME: number = 10;
+  private readonly REPLY_TIME: number = 15;
+  private readonly END_SCORE: number = 5;
   private teamDrawing: number;
   private playerDrawing: number;
   private drawerPlayer: ServerPlayer;
@@ -31,14 +33,14 @@ export class LobbyClassique extends Lobby {
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
+    super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
+    this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.teamDrawing = 0;
     this.playerDrawing = 0;
@@ -67,6 +69,10 @@ export class LobbyClassique extends Lobby {
     }
   }
 
+  protected startGame(): void {
+    this.startRoundTimer();
+  }
+
   protected bindLobbyEndPoints(socket: Socket) {
 
     super.bindLobbyEndPoints(socket);
@@ -81,6 +87,10 @@ export class LobbyClassique extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[guesserValues.teamNumber].currentScore++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
+            if (this.teams[guesserValues.teamNumber].currentScore === this.END_SCORE) {
+              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+            }
             this.playerDrawing++;
             this.teamDrawing++;
             this.startRoundTimer();
@@ -110,22 +120,12 @@ export class LobbyClassique extends Lobby {
         }
       }
     });
-
-    socket.on(SocketLobby.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT);
-        this.currentGameState = CurrentGameState.IN_GAME;
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
     super.unbindLobbyEndPoints(socket);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
-
 
   protected startRoundTimer() {
     // DECIDE ROLES
@@ -133,13 +133,11 @@ export class LobbyClassique extends Lobby {
     // SEND WORD TO DRAWER
     // START TIMER AND SEND TIME TO CLIENT
     this.setRoles();
-    console.log('Word to guess before await: ' + this.wordToGuess);
+    this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
       this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
-      console.log('Word to guess in await: ' + this.wordToGuess);
     });
-    console.log('Word to guess after await: ' + this.wordToGuess);
 
     clearInterval(this.clockTimeout);
 
@@ -149,7 +147,6 @@ export class LobbyClassique extends Lobby {
 
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.endRoundTimer();
         this.startReply();
@@ -159,7 +156,6 @@ export class LobbyClassique extends Lobby {
 
   private endRoundTimer() {
     clearInterval(this.clockTimeout);
-    console.log('Guess over');
   }
 
   private startReply() {
@@ -174,7 +170,6 @@ export class LobbyClassique extends Lobby {
 
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.endReplyTimer();
       }
@@ -183,7 +178,6 @@ export class LobbyClassique extends Lobby {
 
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
-    console.log('Reply over');
     this.playerDrawing++;
     this.teamDrawing++;
     this.startRoundTimer();
@@ -191,13 +185,13 @@ export class LobbyClassique extends Lobby {
 
   private startTimerGuessToClient() {
     const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: gameStartTime});
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: gameStartTime });
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
     const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: timerValue});
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: timerValue });
   }
 
   private setRoles() {

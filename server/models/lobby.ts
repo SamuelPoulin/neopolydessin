@@ -12,7 +12,16 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole, TeamScore } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  LobbyInfo,
+  Player,
+  PlayerRole,
+  ReasonEndGame,
+  TeamScore
+} from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -20,13 +29,8 @@ export interface ServerPlayer extends Player {
   socket: Socket;
 }
 
-const DEFAULT_TEAM_SIZE = 4;
-
-const gameSizeMap = new Map<GameType, number>([
-  [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
-  [GameType.SPRINT_SOLO, 2],
-  [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
-]);
+const DEFAULT_TEAM_SIZE: number = 4;
+const SOLO_TEAM_SIZE: number = 2;
 
 @injectable()
 export abstract class Lobby {
@@ -34,6 +38,11 @@ export abstract class Lobby {
   readonly MAX_LENGTH_MSG: number = 200;
   readonly MS_PER_SEC: number = 1000;
   readonly TIME_ADD_CORRECT_GUESS: number = 30;
+  readonly GAME_SIZE_MAP: Map<GameType, number> = new Map<GameType, number>([
+    [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
+    [GameType.SPRINT_SOLO, SOLO_TEAM_SIZE],
+    [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
+  ]);
 
   lobbyId: string;
   gameType: GameType;
@@ -42,8 +51,6 @@ export abstract class Lobby {
   lobbyName: string;
 
   protected io: Server;
-  protected ownerAccountId: string;
-  protected ownerUsername: string;
   protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
@@ -64,21 +71,15 @@ export abstract class Lobby {
     @inject(Types.DatabaseService) protected databaseService: DatabaseService,
     @inject(Types.PictureWordService) protected pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privacySetting: boolean,
     lobbyName: string
   ) {
     this.io = io;
-    this.ownerAccountId = accountId;
-    this.databaseService.getAccountById(accountId).then((account) => {
-      this.ownerUsername = account.documents.username;
-    });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
     this.lobbyName = lobbyName;
     this.lobbyId = uuidv4();
-    this.size = gameSizeMap.get(GameType.CLASSIC) as number;
     this.wordToGuess = '';
     this.currentGameState = CurrentGameState.LOBBY;
     this.drawingCommands = new DrawingService();
@@ -94,13 +95,18 @@ export abstract class Lobby {
   }
 
   getLobbySummary(): LobbyInfo {
+    const owner = this.getLobbyOwner();
     return {
       lobbyId: this.lobbyId,
       lobbyName: this.lobbyName,
-      ownerUsername: this.ownerUsername,
+      ownerUsername: owner ? owner.username : 'Jesus',
       nbPlayerInLobby: this.players.length,
       gameType: this.gameType
     };
+  }
+
+  getLobbyOwner(): ServerPlayer | undefined {
+    return this.players.find((player) => player.isOwner);
   }
 
   serverPlayerToPlayer(serverPlayer: ServerPlayer): Player {
@@ -112,6 +118,7 @@ export abstract class Lobby {
       teamNumber: serverPlayer.teamNumber,
       finishedLoading: serverPlayer.finishedLoading,
       isBot: serverPlayer.isBot,
+      isOwner: serverPlayer.isOwner
     };
   }
 
@@ -125,6 +132,9 @@ export abstract class Lobby {
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
+      if (removedPlayer.isOwner) {
+        this.players[0].isOwner = true;
+      }
       socket.leave(this.lobbyId);
       socket.to(this.lobbyId)
         .broadcast
@@ -133,13 +143,7 @@ export abstract class Lobby {
         .in(this.lobbyId)
         .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
       if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
-        this.endGame();
-      }
-      else {
-        if (accountId === this.ownerAccountId) {
-          this.ownerAccountId = this.players[0].accountId;
-          this.ownerUsername = this.players[0].username;
-        }
+        this.endGame(ReasonEndGame.PLAYER_DISCONNECT);
       }
     }
   }
@@ -167,7 +171,8 @@ export abstract class Lobby {
             socket,
             teamNumber,
             isBot: false,
-            finishedLoading: false
+            finishedLoading: false,
+            isOwner: this.players.length === 0 ? true : false
           };
           this.players.push(player);
           this.teams[teamNumber].playersInTeam.push(player);
@@ -187,6 +192,14 @@ export abstract class Lobby {
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
+
+    socket.on(SocketLobby.START_GAME_SERVER, () => {
+      const owner = this.getLobbyOwner();
+      if (owner && owner.socket.id === socket.id) {
+        this.currentGameState = CurrentGameState.IN_GAME;
+        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
+      }
+    });
 
     socket.on(SocketDrawing.START_PATH, (startPoint: Coord, brushInfo: BrushInfo) => {
       if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
@@ -276,7 +289,7 @@ export abstract class Lobby {
         playerDoneLoading.finishedLoading = true;
       }
       if (this.players.every((player) => player.finishedLoading)) {
-        this.startRoundTimer();
+        this.startGame();
       }
     });
 
@@ -299,7 +312,6 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
-    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
     socket.removeAllListeners(SocketLobby.LOADING_OVER);
   }
@@ -308,10 +320,10 @@ export abstract class Lobby {
     return this.players.find((player) => player.socket.id === socket.id);
   }
 
-  protected endGame(): void {
+  protected endGame(reason: ReasonEndGame): void {
     this.currentGameState = CurrentGameState.GAME_OVER;
     clearInterval(this.clockTimeout);
-    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME);
+    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }
 
@@ -340,8 +352,8 @@ export abstract class Lobby {
   }
 
   private setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
-    const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socketId);
-    if (senderAccountId === this.ownerAccountId) {
+    const owner = this.getLobbyOwner();
+    if (owner && owner.socket.id === socketId) {
       this.privateLobby = newPrivacySetting;
     }
   }
@@ -351,6 +363,8 @@ export abstract class Lobby {
   }
 
   abstract addPlayer(playerId: string, role: PlayerRole, socket: Socket): void;
+
+  protected abstract startGame(): void;
 
   protected abstract startRoundTimer(): void;
 

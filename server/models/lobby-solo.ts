@@ -3,14 +3,13 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, PlayerRole } from '../../common/communication/lobby';
+import { Difficulty, GameType, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
 @injectable()
 export class LobbySolo extends Lobby {
 
-  private readonly SOLO_TEAM_SIZE: number = 2;
   private guessLeft: number;
 
   constructor(
@@ -18,14 +17,13 @@ export class LobbySolo extends Lobby {
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
-    this.size = this.SOLO_TEAM_SIZE;
+    super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_SOLO;
+    this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = 3;
     this.privateLobby = true;
   }
@@ -38,6 +36,12 @@ export class LobbySolo extends Lobby {
       .catch((err) => {
         console.error(`There was an error when adding ${playerId} : ${err}`);
       });
+  }
+
+  protected startGame(): void {
+    this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
+    this.startRoundTimer();
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
@@ -67,30 +71,20 @@ export class LobbySolo extends Lobby {
         }
       }
     });
-
-    socket.on(SocketLobby.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
-        this.currentGameState = CurrentGameState.IN_GAME;
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
     super.unbindLobbyEndPoints(socket);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
   protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
+    this.drawingCommands.resetDrawing();
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.timeRunOut();
       }
@@ -99,8 +93,7 @@ export class LobbySolo extends Lobby {
 
   private timeRunOut() {
     clearInterval(this.clockTimeout);
-    console.log('game over');
-    this.endGame();
+    this.endGame(ReasonEndGame.TIME_RUN_OUT);
   }
 
   private addTimeOnCorrectGuess() {

@@ -122,7 +122,7 @@ export class SocketIo {
         if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
           lobbyToJoin.addPlayer(playerId, PlayerRole.PASSIVE, socket);
         } else {
-          console.error('coudln\'t add player to lobby');
+          console.error('couldn\'t add player to lobby');
         }
       });
 
@@ -134,17 +134,17 @@ export class SocketIo {
             switch (gametype) {
               case GameType.CLASSIC: {
                 lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_SOLO: {
                 lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_COOP: {
                 lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
             }
