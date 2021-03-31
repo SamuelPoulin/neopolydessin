@@ -15,7 +15,7 @@ export class StatusBarComponent {
 
   username: string;
 
-  constructor(private router: Router, private userService: UserService, private gameService: GameService) {
+  constructor(private router: Router, public userService: UserService, private gameService: GameService) {
     this.username = this.userService.username;
   }
 
