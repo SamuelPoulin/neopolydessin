@@ -30,8 +30,8 @@ export class LobbyCoop extends Lobby {
     this.timeLeftSeconds = 60;
   }
 
-  addPlayer(playerId: string, role: PlayerRole, socket: Socket) {
-    this.addPlayerToTeam(playerId, role, socket, 0)
+  addPlayer(playerId: string, socket: Socket) {
+    this.addPlayerToTeam(playerId, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
