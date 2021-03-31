@@ -85,6 +85,7 @@ export class LobbyClassique extends Lobby {
           case 0: {
             guessStat = GuessResponse.CORRECT;
             this.teams[guesserValues.teamNumber].currentScore++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.playerDrawing++;
             this.teamDrawing++;
             this.startRoundTimer();
