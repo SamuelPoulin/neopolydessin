@@ -44,28 +44,30 @@ class GameActivity : AppCompatActivity() {
         setSubscriptions()
         vm.onPlayerReady()
     }
+    @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
         vm.currentRoleLiveData.observe(this){
             println("Nouveau Role : $it")
             supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to (it == PlayerRole.GUESSER)))
             supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
-            binding.role.text = it.value
+            binding.role.text = getFrenchRole(it.value)
         }
         vm.activeWord.observe(this){
             println("Nouveau Mot : $it")
+            binding.wordGuess.text = "Mot : $it"
         }
         vm.activeTimer.observe(this){
             println("Nouveau timer recu : $it")
             setTimer(it)
         }
     }
-    /*private fun getFrenchRole(status:PlayerStatus):String{
-        return when (status){
-            PlayerStatus.DRAWER -> "Dessinateur"
-            PlayerStatus.GUESSER -> "Devineur"
+    private fun getFrenchRole(role:String):String{
+        return when (role){
+            PlayerRole.DRAWER.value -> "Dessinateur"
+            PlayerRole.GUESSER.value -> "Devineur"
             else -> "Passif"
         }
-    }*/
+    }
     private fun setTimer(timeInMilis:Long){
         val timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
             @SuppressLint("SetTextI18n")
