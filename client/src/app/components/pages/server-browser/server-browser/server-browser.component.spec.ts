@@ -16,9 +16,6 @@ describe('BrowserComponent', () => {
       imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, StatusBarModule, ServerBrowserModule],
       providers: [{ provide: SocketService, useValue: MockSocketService }],
     }).compileComponents();
-  });
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(ServerBrowserComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
