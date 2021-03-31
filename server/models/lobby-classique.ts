@@ -190,14 +190,14 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerGuessToClient() {
-    const gameStartTime = new Date(Date.now() + this.timeLeftSeconds * this.MS_PER_SEC);
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
+    const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: gameStartTime});
   }
 
   private startTimerReplyToClient() {
     const replyTimeSeconds = this.REPLY_TIME;
-    const timerValue = new Date(Date.now() + replyTimeSeconds * this.MS_PER_SEC);
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, timerValue);
+    const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: timerValue});
   }
 
   private setRoles() {
