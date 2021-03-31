@@ -68,6 +68,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         binding!!.redoBtn.visibility = visibility
         binding!!.colorPickerBtn.visibility = visibility
         binding!!.eraserBtn.visibility = visibility
+        binding!!.pencilBtn.visibility = visibility
         isDrawing = isVisible
     }
 
