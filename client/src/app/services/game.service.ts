@@ -11,6 +11,7 @@ import { UserService } from './user.service';
 export class GameService {
   static readonly SECOND: number = 1000;
   canDraw: boolean = false;
+  drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   isHost: boolean = false;
   wordToDraw: string = '';
@@ -46,6 +47,10 @@ export class GameService {
       for (const player of players) {
         if (player.username === this.userService.username) {
           this.isHost = player.isOwner;
+          this.canDraw = player.playerRole === PlayerRole.DRAWER;
+        }
+        if (player.playerRole === PlayerRole.DRAWER) {
+          this.drawer = player;
         }
         this.teams[player.teamNumber].push(player);
       }
@@ -64,11 +69,13 @@ export class GameService {
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.username) {
-          this.canDraw = player.playerRole === PlayerRole.DRAWER;
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
-          this.roleChanged.emit(player.playerRole);
-        } else if (player.playerRole === PlayerRole.DRAWER) {
+          this.canDraw = player.playerRole === PlayerRole.DRAWER;
+        }
+        if (player.playerRole === PlayerRole.DRAWER && this.drawer.username !== player.username) {
+          this.drawer = player;
           this.wordToDraw = '';
+          this.roleChanged.emit(player.playerRole);
         }
         this.teams[player.teamNumber].push(player);
       }
