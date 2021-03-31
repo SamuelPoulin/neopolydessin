@@ -1,30 +1,25 @@
 package com.projet.clientleger.ui.lobby.view
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.api.model.PlayerRole
-import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
-import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LobbyActivity : AppCompatActivity() {
@@ -32,7 +27,6 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
     private val playersView = ArrayList<ConstraintLayout>()
-    private var rolesList = ArrayList<PlayerRole>()
     private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     private lateinit var rvTeams: Array<RecyclerView>
 
@@ -45,10 +39,7 @@ class LobbyActivity : AppCompatActivity() {
 //                }
 
         vm.receiveStartGame().subscribe{
-            lifecycleScope.launch {
-                rolesList = it
-                goToActivity(GameActivity::class.java)
-            }
+            goToGame()
         }
     }
 
@@ -57,6 +48,13 @@ class LobbyActivity : AppCompatActivity() {
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupButtons()
+        if(intent.getBooleanExtra("isJoining", false)){
+            vm.receiveJoinedLobbyInfo().subscribe{
+                println("lobby list received $it")
+            }
+            intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }
+        }
+
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for(i in rvTeams.indices){
             val manager = LinearLayoutManager(this)
@@ -140,26 +138,24 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun startGame(){
         vm.startGame()
-        val intent = Intent(this,GameActivity::class.java)
-        startActivity(intent)
     }
     private fun goToMainMenu(){
         val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }
-
-    private fun <T> goToActivity(java: Class<T>) {
-        startActivity(Intent(this, java))
+    private fun goToGame(){
+        val intent = Intent(this, GameActivity::class.java)
+        startActivity(intent)
     }
     private fun kickPlayer(player:PlayerInfo){
         println("kic: ${player.username}")
     }
-    private fun addPlayerToGame(info: Player){
+    /*private fun addPlayerToGame(info: Player){
         playerCount++
         val textView = playersView[playerCount].findViewWithTag<TextView>("playerView")
         textView.text = info.playerName
         textView.isEnabled = true
-    }
+    }*/
     private fun disableRemoveButtonWithIndex(index:Int){
         when(index){
 //            1-> binding.removePlayer1Button.isEnabled = false

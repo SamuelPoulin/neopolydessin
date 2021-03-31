@@ -12,7 +12,16 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import Types from '../app/types';
 import { SocketIo } from '../app/socketio';
 import { DatabaseService } from '../app/services/database.service';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole, TeamScore } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  LobbyInfo,
+  Player,
+  PlayerRole,
+  ReasonEndGame,
+  TeamScore
+} from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from './commands/path';
 
@@ -134,7 +143,7 @@ export abstract class Lobby {
         .in(this.lobbyId)
         .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
       if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
-        this.endGame();
+        this.endGame(ReasonEndGame.PLAYER_DISCONNECT);
       }
     }
   }
@@ -311,10 +320,10 @@ export abstract class Lobby {
     return this.players.find((player) => player.socket.id === socket.id);
   }
 
-  protected endGame(): void {
+  protected endGame(reason: ReasonEndGame): void {
     this.currentGameState = CurrentGameState.GAME_OVER;
     clearInterval(this.clockTimeout);
-    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME);
+    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }
 

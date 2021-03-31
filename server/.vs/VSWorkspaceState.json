@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\controllers",
+    "\\app\\middlewares",
+    "\\app\\services",
+    "\\app\\utils",
+    "\\models",
+    "\\models\\commands",
+    "\\models\\schemas"
+  ],
+  "SelectedNode": "\\models\\schemas\\logins.ts",
+  "PreviewInSolutionExplorer": false
+}

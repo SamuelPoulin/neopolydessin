@@ -33,7 +33,7 @@ private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobby
         viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
         viewHolder.gameOwnerTextView.text = lobbyList[position].ownerUsername
         viewHolder.gameModeTextView.text = lobbyList[position].gameType
-        viewHolder.gameCapacityTextView.text = lobbyList[position].playerInfo.size.toString()
+        viewHolder.gameCapacityTextView.text = lobbyList[position].nbPlayerInLobby.toString()
         viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
     }
     override fun getItemCount(): Int {

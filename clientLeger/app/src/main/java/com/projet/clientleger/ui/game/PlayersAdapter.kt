@@ -1,39 +1,43 @@
-package com.projet.clientleger.ui.lobby
+package com.projet.clientleger.ui.game
 
+import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextClock
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.lobby.PlayerInfo
-import kotlin.random.Random
+import kotlinx.android.synthetic.main.item_game_player.view.*
 
-class TeamAdapter(private val players: List<PlayerInfo>,
-                  private val removePlayerCallback: (PlayerInfo) -> Unit) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>(){
+class PlayersAdapter(private val players: List<PlayerInfo>) : RecyclerView.Adapter<PlayersAdapter.ViewHolderPlayer>() {
 
     class ViewHolderPlayer(view: View) : RecyclerView.ViewHolder(view){
         val avatarView: ImageView = itemView.findViewById(R.id.avatar)
         val usernameTextView: TextView = itemView.findViewById(R.id.username)
-        val removePlayerBtn: Button = itemView.findViewById(R.id.removePlayerBtn)
+        val actionIcon: ImageView = itemView.findViewById(R.id.actionIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPlayer {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolderPlayer(inflater.inflate(R.layout.item_playerinfo, parent, false))
+        return ViewHolderPlayer(inflater.inflate(R.layout.item_game_player, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolderPlayer, position: Int) {
-        holder.usernameTextView.text = players[position].username
         holder.avatarView.setImageBitmap(players[position].avatar)
-        holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(players[position]) }
-        if(players[position].username.isEmpty())
-            holder.removePlayerBtn.visibility = View.INVISIBLE
+        holder.usernameTextView.text = players[position].username
+        val icon = when(players[position].playerRole){
+            PlayerRole.DRAWER -> R.drawable.ic_drawer
+            PlayerRole.GUESSER -> R.drawable.ic_guessing
+            PlayerRole.PASSIVE -> 0
+        }
+        if(icon != 0)
+            holder.actionIcon.setImageResource(icon)
         else
-            holder.removePlayerBtn.visibility = View.VISIBLE
+            holder.actionIcon.visibility = View.GONE
     }
 
     override fun getItemCount(): Int {

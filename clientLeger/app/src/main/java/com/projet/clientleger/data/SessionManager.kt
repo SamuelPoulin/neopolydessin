@@ -75,17 +75,27 @@ open class SessionManager @Inject constructor(
 
     private fun saveAccountInfo(info: Account?){
         if (info != null) {
-            apiAvatarInterface.getAvatar(info.avatar._id).enqueue(object : Callback<ResponseBody> {
-                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                    val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
-                    val roundedBitmap = BitmapConversion.toRoundedBitmap(bitmap)
-                    accountInfo = info.toAccountInfo(roundedBitmap)
-                }
+            if(info.avatar != null){
+                apiAvatarInterface.getAvatar(info.avatar._id).enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                        val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
+                        val roundedBitmap = BitmapConversion.toRoundedBitmap(bitmap)
+                        accountInfo = info.toAccountInfo(roundedBitmap)
+                    }
 
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                    TODO("Not yet implemented")
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        TODO("Not yet implemented")
+                    }
+                })
+            }
+            else{
+                accountInfo = if (context != null) {
+                    val avatar = BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
+                    info.toAccountInfo(avatar)
+                } else{
+                    info.toAccountInfo(null)
                 }
-            })
+            }
         }
     }
 

@@ -34,6 +34,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     var eraserWidth: Float = DEFAULT_ERASER_SIZE
     lateinit var bufferBrushColor: String
     var currentTool = DEFAULT_TOOL
+    var isUndoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
+    var isRedoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
 
     init {
         drawboardRepository.receiveStartPath().subscribe {
@@ -53,8 +55,17 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
-    fun switchCurrentTool(){
-        currentTool = currentTool.switchTool()
+    fun boardwipe(){
+        paths.value!!.clear()
+        paths.postValue(paths.value)
+        drawingCommandsService.clear()
+    }
+
+    fun switchCurrentTool(tool:String){
+        when(tool){
+            "eraser" -> currentTool = DrawTool.ERASER
+            "pencil" -> currentTool = DrawTool.PEN
+        }
     }
 
     fun getCurrentToolWidth(): Float{
@@ -94,10 +105,18 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun redo(){
         drawingCommandsService.redo()
+        isUndoPossibleLiveData.postValue(true)
     }
 
     fun undo(){
         drawingCommandsService.undo()
+        if(drawingCommandsService.canUndo()){
+            isUndoPossibleLiveData.postValue(true)
+        }
+        else{
+            isUndoPossibleLiveData.postValue(false)
+        }
+        isRedoPossibleLiveData.postValue(true)
     }
 
     fun startPath(coord: Coordinate) {
@@ -150,6 +169,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     fun endPath(coord: Coordinate) {
         drawboardRepository.sendEndPath(coord)
         drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
+        println("TRAIT DESSINÉ")
+        isUndoPossibleLiveData.postValue(true)
     }
 
     fun confirmColor(): String {
@@ -166,6 +187,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             drawboardRepository.sendErasePath(pathId)
             drawingCommandsService.add(ErasePathCommand(pathId, drawboardRepository))
         }
+        isUndoPossibleLiveData.postValue(true)
     }
 
     private fun detectPathCollision(coord: Coordinate) : Int{

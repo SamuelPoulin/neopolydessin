@@ -13,7 +13,7 @@ import { accountInfo } from './services/database.service.spec';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { Difficulty, GameType, LobbyInfo, Player } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, Player, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -212,7 +212,7 @@ describe('Socketio', () => {
 
                 testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                     expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    testClient.socket.emit(SocketLobby.END_GAME);
+                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
                     testClient.socket.close();
                 });
             })
@@ -289,7 +289,7 @@ describe('Socketio', () => {
                 testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.emit(SocketLobby.END_GAME);
+                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
                     testClient.socket.close();
                 })
             });

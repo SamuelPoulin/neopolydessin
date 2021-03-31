@@ -1,8 +1,14 @@
 package com.projet.clientleger.data.model.lobby
 
 import android.graphics.Bitmap
+import com.projet.clientleger.data.enumData.PlayerRole
 
-data class PlayerInfo(val teamNumber: Int = 0,
+data class PlayerInfo(val accountId: String = "",
                       val username: String = "",
-                      val accountId: String = "",
-                      var avatar: Bitmap? = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565))
+                      var avatar: Bitmap? = null,
+                      val avatarId: String? = null,
+                      val playerRole: PlayerRole = PlayerRole.PASSIVE,
+                      val teamNumber: Int = 0,
+                      val isBot: Boolean = false,
+                      val isOwner: Boolean = false,
+                      val finishedLoading: Boolean = false)
