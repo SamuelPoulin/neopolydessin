@@ -15,7 +15,9 @@ import { DatabaseService } from '../app/services/database.service';
 import {
   CurrentGameState,
   Difficulty,
+  Entity,
   GameType,
+  instanceOfPlayer,
   LobbyInfo,
   Player,
   PlayerRole,
@@ -59,12 +61,8 @@ export abstract class Lobby {
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
 
-  protected players: ServerPlayer[];
-  protected teams: {
-    teamNumber: number;
-    currentScore: number;
-    playersInTeam: ServerPlayer[];
-  }[];
+  protected players: Entity[];
+  protected teamScores: number[];
 
   constructor(
     @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
@@ -85,12 +83,12 @@ export abstract class Lobby {
     this.drawingCommands = new DrawingService();
     this.timeLeftSeconds = 0;
     this.players = [];
-    this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }];
+    this.teamScores = [];
   }
 
   toLobbyInfo(): Player[] {
     return this.players.map((player) => {
-      return this.serverPlayerToPlayer(player);
+      return this.toPlayer(player);
     });
   }
 
@@ -106,29 +104,25 @@ export abstract class Lobby {
   }
 
   getLobbyOwner(): ServerPlayer | undefined {
-    return this.players.find((player) => player.isOwner);
+    return this.players.find((player) => !player.isBot && (player as Player).isOwner) as ServerPlayer;
   }
 
-  serverPlayerToPlayer(serverPlayer: ServerPlayer): Player {
+  toPlayer(player: Entity): Player {
     return {
-      accountId: serverPlayer.accountId,
-      username: serverPlayer.username,
-      avatarId: serverPlayer.avatarId,
-      playerRole: serverPlayer.playerRole,
-      teamNumber: serverPlayer.teamNumber,
-      finishedLoading: serverPlayer.finishedLoading,
-      isBot: serverPlayer.isBot,
-      isOwner: serverPlayer.isOwner
+      accountId: instanceOfPlayer(player) ? (player as Player).accountId : null,
+      avatarId: instanceOfPlayer(player) ? (player as Player).avatarId : null,
+      finishedLoading: instanceOfPlayer(player) ? (player as Player).finishedLoading : null,
+      username: player.username,
+      playerRole: player.playerRole,
+      teamNumber: player.teamNumber,
+      isBot: player.isBot,
+      isOwner: player.isOwner
     };
   }
 
   removePlayer(accountId: string, socket: Socket) {
-    const index = this.players.findIndex((player) => player.accountId === accountId);
+    const index = this.players.findIndex((player) => !player.isBot && (player as Player).accountId === accountId);
     if (index > -1) {
-      const teamIndex = this.teams[this.players[index].teamNumber].playersInTeam.findIndex(((player) => player.accountId === accountId));
-      if (teamIndex > -1) {
-        this.teams[this.players[index].teamNumber].playersInTeam.splice(teamIndex, 1);
-      }
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
@@ -136,12 +130,7 @@ export abstract class Lobby {
         this.players[0].isOwner = true;
       }
       socket.leave(this.lobbyId);
-      socket.to(this.lobbyId)
-        .broadcast
-        .emit(SocketMessages.PLAYER_DISCONNECTION, this.serverPlayerToPlayer(removedPlayer), Date.now());
-      this.io
-        .in(this.lobbyId)
-        .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+      this.emitLeaveInfo(removedPlayer, socket);
       if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
         this.endGame(ReasonEndGame.PLAYER_DISCONNECT);
       }
@@ -149,14 +138,13 @@ export abstract class Lobby {
   }
 
   findPlayerById(accountId: string): Player | undefined {
-    return this.players.find((player) => player.accountId === accountId);
+    return this.players.find((player) => !player.isBot && (player as Player).accountId === accountId) as Player;
   }
 
   lobbyHasRoom(): boolean {
     return this.players.length < this.size;
   }
 
-  // todo remove playerRole sometime
   protected async addPlayerToTeam(playerId: string, socket: Socket, teamNumber: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.databaseService.getAccountById(playerId)
@@ -175,14 +163,8 @@ export abstract class Lobby {
             isOwner: this.players.length === 0 ? true : false
           };
           this.players.push(player);
-          this.teams[teamNumber].playersInTeam.push(player);
           socket.join(this.lobbyId);
-          socket.to(this.lobbyId)
-            .broadcast
-            .emit(SocketMessages.PLAYER_CONNECTION, this.serverPlayerToPlayer(player), Date.now());
-          this.io
-            .in(this.lobbyId)
-            .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+          this.emitJoinInfo(player, socket);
           resolve();
         })
         .catch((err) => {
@@ -191,7 +173,44 @@ export abstract class Lobby {
     });
   }
 
+  protected emitLeaveInfo(removedPlayer: Entity, socket: Socket): void {
+    socket.to(this.lobbyId).broadcast
+      .emit(SocketMessages.PLAYER_DISCONNECTION, this.toPlayer(removedPlayer), Date.now());
+    this.io.in(this.lobbyId)
+      .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+  }
+
+  protected emitJoinInfo(player: ServerPlayer, socket: Socket): void {
+    socket.to(this.lobbyId).broadcast
+      .emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
+    this.io.in(this.lobbyId)
+      .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+  }
+
   protected bindLobbyEndPoints(socket: Socket) {
+
+    // socket.on(SocketLobby.ADD_BOT, () => {
+    //   const bot: ServerPlayer = {
+    //     // accountId: playerId,
+    //     username: playerName,
+    //     // avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
+    //     playerRole: PlayerRole.PASSIVE,
+    //     // socket,
+    //     teamNumber,
+    //     isBot: true,
+    //     finishedLoading: false,
+    //     isOwner: this.players.length === 0 ? true : false
+    //   };
+    //   this.players.push(player);
+    //   this.teams[teamNumber].playersInTeam.push(player);
+    //   socket.join(this.lobbyId);
+    //   this.emitJoinInfo(player, socket);
+
+    // });
+
+    // socket.on(SocketLobby.REMOVE_BOT, () => {
+
+    // });
 
     socket.on(SocketLobby.START_GAME_SERVER, () => {
       const owner = this.getLobbyOwner();
@@ -288,7 +307,7 @@ export abstract class Lobby {
       if (playerDoneLoading) {
         playerDoneLoading.finishedLoading = true;
       }
-      if (this.players.every((player) => player.finishedLoading)) {
+      if (this.everyPlayerIsLoaded()) {
         this.startGame();
       }
     });
@@ -317,7 +336,7 @@ export abstract class Lobby {
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => player.socket.id === socket.id);
+    return this.players.find((player) => (player as ServerPlayer).socket.id === socket.id) as Player;
   }
 
   protected endGame(reason: ReasonEndGame): void {
@@ -327,14 +346,18 @@ export abstract class Lobby {
     SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
   }
 
+  protected getTeamLength(teamNumber: number): number {
+    return this.players.filter((player) => player.teamNumber === teamNumber).length;
+  }
+
   protected getTeamsScoreArray(): TeamScore[] {
     const teamScoreArray: TeamScore[] = [];
-    this.teams.forEach((team) => {
+    for (let i = 0; i < this.teamScores.length; i++) {
       teamScoreArray.push({
-        teamNumber: team.teamNumber,
-        score: team.currentScore
+        teamNumber: i,
+        score: this.teamScores[i],
       });
-    });
+    }
     return teamScoreArray;
   }
 
@@ -360,6 +383,10 @@ export abstract class Lobby {
 
   private validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
+  }
+
+  private everyPlayerIsLoaded(): boolean {
+    return this.players.every((player) => (!player.isBot && (player as Player).finishedLoading) || player.isBot);
   }
 
   abstract addPlayer(playerId: string, socket: Socket): void;

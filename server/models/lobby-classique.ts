@@ -9,6 +9,7 @@ import {
   GameType,
   GuessMessage,
   GuessResponse,
+  Player,
   PlayerRole,
   ReasonEndGame
 } from '../../common/communication/lobby';
@@ -24,9 +25,8 @@ export class LobbyClassique extends Lobby {
   private readonly START_GAME_TIME_LEFT: number = 30;
   private readonly REPLY_TIME: number = 15;
   private readonly END_SCORE: number = 5;
-  private teamDrawing: number;
-  private playerDrawing: number;
-  private drawerPlayer: ServerPlayer;
+  private drawingTeamNumber: number;
+  private drawer: ServerPlayer[];
 
   constructor(
     socketIdService: SocketIdService,
@@ -38,16 +38,16 @@ export class LobbyClassique extends Lobby {
     lobbyName: string
   ) {
     super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
-    this.teams = [{ teamNumber: 0, currentScore: 0, playersInTeam: [] }, { teamNumber: 1, currentScore: 0, playersInTeam: [] }];
     this.gameType = GameType.CLASSIC;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
-    this.teamDrawing = 0;
-    this.playerDrawing = 0;
+    this.teamScores = [0, 0];
+    this.drawingTeamNumber = 0;
+    this.drawer = [];
   }
 
   addPlayer(playerId: string, socket: Socket) {
-    const teamNumber = (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) ? 0 : 1;
+    const teamNumber = (this.getTeamLength(0) <= this.getTeamLength(1)) ? 0 : 1;
     this.addPlayerToTeam(playerId, socket, teamNumber)
       .then(() => {
         this.bindLobbyEndPoints(socket);
@@ -58,14 +58,12 @@ export class LobbyClassique extends Lobby {
   }
 
   changeTeam(accountId: string, teamNumber: number) {
-    const index = this.players.findIndex((player) => player.accountId === accountId);
-    if (index < -1 && this.teams[teamNumber].playersInTeam.length < (this.size / 2)) {
-      const oldTeamIndex = this.teams[this.players[index].teamNumber].playersInTeam.findIndex((player) => player.accountId === accountId);
-      if (oldTeamIndex) {
-        this.teams[this.players[index].teamNumber].playersInTeam.splice(oldTeamIndex, 1);
-      }
+    const index = this.players.findIndex((player) => (player as Player).accountId === accountId);
+    if (index > -1
+      && this.players[index].teamNumber !== teamNumber
+      && this.getTeamLength(teamNumber) < this.size / 2
+    ) {
       this.players[index].teamNumber = teamNumber;
-      this.teams[teamNumber].playersInTeam.push(this.players[index]);
     }
   }
 
@@ -78,46 +76,42 @@ export class LobbyClassique extends Lobby {
     super.bindLobbyEndPoints(socket);
 
     socket.on(SocketLobby.PLAYER_GUESS, (word: string) => {
-      const guesserAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      const guesserValues = this.players.find((element) => element.accountId === guesserAccountId);
-      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
+      const accountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      const guesser = this.getGuesser();
+      if (guesser && guesser.accountId === accountId) {
         const distance = levenshtein(word, this.wordToGuess);
-        let guessStat;
+        let guessStatus: GuessResponse;
         switch (distance) {
           case 0: {
-            guessStat = GuessResponse.CORRECT;
-            this.teams[guesserValues.teamNumber].currentScore++;
+            guessStatus = GuessResponse.CORRECT;
+            this.teamScores[guesser.teamNumber]++;
             this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
-            if (this.teams[guesserValues.teamNumber].currentScore === this.END_SCORE) {
+            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
               this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
             }
-            this.playerDrawing++;
-            this.teamDrawing++;
+            this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
             this.startRoundTimer();
             break;
           }
           case 1:
           case 2: {
-            guessStat = GuessResponse.CLOSE;
+            guessStatus = GuessResponse.CLOSE;
             this.startReply();
             break;
           }
           default: {
-            guessStat = GuessResponse.WRONG;
+            guessStatus = GuessResponse.WRONG;
             this.startReply();
             break;
           }
         }
-        const player = this.findPlayerBySocket(socket);
-        if (player) {
-          const guessReturn: GuessMessage = {
-            content: word,
-            timestamp: Date.now(),
-            guessStatus: guessStat,
-            senderUsername: player.username
-          };
-          this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
-        }
+        const guessReturn: GuessMessage = {
+          content: word,
+          timestamp: Date.now(),
+          guessStatus,
+          senderUsername: guesser.username
+        };
+        this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
       }
     });
   }
@@ -136,7 +130,7 @@ export class LobbyClassique extends Lobby {
     this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
-      this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
+      this.io.to(this.drawer[this.drawingTeamNumber].socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
     });
 
     clearInterval(this.clockTimeout);
@@ -178,8 +172,7 @@ export class LobbyClassique extends Lobby {
 
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
-    this.playerDrawing++;
-    this.teamDrawing++;
+    this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.startRoundTimer();
   }
 
@@ -195,57 +188,38 @@ export class LobbyClassique extends Lobby {
   }
 
   private setRoles() {
-    const indexTeamDrawing = this.teamDrawing % 2;
-    const indexPlayerDrawing = this.playerDrawing % 2;
-    this.teams.forEach((team, indexTeam) => {
-      team.playersInTeam.forEach((player, indexPlayer) => {
-        if (indexTeamDrawing === indexTeam) {
-          const botPlayer = this.findBotPlayerInTeam(indexTeam);
-          let shouldBeDrawer;
-          if (botPlayer) {
-            shouldBeDrawer = indexPlayer === botPlayer;
-          }
-          else {
-            shouldBeDrawer = indexPlayer === indexPlayerDrawing;
-          }
-          if (shouldBeDrawer) {
-            player.playerRole = PlayerRole.DRAWER;
-            this.drawerPlayer = player;
-          }
-          else {
+    this.players.forEach((player) => {
+      if (player.teamNumber === this.drawingTeamNumber) {
+        if (player.isBot) {
+          player.playerRole = PlayerRole.DRAWER;
+        } else {
+          const previousDrawer = this.drawer[this.drawingTeamNumber];
+          if (previousDrawer && (player as Player).accountId === previousDrawer.accountId) {
             player.playerRole = PlayerRole.GUESSER;
+          } else {
+            player.playerRole = PlayerRole.DRAWER;
+            this.drawer[this.drawingTeamNumber] = player as ServerPlayer;
           }
         }
-        else {
-          player.playerRole = PlayerRole.PASSIVE;
-        }
-      });
+      } else {
+        player.playerRole = PlayerRole.PASSIVE;
+      }
     });
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
   private setReplyRoles() {
-    const indexTeamDrawing = this.teamDrawing % 2;
-    this.teams.forEach((team, indexTeam) => {
-      team.playersInTeam.forEach((player, indexPlayer) => {
-        if (indexTeamDrawing === indexTeam) {
-          player.playerRole = PlayerRole.PASSIVE;
-        }
-        else {
-          player.playerRole = PlayerRole.GUESSER;
-        }
-      });
+    this.players.forEach((player) => {
+      if (player.teamNumber === this.drawingTeamNumber) {
+        player.playerRole = PlayerRole.PASSIVE;
+      } else {
+        player.playerRole = PlayerRole.GUESSER;
+      }
     });
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
-  private findBotPlayerInTeam(teamIndex: number): number | undefined {
-    let indexBotPlayer;
-    this.teams[teamIndex].playersInTeam.forEach((player, index) => {
-      if (player.isBot) {
-        indexBotPlayer = index;
-      }
-    });
-    return indexBotPlayer;
+  private getGuesser(): Player | undefined {
+    return this.players.find((player) => !player.isBot && player.playerRole === PlayerRole.GUESSER) as Player;
   }
 }

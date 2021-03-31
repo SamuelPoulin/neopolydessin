@@ -6,6 +6,9 @@ export enum SocketLobby {
     JOIN_LOBBY = 'joinLobby',
     LEAVE_LOBBY = 'leaveLobby',
 
+    ADD_BOT = 'addBot',
+    REMOVE_BOT = 'removeBot',
+
     CHANGE_PRIVACY_SETTING = 'privacySetting',
     CHANGED_PRIVACY_SETTING = 'changedPrivacy',
 

@@ -52,7 +52,7 @@ export class LobbySolo extends Lobby {
       const guesserValues = this.findPlayerBySocket(socket);
       if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         if (word === this.wordToGuess) {
-          this.teams[0].currentScore++;
+          this.teamScores[0]++;
           this.timeLeftSeconds += 30;
           this.addTimeOnCorrectGuess();
           // EMIT NEW TIME

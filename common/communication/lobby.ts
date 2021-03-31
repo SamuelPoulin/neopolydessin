@@ -8,15 +8,26 @@ export interface LobbyInfo {
   gameType: GameType;
 }
 
-export interface Player {
-  accountId: string;
+export interface Player extends Entity {
+  accountId: string | null;
+  avatarId: string | null;
+  finishedLoading: boolean | null;
+}
+
+export interface Entity {
   username: string;
-  avatarId: string;
   playerRole: PlayerRole;
   teamNumber: number;
   isBot: boolean;
   isOwner: boolean;
-  finishedLoading: boolean;
+}
+
+export const instanceOfEntity: (object: any) => boolean = (object: any): object is Entity => {
+  return 'username' in object;
+}
+
+export const instanceOfPlayer: (object: any) => boolean = (object: any): object is Player => {
+  return 'accountId' in object;
 }
 
 export interface TeamScore {
