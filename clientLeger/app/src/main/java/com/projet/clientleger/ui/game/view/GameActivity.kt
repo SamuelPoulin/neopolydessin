@@ -37,6 +37,7 @@ class GameActivity : AppCompatActivity() {
     lateinit var binding: ActivityGameBinding
     private var currentKeyWord : String = ""
     private val players: ArrayList<PlayerInfo> = ArrayList()
+    private lateinit var timer:CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +106,8 @@ class GameActivity : AppCompatActivity() {
         }
     }
     private fun setTimer(timeInMilis:Long){
-        val timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
+        timer.cancel()
+        timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
             @SuppressLint("SetTextI18n")
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){

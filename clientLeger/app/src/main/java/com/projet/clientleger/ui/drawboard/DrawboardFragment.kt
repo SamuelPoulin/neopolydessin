@@ -7,15 +7,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import com.google.android.material.slider.Slider
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.DrawTool
-import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -36,6 +33,18 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
         setFragmentResultListener("isDrawing"){requestKey, bundle ->
             changeToolsVisibility(bundle["boolean"] as Boolean)
+        }
+        setSubscriptions()
+    }
+
+    private fun setSubscriptions(){
+        vm.isUndoPossibleLiveData.observe(requireActivity()){
+            println("DISABLE/ENABLE REDO BUTTON")
+            binding!!.undoBtn.isEnabled = it
+        }
+        vm.isRedoPossibleLiveData.observe(requireActivity()){
+            println("DISABLE/ENABLE UNDO BUTTON")
+            binding!!.redoBtn.isEnabled = it
         }
     }
 
