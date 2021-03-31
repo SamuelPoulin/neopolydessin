@@ -34,6 +34,9 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         setFragmentResultListener("isDrawing"){requestKey, bundle ->
             changeToolsVisibility(bundle["boolean"] as Boolean)
         }
+        setFragmentResultListener("boardwipeNeeded"){requestKey, bundle ->
+            vm.boardwipe()
+        }
         setSubscriptions()
     }
 
