@@ -4,10 +4,10 @@ enum class DrawTool(val value: String) {
     PEN("Pen"),
     ERASER("Eraser");
 
-    fun switchTool(): DrawTool {
+    /*fun switchTool(): DrawTool {
         return if(this == PEN)
             ERASER
         else
             PEN
-    }
+    }*/
 }

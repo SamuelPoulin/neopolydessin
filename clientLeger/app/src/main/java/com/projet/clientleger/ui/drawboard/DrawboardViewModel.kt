@@ -53,8 +53,11 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
 
-    fun switchCurrentTool(){
-        currentTool = currentTool.switchTool()
+    fun switchCurrentTool(tool:String){
+        when(tool){
+            "eraser" -> currentTool = DrawTool.ERASER
+            "pencil" -> currentTool = DrawTool.PEN
+        }
     }
 
     fun getCurrentToolWidth(): Float{
