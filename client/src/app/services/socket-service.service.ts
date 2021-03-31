@@ -192,10 +192,10 @@ export class SocketService {
     this.socket.emit(SocketLobby.START_GAME_SERVER);
   }
 
-  receiveStartPath(): Observable<{ coord: Coordinate; brush: BrushInfo }> {
-    return new Observable<{ coord: Coordinate; brush: BrushInfo }>((obs) => {
+  receiveStartPath(): Observable<{ id: number; coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ id: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
       this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate, brush: BrushInfo) => {
-        obs.next({ coord, brush });
+        obs.next({ id, coord, brush });
       });
     });
   }
