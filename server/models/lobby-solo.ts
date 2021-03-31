@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, GameType, PlayerRole } from '../../common/communication/lobby';
+import { Difficulty, GameType, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
@@ -93,7 +93,7 @@ export class LobbySolo extends Lobby {
 
   private timeRunOut() {
     clearInterval(this.clockTimeout);
-    this.endGame();
+    this.endGame(ReasonEndGame.TIME_RUN_OUT);
   }
 
   private addTimeOnCorrectGuess() {
