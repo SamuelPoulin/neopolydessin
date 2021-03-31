@@ -55,7 +55,7 @@ export class EditorService {
 
     this.initListeners();
     this.gameService.roleChanged.subscribe(() => {
-      // this.resetDrawing();
+      this.resetDrawing();
       this.initListeners();
     });
 
@@ -68,6 +68,9 @@ export class EditorService {
   }
 
   resetDrawing(): void {
+    if (this.view) {
+      this.shapes.forEach(this.view.removeShape, this.view);
+    }
     this.shapesBuffer.length = 0;
     this.shapes.length = 0;
     this.previewShapes.length = 0;
@@ -159,7 +162,6 @@ export class EditorService {
       if (!this.view) {
         this.shapesBuffer.push(shape);
       } else if (!this.view.svg.contains(shape.svgNode)) {
-        this.socketService.sendAddPath(shape.id - 1); // todo - conform to server standard
         this.shapesBuffer.push(shape);
         this.view.addShape(shape);
       }

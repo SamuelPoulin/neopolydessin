@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { GameService } from '@services/game.service';
 import { Player, PlayerRole } from '../../../../../../common/communication/lobby';
 
 @Component({
@@ -8,16 +9,20 @@ import { Player, PlayerRole } from '../../../../../../common/communication/lobby
 })
 export class TeamComponent {
   @Input() team: Player[];
-  @Input() score: number;
+  @Input() scoreIndex: number;
   @Input() name: string;
   @Input() ennemy: boolean;
 
-  constructor() {
+  constructor(private gameService: GameService) {
     this.team = [];
     this.name = '';
   }
 
   get playerRole() {
     return PlayerRole;
+  }
+
+  get score() {
+    return this.gameService.scores[this.scoreIndex].score;
   }
 }

@@ -1,5 +1,7 @@
 import { async, TestBed } from '@angular/core/testing';
 import { ChatService } from './chat.service';
+import { GameService } from './game.service';
+import { MockGameService } from './game.service.spec';
 import { SocketService } from './socket-service.service';
 import { MockSocketService } from './socket-service.service.spec';
 
@@ -17,7 +19,10 @@ describe('ChatService', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: SocketService, useValue: MockSocketService }],
+      providers: [
+        { provide: SocketService, useValue: MockSocketService },
+        { provide: GameService, useValue: MockGameService },
+      ],
     }).compileComponents();
   }));
 

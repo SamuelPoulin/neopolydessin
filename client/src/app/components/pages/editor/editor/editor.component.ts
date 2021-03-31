@@ -35,6 +35,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   drawingId: string;
   drawing: Drawing;
   modalTypes: typeof ModalType;
+  timeLeft: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,6 +54,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.keyboardListener = new EditorKeyboardListener(this);
 
     this.currentToolType = ToolType.Pen;
+
+    setInterval(() => this.updateTimeLeft(), GameService.SECOND);
   }
 
   ngOnInit(): void {
@@ -134,8 +137,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
-  get timeLeft(): string {
-    return format(new Date(this.gameService.getTimeLeft()), 'mm:ss');
+  updateTimeLeft(): void {
+    this.timeLeft = format(new Date(this.gameService.getTimeLeft()), 'mm:ss');
   }
 
   get hint(): string {

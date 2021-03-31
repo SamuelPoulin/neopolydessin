@@ -9,7 +9,7 @@ import { UserService } from './user.service';
   providedIn: 'root',
 })
 export class GameService {
-  private static readonly SECOND: number = 1000;
+  static readonly SECOND: number = 1000;
   canDraw: boolean = false;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   isHost: boolean = false;
@@ -33,12 +33,15 @@ export class GameService {
 
   constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
     this.resetTeams();
+    this.scores = [
+      { teamNumber: 0, score: 0 },
+      { teamNumber: 1, score: 0 },
+    ];
     this.initSubscriptions();
   }
 
   initSubscriptions() {
     this.lobbySubscription = this.socketService.getLobbyInfo().subscribe((players) => {
-      console.log(players);
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.username) {
@@ -46,7 +49,6 @@ export class GameService {
         }
         this.teams[player.teamNumber].push(player);
       }
-      console.log(this.teams);
     });
     this.timestampSubscription = this.socketService.receiveNextTimestamp().subscribe((timeInfo) => {
       this.nextTimestamp = Date.now() - timeInfo.serverTime + timeInfo.timestamp;
@@ -59,15 +61,14 @@ export class GameService {
       this.router.navigate(['edit']);
     });
     this.rolesSubscription = this.socketService.receiveRoles().subscribe((players) => {
-      console.log(players);
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.username) {
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
-          this.roleChanged.emit(player.playerRole);
         } else if (player.playerRole === PlayerRole.DRAWER) {
           this.wordToDraw = '';
+          this.roleChanged.emit(player.playerRole);
         }
         this.teams[player.teamNumber].push(player);
       }
@@ -84,10 +85,6 @@ export class GameService {
 
   resetTeams() {
     this.teams = [[], []];
-    this.scores = [
-      { teamNumber: 0, score: 0 },
-      { teamNumber: 1, score: 0 },
-    ];
   }
 
   startGame() {
