@@ -35,7 +35,7 @@ class GameActivity : AppCompatActivity() {
 
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
-    private var currentKeyWord : String = ""
+    //private var currentKeyWord : String = ""
     private val players: ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
 
