@@ -25,10 +25,9 @@ import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
+import kotlinx.android.synthetic.main.item_lobbyinfo.*
 import java.io.Serializable
 import javax.inject.Inject
-
-
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
@@ -108,7 +107,7 @@ class MainmenuActivity : AppCompatActivity() {
         dialogView.actionBtn.setOnClickListener {
             val gameInfo = GameCreationInfosModel(vm.getUsername(), selectedGameMode.value, selectedDifficulty.value, false)
             if(isCreating){
-                vm.createGame(dialog.gameName.text.toString(), selectedGameMode , selectedDifficulty, false)
+                vm.createGame(getGameName(dialog), selectedGameMode , selectedDifficulty, false)
                 val intent = Intent(this,LobbyActivity::class.java).apply{
                     putExtra("GAME_INFO",gameInfo as Serializable)
                 }
@@ -124,6 +123,13 @@ class MainmenuActivity : AppCompatActivity() {
         dialogView.cancelButton.setOnClickListener {
             dialog.dismiss()
         }
+    }
+    private fun getGameName(dialog:AlertDialog):String{
+        var gameName = "Partie de ${vm.getUsername()}"
+        if(dialog.gameName.text.toString() != ""){
+            gameName = dialog.gameName.text.toString()
+        }
+        return gameName
     }
     private fun setupGamemodeSpinner(dialogView:View){
         val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
