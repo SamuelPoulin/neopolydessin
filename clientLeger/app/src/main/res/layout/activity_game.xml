@@ -30,11 +30,13 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:contentDescription="@string/logo" />
 
-            <TextView
-                android:id="@+id/timerText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Temps Restant : "
+            <ImageView
+                android:id="@+id/timerIcon"
+                android:layout_width="0dp"
+                app:layout_constraintWidth_percent="0.1"
+                app:layout_constraintHeight_percent="1"
+                android:layout_height="0dp"
+                android:src="@drawable/download"
                 android:textColor="@color/black"
                 android:textSize="35sp"
                 android:textStyle="bold"
@@ -48,7 +50,7 @@
                 android:textColor="@color/green"
                 android:textSize="35sp"
                 android:textStyle="bold"
-                app:layout_constraintLeft_toRightOf="@id/timerText"
+                app:layout_constraintLeft_toRightOf="@id/timerIcon"
                 app:layout_constraintBottom_toBottomOf="parent" />
             <TextView
                 android:id="@+id/role"
