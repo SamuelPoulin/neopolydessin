@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextClock
 import android.widget.TextView
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.PlayerRole
@@ -27,13 +28,17 @@ class PlayersAdapter(private val players: List<PlayerInfo>) : RecyclerView.Adapt
     }
 
     override fun onBindViewHolder(holder: ViewHolderPlayer, position: Int) {
-        println(holder.avatarView)
-        holder.avatarView.setImageBitmap(players[position].avatar)
+        if(players[position].avatar == null){
+            holder.avatarView.setImageResource(R.drawable.ic_missing_player)
+        }
+        else{
+            holder.avatarView.setImageBitmap(players[position].avatar)
+        }
         holder.usernameTextView.text = players[position].username
         val icon = when(players[position].playerRole){
             PlayerRole.DRAWER -> R.drawable.ic_drawer
             PlayerRole.GUESSER -> R.drawable.ic_guessing
-            PlayerRole.PASSIVE -> 0
+            else -> 0
         }
         if(icon != 0)
             holder.actionIcon.setImageResource(icon)

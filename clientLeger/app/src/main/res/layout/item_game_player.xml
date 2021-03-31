@@ -4,11 +4,10 @@
     android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/avatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        android:layout_width="35dp"
+        android:layout_height="35dp"/>
     <TextView
         android:id="@+id/username"
-        android:text="stonkMaster"
         android:textStyle="bold"
         android:textColor="@color/black"
         android:layout_gravity="center"
