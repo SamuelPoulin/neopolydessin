@@ -19,7 +19,7 @@ data class Player(val accountId: String = "",
                   val finishedLoading: Boolean = false) : Parcelable {
     fun toPlayerInfo(avatarBitmap: Bitmap?): PlayerInfo {
         return PlayerInfo(accountId, username,
-                avatarBitmap, PlayerRole.stringToRole(playerRole),
+                avatarBitmap, avatarId, PlayerRole.stringToRole(playerRole),
                 teamNumber, isBot, isOwner, finishedLoading)
     }
 }

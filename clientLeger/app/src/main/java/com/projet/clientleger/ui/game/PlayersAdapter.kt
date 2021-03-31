@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextClock
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.PlayerRole
@@ -16,7 +17,7 @@ class PlayersAdapter(private val players: List<PlayerInfo>) : RecyclerView.Adapt
 
     class ViewHolderPlayer(view: View) : RecyclerView.ViewHolder(view){
         val avatarView: ImageView = itemView.findViewById(R.id.avatar)
-        val usernameTextView: TextClock = itemView.findViewById(R.id.username)
+        val usernameTextView: TextView = itemView.findViewById(R.id.username)
         val actionIcon: ImageView = itemView.findViewById(R.id.actionIcon)
     }
 

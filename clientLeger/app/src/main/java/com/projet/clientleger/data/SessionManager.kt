@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.*
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.TokenInterceptor

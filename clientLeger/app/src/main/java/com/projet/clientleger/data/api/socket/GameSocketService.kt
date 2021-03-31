@@ -1,5 +1,6 @@
 package com.projet.clientleger.data.api.socket
 
+import android.graphics.Bitmap
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
@@ -38,4 +39,12 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
     fun onPlayerReady(){
         socketService.socket.emit(GameSocketEndPoints.PLAYER_READY.value)
     }
+
+//    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{
+//        for(player in players)
+//        {
+//            var avatar: Bitmap? = null
+//
+//        }
+//    }
 }

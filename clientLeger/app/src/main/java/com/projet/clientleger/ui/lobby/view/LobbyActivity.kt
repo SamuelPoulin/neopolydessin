@@ -3,16 +3,15 @@ package com.projet.clientleger.ui.lobby.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.game.view.GameActivity
@@ -21,7 +20,6 @@ import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LobbyActivity : AppCompatActivity() {
@@ -41,9 +39,7 @@ class LobbyActivity : AppCompatActivity() {
 //                }
 
         vm.receiveStartGame().subscribe{
-            lifecycleScope.launch {
-                goToActivity(GameActivity::class.java)
-            }
+            goToGame()
         }
     }
 
@@ -140,9 +136,9 @@ class LobbyActivity : AppCompatActivity() {
         val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }
-
-    private fun <T> goToActivity(java: Class<T>) {
-        startActivity(Intent(this, java))
+    private fun goToGame(){
+        val intent = Intent(this, GameActivity::class.java)
+        startActivity(intent)
     }
     private fun kickPlayer(player:PlayerInfo){
         println("kic: ${player.username}")

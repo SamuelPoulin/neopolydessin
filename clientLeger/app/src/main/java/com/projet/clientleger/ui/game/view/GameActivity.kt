@@ -2,6 +2,7 @@ package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Rect
 import android.opengl.Visibility
 import android.os.Bundle
@@ -11,13 +12,19 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.PlayerRole
+import com.projet.clientleger.data.model.game.PlayerAvatar
+import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.game.PlayersAdapter
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 const val MILLIS_IN_SEC:Long = 1000
 const val TIME_ALMOST_UP:Int= 15000
@@ -29,6 +36,7 @@ class GameActivity : AppCompatActivity() {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private var currentKeyWord : String = ""
+    private val players: ArrayList<PlayerInfo> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +53,10 @@ class GameActivity : AppCompatActivity() {
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
         //clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
+
+        binding.playersRv.layoutManager = LinearLayoutManager(this)
+        binding.playersRv.adapter = PlayersAdapter(players)
+
         vm.onPlayerReady()
     }
     @SuppressLint("SetTextI18n")
@@ -55,6 +67,15 @@ class GameActivity : AppCompatActivity() {
             supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
             binding.role.text = getFrenchRole(it.value)
         }
+
+        vm.playersLiveData.observe(this){
+            if(players.isEmpty())
+                updatePlayersAvatar(it)
+            players.clear()
+            players.addAll(it)
+            binding.playersRv.adapter?.notifyDataSetChanged()
+        }
+
         vm.activeWord.observe(this){
             println("Nouveau Mot : $it")
             if(vm.currentRoleLiveData.value == PlayerRole.DRAWER){
@@ -71,6 +92,11 @@ class GameActivity : AppCompatActivity() {
             setTimer(it)
         }
     }
+
+    private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
+        
+    }
+
     private fun getFrenchRole(role:String):String{
         return when (role){
             PlayerRole.DRAWER.value -> "Dessinateur"
