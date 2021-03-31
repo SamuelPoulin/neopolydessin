@@ -53,14 +53,6 @@ class SearchLobbyActivity : AppCompatActivity() {
                     println(error)
                 })
         }
-        println(lobbyList)
-        vm.receiveJoinedLobbyInfo().subscribe{
-            val intent = Intent(this, LobbyActivity::class.java).apply{
-                putExtra("LOBBY_INFO",it)
-                putExtra("GAME_INFO", GameCreationInfosModel("me", gameInfo.gameMode, gameInfo.difficulty, false) as Serializable)
-            }
-            startActivity(intent)
-        }
     }
     private fun removeGameWithID(id:String){
         //algo pour trouver les items par tag (pour remove). sera plus facile lorsqu'on aura une map
@@ -82,7 +74,14 @@ class SearchLobbyActivity : AppCompatActivity() {
     }
 
     private fun joinLobby(lobbyId: String){
-        vm.joinLobby(lobbyId)
+        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        val intent = Intent(this, LobbyActivity::class.java).apply{
+            putExtra("isJoining", true)
+            putExtra("lobbyId", lobbyId)
+            //putExtra("LOBBY_INFO",it)
+            putExtra("GAME_INFO", GameCreationInfosModel("me", gameInfo.gameMode, gameInfo.difficulty, false) as Serializable)
+        }
+        startActivity(intent)
     }
     private fun setGameModeWithInput(gameMode:String){
         when(gameMode){

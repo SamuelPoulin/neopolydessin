@@ -48,6 +48,13 @@ class LobbyActivity : AppCompatActivity() {
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupButtons()
+        if(intent.getBooleanExtra("isJoining", false)){
+            vm.receiveJoinedLobbyInfo().subscribe{
+                println("lobby list received $it")
+            }
+            intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }
+        }
+
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for(i in rvTeams.indices){
             val manager = LinearLayoutManager(this)

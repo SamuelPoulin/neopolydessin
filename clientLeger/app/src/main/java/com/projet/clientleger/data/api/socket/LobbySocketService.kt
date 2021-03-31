@@ -39,6 +39,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return Observable.create{
             emitter -> socketService.socket.emit("getListLobby",gameMode.value, difficulty.value, Ack{ res ->
+            println(res[0])
             val jsonList = res[0] as JSONArray
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){
@@ -51,12 +52,10 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<Player>>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
-            println("players received")
             val list = ArrayList<Player>()
             val jsonList = players as JSONArray
             for(i in 0 until jsonList.length())
                 list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
-            println(list)
             list
         }
     }

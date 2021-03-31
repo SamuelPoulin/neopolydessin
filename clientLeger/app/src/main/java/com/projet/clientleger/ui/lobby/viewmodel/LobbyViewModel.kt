@@ -117,4 +117,12 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         teams[0].value!![0] = playerInfo
         teams[0].postValue(teams[0].value!!)
     }
+
+    fun joinGame(lobbyId: String){
+        lobbyRepository.joinLobby(lobbyId)
+    }
+
+    fun receiveJoinedLobbyInfo(): Observable<ArrayList<PlayerInfo>> {
+        return lobbyRepository.receiveJoinedLobbyInfo()
+    }
 }

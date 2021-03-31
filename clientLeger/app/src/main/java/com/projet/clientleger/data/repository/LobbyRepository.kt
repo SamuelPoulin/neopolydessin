@@ -47,6 +47,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return Observable.create { emitter ->
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
+                println(it)
                 for(player in it){
                     var avatar: Bitmap? = null
                     if(player.avatarId!= null){
@@ -57,6 +58,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
                     }
                     list.add(player.toPlayerInfo(avatar))
                 }
+                println("emit next: $list")
                 emitter.onNext(list)
             }
         }
