@@ -42,11 +42,9 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     private fun setSubscriptions(){
         vm.isUndoPossibleLiveData.observe(requireActivity()){
-            println("DISABLE/ENABLE REDO BUTTON")
             binding!!.undoBtn.isEnabled = it
         }
         vm.isRedoPossibleLiveData.observe(requireActivity()){
-            println("DISABLE/ENABLE UNDO BUTTON")
             binding!!.redoBtn.isEnabled = it
         }
     }
