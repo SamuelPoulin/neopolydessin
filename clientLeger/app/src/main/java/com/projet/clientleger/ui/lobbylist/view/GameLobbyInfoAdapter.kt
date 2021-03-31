@@ -11,6 +11,8 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.LobbyInfo
 import com.projet.clientleger.data.model.GameInfo
 
+const val MAX_GAME_SIZE:Int = 4
+
 class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
 private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
@@ -35,6 +37,12 @@ private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobby
         viewHolder.gameModeTextView.text = lobbyList[position].gameType
         viewHolder.gameCapacityTextView.text = lobbyList[position].nbPlayerInLobby.toString()
         viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
+        disableFullGame(viewHolder,position)
+    }
+    private fun disableFullGame(viewHolder: ViewHolder, position: Int){
+        if(lobbyList[position].nbPlayerInLobby >= MAX_GAME_SIZE){
+            viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).isEnabled = false
+        }
     }
     override fun getItemCount(): Int {
         return lobbyList.size
