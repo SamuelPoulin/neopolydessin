@@ -43,7 +43,6 @@ export abstract class Lobby {
 
   protected io: Server;
   protected ownerAccountId: string;
-  protected ownerUsername: string;
   protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
@@ -71,9 +70,6 @@ export abstract class Lobby {
   ) {
     this.io = io;
     this.ownerAccountId = accountId;
-    this.databaseService.getAccountById(accountId).then((account) => {
-      this.ownerUsername = account.documents.username;
-    });
     this.difficulty = difficulty;
     this.privateLobby = privacySetting;
     this.lobbyName = lobbyName;
@@ -92,7 +88,6 @@ export abstract class Lobby {
     if (newOwner) {
       newOwner.isOwner = true;
       this.ownerAccountId = newOwner.accountId;
-      this.ownerUsername = newOwner.username;
     }
   }
 
@@ -103,10 +98,12 @@ export abstract class Lobby {
   }
 
   getLobbySummary(): LobbyInfo {
+    const owner = this.players.find((player) => player.isOwner);
+    const ownerName = owner? owner.username : 'Jesus';
     return {
       lobbyId: this.lobbyId,
       lobbyName: this.lobbyName,
-      ownerUsername: this.ownerUsername,
+      ownerUsername: ownerName,
       nbPlayerInLobby: this.players.length,
       gameType: this.gameType
     };
@@ -137,7 +134,6 @@ export abstract class Lobby {
       this.unbindLobbyEndPoints(socket);
       if (accountId === this.ownerAccountId) {
         this.ownerAccountId = this.players[0].accountId;
-        this.ownerUsername = this.players[0].username;
         this.players[0].isOwner = true;
       }
       socket.leave(this.lobbyId);
