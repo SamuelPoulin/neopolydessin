@@ -128,6 +128,7 @@ export class LobbyClassique extends Lobby {
     // SEND WORD TO DRAWER
     // START TIMER AND SEND TIME TO CLIENT
     this.setRoles();
+    this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
       this.io.to(this.drawerPlayer.socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);

@@ -108,6 +108,7 @@ export class LobbyCoop extends Lobby {
   protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
+    this.drawingCommands.resetDrawing();
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
