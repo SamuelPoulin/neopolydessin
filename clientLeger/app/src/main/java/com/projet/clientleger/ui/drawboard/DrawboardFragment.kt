@@ -7,10 +7,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import com.google.android.material.slider.Slider
 import com.projet.clientleger.data.enumData.DrawTool
+import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -24,6 +28,16 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     val vm: DrawboardViewModel by viewModels()
     private var binding: DrawboardFragmentBinding? = null
+    private var isDrawing = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setFragmentResultListener("isDrawing"){requestKey, bundle ->
+            changeToolsVisibility(bundle["boolean"] as Boolean)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = DrawboardFragmentBinding.inflate(inflater, container, false)
@@ -45,6 +59,17 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         binding = null
     }
 
+    private fun changeToolsVisibility(isVisible: Boolean){
+        val visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
+        binding!!.strokeWidthSlider.visibility = visibility
+        binding!!.toolPreviewContainer.visibility = visibility
+        binding!!.undoBtn.visibility = visibility
+        binding!!.redoBtn.visibility = visibility
+        binding!!.colorPickerBtn.visibility = visibility
+        binding!!.eraserBtn.visibility = visibility
+        isDrawing = isVisible
+    }
+
     private fun setupBtnClickListeners(){
         binding!!.colorPickerBtn.setOnClickListener { pickColor() }
         binding!!.eraserBtn.setOnClickListener { changeTool() }
@@ -55,7 +80,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupViewListener(){
         binding!!.drawingBoard.setOnTouchListener { _, event ->
-            if (event != null) {
+            if (event != null && isDrawing) {
                 when(vm.currentTool){
                     DrawTool.PEN -> handlePenViewEvent(event)
                     DrawTool.ERASER -> handleEraserViewEvent(event)
