@@ -32,10 +32,12 @@ export class UserService {
     this.router.navigate(['/login']);
   }
 
+  // TODO: REMOVE ANY
   async fetchAvatar(): Promise<void> {
     return new Promise<void>((resolve) => {
       this.apiService.getAccount().then((account) => {
         this.apiService.getAvatarById(account.avatar._id).then((blob: any) => {
+          // eslint-disable-line
           this._avatarBlob = blob;
           resolve();
         });

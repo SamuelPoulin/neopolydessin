@@ -100,8 +100,11 @@ export class APIService {
     });
   }
 
+  // TODO: REMOVE ANYs
   async getAvatarById(id: string): Promise<any> {
+    // eslint-disable-line
     return new Promise<any>((resolve) => {
+      // eslint-disable-line
       const url = APIService.API_AVATAR_ROUTE + `/${id}`;
       this.http.get(url, { headers: { authorization: this.localSaveService.accessToken }, responseType: 'blob' }).subscribe((blob) => {
         resolve(blob);
@@ -110,7 +113,9 @@ export class APIService {
   }
 
   async getAccount(): Promise<any> {
+    // eslint-disable-line
     return new Promise<any>((resolve) => {
+      // eslint-disable-line
       this.http
         .get(APIService.API_ACCOUNT_ROUTE, { headers: { authorization: this.localSaveService.accessToken } })
         .subscribe((account) => {

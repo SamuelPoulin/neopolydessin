@@ -24,6 +24,7 @@ export class AvatarComponent implements OnInit {
     this.fontSize = 25;
   }
 
+  // TODO: REMOVE ANY
   ngOnInit() {
     this.color = randomColor({ seed: this.username, luminosity: 'bright' });
 
@@ -38,6 +39,7 @@ export class AvatarComponent implements OnInit {
     }
     if (this.avatarId) {
       this.apiService.getAvatarById(this.avatarId).then((blob: any) => {
+        // eslint-disable-line
         this.url = URL.createObjectURL(blob);
       });
     }
