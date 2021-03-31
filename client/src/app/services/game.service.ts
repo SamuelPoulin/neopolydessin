@@ -66,9 +66,9 @@ export class GameService {
         if (player.username === this.userService.username) {
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
+          this.roleChanged.emit(player.playerRole);
         } else if (player.playerRole === PlayerRole.DRAWER) {
           this.wordToDraw = '';
-          this.roleChanged.emit(player.playerRole);
         }
         this.teams[player.teamNumber].push(player);
       }
