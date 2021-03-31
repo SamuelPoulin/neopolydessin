@@ -15,6 +15,7 @@ export interface Player {
   playerRole: PlayerRole;
   teamNumber: number;
   isBot: boolean;
+  isOwner: boolean;
   finishedLoading: boolean;
 }
 
