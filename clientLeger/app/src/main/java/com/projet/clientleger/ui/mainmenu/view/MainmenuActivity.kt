@@ -131,6 +131,9 @@ class MainmenuActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
+        dialogView.cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
     }
     private fun setupGamemodeSpinner(dialogView:View){
         val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
