@@ -27,6 +27,7 @@ class PlayersAdapter(private val players: List<PlayerInfo>) : RecyclerView.Adapt
     }
 
     override fun onBindViewHolder(holder: ViewHolderPlayer, position: Int) {
+        println(holder.avatarView)
         holder.avatarView.setImageBitmap(players[position].avatar)
         holder.usernameTextView.text = players[position].username
         val icon = when(players[position].playerRole){
