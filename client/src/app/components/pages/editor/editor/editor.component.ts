@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
+import { ChatService } from '@services/chat.service';
 import { GameService } from '@services/game.service';
 import { format } from 'date-fns';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
@@ -41,7 +42,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
     public gameService: GameService,
     public dialog: ModalDialogService,
     private apiService: APIService,
+    private chatService: ChatService,
   ) {
+    this.chatService.resetGameMessages();
+
     this.surfaceColor = DrawingSurfaceComponent.DEFAULT_COLOR;
     this.surfaceWidth = DrawingSurfaceComponent.DEFAULT_WIDTH;
     this.surfaceHeight = DrawingSurfaceComponent.DEFAULT_HEIGHT;

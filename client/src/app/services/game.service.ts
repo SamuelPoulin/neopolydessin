@@ -1,8 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Player, PlayerRole } from '../../../../common/communication/lobby';
-import { ChatService } from './chat.service';
+import { Player, PlayerRole, TeamScore } from '../../../../common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
@@ -19,6 +18,7 @@ export class GameService {
   lobbySubscription: Subscription;
   rolesSubscription: Subscription;
   wordSubscription: Subscription;
+  scoresSubscription: Subscription;
 
   startClientGameSubscription: Subscription;
   endGameSubscription: Subscription;
@@ -26,28 +26,27 @@ export class GameService {
   timestampSubscription: Subscription;
 
   teams: Player[][];
+  scores: TeamScore[];
   nextTimestamp: number;
   timeRemaining: number;
+  canGuess: boolean;
 
-  constructor(
-    private router: Router,
-    private socketService: SocketService,
-    private userService: UserService,
-    private chatService: ChatService,
-  ) {
+  constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
     this.resetTeams();
     this.initSubscriptions();
   }
 
   initSubscriptions() {
     this.lobbySubscription = this.socketService.getLobbyInfo().subscribe((players) => {
+      console.log(players);
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.username) {
-          this.isHost = false;
+          this.isHost = player.isOwner;
         }
         this.teams[player.teamNumber].push(player);
       }
+      console.log(this.teams);
     });
     this.timestampSubscription = this.socketService.receiveNextTimestamp().subscribe((timeInfo) => {
       this.nextTimestamp = Date.now() - timeInfo.serverTime + timeInfo.timestamp;
@@ -65,6 +64,7 @@ export class GameService {
       for (const player of players) {
         if (player.username === this.userService.username) {
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
+          this.canGuess = player.playerRole === PlayerRole.GUESSER;
           this.roleChanged.emit(player.playerRole);
         } else if (player.playerRole === PlayerRole.DRAWER) {
           this.wordToDraw = '';
@@ -75,14 +75,22 @@ export class GameService {
     this.wordSubscription = this.socketService.receiveWord().subscribe((word) => {
       this.wordToDraw = word;
     });
+    this.scoresSubscription = this.socketService.receiveScores().subscribe((scores) => {
+      for (const score of scores) {
+        this.scores[score.teamNumber].score = score.score;
+      }
+    });
   }
 
   resetTeams() {
     this.teams = [[], []];
+    this.scores = [
+      { teamNumber: 0, score: 0 },
+      { teamNumber: 1, score: 0 },
+    ];
   }
 
   startGame() {
-    this.chatService.resetGameMessages();
     this.socketService.startGame();
   }
 

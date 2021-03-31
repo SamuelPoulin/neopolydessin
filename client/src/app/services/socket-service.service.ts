@@ -9,7 +9,16 @@ import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing
 import { BrushInfo } from '../../../../common/communication/brush-info';
 import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
-import { Difficulty, GameType, GuessMessage, GuessMessageCoop, LobbyInfo, Player, TimeInfo } from '../../../../common/communication/lobby';
+import {
+  Difficulty,
+  GameType,
+  GuessMessage,
+  GuessMessageCoop,
+  LobbyInfo,
+  Player,
+  TeamScore,
+  TimeInfo,
+} from '../../../../common/communication/lobby';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 import { UserService } from './user.service';
@@ -80,6 +89,12 @@ export class SocketService {
     return new Observable<GuessMessage>((msgObs) => {
       this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
       this.socket.on(SocketLobby.COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
+    });
+  }
+
+  receiveScores(): Observable<TeamScore[]> {
+    return new Observable<TeamScore[]>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_TEAMS_SCORE, (scores: TeamScore[]) => obs.next(scores));
     });
   }
 

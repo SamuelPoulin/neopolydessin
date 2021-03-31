@@ -19,7 +19,6 @@ export class ChatComponent {
 
   inputValue: string = '';
   emojiMartOpen: boolean = false;
-  guessing: boolean = false;
 
   constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
@@ -27,7 +26,7 @@ export class ChatComponent {
 
   sendMessage(): void {
     if (this.inputValid) {
-      if (this.guessing) {
+      if (this.chatService.guessing) {
         this.chatService.sendGuess(this.inputValue);
       } else {
         this.chatService.sendMessage(this.inputValue);
@@ -70,7 +69,7 @@ export class ChatComponent {
   }
 
   toggleGuessMode(): void {
-    this.guessing = !this.guessing;
+    this.chatService.guessing = !this.chatService.guessing;
   }
 
   addEmoji(e: EmojiEvent) {

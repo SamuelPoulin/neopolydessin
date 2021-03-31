@@ -15,10 +15,10 @@
       </ng-container>
     </ng-container>
   </div>
-  <div id="chat-writer" [style.background-color]="guessing ? correctColor : 'white'">
+  <div id="chat-writer" [style.background-color]="chatService.guessing ? correctColor : 'white'">
     <div id="emoji-section-container">
       <button id="emoji-button" mat-icon-button (click)="toggleEmojiMart()">
-        <mat-icon [style.color]="guessing ? 'white' : iconColor">sentiment_satisfied_alt</mat-icon>
+        <mat-icon [style.color]="chatService.guessing ? 'white' : iconColor">sentiment_satisfied_alt</mat-icon>
       </button>
       <ng-container *ngIf="emojiMartOpen">
         <div id="emoji-picker-anchor">
@@ -26,15 +26,17 @@
         </div>
       </ng-container>
     </div>
-    <button id="guess-button" mat-icon-button (click)="toggleGuessMode()">
-      <mat-icon [style.color]="guessing ? 'white' : iconColor">lightbulb</mat-icon>
-    </button>
-    <input type="text" id="message-textbox" [style.color]="guessing ? 'white' : 'black'" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" placeholder="Aa" />
+    <ng-container *ngIf="chatService.canGuess">
+      <button id="guess-button" mat-icon-button (click)="toggleGuessMode()">
+        <mat-icon [style.color]="chatService.guessing ? 'white' : iconColor">lightbulb</mat-icon>
+      </button>
+    </ng-container>
+    <input type="text" id="message-textbox" [style.color]="chatService.guessing ? 'white' : 'black'" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" placeholder="Aa" />
     <ng-container *ngIf="length > maxLength">
       <div id="message-length">{{ length }}/{{ maxLength }}</div>
     </ng-container>
     <button id="send-button" mat-icon-button (click)="sendMessage()">
-      <mat-icon [style.color]="guessing ? correctColor : iconColor">send</mat-icon>
+      <mat-icon [style.color]="chatService.guessing ? correctColor : iconColor">send</mat-icon>
     </button>
   </div>
 </div>

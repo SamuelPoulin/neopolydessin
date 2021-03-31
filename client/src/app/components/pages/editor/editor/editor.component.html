@@ -23,8 +23,8 @@
     </div>
     <div id="game-area-teams-container">
       <div id="game-area-teams">
-        <app-team [team]="gameService.teams[0]" name="Équipe 1"></app-team>
-        <app-team [team]="gameService.teams[1]" name="Équipe 2" ennemy></app-team>
+        <app-team [team]="gameService.teams[0]" [score]="gameService.scores[0].score" name="Équipe 1"></app-team>
+        <app-team [team]="gameService.teams[1]" [score]="gameService.scores[1].score" name="Équipe 2" ennemy></app-team>
       </div>
     </div>
     <app-chat></app-chat>

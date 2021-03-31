@@ -8,6 +8,7 @@ import { Player, PlayerRole } from '../../../../../../common/communication/lobby
 })
 export class TeamComponent {
   @Input() team: Player[];
+  @Input() score: number;
   @Input() name: string;
   @Input() ennemy: boolean;
 

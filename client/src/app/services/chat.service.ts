@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
 import { Subscription } from 'rxjs';
 import { Message } from '../../../../common/communication/chat-message';
+import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
 
 @Injectable({ providedIn: 'root' })
@@ -17,8 +18,9 @@ export class ChatService {
 
   rooms: ChatRoom[] = [];
   currentRoomIndex: number = 0;
+  guessing: boolean = false;
 
-  constructor(private socketService: SocketService) {
+  constructor(private socketService: SocketService, private gameService: GameService) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, type: ChatRoomType.GAME, messages: [] });
     this.currentRoomIndex = 0;
 
@@ -63,6 +65,7 @@ export class ChatService {
 
   sendGuess(text: string) {
     this.socketService.sendGuess(text);
+    this.guessing = false;
   }
 
   closeRoom(roomName: string) {
@@ -101,5 +104,9 @@ export class ChatService {
     } else {
       return null;
     }
+  }
+
+  get canGuess(): boolean {
+    return this.gameService.canGuess;
   }
 }
