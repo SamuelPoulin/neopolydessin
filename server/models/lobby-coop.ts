@@ -142,11 +142,11 @@ export class LobbyCoop extends Lobby {
   private addTimeOnCorrectGuess() {
     const timeCorrectGuess = 30000;
     const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, endTime);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: endTime});
   }
 
   private sendStartTimeToClient() {
     const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, {serverTime: Date.now(), timestamp: gameStartTime});
   }
 }
