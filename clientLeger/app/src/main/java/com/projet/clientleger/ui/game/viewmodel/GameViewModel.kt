@@ -16,10 +16,10 @@ import javax.inject.Inject
 @HiltViewModel
 class GameViewModel @Inject constructor(private val gameRepository: GameRepository): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
-    val currentRoleLiveData: MutableLiveData<PlayerRole> = MutableLiveData(PlayerRole.PASSIVE)
+    val currentRoleLiveData: MutableLiveData<PlayerRole> = MutableLiveData()
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
-    val activeWord: MutableLiveData<String> = MutableLiveData("")
-    val activeTimer: MutableLiveData<Long> = MutableLiveData(0)
+    val activeWord: MutableLiveData<String> = MutableLiveData()
+    val activeTimer: MutableLiveData<Long> = MutableLiveData()
     val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
