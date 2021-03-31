@@ -128,6 +128,7 @@ class GameActivity : AppCompatActivity() {
                 }
             }
             override fun onFinish(){
+
             }
         }
         timer?.start()

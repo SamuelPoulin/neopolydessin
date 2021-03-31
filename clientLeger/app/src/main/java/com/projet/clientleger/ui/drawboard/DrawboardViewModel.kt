@@ -104,12 +104,9 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun undo(){
         drawingCommandsService.undo()
-        if(drawingCommandsService.canUndo()){
-            isUndoPossibleLiveData.postValue(true)
-        }
-        else{
+        /*if(!drawingCommandsService.canUndo()){
             isUndoPossibleLiveData.postValue(false)
-        }
+        }*/
         isRedoPossibleLiveData.postValue(true)
     }
 
@@ -163,8 +160,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     fun endPath(coord: Coordinate) {
         drawboardRepository.sendEndPath(coord)
         drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
-        println("TRAIT DESSINÉ")
         isUndoPossibleLiveData.postValue(true)
+        isRedoPossibleLiveData.postValue(false)
     }
 
     fun confirmColor(): String {
