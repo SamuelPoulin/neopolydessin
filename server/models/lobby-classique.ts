@@ -91,7 +91,9 @@ export class LobbyClassique extends Lobby {
             if (this.teams[guesserValues.teamNumber].currentScore === this.END_SCORE) {
               this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
             }
-            this.playerDrawing++;
+            if (this.playerDrawing % 2 === 1) {
+              this.playerDrawing++;
+            }
             this.teamDrawing++;
             this.startRoundTimer();
             break;
@@ -141,6 +143,7 @@ export class LobbyClassique extends Lobby {
 
     clearInterval(this.clockTimeout);
 
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
     this.currentGameState = CurrentGameState.DRAWING;
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.startTimerGuessToClient();
@@ -164,6 +167,7 @@ export class LobbyClassique extends Lobby {
     clearInterval(this.clockTimeout);
     this.setReplyRoles();
 
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.REPLY);
     this.currentGameState = CurrentGameState.REPLY;
     this.timeLeftSeconds = this.REPLY_TIME;
     this.startTimerReplyToClient();
@@ -178,7 +182,9 @@ export class LobbyClassique extends Lobby {
 
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
-    this.playerDrawing++;
+    if (this.playerDrawing % 2 === 1) {
+      this.playerDrawing++;
+    }
     this.teamDrawing++;
     this.startRoundTimer();
   }
