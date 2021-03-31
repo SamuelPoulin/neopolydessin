@@ -28,26 +28,6 @@ private const val MESSAGE_CONTENT_ERROR: String =
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
 
-    /*private var messages: ArrayList<IMessage> = ArrayList()
-    private lateinit var username: String
-
-    @Inject
-    lateinit var socketService: SocketService
-
-    fun setSubscriptions() {
-        socketService.receiveMessage()
-            .subscribe { message ->
-                addMessage(message)
-            }
-        socketService.receivePlayerConnection().subscribe { message ->
-            message.content = "${message.content} a rejoint la discussion"
-            addMessage(message)
-        }
-        socketService.receivePlayerDisconnection().subscribe { message ->
-            message.content = "${message.content} a quitté la discussion"
-            addMessage(message)
-        }
-    }*/
     val vm: ChatViewModel by viewModels()
     private var binding: FragmentChatBinding? = null
     var baseHeight: Int = -1
@@ -189,7 +169,8 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         else{
             binding!!.guessingToggleBtn.visibility = View.GONE
+            if(vm.sendingModeIsGuessing)
+                vm.toggleSendMode()
         }
-
     }
 }
