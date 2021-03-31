@@ -157,7 +157,7 @@ export abstract class Lobby {
   }
 
   // todo remove playerRole sometime
-  protected async addPlayerToTeam(playerId: string, playerRole: PlayerRole, socket: Socket, teamNumber: number): Promise<void> {
+  protected async addPlayerToTeam(playerId: string, socket: Socket, teamNumber: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.databaseService.getAccountById(playerId)
         .then((account) => {
@@ -167,7 +167,7 @@ export abstract class Lobby {
             username: playerName,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             avatarId: account.documents.avatar ? (account.documents.avatar as any)._id : null,
-            playerRole,
+            playerRole: PlayerRole.PASSIVE,
             socket,
             teamNumber,
             isBot: false,
@@ -362,7 +362,7 @@ export abstract class Lobby {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
 
-  abstract addPlayer(playerId: string, role: PlayerRole, socket: Socket): void;
+  abstract addPlayer(playerId: string, socket: Socket): void;
 
   protected abstract startGame(): void;
 

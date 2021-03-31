@@ -46,9 +46,9 @@ export class LobbyClassique extends Lobby {
     this.playerDrawing = 0;
   }
 
-  addPlayer(playerId: string, status: PlayerRole, socket: Socket) {
+  addPlayer(playerId: string, socket: Socket) {
     const teamNumber = (this.teams[0].playersInTeam.length <= this.teams[1].playersInTeam.length) ? 0 : 1;
-    this.addPlayerToTeam(playerId, status, socket, teamNumber)
+    this.addPlayerToTeam(playerId, socket, teamNumber)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
