@@ -156,7 +156,6 @@ open class SessionManager @Inject constructor(
 
     open suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T>{
         var res = callback.invoke()
-        println("response : $res")
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
             res = callback.invoke()
