@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
+import androidx.core.view.iterator
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_search_lobby.*
+import kotlinx.android.synthetic.main.item_lobbyinfo.view.*
 import kotlinx.coroutines.launch
 import java.io.Serializable
 
@@ -41,7 +44,9 @@ class SearchLobbyActivity : AppCompatActivity() {
         setDifficultyWithInput(gameInfo.difficulty)
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
-
+        setSubscriptions()
+    }
+    private fun setSubscriptions(){
         lifecycleScope.launch {
             vm.receiveAllLobbies(selectedGameMode, selectedDifficulty).subscribe({
                 lifecycleScope.launch {
@@ -49,9 +54,9 @@ class SearchLobbyActivity : AppCompatActivity() {
                     rvGames.adapter?.notifyDataSetChanged()
                 }
             },
-                { error ->
-                    println(error)
-                })
+                    { error ->
+                        println(error)
+                    })
         }
     }
     private fun removeGameWithID(id:String){
