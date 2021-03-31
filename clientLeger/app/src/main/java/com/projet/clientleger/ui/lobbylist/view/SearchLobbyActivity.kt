@@ -19,6 +19,7 @@ import com.projet.clientleger.data.model.GameInfo
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_search_lobby.*
 import kotlinx.android.synthetic.main.item_lobbyinfo.view.*
@@ -45,6 +46,11 @@ class SearchLobbyActivity : AppCompatActivity() {
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
         setSubscriptions()
+
+        logoutBtn.setOnClickListener {
+            val intent = Intent(this,MainmenuActivity::class.java)
+            startActivity(intent)
+        }
     }
     private fun setSubscriptions(){
         lifecycleScope.launch {
