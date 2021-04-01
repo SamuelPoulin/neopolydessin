@@ -193,7 +193,6 @@ describe('Socketio', () => {
                             expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
                         }
                     });
-                    console.log('bruuuuuh');
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                     testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
