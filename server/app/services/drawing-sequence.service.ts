@@ -33,7 +33,7 @@ export class DrawingSequenceService {
       case DrawMode.CENTER_FIRST:
         const center = this.findCenterPointOfDrawing(paths);
         stack = paths
-          .sort((a, b) => this.distanceBetween(a.path[0], center) - this.distanceBetween(b.path[0], center))
+          .sort((a, b) => this.getCenterMost(a.path, center) - this.getCenterMost(b.path, center))
           .map((path) => this.toSegment(path));
         break;
 
@@ -47,29 +47,42 @@ export class DrawingSequenceService {
 
       case DrawMode.PAN_B_TO_T:
         stack = paths
-          .sort((a, b) => b.path[0].y - a.path[0].y)
+          .sort((a, b) => this.getTopMost(b.path) - this.getTopMost(a.path))
           .map((path) => this.toSegment(path));
         break;
 
       case DrawMode.PAN_T_TO_B:
         stack = paths
-          .sort((a, b) => a.path[0].y - b.path[0].y)
+          .sort((a, b) => this.getTopMost(a.path) - this.getTopMost(b.path))
           .map((path) => this.toSegment(path));
         break;
 
       case DrawMode.PAN_L_TO_R:
         stack = paths
-          .sort((a, b) => a.path[0].x - b.path[0].x)
+          .sort((a, b) => this.getLeftMost(a.path) - this.getLeftMost(b.path))
           .map((path) => this.toSegment(path));
         break;
 
       case DrawMode.PAN_R_TO_L:
         stack = paths
-          .sort((a, b) => b.path[0].x - a.path[0].x)
+          .sort((a, b) => this.getLeftMost(b.path) - this.getLeftMost(a.path))
           .map((path) => this.toSegment(path));
         break;
     }
     return { stack };
+  }
+
+  private getLeftMost(path: Coord[]): number {
+    return this.minOf(path, true);
+  }
+
+  private getTopMost(path: Coord[]): number {
+    return this.minOf(path, false);
+  }
+
+  private getCenterMost(path: Coord[], center: Coord): number {
+    const closestToCenter = path.sort((a, b) => this.distanceBetween(a, center) - this.distanceBetween(b, center))[0];
+    return this.distanceBetween(closestToCenter, center);
   }
 
   private distanceBetween(coord1: Coord, coord2: Coord): number {
@@ -81,9 +94,8 @@ export class DrawingSequenceService {
     paths.forEach((path) => {
       allCoords = allCoords.concat(allCoords, path.path);
     });
-    // https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects
-    const maxY = allCoords.reduce((a, b) => a.y > b.y ? a : b).y;
-    const maxX = allCoords.reduce((a, b) => a.x > b.x ? a : b).x;
+    const maxX = this.maxOf(allCoords, true);
+    const maxY = this.maxOf(allCoords, false);
     return { x: maxX / 2, y: maxY / 2 };
   }
 
@@ -92,6 +104,18 @@ export class DrawingSequenceService {
       brushInfo: path.brushInfo ? path.brushInfo : DEFAULT_BRUSH_INFO,
       path: path.path
     };
+  }
+
+  private maxOf(coords: Coord[], useX: boolean): number {
+    // tweaked from https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects
+    const coord = coords.reduce((a, b) => (useX ? a.x : a.y) > (useX ? b.x : b.y) ? a : b);
+    return useX ? coord.x : coord.y;
+  }
+
+  private minOf(coords: Coord[], useX: boolean): number {
+    // tweaked from https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects
+    const coord = coords.reduce((a, b) => (useX ? a.x : a.y) < (useX ? b.x : b.y) ? a : b);
+    return useX ? coord.x : coord.y;
   }
 
 }
