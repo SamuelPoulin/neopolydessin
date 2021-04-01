@@ -30,8 +30,8 @@ export class LobbyCoop extends Lobby {
     this.timeLeftSeconds = 60;
   }
 
-  addPlayer(playerId: string, role: PlayerRole, socket: Socket) {
-    this.addPlayerToTeam(playerId, role, socket, 0)
+  addPlayer(playerId: string, socket: Socket) {
+    this.addPlayerToTeam(playerId, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
@@ -55,7 +55,7 @@ export class LobbyCoop extends Lobby {
         switch (distance) {
           case 0: {
             guessStat = GuessResponse.CORRECT;
-            this.teams[0].currentScore++;
+            this.teamScores[0]++;
             this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
             this.addTimeOnCorrectGuess();

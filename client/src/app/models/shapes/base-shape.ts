@@ -17,6 +17,7 @@ export abstract class BaseShape {
   strokeWidth: number;
   secondaryColor: Color;
   primaryColor: Color;
+  serverId: number;
 
   abstract get origin(): Coordinate;
   abstract set origin(c: Coordinate);

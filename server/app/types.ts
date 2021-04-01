@@ -15,5 +15,6 @@ export default {
   AvatarService: Symbol('AvatarService'),
   PictureWordController: Symbol('PictureWordController'),
   PictureWordService: Symbol('PictureWordService'),
+  DrawingSequenceService: Symbol('DrawingSequenceService')
 
 };

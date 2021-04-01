@@ -1,15 +1,11 @@
 package com.projet.clientleger.data.api.socket
 
-import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.Difficulty
 import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.model.LobbyInfo
-import com.projet.clientleger.data.api.model.PlayerRole
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.api.model.lobby.Player
-import com.projet.clientleger.data.model.account.AccountInfo
-import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
@@ -43,6 +39,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return Observable.create{
             emitter -> socketService.socket.emit("getListLobby",gameMode.value, difficulty.value, Ack{ res ->
+            println(res[0])
             val jsonList = res[0] as JSONArray
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){
@@ -55,12 +52,10 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<Player>>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
-            println("players received")
             val list = ArrayList<Player>()
             val jsonList = players as JSONArray
             for(i in 0 until jsonList.length())
                 list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
-            println(list)
             list
         }
     }
@@ -73,15 +68,8 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.START_GAME.value)
     }
 
-    fun receiveStartGame() : Observable<ArrayList<PlayerRole>> {
-        return Observable.create {
-            socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) { res ->
-                val jsonList = res[0] as JSONArray
-                val list = ArrayList<PlayerRole>()
-                for (i in 0 until jsonList.length()) {
-                    list.add(Json.decodeFromString(PlayerRole.serializer(), jsonList.get(i).toString()))
-                }
-            }
-        }
+
+    fun receiveStartGame() : Observable<String>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {""}
     }
 }

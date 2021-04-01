@@ -62,6 +62,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         setFragmentResult("openFriendChat", bundleOf("friend" to friendSimplified))
     }
 
+
     private fun acceptFriendRequest(idOfFriend: String) {
         lifecycleScope.launch {
             vm.acceptFriendRequest(idOfFriend)

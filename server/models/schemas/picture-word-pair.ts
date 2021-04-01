@@ -33,15 +33,17 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
   drawnPaths: {
     type: [
       {
+        _id: false,
         id: Number,
-        path: [{ x: Number, y: Number }],
+        path: [{ _id: false, x: Number, y: Number }],
         brushInfo: {
           color: String,
           strokeWidth: Number
         }
       }
     ],
-    required: false
+    required: false,
+    _id: false
   },
   hints: [String],
   difficulty: {
@@ -51,7 +53,14 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
   },
   drawMode: {
     type: String,
-    enum: [DrawMode.CONVENTIONAL, DrawMode.RANDOM, DrawMode.PANORAMIC, DrawMode.CENTER_FIRST],
+    enum: [
+      DrawMode.CONVENTIONAL,
+      DrawMode.RANDOM,
+      DrawMode.PAN_L_TO_R,
+      DrawMode.PAN_R_TO_L,
+      DrawMode.PAN_T_TO_B,
+      DrawMode.PAN_B_TO_T,
+      DrawMode.CENTER_FIRST],
     default: DrawMode.CONVENTIONAL
   }
 });

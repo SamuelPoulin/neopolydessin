@@ -14,7 +14,7 @@ import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
-import { Difficulty, GameType, LobbyInfo, PlayerRole } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
@@ -120,7 +120,7 @@ export class SocketIo {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
-          lobbyToJoin.addPlayer(playerId, PlayerRole.PASSIVE, socket);
+          lobbyToJoin.addPlayer(playerId, socket);
         } else {
           console.error('couldn\'t add player to lobby');
         }
@@ -148,7 +148,7 @@ export class SocketIo {
                 break;
               }
             }
-            lobby.addPlayer(playerId, PlayerRole.DRAWER, socket);
+            lobby.addPlayer(playerId, socket);
             this.lobbyList.push(lobby);
           } else {
             console.error('player doesn\'t exist');

@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
-import { Coord, Path } from '../../models/commands/path';
+import { Path } from '../../models/commands/path';
 import { BrushInfo } from '../../../common/communication/brush-info';
+import { Coord } from '../../../common/communication/drawing-sequence';
 @injectable()
 export class DrawingService {
 

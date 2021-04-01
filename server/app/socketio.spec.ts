@@ -13,9 +13,8 @@ import { accountInfo } from './services/database.service.spec';
 import * as jwtUtils from './utils/jwt-util';
 import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
-import { Difficulty, GameType, LobbyInfo, Player, ReasonEndGame } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, Player, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
-import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
@@ -27,6 +26,7 @@ import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { PictureWordService } from './services/picture-word.service';
 import { DrawMode } from '../../common/communication/draw-mode';
+import { Coord } from '../../common/communication/drawing-sequence';
 
 export const accountInfo3: Register = {
     firstName: 'a',
@@ -172,8 +172,12 @@ describe('Socketio', () => {
                     testClient.socket.close();
                 });
 
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
-                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                let nbConnections = 0;
+                testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+                    nbConnections++;
+                    if (nbConnections === 3) {
+                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                    }
                 });
 
                 testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
@@ -181,6 +185,14 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                    players.forEach((player) => {
+                        if (player.teamNumber === 0) {
+                            expect(player.playerRole).to.equal(PlayerRole.DRAWER);
+
+                        } else {
+                            expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
+                        }
+                    });
                     testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
                     testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
                     testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
@@ -192,6 +204,7 @@ describe('Socketio', () => {
                 testClient.socket.on('connect', () => {
                     testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                        clients[0].emit(SocketLobby.ADD_BOT, 1);
                     });
                 });
 

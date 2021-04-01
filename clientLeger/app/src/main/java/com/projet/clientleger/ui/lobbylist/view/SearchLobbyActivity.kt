@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
+import androidx.core.view.iterator
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +19,10 @@ import com.projet.clientleger.data.model.GameInfo
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_search_lobby.*
+import kotlinx.android.synthetic.main.item_lobbyinfo.view.*
 import kotlinx.coroutines.launch
 import java.io.Serializable
 
@@ -41,7 +45,14 @@ class SearchLobbyActivity : AppCompatActivity() {
         setDifficultyWithInput(gameInfo.difficulty)
         rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         rvGames.adapter = adapter
+        setSubscriptions()
 
+        logoutBtn.setOnClickListener {
+            val intent = Intent(this,MainmenuActivity::class.java)
+            startActivity(intent)
+        }
+    }
+    private fun setSubscriptions(){
         lifecycleScope.launch {
             vm.receiveAllLobbies(selectedGameMode, selectedDifficulty).subscribe({
                 lifecycleScope.launch {
@@ -49,17 +60,9 @@ class SearchLobbyActivity : AppCompatActivity() {
                     rvGames.adapter?.notifyDataSetChanged()
                 }
             },
-                { error ->
-                    println(error)
-                })
-        }
-        println(lobbyList)
-        vm.receiveJoinedLobbyInfo().subscribe{
-            val intent = Intent(this, LobbyActivity::class.java).apply{
-                putExtra("LOBBY_INFO",it)
-                putExtra("GAME_INFO", GameCreationInfosModel("me", gameInfo.gameMode, gameInfo.difficulty, false) as Serializable)
-            }
-            startActivity(intent)
+                    { error ->
+                        println(error)
+                    })
         }
     }
     private fun removeGameWithID(id:String){
@@ -82,7 +85,14 @@ class SearchLobbyActivity : AppCompatActivity() {
     }
 
     private fun joinLobby(lobbyId: String){
-        vm.joinLobby(lobbyId)
+        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
+        val intent = Intent(this, LobbyActivity::class.java).apply{
+            putExtra("isJoining", true)
+            putExtra("lobbyId", lobbyId)
+            //putExtra("LOBBY_INFO",it)
+            putExtra("GAME_INFO", GameCreationInfosModel("me", gameInfo.gameMode, gameInfo.difficulty, false) as Serializable)
+        }
+        startActivity(intent)
     }
     private fun setGameModeWithInput(gameMode:String){
         when(gameMode){

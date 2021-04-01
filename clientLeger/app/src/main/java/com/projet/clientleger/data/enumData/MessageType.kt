@@ -6,5 +6,8 @@ enum class MessageType {
     SYSTEM,
     GUESS_WRONG,
     GUESS_CLOSE,
-    GUESS_CORRECT
+    GUESS_CORRECT,
+    USER_GUESS_WRONG,
+    USER_GUESS_CLOSE,
+    USER_GUESS_CORRECT
 }

@@ -1,13 +1,15 @@
 package com.projet.clientleger.data.api.socket
 
+import com.projet.clientleger.data.api.model.chat.GuessMessage
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.MessageGuess
+import com.projet.clientleger.data.model.chat.GuessMessageInfo
 import com.projet.clientleger.data.model.chat.MessageSystem
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import javax.inject.Inject
@@ -22,7 +24,7 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
     fun receivePlayerConnection(): Observable<MessageSystem>{
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value){ (playerInfo, timestamp) ->
             val info = Json.decodeFromString(Player.serializer(), playerInfo.toString())
-            MessageSystem(info.playerName, timestamp as Long)
+            MessageSystem(info.username, timestamp as Long)
         }
     }
 
@@ -38,12 +40,13 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.emit(ChatSocketEndpoints.SEND_MSG.value, obj)
     }
 
-    fun sendGuess(guess: String): Observable<MessageGuess>{
-        return Observable.create{ emitter ->
-            socketService.socket.emit(ChatSocketEndpoints.SEND_GUESS.value, guess, Ack{ (messageGuess) ->
-                val msg = Json.decodeFromString(MessageGuess.serializer(), messageGuess.toString())
-                emitter.onNext(msg)
-            })
+    fun sendGuess(guess: String){
+            socketService.socket.emit(ChatSocketEndpoints.SEND_GUESS.value, guess)
+    }
+
+    fun receiveGuessClassic(): Observable<GuessMessageInfo>{
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS_CLASSIC.value){(guessMessage) ->
+            Json.decodeFromString(GuessMessage.serializer(), guessMessage.toString()).toInfo()
         }
     }
 

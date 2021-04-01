@@ -1,7 +1,6 @@
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
-import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
 import { ToolType } from '@tools/tool-type.enum';
 
 export class EditorKeyboardListener extends KeyboardListenerService {
@@ -30,15 +29,6 @@ export class EditorKeyboardListener extends KeyboardListenerService {
           const increment = GridProperties.GRID_SIZE_INCREMENT;
           const size = editorComponent.editorService.gridProperties.size.value - increment;
           editorComponent.editorService.gridProperties.size.value = Math.ceil(size / increment) * increment;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('g', false),
-        () => {
-          editorComponent.editorService.gridProperties.visibility.value =
-            editorComponent.editorService.gridProperties.visibility.value === GridVisibility.visible
-              ? GridVisibility.hidden
-              : GridVisibility.visible;
         },
       ],
       [
@@ -74,7 +64,7 @@ export class EditorKeyboardListener extends KeyboardListenerService {
           }
           return true;
         },
-      ]
+      ],
     ]);
 
     this.defaultEventAction = (e) => {
