@@ -37,7 +37,10 @@ export class PictureWordController {
         body('drawMode').isIn([
           DrawMode.CONVENTIONAL,
           DrawMode.RANDOM,
-          DrawMode.PANORAMIC,
+          DrawMode.PAN_L_TO_R,
+          DrawMode.PAN_R_TO_L,
+          DrawMode.PAN_T_TO_B,
+          DrawMode.PAN_B_TO_T,
           DrawMode.CENTER_FIRST,
         ])
 
@@ -69,7 +72,10 @@ export class PictureWordController {
         body('drawMode').isIn([
           DrawMode.CONVENTIONAL,
           DrawMode.RANDOM,
-          DrawMode.PANORAMIC,
+          DrawMode.PAN_L_TO_R,
+          DrawMode.PAN_R_TO_L,
+          DrawMode.PAN_T_TO_B,
+          DrawMode.PAN_B_TO_T,
           DrawMode.CENTER_FIRST,
         ])
       ],
