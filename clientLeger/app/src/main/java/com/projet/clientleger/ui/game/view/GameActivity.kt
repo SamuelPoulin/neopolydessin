@@ -63,7 +63,6 @@ class GameActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
         vm.currentRoleLiveData.observe(this){
-            println("Nouveau Role : $it")
             supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to (it == PlayerRole.GUESSER)))
             supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
             binding.role.text = getFrenchRole(it.value)

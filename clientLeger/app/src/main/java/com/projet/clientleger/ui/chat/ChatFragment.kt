@@ -33,12 +33,10 @@ class ChatFragment @Inject constructor() : Fragment() {
     var baseHeight: Int = -1
     var screenSize: Int = -1
     var baseWidth: Int = -1
-    var isGuessing: Boolean = false
 
     companion object {
         fun newInstance() = ChatFragment()
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,9 +45,8 @@ class ChatFragment @Inject constructor() : Fragment() {
         screenSize = displayMetrics.widthPixels
         baseWidth = screenSize/2
         setFragmentResultListener("isGuessing"){ requestKey, bundle ->
-            isGuessing = bundle["boolean"] as Boolean
-            updateGuessing()
-            println("isGuessing: ${bundle["boolean"] as Boolean}")
+            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
+            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
         }
         setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
             resize(bundle["height"] as Int)
@@ -57,6 +54,12 @@ class ChatFragment @Inject constructor() : Fragment() {
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             (bundle["friend"] as FriendSimplified).username
             // TODO chat openned from friendslists
+        }
+        vm.isGuessing.observe(requireActivity()){
+            updateTheme(it)
+        }
+        vm.isGuesser.observe(requireActivity()){
+            updateGuessingBtnVisibility(it)
         }
     }
 
@@ -122,11 +125,11 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun toggleSendMode(){
-        if(!isGuessing)
-            return
+        vm.isGuessing.postValue(!vm.isGuessing.value!!)
+    }
 
-        vm.toggleSendMode()
-        if(vm.sendingModeIsGuessing) {
+    private fun updateTheme(isGuessing: Boolean){
+        if(isGuessing){
             binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_guessing_input_background)
             binding!!.guessingToggleBtn.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_lightbulb_white)
             binding!!.sendButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_sent)
@@ -150,14 +153,12 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
     }
 
-    private fun updateGuessing(){
-        if(isGuessing){
+    private fun updateGuessingBtnVisibility(isGuesser: Boolean){
+        if(isGuesser){
             binding!!.guessingToggleBtn.visibility = View.VISIBLE
         }
         else{
-            binding!!.guessingToggleBtn.visibility = View.GONE
-            if(vm.sendingModeIsGuessing)
-                vm.toggleSendMode()
+            binding!!.guessingToggleBtn.visibility = View.INVISIBLE
         }
     }
 }
