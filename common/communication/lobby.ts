@@ -6,6 +6,7 @@ export interface LobbyInfo {
   ownerUsername: string;
   nbPlayerInLobby: number;
   gameType: GameType;
+  maxSize: number;
 }
 
 export interface Player {

@@ -96,12 +96,14 @@ export abstract class Lobby {
 
   getLobbySummary(): LobbyInfo {
     const owner = this.getLobbyOwner();
+    const gameSize = this.GAME_SIZE_MAP.get(this.gameType);
     return {
       lobbyId: this.lobbyId,
       lobbyName: this.lobbyName,
       ownerUsername: owner ? owner.username : 'Jesus',
       nbPlayerInLobby: this.players.length,
-      gameType: this.gameType
+      gameType: this.gameType,
+      maxSize: gameSize ? gameSize : DEFAULT_TEAM_SIZE
     };
   }
 
