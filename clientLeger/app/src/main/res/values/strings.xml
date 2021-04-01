@@ -66,4 +66,6 @@
     <string name="title_activity_game">GameActivity</string>
     <string name="timer_over">0:00</string>
     <string name="logout_button">logout button</string>
+    <string name="base_player_name">PlayerName</string>
+    <string name="avatar_description">the avatar of the player</string>
 </resources>
