@@ -5,5 +5,7 @@ enum class ChatSocketEndpoints(val value: String) {
     SEND_MSG("SendMsg"),
     RECEIVE_PLAYER_CONNECTION("PlayerConnected"),
     RECEIVE_PLAYER_DISCONNECT("PlayerDisconnected"),
-    SEND_GUESS("guess")
+    SEND_GUESS("guess"),
+    RECEIVE_GUESS_CLASSIC("classiqueGuessBroadcast"),
+    RECEIVE_GUESS_COOP("coopGuessBroadcast")
 }
