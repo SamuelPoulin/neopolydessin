@@ -13,8 +13,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
     val username: String = chatRepository.getUsername()
-    var sendingModeIsGuessing = false
-
+    val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
     init {
         receiveMessage()
         receivePlayerConnection()
@@ -27,15 +27,13 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     fun sendMessage(){
         messageContentLiveData.value?.let{
-            if(sendingModeIsGuessing) {
+            if(isGuessing.value!!) {
                 chatRepository.sendGuess(it)
                 } else {
                 chatRepository.sendMessage(Message(formatMessageContent(it)))
             }
         }
     }
-
-
 
     private fun receiveMessage(){
         chatRepository.receiveMessage().subscribe{
@@ -60,13 +58,9 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         }
     }
 
-    fun formatMessageContent(messageContent: String): String {
+    private fun formatMessageContent(messageContent: String): String {
         var adjustedText: String = messageContent.replace("\\s+".toRegex(), " ")
         adjustedText = adjustedText.trimStart()
         return adjustedText
-    }
-
-    fun toggleSendMode(){
-        sendingModeIsGuessing = !sendingModeIsGuessing
     }
 }

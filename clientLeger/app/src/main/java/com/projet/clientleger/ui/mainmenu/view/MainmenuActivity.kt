@@ -54,11 +54,6 @@ class MainmenuActivity : AppCompatActivity() {
             true
         }
 
-        vm.connectSocket(getSharedPreferences(
-                getString(R.string.user_creds),
-                Context.MODE_PRIVATE
-        ).getString("accessToken", "")!!)
-
         //To remove before PR --------------------------------------------------------------------------
 //        val intent = Intent(this, GameActivity::class.java)
 //        startActivity(intent)
