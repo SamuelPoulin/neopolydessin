@@ -25,7 +25,8 @@ import {
   TeamScore
 } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
-import { Coord } from './commands/path';
+import { Coord } from '../../common/communication/drawing-sequence';
+
 
 export interface ServerPlayer extends Player {
   socket: Socket;
