@@ -25,15 +25,18 @@ export class DrawingSequenceService {
     let stack: Segment[] = [];
 
     switch (drawing.drawMode) {
+
       case DrawMode.CONVENTIONAL:
         stack = paths.map((path) => this.toSegment(path));
         break;
+
       case DrawMode.CENTER_FIRST:
         const center = this.findCenterPointOfDrawing(paths);
         stack = paths
           .sort((a, b) => this.distanceBetween(a.path[0], center) - this.distanceBetween(b.path[0], center))
           .map((path) => this.toSegment(path));
         break;
+
       case DrawMode.RANDOM:
         while (paths.length > 0) {
           const randomIndex = Math.floor(Math.random() * paths.length);
@@ -41,15 +44,30 @@ export class DrawingSequenceService {
           stack.push(this.toSegment(randomPath));
         }
         break;
+
       case DrawMode.PAN_B_TO_T:
-        break;
-      case DrawMode.PAN_T_TO_B:
-        break;
-      case DrawMode.PAN_L_TO_R:
-        break;
-      case DrawMode.PAN_R_TO_L:
+        stack = paths
+          .sort((a, b) => b.path[0].y - a.path[0].y)
+          .map((path) => this.toSegment(path));
         break;
 
+      case DrawMode.PAN_T_TO_B:
+        stack = paths
+          .sort((a, b) => a.path[0].y - b.path[0].y)
+          .map((path) => this.toSegment(path));
+        break;
+
+      case DrawMode.PAN_L_TO_R:
+        stack = paths
+          .sort((a, b) => a.path[0].x - b.path[0].x)
+          .map((path) => this.toSegment(path));
+        break;
+
+      case DrawMode.PAN_R_TO_L:
+        stack = paths
+          .sort((a, b) => b.path[0].x - a.path[0].x)
+          .map((path) => this.toSegment(path));
+        break;
     }
     return { stack };
   }
