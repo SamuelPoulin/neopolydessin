@@ -1,11 +1,7 @@
 import { BrushInfo } from '../../../common/communication/brush-info';
+import { Coord } from '../../../common/communication/drawing-sequence';
 
-export interface Coord {
-  x: number;
-  y: number;
-}
-
-const DEFAULT_BRUSH_INFO: BrushInfo = {
+export const DEFAULT_BRUSH_INFO: BrushInfo = {
   color: '#000000',
   strokeWidth: 1,
 };
