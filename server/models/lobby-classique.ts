@@ -6,9 +6,11 @@ import { SocketIdService } from '../app/services/socket-id.service';
 import {
   CurrentGameState,
   Difficulty,
+  Entity,
   GameType,
   GuessMessage,
   GuessResponse,
+  instanceOfPlayer,
   Player,
   PlayerRole,
   ReasonEndGame
@@ -26,7 +28,7 @@ export class LobbyClassique extends Lobby {
   private readonly REPLY_TIME: number = 15;
   private readonly END_SCORE: number = 5;
   private drawingTeamNumber: number;
-  private drawer: ServerPlayer[];
+  private drawers: Entity[];
 
   constructor(
     socketIdService: SocketIdService,
@@ -43,7 +45,7 @@ export class LobbyClassique extends Lobby {
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.teamScores = [0, 0];
     this.drawingTeamNumber = 0;
-    this.drawer = [];
+    this.drawers = [];
   }
 
   addPlayer(playerId: string, socket: Socket) {
@@ -77,41 +79,44 @@ export class LobbyClassique extends Lobby {
 
     socket.on(SocketLobby.PLAYER_GUESS, (word: string) => {
       const accountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      const guesser = this.getGuesser();
-      if (guesser && guesser.accountId === accountId) {
-        const distance = levenshtein(word, this.wordToGuess);
-        let guessStatus: GuessResponse;
-        switch (distance) {
-          case 0: {
-            guessStatus = GuessResponse.CORRECT;
-            this.teamScores[guesser.teamNumber]++;
-            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
-            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
-              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+      const guessers = this.getGuessers();
+      if (guessers) {
+        const guesser = guessers.find((player) => player.accountId === accountId);
+        if (guesser) {
+          const distance = levenshtein(word, this.wordToGuess);
+          let guessStatus: GuessResponse;
+          switch (distance) {
+            case 0: {
+              guessStatus = GuessResponse.CORRECT;
+              this.teamScores[guesser.teamNumber]++;
+              this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
+              if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
+                this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+              }
+              this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
+              this.startRoundTimer();
+              break;
             }
-            this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
-            this.startRoundTimer();
-            break;
+            case 1:
+            case 2: {
+              guessStatus = GuessResponse.CLOSE;
+              this.startReply();
+              break;
+            }
+            default: {
+              guessStatus = GuessResponse.WRONG;
+              this.startReply();
+              break;
+            }
           }
-          case 1:
-          case 2: {
-            guessStatus = GuessResponse.CLOSE;
-            this.startReply();
-            break;
-          }
-          default: {
-            guessStatus = GuessResponse.WRONG;
-            this.startReply();
-            break;
-          }
+          const guessReturn: GuessMessage = {
+            content: word,
+            timestamp: Date.now(),
+            guessStatus,
+            senderUsername: guesser.username
+          };
+          this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
         }
-        const guessReturn: GuessMessage = {
-          content: word,
-          timestamp: Date.now(),
-          guessStatus,
-          senderUsername: guesser.username
-        };
-        this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
       }
     });
   }
@@ -130,7 +135,10 @@ export class LobbyClassique extends Lobby {
     this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord().then((wordStructure) => {
       this.wordToGuess = wordStructure.word;
-      this.io.to(this.drawer[this.drawingTeamNumber].socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
+      const drawer = this.drawers[this.drawingTeamNumber];
+      if (instanceOfPlayer(drawer)) {
+        this.io.to((drawer as ServerPlayer).socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
+      }
     });
 
     clearInterval(this.clockTimeout);
@@ -188,23 +196,40 @@ export class LobbyClassique extends Lobby {
   }
 
   private setRoles() {
+    let newDrawer: Entity | undefined;
     this.players.forEach((player) => {
       if (player.teamNumber === this.drawingTeamNumber) {
         if (player.isBot) {
           player.playerRole = PlayerRole.DRAWER;
+          newDrawer = player;
         } else {
-          const previousDrawer = this.drawer[this.drawingTeamNumber];
-          if (previousDrawer && (player as Player).accountId === previousDrawer.accountId) {
-            player.playerRole = PlayerRole.GUESSER;
-          } else {
-            player.playerRole = PlayerRole.DRAWER;
-            this.drawer[this.drawingTeamNumber] = player as ServerPlayer;
-          }
+          player.playerRole = PlayerRole.PASSIVE;
         }
-      } else {
-        player.playerRole = PlayerRole.PASSIVE;
       }
     });
+    this.players.forEach((player) => {
+      if (!player.isBot && player.teamNumber === this.drawingTeamNumber) {
+        if (!newDrawer) {
+          const previousDrawer = this.drawers[this.drawingTeamNumber];
+          if (previousDrawer) {
+            if (previousDrawer.username !== player.username) {
+              player.playerRole = PlayerRole.DRAWER;
+              newDrawer = player;
+            } else {
+              player.playerRole = PlayerRole.GUESSER;
+            }
+          } else {
+            player.playerRole = PlayerRole.DRAWER;
+            newDrawer = player;
+          }
+        } else {
+          player.playerRole = PlayerRole.GUESSER;
+        }
+      }
+    });
+    if (newDrawer) {
+      this.drawers[this.drawingTeamNumber] = newDrawer;
+    }
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
@@ -219,7 +244,7 @@ export class LobbyClassique extends Lobby {
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }
 
-  private getGuesser(): Player | undefined {
-    return this.players.find((player) => !player.isBot && player.playerRole === PlayerRole.GUESSER) as Player;
+  private getGuessers(): Player[] | undefined {
+    return this.players.filter((player) => !player.isBot && player.playerRole === PlayerRole.GUESSER) as Player[];
   }
 }

@@ -174,33 +174,41 @@ export abstract class Lobby {
   }
 
   protected emitLeaveInfo(removedPlayer: Entity, socket: Socket): void {
-    socket.to(this.lobbyId).broadcast
-      .emit(SocketMessages.PLAYER_DISCONNECTION, this.toPlayer(removedPlayer), Date.now());
-    this.io.in(this.lobbyId)
-      .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+    if (instanceOfPlayer(removedPlayer)) {
+      socket.to(this.lobbyId).broadcast.emit(SocketMessages.PLAYER_DISCONNECTION, this.toPlayer(removedPlayer), Date.now());
+    } else {
+      this.io.in(this.lobbyId).emit(SocketMessages.PLAYER_DISCONNECTION, this.toPlayer(removedPlayer), Date.now());
+    }
+    this.io.in(this.lobbyId).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
   }
 
   protected emitJoinInfo(player: Entity, socket: Socket): void {
-    socket.to(this.lobbyId).broadcast
-      .emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
-    this.io.in(this.lobbyId)
-      .emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+    if (instanceOfPlayer(player)) {
+      socket.to(this.lobbyId).broadcast.emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
+    } else {
+      this.io.in(this.lobbyId).emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
+    }
+    this.io.in(this.lobbyId).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
 
     socket.on(SocketLobby.ADD_BOT, (teamNumber: number) => {
       const owner = this.getLobbyOwner();
-      if (owner && owner.socket.id === socket.id) {
-        const bot: Entity = {
-          username: 'bob',
-          playerRole: PlayerRole.PASSIVE,
-          teamNumber,
-          isBot: true,
-          isOwner: false
-        };
-        this.players.push(bot);
-        this.emitJoinInfo(bot, socket);
+      if (owner && owner.socket.id === socket.id && this.lobbyHasRoom()) {
+        if (this.gameType === GameType.CLASSIC && this.getTeamLength(teamNumber) >= this.size / 2) {
+          console.error(`already enough players in team ${teamNumber}`);
+        } else {
+          const bot: Entity = {
+            username: 'bob',
+            playerRole: PlayerRole.PASSIVE,
+            teamNumber,
+            isBot: true,
+            isOwner: false
+          };
+          this.players.push(bot);
+          this.emitJoinInfo(bot, socket);
+        }
       }
     });
 
@@ -339,7 +347,7 @@ export abstract class Lobby {
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {
-    return this.players.find((player) => (player as ServerPlayer).socket.id === socket.id) as Player;
+    return this.players.find((player) => instanceOfPlayer(player) && (player as ServerPlayer).socket.id === socket.id) as Player;
   }
 
   protected endGame(reason: ReasonEndGame): void {
