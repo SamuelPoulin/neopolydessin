@@ -6,6 +6,8 @@ export interface LobbyInfo {
   ownerUsername: string;
   nbPlayerInLobby: number;
   gameType: GameType;
+  difficulty: Difficulty;
+  maxSize: number;
 }
 
 export interface Player extends Entity {
@@ -28,6 +30,11 @@ export const instanceOfEntity: (object: any) => boolean = (object: any): object 
 
 export const instanceOfPlayer: (object: any) => boolean = (object: any): object is Player => {
   return 'accountId' in object;
+}
+
+export interface TimeInfo {
+  serverTime: number;
+  timestamp: number;
 }
 
 export interface TeamScore {

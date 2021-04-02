@@ -17,5 +17,5 @@ object ViewModelMainmenuModule {
 
     @Provides
     @ViewModelScoped
-    fun provideRepo(apiMainmenuInterface: ApiMainmenuInterface, socketService: SocketService, lobbySocketService: LobbySocketService, sessionManager: SessionManager) = MainmenuRepository(socketService, apiMainmenuInterface, lobbySocketService, sessionManager)
+    fun provideRepo(socketService: SocketService, lobbySocketService: LobbySocketService, sessionManager: SessionManager) = MainmenuRepository(socketService,lobbySocketService, sessionManager)
 }

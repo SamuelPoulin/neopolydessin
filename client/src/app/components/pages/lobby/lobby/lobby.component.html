@@ -8,14 +8,16 @@
           <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
           Lien d'invitation
         </button>
-        <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button" (click)="startGame()">
-          Lancer la partie
-          <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
-        </button>
+        <ng-container *ngIf="gameService.isHost">
+          <button  id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button" (click)="startGame()">
+            Lancer la partie
+            <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
+          </button>
+        </ng-container>
       </div>
       <div id="players-container">
-        <app-team [team]="playersTeam1" name="Équipe 1"></app-team>
-        <app-team [team]="playersTeam2" name="Équipe 2" ennemy></app-team>
+        <app-team [team]="gameService.teams[0]" name="Équipe 1"></app-team>
+        <app-team [team]="gameService.teams[1]" name="Équipe 2" ennemy></app-team>
       </div>
     </div>
   </div>

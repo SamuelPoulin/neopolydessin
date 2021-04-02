@@ -35,6 +35,7 @@ export enum FriendsListEvent {
 export class SocketIo {
 
   static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
+  static UPDATE_GAME_LIST: Observable<void> = new Observable();
   static CLIENT_CONNECTED: Observable<Socket> = new Observable();
   static CLIENT_DISCONNECTED: Observable<Socket> = new Observable();
 
@@ -62,6 +63,16 @@ export class SocketIo {
       console.log(`Connected with ${socket.id} \n`);
     });
 
+    SocketIo.UPDATE_GAME_LIST.subscribe(() => {
+      const updatedLobbies = this.lobbyList
+        .filter((lobby) => {
+          return !lobby.privateLobby;
+        }).map((lobby) => {
+          return lobby.getLobbySummary();
+        });
+      this.io.emit(SocketLobby.UPDATE_LOBBIES, updatedLobbies);
+    });
+
     SocketIo.CLIENT_DISCONNECTED.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
     });
@@ -72,6 +83,7 @@ export class SocketIo {
       if (index > -1) {
         this.lobbyList.splice(index, 1);
       }
+      SocketIo.UPDATE_GAME_LIST.notify();
     });
 
     DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { friends: Friend[]; event: FriendsListEvent }) => {

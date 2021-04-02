@@ -14,7 +14,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
             arrayOf(MutableLiveData(ArrayList()),
             MutableLiveData(ArrayList()))
-    val realPlayerTeams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
+    private val realPlayerTeams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     lateinit var defaultImage: Bitmap
     init {
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
@@ -124,5 +124,13 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun receiveJoinedLobbyInfo(): Observable<ArrayList<PlayerInfo>> {
         return lobbyRepository.receiveJoinedLobbyInfo()
+    }
+
+    fun clearAvatarStorage(){
+        lobbyRepository.clearAvatarStorage()
+    }
+
+    fun kickPlayer(){
+        lobbyRepository.kickPlayer()
     }
 }

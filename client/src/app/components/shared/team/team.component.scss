@@ -11,6 +11,15 @@
   margin-top: 25px;
 }
 
+.player-role-icon {
+  margin: 0px 5px;
+  color: #2F2F2F;
+}
+
+.player-owner-role {
+  color: orange
+}
+
 .player-avatar {
   margin: 0px 5px;
 }
@@ -27,6 +36,7 @@
 
 .player-container {
   display: flex;
+  align-items: center;
 
   padding: 5px 0px;
 

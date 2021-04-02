@@ -13,8 +13,8 @@
         <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
       </app-drawing-surface>
       <div id="game-area-player">
-        <div id="game-area-player-text">C'est le tour à&nbsp;</div>
-        <div id="game-area-player-name">samuelpoulin</div>
+        <div id="game-area-player-text">{{hint}}&nbsp;</div>
+        <div id="game-area-player-name">{{gameService.wordToDraw}}</div>
       </div>
         <div id="game-area-timer">
           <mat-icon [inline]="true">timer</mat-icon>
@@ -23,8 +23,8 @@
     </div>
     <div id="game-area-teams-container">
       <div id="game-area-teams">
-        <app-team [team]="team1" name="Équipe 1"></app-team>
-        <app-team [team]="team2" name="Équipe 2" ennemy></app-team>
+        <app-team [team]="gameService.teams[0]" [scoreIndex]="0" name="Équipe 1"></app-team>
+        <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy></app-team>
       </div>
     </div>
     <app-chat></app-chat>

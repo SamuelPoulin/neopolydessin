@@ -47,8 +47,19 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   joinLobby(lobbyId: string): void {
+    this.socketService.joinLobby(lobbyId);
     this.router.navigate([`/lobby/${lobbyId}`]);
-    this.socketService.joinLobby(lobbyId); // todo - move to lobby component?
+  }
+
+  getGameTypeName(gameType: GameType) {
+    switch (gameType) {
+      case GameType.CLASSIC:
+        return 'Classique';
+      case GameType.SPRINT_COOP:
+        return 'Co-op';
+      default:
+        return '';
+    }
   }
 
   get showEmptyMessage(): boolean {

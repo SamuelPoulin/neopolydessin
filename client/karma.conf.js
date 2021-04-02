@@ -5,6 +5,7 @@
 
 module.exports = (config) => {
   config.set({
+    browserNoActivityTimeout: 400000,
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
@@ -25,7 +26,7 @@ module.exports = (config) => {
       fixWebpackSourcePaths: true,
       combineBrowserReports: true,
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['spec', 'kjhtml'],
     port: 9876,
     colors: true,
     browserNoActivityTimeout: 10000,

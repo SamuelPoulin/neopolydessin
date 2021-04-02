@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
 
 import { TeamComponent } from './team.component';
 
@@ -9,6 +11,7 @@ describe('TeamComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TeamComponent],
+      providers: [{ provide: GameService, useValue: MockGameService }],
     }).compileComponents();
   });
 

@@ -70,7 +70,7 @@ describe('PenTool', () => {
 
   beforeEach(() => {
     const editor = TestBed.inject(EditorService);
-    editor.gameService.isDrawer = true;
+    editor.gameService.canDraw = true;
     penToolMock = new PenToolMock(editor);
   });
 

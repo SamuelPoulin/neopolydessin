@@ -52,8 +52,12 @@ export class EditorService {
     this._commandReceiver = new CommandReceiver();
 
     this.tools = new Map<ToolType, Tool>();
-    this.initTools();
+
     this.initListeners();
+    this.gameService.roleChanged.subscribe(() => {
+      this.resetDrawing();
+      this.initListeners();
+    });
 
     this.shapesBuffer = new Array<BaseShape>();
     this.shapes = new Array<BaseShape>();
@@ -64,6 +68,9 @@ export class EditorService {
   }
 
   resetDrawing(): void {
+    if (this.view) {
+      this.shapes.forEach(this.view.removeShape, this.view);
+    }
     this.shapesBuffer.length = 0;
     this.shapes.length = 0;
     this.previewShapes.length = 0;
@@ -96,20 +103,22 @@ export class EditorService {
   }
 
   initListeners(): void {
+    this.initTools();
+
     if (this.removePathSubscription) {
       this.removePathSubscription.unsubscribe();
       this.addPathSubscription.unsubscribe();
     }
 
-    if (!this.gameService.isDrawer) {
+    if (!this.gameService.canDraw) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
-        const shape = this.findShapeById(id + 1); // todo - conform to server standard?
+        const shape = this.findShapeById(id, true);
         if (shape) {
           this.removeShape(shape);
         }
       });
       this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
-        const shape = new Path(undefined, data.id + 1);
+        const shape = new Path();
         shape.primaryColor = Color.ahex(data.brush.color.slice(1));
         shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
         data.path.forEach((coord: Coordinate) => {
@@ -153,7 +162,6 @@ export class EditorService {
       if (!this.view) {
         this.shapesBuffer.push(shape);
       } else if (!this.view.svg.contains(shape.svgNode)) {
-        this.socketService.sendAddPath(shape.id - 1); // todo - conform to server standard
         this.shapesBuffer.push(shape);
         this.view.addShape(shape);
       }
@@ -165,7 +173,7 @@ export class EditorService {
   }
 
   removeShapeFromView(shape: BaseShape): void {
-    this.socketService.sendRemovePath(shape.id - 1); // todo - conform to server standard
+    this.socketService.sendRemovePath(shape.serverId);
     this.view.removeShape(shape);
   }
 
@@ -177,11 +185,20 @@ export class EditorService {
     }
   }
 
-  findShapeById(id: number): BaseShape | undefined {
-    const matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+  findShapeById(id: number, useServerID: boolean = false): BaseShape | undefined {
+    let matchingShapes;
+    if (useServerID) {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.serverId === id);
+    } else {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+    }
     if (matchingShapes.length > 1) {
       throw ShapeError.idCollision();
     }
     return matchingShapes.length ? matchingShapes[0] : undefined;
+  }
+
+  setReady() {
+    this.socketService.sendReady();
   }
 }

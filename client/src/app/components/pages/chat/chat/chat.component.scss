@@ -12,8 +12,10 @@
   flex-direction: column;
   justify-content: flex-start;
 
+  max-width: 400px;
   height: 100%;
-  overflow-y: scroll;
+
+  overflow-y: auto;
   margin-bottom: 100px;
 }
 
@@ -37,7 +39,7 @@
 
 chat-message {
   display: flex;
-  max-width: 50%;
+  max-width: 70%;
   margin: 0px 25px;
 }
 
@@ -55,8 +57,12 @@ system-message {
 
 #emoji-button,
 #send-button {
-  color: #2196f3;
-  margin: 0px 10px;
+  margin-left: 10px;
+}
+
+#guess-button,
+#send-button {
+  margin-right: 10px;
 }
 
 #send-button {
@@ -87,6 +93,8 @@ system-message {
   min-width: 10px;
 
   font-size: 20px;
+  background-color: transparent;
+  color: red;
 
   word-break: break-word;
   &:focus {
@@ -108,5 +116,5 @@ system-message {
   width: 90%;
   height: 75px;
 
-  background-color: white;
+  transition: background-color 0.5s;
 }

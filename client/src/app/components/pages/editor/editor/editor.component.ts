@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
+import { ChatService } from '@services/chat.service';
+import { GameService } from '@services/game.service';
 import { format } from 'date-fns';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { Tool } from 'src/app/models/tools/tool';
@@ -19,9 +21,6 @@ import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.comp
   styleUrls: ['./editor.component.scss'],
 })
 export class EditorComponent implements OnInit, AfterViewInit {
-  private static readonly SECOND: number = 1000;
-  private readonly twoMinutes: number = 120;
-
   @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
@@ -36,18 +35,18 @@ export class EditorComponent implements OnInit, AfterViewInit {
   drawingId: string;
   drawing: Drawing;
   modalTypes: typeof ModalType;
-
-  team1: string[];
-  team2: string[];
-  gameEnd: number;
-  timeRemaining: number;
+  timeLeft: string;
 
   constructor(
     private route: ActivatedRoute,
     public editorService: EditorService,
+    public gameService: GameService,
     public dialog: ModalDialogService,
     private apiService: APIService,
+    private chatService: ChatService,
   ) {
+    this.chatService.resetGameMessages();
+
     this.surfaceColor = DrawingSurfaceComponent.DEFAULT_COLOR;
     this.surfaceWidth = DrawingSurfaceComponent.DEFAULT_WIDTH;
     this.surfaceHeight = DrawingSurfaceComponent.DEFAULT_HEIGHT;
@@ -56,11 +55,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
     this.currentToolType = ToolType.Pen;
 
-    this.team1 = ['samuelpoulin', 'masuelmoulin'];
-    this.team2 = ['mortsel', 'guiboy'];
-    this.gameEnd = Date.now() + EditorComponent.SECOND * this.twoMinutes;
-
-    this.startCount();
+    setInterval(() => this.updateTimeLeft(), GameService.SECOND);
   }
 
   ngOnInit(): void {
@@ -70,6 +65,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
       this.surfaceColor = params.color ? Color.hex(params.color) : this.surfaceColor;
       this.drawingId = params.id;
     });
+    this.editorService.setReady();
   }
 
   ngAfterViewInit(): void {
@@ -114,14 +110,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
-  startCount(): void {
-    this.timeRemaining = this.getTimeLeft();
-
-    setInterval(() => {
-      this.timeRemaining = this.getTimeLeft();
-    }, EditorComponent.SECOND);
-  }
-
   setToolbarState(opened: boolean): void {
     if (opened) {
       this.toolbar.open();
@@ -149,12 +137,12 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
-  get timeLeft(): string {
-    return format(new Date(this.timeRemaining), 'mm:ss');
+  updateTimeLeft(): void {
+    this.timeLeft = format(new Date(this.gameService.getTimeLeft()), 'mm:ss');
   }
 
-  getTimeLeft(): number {
-    return this.gameEnd - Date.now();
+  get hint(): string {
+    return this.gameService.wordToDraw ? 'Le mot à dessiner est' : '';
   }
 
   get loading(): boolean {

@@ -35,7 +35,7 @@ class GameActivity : AppCompatActivity() {
 
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
-    private var currentKeyWord : String = ""
+    //private var currentKeyWord : String = ""
     private val players: ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
 
@@ -63,7 +63,6 @@ class GameActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
         vm.currentRoleLiveData.observe(this){
-            println("Nouveau Role : $it")
             supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to (it == PlayerRole.GUESSER)))
             supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
             binding.role.text = getFrenchRole(it.value)
@@ -137,6 +136,7 @@ class GameActivity : AppCompatActivity() {
                 }
             }
             override fun onFinish(){
+
             }
         }
         timer?.start()

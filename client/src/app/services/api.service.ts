@@ -24,17 +24,21 @@ export class APIService {
   private static API_LOGIN_ROUTE: string;
   private static API_REFRESH_ROUTE: string;
   private static API_REGISTER_ROUTE: string;
+  private static API_AVATAR_ROUTE: string;
+  private static API_ACCOUNT_ROUTE: string;
 
   constructor(private http: HttpClient, private notification: MatSnackBar, private localSaveService: LocalSaveService) {
     APIService.API_BASE_URL = environment.apiBaseUrl;
     APIService.API_EMAIL_ROUTE = '/email';
-    APIService.API_DATABASE_ROUTE = '/database';
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
-    APIService.API_AUTH_ROUTE = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + '/auth';
+    APIService.API_DATABASE_ROUTE = APIService.API_BASE_URL + '/database';
+    APIService.API_AUTH_ROUTE = APIService.API_DATABASE_ROUTE + '/auth';
     APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
     APIService.API_REFRESH_ROUTE = APIService.API_AUTH_ROUTE + '/refresh';
     APIService.API_REGISTER_ROUTE = APIService.API_AUTH_ROUTE + '/register';
+    APIService.API_AVATAR_ROUTE = APIService.API_BASE_URL + '/avatar';
+    APIService.API_ACCOUNT_ROUTE = APIService.API_DATABASE_ROUTE + '/account';
   }
 
   async login(username: string, password: string) {
@@ -93,6 +97,30 @@ export class APIService {
       this.http.get<Drawing>(url).subscribe((drawing: Drawing) => {
         resolve(drawing);
       });
+    });
+  }
+
+  // TODO: REMOVE ANYs
+  // eslint-disable-next-line
+  async getAvatarById(id: string): Promise<any> {
+    // eslint-disable-next-line
+    return new Promise<any>((resolve) => {
+      const url = APIService.API_AVATAR_ROUTE + `/${id}`;
+      this.http.get(url, { headers: { authorization: this.localSaveService.accessToken }, responseType: 'blob' }).subscribe((blob) => {
+        resolve(blob);
+      });
+    });
+  }
+
+  // eslint-disable-next-line
+  async getAccount(): Promise<any> {
+    // eslint-disable-next-line
+    return new Promise<any>((resolve) => {
+      this.http
+        .get(APIService.API_ACCOUNT_ROUTE, { headers: { authorization: this.localSaveService.accessToken } })
+        .subscribe((account) => {
+          resolve(account);
+        });
     });
   }
 

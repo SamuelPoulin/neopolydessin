@@ -1,10 +1,10 @@
 package com.projet.clientleger.ui.lobbylist.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.data.api.model.Difficulty
-import com.projet.clientleger.data.api.model.GameType
-import com.projet.clientleger.data.api.model.LobbyInfo
-import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,8 +13,27 @@ import io.reactivex.rxjava3.core.Observable
 
 @HiltViewModel
 class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
-    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
-        return lobbyRepository.receivedAllLobbies(gameMode, difficulty)
+    val lobbies: MutableLiveData<ArrayList<LobbyInfo>> = MutableLiveData(ArrayList())
+    lateinit var selectedGameType: GameType
+    lateinit var selectedDifficulty: Difficulty
+
+    fun init(gameType: GameType, difficulty: Difficulty) {
+        selectedGameType = gameType
+        selectedDifficulty = difficulty
+
+        lobbyRepository.receiveUpdateLobbyList().subscribe {
+            filterLobbies(it)
+            lobbies.postValue(it)
+        }
+
+        lobbyRepository.receivedAllLobbies(gameType, difficulty).subscribe{
+            lobbies.postValue(it)
+        }
+
+    }
+
+    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
+        return lobbyRepository.receivedAllLobbies(gameType, difficulty)
     }
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
@@ -23,5 +42,9 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
 
     fun joinLobby(lobbyId: String){
         lobbyRepository.joinLobby(lobbyId)
+    }
+
+    fun filterLobbies(unfilteredLobbies: ArrayList<LobbyInfo>){
+        unfilteredLobbies.removeIf {it.difficulty != selectedDifficulty || it.gameType != selectedGameType}
     }
 }
