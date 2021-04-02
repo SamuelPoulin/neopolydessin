@@ -5,6 +5,7 @@ export interface Coord {
     y: number;
 }
 export interface Segment {
+    zIndex: number;
     brushInfo: BrushInfo;
     path: Coord[];
 }
