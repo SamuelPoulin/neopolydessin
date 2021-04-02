@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -12,7 +12,11 @@
         android:layout_height="50dp"
         android:layout_gravity="start|center_vertical"
         android:layout_margin="10dp"
-        android:contentDescription="@string/avatar_description" />
+        android:contentDescription="@string/avatar_description"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/username"/>
 
     <TextView
         android:id="@+id/username"
@@ -24,23 +28,23 @@
         android:text="@string/base_player_name"
         android:textColor="@color/black"
         android:textSize="25sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@id/avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/attributeIcon"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start|center_vertical">
+
         <ImageView
             android:id="@+id/attributeIcon"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:src="@drawable/ic_is_owner"
             app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintLeft_toRightOf="@id/username"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintRight_toLeftOf="@id/removePlayerBtn"/>
 
     <Button
         android:id="@+id/removePlayerBtn"
@@ -49,5 +53,8 @@
         android:layout_gravity="end|center_vertical"
         android:layout_margin="10dp"
         android:text="@string/remove_player_button_text"
-        android:textSize="15sp" />
-</LinearLayout>
+        android:textSize="15sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
