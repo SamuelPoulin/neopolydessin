@@ -133,6 +133,9 @@ class GameActivity : AppCompatActivity() {
             println("Nouveau timer recu : $it")
             setTimer(it)
         }
+        vm.teamScores.observe(this){
+            println("Nouveau Scores recus: $it")
+        }
         vm.receiveEndGameNotice().subscribe(){
             showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
         }

@@ -51,6 +51,18 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
     }
+    fun receiveTeamScores():Observable<ArrayList<Int>>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value){ res ->
+            println("Scores d'équipes recus dans socket : ${res.toString()}")
+            val receivedList = res[0] as JSONArray
+            val list = ArrayList<Int>()
+            for(i in 0 until receivedList.length()){
+                val score = receivedList.get(i).toString().toInt()
+                list.add(score)
+            }
+            list
+        }
+    }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{
 //        for(player in players)

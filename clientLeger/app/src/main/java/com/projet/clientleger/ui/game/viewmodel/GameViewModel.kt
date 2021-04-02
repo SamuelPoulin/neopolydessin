@@ -20,6 +20,7 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
     val activeWord: MutableLiveData<String> = MutableLiveData()
     val activeTimer: MutableLiveData<Long> = MutableLiveData()
+    val teamScores:MutableLiveData<ArrayList<Int>> = MutableLiveData()
     val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
@@ -35,6 +36,9 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
             val timer = System.currentTimeMillis() - it.serverTime + it.timestamp
             activeTimer.postValue(findTimeLeft(timer)) }
 
+        gameRepository.receiveTeamScores().subscribe{
+            teamScores.postValue(it)
+        }
     }
     private fun findTimeLeft(finishTime:Long):Long{
         return finishTime - System.currentTimeMillis()

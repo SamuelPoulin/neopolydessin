@@ -42,4 +42,7 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun unsubscribe(){
         gameSocketService.unsubscribe()
     }
+    fun receiveTeamScores():Observable<ArrayList<Int>>{
+        return gameSocketService.receiveTeamScores()
+    }
 }

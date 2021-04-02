@@ -72,11 +72,6 @@ class LobbyActivity : AppCompatActivity() {
         binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
         //binding.startGameButton.visibility = View.INVISIBLE
 
-        if(gameType == GameType.SPRINT_SOLO){
-            println("MODE DE JEU SOLOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-
-        }
-
         setSubscriptions()
 
 //        val fragment :ChatFragment = ChatFragment.newInstance()
