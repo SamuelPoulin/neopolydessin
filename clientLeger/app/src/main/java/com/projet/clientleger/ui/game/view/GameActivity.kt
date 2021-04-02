@@ -5,11 +5,14 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Rect
+import android.graphics.drawable.ColorDrawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.Gravity
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.PlayerRole
+import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
@@ -24,6 +28,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
+import kotlinx.android.synthetic.main.dialog_button_quit_game.*
+import kotlinx.android.synthetic.main.dialog_gamemode.*
+import kotlinx.android.synthetic.main.dialog_gamemode.title
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
@@ -32,6 +39,8 @@ const val MILLIS_IN_SEC:Long = 1000
 const val TIME_ALMOST_UP:Int= 15000
 const val TWO_DIGITS:Int = 10
 const val SEC_IN_MIN:Int = 60
+const val QUIT_GAME_MESSAGE:String = "Voulez vous vraiment quitter?"
+
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity() {
 
@@ -61,12 +70,31 @@ class GameActivity : AppCompatActivity() {
         binding.playersRv.adapter = PlayersAdapter(players)
 
         binding.logoutBtn.setOnClickListener {
-            //val intent = Intent(this, MainmenuActivity::class.java)
-            //startActivity(intent)
+            showQuitGameDialog(QUIT_GAME_MESSAGE, false)
+        }
+        vm.onPlayerReady()
+    }
+    private fun showQuitGameDialog(message:String, isMessageFromServer:Boolean){
+        val dialogView = layoutInflater.inflate(R.layout.dialog_button_quit_game, null)
+        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
+
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.title.text = message
+
+        dialog.quitBtn.setOnClickListener {
             finish()
         }
 
-        vm.onPlayerReady()
+        if(isMessageFromServer){
+            dialog.continueBtn.visibility = View.GONE
+            dialog.setOnDismissListener { finish() }
+        }
+        else{
+            dialog.continueBtn.setOnClickListener {
+                dialog.dismiss()
+            }
+        }
     }
     @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
@@ -100,6 +128,9 @@ class GameActivity : AppCompatActivity() {
         vm.activeTimer.observe(this){
             println("Nouveau timer recu : $it")
             setTimer(it)
+        }
+        vm.receiveEndGameNotice().subscribe(){
+            showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
         }
     }
 
