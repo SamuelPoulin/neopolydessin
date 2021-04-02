@@ -46,7 +46,7 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.friendslistBtn -> toggleFriendslist()
+                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
                 R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
             }
             true
@@ -55,15 +55,6 @@ class MainmenuActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
-    }
-
-    fun toggleFriendslist() {
-        binding.friendslistContainer.visibility =
-                when (binding.friendslistContainer.visibility) {
-                    View.VISIBLE -> View.GONE
-                    View.GONE -> View.VISIBLE
-                    else -> View.GONE
-                }
     }
 
     fun showGameDialog(isCreating: Boolean) {
@@ -96,7 +87,9 @@ class MainmenuActivity : AppCompatActivity() {
             val intent: Intent
             if(isCreating) {
                 intent = Intent(this, LobbyActivity::class.java)
-                vm.createGame(getGameName(dialog), selectedGameType, selectedDifficulty, false)
+                intent.putExtra("gameName", getGameName(dialog))
+                intent.putExtra("isPrivate", false)
+                //vm.createGame(getGameName(dialog), selectedGameType, selectedDifficulty, false)
             }
             else
                 intent = Intent(this, SearchLobbyActivity::class.java)

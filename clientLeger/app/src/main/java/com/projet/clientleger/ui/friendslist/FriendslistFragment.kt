@@ -51,6 +51,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         binding?.rvFriends?.layoutManager = LinearLayoutManager(activity)
         binding?.rvFriends?.adapter =
             FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest)
+        view.visibility = View.GONE
     }
 
     override fun onDestroyView() {
@@ -72,6 +73,15 @@ class FriendslistFragment @Inject constructor() : Fragment() {
     private fun refuseFriendRequest(idOfFriend: String) {
         lifecycleScope.launch {
             vm.refuseFriendRequest(idOfFriend)
+        }
+    }
+
+    fun toggleVisibility(){
+        view?.let {
+            view?.visibility = when(it.visibility){
+                View.VISIBLE -> View.GONE
+                else -> View.VISIBLE
+            }
         }
     }
 

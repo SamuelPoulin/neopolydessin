@@ -3,6 +3,8 @@ package com.projet.clientleger.ui.lobby.viewmodel
 import android.graphics.Bitmap
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
@@ -33,6 +35,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun getAccountInfo(): AccountInfo{
         return lobbyRepository.getAccountInfo()
+    }
+
+    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean){
+        lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
     }
 
     private fun addPlayer(player: PlayerInfo){
