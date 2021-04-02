@@ -67,9 +67,16 @@ class LobbyActivity : AppCompatActivity() {
         }
         vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
         intent.getSerializableExtra("gameType") as GameType
-        binding.gamemode.text = (intent.getSerializableExtra("gameType") as GameType).toFrenchString()
+        val gameType = intent.getSerializableExtra("gameType") as GameType
+        binding.gamemode.text = gameType.toFrenchString()
         binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
         //binding.startGameButton.visibility = View.INVISIBLE
+
+        if(gameType == GameType.SPRINT_SOLO){
+            println("MODE DE JEU SOLOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+
+        }
+
         setSubscriptions()
 
 //        val fragment :ChatFragment = ChatFragment.newInstance()

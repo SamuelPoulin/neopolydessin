@@ -49,7 +49,6 @@ class SearchLobbyActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-
         vm.init(selectedGameType, selectedDifficulty)
 
     }
