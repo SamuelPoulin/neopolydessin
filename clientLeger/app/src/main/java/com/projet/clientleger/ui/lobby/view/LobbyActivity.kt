@@ -69,7 +69,7 @@ class LobbyActivity : AppCompatActivity() {
         intent.getSerializableExtra("gameType") as GameType
         binding.gamemode.text = (intent.getSerializableExtra("gameType") as GameType).toFrenchString()
         binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
-        binding.startGameButton.visibility = View.INVISIBLE
+        //binding.startGameButton.visibility = View.INVISIBLE
         setSubscriptions()
 
 //        val fragment :ChatFragment = ChatFragment.newInstance()
