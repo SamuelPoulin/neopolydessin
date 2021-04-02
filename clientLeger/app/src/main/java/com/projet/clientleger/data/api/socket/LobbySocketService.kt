@@ -26,6 +26,17 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         }
     }
 
+    fun unsubscribeLobby(){
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_PLAYER_LEAVE.value)
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_PLAYER_LEAVE.value)
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value)
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_START_GAME.value)
+    }
+    fun unsubscribeLobbyList(){
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_ALL_LOBBIES.value)
+        socketService.socket.off(LobbySocketEndpoints.RECEIVE_UPDATE_LOBBY_LIST.value)
+    }
+
     fun receivePlayerLeave(): Observable<String>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_PLAYER_LEAVE.value){(username, timestamp) ->
             username as String
@@ -38,7 +49,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
 
     fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
         return Observable.create{
-            emitter -> socketService.socket.emit("getListLobby",gameType.value, difficulty.value, Ack{ res ->
+            emitter -> socketService.socket.emit(LobbySocketEndpoints.RECEIVE_ALL_LOBBIES.value,gameType.value, difficulty.value, Ack{ res ->
             val jsonList = res[0] as JSONArray
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){

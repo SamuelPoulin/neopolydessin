@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
+import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.serialization.json.Json
@@ -38,6 +39,17 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
     }
     fun onPlayerReady(){
         socketService.socket.emit(GameSocketEndPoints.PLAYER_READY.value)
+    }
+    fun receiveEndGameNotice():Observable<String>{
+        return socketService.receiveFromSocket((GameSocketEndPoints.END_GAME_TRIGGER.value)){(message) ->
+            message as String
+        }
+    }
+    fun unsubscribe(){
+        socketService.socket.off(GameSocketEndPoints.END_GAME_TRIGGER.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_ROLES.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
+        socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
     }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{

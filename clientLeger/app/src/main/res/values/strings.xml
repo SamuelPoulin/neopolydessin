@@ -68,4 +68,7 @@
     <string name="logout_button">logout button</string>
     <string name="base_player_name">PlayerName</string>
     <string name="avatar_description">the avatar of the player</string>
+    <string name="quit_label">Quitter</string>
+    <string name="timer_icon_des">timer icon</string>
+    <string name="continuer_partie">Continuer</string>
 </resources>

@@ -47,8 +47,8 @@ class SearchLobbyActivity : AppCompatActivity() {
         binding.logoutBtn.setOnClickListener {
             val intent = Intent(this,MainmenuActivity::class.java)
             startActivity(intent)
+            finish()
         }
-
         vm.init(selectedGameType, selectedDifficulty)
 
     }
@@ -79,5 +79,12 @@ class SearchLobbyActivity : AppCompatActivity() {
             putExtra("difficulty", vm.selectedDifficulty)
         }
         startActivity(intent)
+        finish()
+    }
+
+    override fun onDestroy() {
+        println("Search Lobby détruit")
+        vm.unsubscribe()
+        super.onDestroy()
     }
 }

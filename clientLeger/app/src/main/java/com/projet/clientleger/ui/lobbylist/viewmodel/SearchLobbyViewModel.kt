@@ -47,4 +47,7 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
     fun filterLobbies(unfilteredLobbies: ArrayList<LobbyInfo>){
         unfilteredLobbies.removeIf {it.difficulty != selectedDifficulty || it.gameType != selectedGameType}
     }
+    fun unsubscribe(){
+        lobbyRepository.unsubscribeLobbyList()
+    }
 }

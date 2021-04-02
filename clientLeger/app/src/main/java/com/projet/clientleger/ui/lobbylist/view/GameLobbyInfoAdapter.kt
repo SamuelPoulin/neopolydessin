@@ -1,5 +1,6 @@
 package com.projet.clientleger.ui.lobbylist.view
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
         return ViewHolder(contactView)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
         viewHolder.gameModeTextView.text = lobbyList[position].gameType.value

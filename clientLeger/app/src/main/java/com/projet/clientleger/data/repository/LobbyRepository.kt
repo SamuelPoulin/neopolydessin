@@ -29,6 +29,13 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.receivePlayerLeave()
     }
 
+    fun unsubscribeLobby(){
+        lobbySocketService.unsubscribeLobby()
+    }
+    fun unsubscribeLobbyList(){
+        lobbySocketService.unsubscribeLobbyList()
+    }
+
     fun receivedAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
         return lobbySocketService.receiveAllLobbies(gameType,difficulty)
     }
