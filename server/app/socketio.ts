@@ -162,7 +162,6 @@ export class SocketIo {
             }
             lobby.addPlayer(playerId, socket);
             this.lobbyList.push(lobby);
-            SocketIo.UPDATE_GAME_LIST.notify();
           } else {
             console.error('player doesn\'t exist');
           }
