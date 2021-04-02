@@ -6,28 +6,40 @@ export interface LobbyInfo {
   ownerUsername: string;
   nbPlayerInLobby: number;
   gameType: GameType;
+  difficulty: Difficulty;
+  maxSize: number;
 }
 
-export interface Player {
-  accountId: string;
+export interface Player extends Entity {
+  accountId: string | null;
+  avatarId: string | null;
+  finishedLoading: boolean | null;
+}
+
+export interface Entity {
   username: string;
-  avatarId: string;
-  playerStatus: PlayerStatus;
+  playerRole: PlayerRole;
   teamNumber: number;
   isBot: boolean;
-  finishedLoading: boolean;
+  isOwner: boolean;
 }
 
-export interface PlayerInfo {
-  teamNumber: number
-  playerName: string
-  accountId: string
-  avatar: string
+export const instanceOfEntity: (object: any) => boolean = (object: any): object is Entity => {
+  return 'username' in object;
 }
 
-export interface PlayerRole {
-  playerName: string;
-  playerStatus: PlayerStatus;
+export const instanceOfPlayer: (object: any) => boolean = (object: any): object is Player => {
+  return 'accountId' in object;
+}
+
+export interface TimeInfo {
+  serverTime: number;
+  timestamp: number;
+}
+
+export interface TeamScore {
+  teamNumber: number,
+  score: number
 }
 
 export interface GuessMessage extends ChatMessage {
@@ -50,13 +62,19 @@ export enum GuessResponse {
   WRONG = 'wrong'
 }
 
+export enum ReasonEndGame {
+  PLAYER_DISCONNECT = 'playerDisconnected',
+  WINNING_SCORE_REACHED = 'winningScoreReached',
+  TIME_RUN_OUT = 'timeRunOut'
+}
+
 export enum Difficulty {
   EASY = 'easy',
   INTERMEDIATE = 'intermediate',
   HARD = 'hard'
 }
 
-export enum PlayerStatus {
+export enum PlayerRole {
   DRAWER = 'active',
   GUESSER = 'guesser',
   PASSIVE = 'passive'

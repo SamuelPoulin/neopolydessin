@@ -29,6 +29,10 @@ class SocketService @Inject constructor() {
         socket.connect()
     }
 
+    fun disconnect(){
+        socket.disconnect()
+    }
+
     fun <T> receiveFromSocket(
         endpoint: String,
         parser: (received: Array<Any>) -> T

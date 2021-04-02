@@ -4,15 +4,7 @@ import { levenshtein } from '../app/utils/levenshtein-distance';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import {
-  CurrentGameState,
-  Difficulty,
-  GameType,
-  PlayerStatus,
-  PlayerRole,
-  GuessResponse,
-  GuessMessageCoop
-} from '../../common/communication/lobby';
+import { Difficulty, GameType, PlayerRole, GuessResponse, GuessMessageCoop, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
@@ -21,26 +13,25 @@ export class LobbyCoop extends Lobby {
 
   private readonly NB_GUESS: number = 5;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
-    this.guessLeft = this.NB_GUESS;
+    super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_COOP;
+    this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
+    this.guessLeft = this.NB_GUESS;
     this.timeLeftSeconds = 60;
   }
 
-  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
-    this.addPlayerToTeam(playerId, status, socket, 0)
+  addPlayer(playerId: string, socket: Socket) {
+    this.addPlayerToTeam(playerId, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
@@ -49,16 +40,23 @@ export class LobbyCoop extends Lobby {
       });
   }
 
+  protected startGame(): void {
+    this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
+    this.startRoundTimer();
+  }
+
   protected bindLobbyEndPoints(socket: Socket) {
     socket.on(SocketLobby.PLAYER_GUESS, async (word: string) => {
       const guesserValues = this.findPlayerBySocket(socket);
-      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         const distance = levenshtein(word, this.wordToGuess);
         let guessStat;
         switch (distance) {
           case 0: {
             guessStat = GuessResponse.CORRECT;
-            this.teams[0].currentScore++;
+            this.teamScores[0]++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
             this.addTimeOnCorrectGuess();
             break;
@@ -68,14 +66,9 @@ export class LobbyCoop extends Lobby {
             guessStat = GuessResponse.CLOSE;
             this.guessLeft--;
             if (this.guessLeft === 0) {
-              // SELECT NEW WORD
-              console.log('Word to guess before await: ' + this.wordToGuess);
               await this.pictureWordService.getRandomWord().then((wordStructure) => {
                 this.wordToGuess = wordStructure.word;
-                console.log('Word to guess in await: ' + this.wordToGuess);
               });
-              console.log('Word to guess after await: ' + this.wordToGuess);
-              // EMIT NEW DRAWING BY BOT
               this.guessLeft = this.NB_GUESS;
             }
             break;
@@ -84,20 +77,14 @@ export class LobbyCoop extends Lobby {
             guessStat = GuessResponse.WRONG;
             this.guessLeft--;
             if (this.guessLeft === 0) {
-              // SELECT NEW WORD
-              console.log('Word to guess before await: ' + this.wordToGuess);
               await this.pictureWordService.getRandomWord().then((wordStructure) => {
                 this.wordToGuess = wordStructure.word;
-                console.log('Word to guess in await: ' + this.wordToGuess);
               });
-              console.log('Word to guess after await: ' + this.wordToGuess);
-              // EMIT NEW DRAWING BY BOT
               this.guessLeft = this.NB_GUESS;
             }
             break;
           }
         }
-        console.log('Before response');
         const player = this.findPlayerBySocket(socket);
         if (player) {
           const guessReturn: GuessMessageCoop = {
@@ -111,33 +98,20 @@ export class LobbyCoop extends Lobby {
         }
       }
     });
-
-    socket.on(SocketLobby.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        const roleArray: PlayerRole[] = [];
-        this.players.forEach((player) => {
-          roleArray.push({ playerName: player.username, playerStatus: PlayerStatus.GUESSER });
-        });
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
-        this.currentGameState = CurrentGameState.IN_GAME;
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
     super.unbindLobbyEndPoints(socket);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
   protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
+    this.drawingCommands.resetDrawing();
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.timeRunOut();
       }
@@ -146,18 +120,17 @@ export class LobbyCoop extends Lobby {
 
   private timeRunOut() {
     clearInterval(this.clockTimeout);
-    console.log('game over');
-    this.endGame();
+    this.endGame(ReasonEndGame.TIME_RUN_OUT);
   }
 
   private addTimeOnCorrectGuess() {
-    const timeCorrectGuess = 30000;
+    const timeCorrectGuess = this.TIME_ADD_CORRECT_GUESS * this.MS_PER_SEC;
     const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, endTime);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }
 
   private sendStartTimeToClient() {
     const gameStartTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
-    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, gameStartTime);
+    this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: gameStartTime });
   }
 }

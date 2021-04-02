@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { body, header } from 'express-validator';
+import { body, header, param } from 'express-validator';
 import { inject, injectable } from 'inversify';
 import { PictureWordService } from '../services/picture-word.service';
 import { jwtVerify } from '../middlewares/jwt-verify';
@@ -27,7 +27,7 @@ export class PictureWordController {
       [
         header('Content-Type').contains('application/json'),
         body('word').exists(),
-        body('picture').isArray({ min: 1 }),
+        body('picture').exists(),
         body('hints').isArray({ min: 3, max: 3 }),
         body('difficulty').isIn([
           Difficulty.EASY,
@@ -37,10 +37,12 @@ export class PictureWordController {
         body('drawMode').isIn([
           DrawMode.CONVENTIONAL,
           DrawMode.RANDOM,
-          DrawMode.PANORAMIC,
+          DrawMode.PAN_L_TO_R,
+          DrawMode.PAN_R_TO_L,
+          DrawMode.PAN_T_TO_B,
+          DrawMode.PAN_B_TO_T,
           DrawMode.CENTER_FIRST,
         ])
-
       ],
       validationCheck,
       jwtVerify,
@@ -48,7 +50,7 @@ export class PictureWordController {
       async (req: Request, res: Response, next: NextFunction) => {
         this.pictureWordService.uploadPicture(req.body)
           .then((response) => {
-            res.status(response.statusCode);
+            res.status(response.statusCode).json({ id: response.documents });
           })
           .catch((err: ErrorMsg) => {
             res.status(err.statusCode).json(err.message);
@@ -69,7 +71,10 @@ export class PictureWordController {
         body('drawMode').isIn([
           DrawMode.CONVENTIONAL,
           DrawMode.RANDOM,
-          DrawMode.PANORAMIC,
+          DrawMode.PAN_L_TO_R,
+          DrawMode.PAN_R_TO_L,
+          DrawMode.PAN_T_TO_B,
+          DrawMode.PAN_B_TO_T,
           DrawMode.CENTER_FIRST,
         ])
       ],
@@ -79,7 +84,37 @@ export class PictureWordController {
       async (req: Request, res: Response, next: NextFunction) => {
         this.pictureWordService.uploadDrawing(req.body)
           .then((response) => {
-            res.status(response.statusCode).json('drawing added successfully');
+            res.status(response.statusCode).json({ id: response.documents });
+          })
+          .catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.get('/sequence/:id',
+      [
+        param('id').isString().isLength({ min: 24 })
+      ],
+      validationCheck,
+      async (req: Request, res: Response, next: NextFunction) => {
+        this.pictureWordService.getSequenceToDraw(req.params.id)
+          .then((response) => {
+            res.status(response.statusCode).json(response.documents);
+          })
+          .catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.delete('/:id',
+      [
+        param('id').isString().isLength({ min: 24 })
+      ],
+      validationCheck,
+      async (req: Request, res: Response, next: NextFunction) => {
+        this.pictureWordService.deletePictureWord(req.params.id)
+          .then((response) => {
+            res.status(response.statusCode).json(response.documents);
           })
           .catch((err: ErrorMsg) => {
             res.status(err.statusCode).json(err.message);

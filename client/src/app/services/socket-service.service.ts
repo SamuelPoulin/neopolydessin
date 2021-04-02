@@ -7,10 +7,18 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../../../common/communication/brush-info';
-import { PlayerInfo } from '../../../../common/communication/player-info';
-import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
+import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
 import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
-import { Difficulty, GameType, LobbyInfo, Player } from '../../../../common/communication/lobby';
+import {
+  Difficulty,
+  GameType,
+  GuessMessage,
+  GuessMessageCoop,
+  LobbyInfo,
+  Player,
+  TeamScore,
+  TimeInfo,
+} from '../../../../common/communication/lobby';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 import { UserService } from './user.service';
@@ -59,15 +67,62 @@ export class SocketService {
     });
   }
 
+  receiveWord(): Observable<string> {
+    return new Observable<string>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_WORD_TO_DRAW, (word: string) => obs.next(word));
+    });
+  }
+
+  receiveGameEnd(): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.on(SocketLobby.END_GAME, () => obs.next(true));
+    });
+  }
+
+  receiveGameStart(): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.on(SocketLobby.START_GAME_CLIENT, () => obs.next(true));
+    });
+  }
+
+  receiveGuess(): Observable<GuessMessage> {
+    return new Observable<GuessMessage>((msgObs) => {
+      this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
+      this.socket.on(SocketLobby.COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
+    });
+  }
+
+  receiveScores(): Observable<TeamScore[]> {
+    return new Observable<TeamScore[]>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_TEAMS_SCORE, (scores: TeamScore[]) => obs.next(scores));
+    });
+  }
+
+  receivePrivateMessage(): Observable<ChatMessage> {
+    return new Observable<ChatMessage>((msgObs) => {
+      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
+    });
+  }
+
+  receiveNextTimestamp(): Observable<TimeInfo> {
+    return new Observable<TimeInfo>((obs) => {
+      this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));
+    });
+  }
+
   receivePlayerConnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((msgObs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: PlayerInfo, timeStamp: number) =>
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: Player, timeStamp: number) =>
         msgObs.next({
           timestamp: timeStamp,
-          content: `${playerInfo.playerName} a rejoint la discussion.`,
+          content: `${playerInfo.username} a rejoint la discussion.`,
         }),
       );
     });
+  }
+
+  leaveLobby(): void {
+    this.socket.emit(SocketLobby.LEAVE_LOBBY);
   }
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
@@ -90,8 +145,16 @@ export class SocketService {
     });
   }
 
-  sendMessage(message: Message): void {
-    this.socket.emit(SocketMessages.SEND_MESSAGE, message);
+  sendMessage(message: string): void {
+    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message });
+  }
+
+  sendGuess(guess: string) {
+    this.socket.emit(SocketLobby.PLAYER_GUESS, guess);
+  }
+
+  sendReady() {
+    this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
   async createLobby(name: string): Promise<string> {
@@ -100,19 +163,27 @@ export class SocketService {
     });
   }
 
-  getPlayerJoined(): Observable<string> {
-    return new Observable<string>((obs) => {
-      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: string) => {
+  getPlayerJoined(): Observable<Player> {
+    return new Observable<Player>((obs) => {
+      this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: Player) => {
         // todo - use new format
-        obs.next(player.toString());
+        obs.next(player);
       });
     });
   }
 
-  getLobbyInfo(): Observable<Player> {
-    return new Observable<Player>((obs) => {
-      this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (player: Player) => {
-        obs.next(player);
+  getLobbyInfo(): Observable<Player[]> {
+    return new Observable<Player[]>((obs) => {
+      this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+        obs.next(players);
+      });
+    });
+  }
+
+  receiveRoles(): Observable<Player[]> {
+    return new Observable<Player[]>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+        obs.next(players);
       });
     });
   }
@@ -121,10 +192,10 @@ export class SocketService {
     this.socket.emit(SocketLobby.START_GAME_SERVER);
   }
 
-  receiveStartPath(): Observable<{ coord: Coordinate; brush: BrushInfo }> {
-    return new Observable<{ coord: Coordinate; brush: BrushInfo }>((obs) => {
+  receiveStartPath(): Observable<{ id: number; coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ id: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
       this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate, brush: BrushInfo) => {
-        obs.next({ coord, brush });
+        obs.next({ id, coord, brush });
       });
     });
   }

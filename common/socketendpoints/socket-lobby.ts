@@ -2,9 +2,13 @@ export enum SocketLobby {
     CREATE_LOBBY = 'createLobby',
     GET_ALL_LOBBIES = 'getListLobby',
     RECEIVE_LOBBY_INFO = 'receiveLobbyInfo',
+    UPDATE_LOBBIES = 'updateLobbies',
 
     JOIN_LOBBY = 'joinLobby',
     LEAVE_LOBBY = 'leaveLobby',
+
+    ADD_BOT = 'addBot',
+    REMOVE_BOT = 'removeBot',
 
     CHANGE_PRIVACY_SETTING = 'privacySetting',
     CHANGED_PRIVACY_SETTING = 'changedPrivacy',
@@ -20,6 +24,8 @@ export enum SocketLobby {
 
     UPDATE_ROLES = 'updateRoles',
     UPDATE_WORD_TO_DRAW = 'updateWordToDraw',
+    UPDATE_TEAMS_SCORE = 'updateTeamsScore',
+    UPDATE_GAME_STATE = 'updateGameState',
 
     COOP_GUESS_BROADCAST = 'coopGuessBroadcast',
     CLASSIQUE_GUESS_BROADCAST = 'classiqueGuessBroadcast'

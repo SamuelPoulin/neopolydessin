@@ -1,30 +1,23 @@
 package com.projet.clientleger.ui.lobby.view
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.api.model.PlayerRole
-import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
-import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
-import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class LobbyActivity : AppCompatActivity() {
@@ -32,9 +25,9 @@ class LobbyActivity : AppCompatActivity() {
     lateinit var binding: ActivityLobbyBinding
     private var playerCount:Int = 0
     private val playersView = ArrayList<ConstraintLayout>()
-    private var rolesList = ArrayList<PlayerRole>()
     private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     private lateinit var rvTeams: Array<RecyclerView>
+    var nextActivityIntent: Intent? = null
 
     private fun setSubscriptions() {
 //        vm.receivePlayersInfo()
@@ -45,10 +38,7 @@ class LobbyActivity : AppCompatActivity() {
 //                }
 
         vm.receiveStartGame().subscribe{
-            lifecycleScope.launch {
-                rolesList = it
-                goToActivity(GameActivity::class.java)
-            }
+            goToGame()
         }
     }
 
@@ -56,7 +46,12 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.lifecycleOwner = this
         setupButtons()
+        if(intent.getBooleanExtra("isJoining", false)){
+            intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }
+        }
+
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for(i in rvTeams.indices){
             val manager = LinearLayoutManager(this)
@@ -71,18 +66,18 @@ class LobbyActivity : AppCompatActivity() {
             }
         }
         vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
-        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
-        val username = vm.getUsername()
-        //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
-        binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
-        binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
-        //addPlayerToGame(gameInfo.gameCreator)
-        setSubscriptions()
-        if(gameInfo.gameCreator != username){
-            binding.startGameButton.visibility = View.INVISIBLE
-        } else{
-            vm.setUserInfo()
+        intent.getSerializableExtra("gameType") as GameType
+        val gameType = intent.getSerializableExtra("gameType") as GameType
+        binding.gamemode.text = gameType.toFrenchString()
+        binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
+        //binding.startGameButton.visibility = View.INVISIBLE
+
+        if(gameType == GameType.SPRINT_SOLO){
+            println("MODE DE JEU SOLOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+
         }
+
+        setSubscriptions()
 
 //        val fragment :ChatFragment = ChatFragment.newInstance()
 //
@@ -93,28 +88,6 @@ class LobbyActivity : AppCompatActivity() {
 //                .commit()
 //        }
     }
-    private fun getFrenchGameMode(englishMode:String):String{
-        when(englishMode){
-            "classic" -> return "Classique"
-            "solo" -> return "Solo"
-            "coop" -> return "Coop"
-        }
-        return "Classique"
-    }
-    private fun getFrenchDifficulty(englishDifficulty:String):String{
-        when(englishDifficulty){
-            "easy" -> return "Facile"
-            "intermediate" -> return "Intermediaire"
-            "hard" -> return "Difficile"
-        }
-        return "Facile"
-    }
-
-    /*private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
-        for(i in lobbyInfo.playerInfo.indices){
-            playersView[i].text = lobbyInfo.playerInfo[i].playerName
-        }
-    }*/
 
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {
@@ -122,56 +95,28 @@ class LobbyActivity : AppCompatActivity() {
         }
         binding.exitGame.setOnClickListener {
             vm.leaveLobby()
-            goToMainMenu()
+            finish()
         }
-//        binding.removePlayer1Button.setOnClickListener {
-//            kickPlayer(1)
-//        }
-//        binding.removePlayer2Button.setOnClickListener {
-//            kickPlayer(2)
-//        }
-//        binding.removePlayer3Button.setOnClickListener {
-//            kickPlayer(3)
-//        }
-//        binding.removePlayer4Button.setOnClickListener {
-//            kickPlayer(4)
-//        }
-        disableAllRemoveButtons()
     }
     private fun startGame(){
         vm.startGame()
-        val intent = Intent(this,GameActivity::class.java)
-        startActivity(intent)
     }
-    private fun goToMainMenu(){
-        val intent = Intent(this, MainmenuActivity::class.java)
+    private fun goToGame(){
+        vm.unsubscribe()
+        val intent = Intent(this, GameActivity::class.java)
+        nextActivityIntent = intent
         startActivity(intent)
-    }
-
-    private fun <T> goToActivity(java: Class<T>) {
-        startActivity(Intent(this, java))
+        finish()
     }
     private fun kickPlayer(player:PlayerInfo){
         println("kic: ${player.username}")
     }
-    private fun addPlayerToGame(info: Player){
-        playerCount++
-        val textView = playersView[playerCount].findViewWithTag<TextView>("playerView")
-        textView.text = info.playerName
-        textView.isEnabled = true
-    }
-    private fun disableRemoveButtonWithIndex(index:Int){
-        when(index){
-//            1-> binding.removePlayer1Button.isEnabled = false
-//            2-> binding.removePlayer2Button.isEnabled = false
-//            3-> binding.removePlayer3Button.isEnabled = false
-//            4-> binding.removePlayer4Button.isEnabled = false
-        }
-    }
-    private fun disableAllRemoveButtons(){
-//        binding.removePlayer1Button.isEnabled = false
-//        binding.removePlayer2Button.isEnabled = false
-//        binding.removePlayer3Button.isEnabled = false
-//        binding.removePlayer4Button.isEnabled = false
+
+    override fun onDestroy() {
+        println("Lobby détruit")
+        vm.unsubscribe()
+        if(nextActivityIntent == null)
+            vm.clearAvatarStorage()
+        super.onDestroy()
     }
 }

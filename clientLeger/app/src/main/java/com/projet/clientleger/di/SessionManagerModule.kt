@@ -5,6 +5,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
+import com.projet.clientleger.data.api.socket.SocketService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,5 +21,6 @@ object SessionManagerModule {
     fun provideSessionManager(@ApplicationContext context: Context,
                               tokenInterceptor: TokenInterceptor,
                               apiSessionManagerInterface: ApiSessionManagerInterface,
-                              apiAvatarInterface: ApiAvatarInterface): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface, apiAvatarInterface)
+                              apiAvatarInterface: ApiAvatarInterface,
+                              socketService: SocketService): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface, apiAvatarInterface, socketService)
 }

@@ -9,7 +9,8 @@ import { MockAPIService } from '@services/api.service.spec';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
-import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
+import { UserService } from '@services/user.service';
+import { MockUserService } from '@services/user.service.spec';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
 import { EditorModule } from '../editor.module';
@@ -24,6 +25,7 @@ describe('EditorKeyboardListener', () => {
       providers: [
         { provide: EditorService, useClass: MockEditorService },
         { provide: APIService, useValue: MockAPIService },
+        { provide: UserService, useValue: MockUserService },
       ],
     }).compileComponents();
   }));
@@ -96,11 +98,5 @@ describe('EditorKeyboardListener', () => {
     component.editorService.gridProperties.size.value = 25;
     keyboardListener.handle(keyDown('+', false, false));
     expect(component.editorService.gridProperties.size.value).toEqual(30);
-  });
-
-  it('should set grid visible when typing g', () => {
-    component.editorService.gridProperties.visibility.value = GridVisibility.hidden;
-    keyboardListener.handle(keyDown('g', false, false));
-    expect(component.editorService.gridProperties.visibility.value).toEqual(GridVisibility.visible);
   });
 });

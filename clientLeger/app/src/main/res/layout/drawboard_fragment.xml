@@ -26,7 +26,8 @@
             android:layout_width="1000px"
             android:layout_height="1000px"
             android:id="@+id/drawingBoard"
-            android:layout_margin="3dp"/>
+            android:layout_margin="3dp"
+            tools:ignore="PxUsage" />
     </FrameLayout>
     <com.google.android.material.slider.Slider
         android:id="@+id/strokeWidthSlider"
@@ -54,33 +55,56 @@
             android:layout_margin="5dp"
             />
     </FrameLayout>
-    <Button
+    <ImageButton
         android:id="@+id/undoBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="undo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.06"
+        app:layout_constraintWidth_percent="0.15"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/ic_undo"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
-    <Button
+    <ImageButton
         android:id="@+id/redoBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="redo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.06"
+        app:layout_constraintWidth_percent="0.15"
+        android:src="@drawable/ic_redo"
+        android:backgroundTint="@color/white"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/undoBtn"/>
-    <Button
+    <ImageButton
         android:id="@+id/colorPickerBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Color"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.06"
+        app:layout_constraintWidth_percent="0.15"
+        android:src="@drawable/ic_color_picker"
+        android:backgroundTint="@color/white"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/redoBtn"/>
-    <Button
+    <ImageButton
         android:id="@+id/eraserBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Eraser"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colorPickerBtn"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintWidth_percent="0.15"
+        android:src="@drawable/ic_delete"
+        android:backgroundTint="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/colorPickerBtn"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+    <ImageButton
+        android:id="@+id/pencilBtn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.06"
+        app:layout_constraintWidth_percent="0.15"
+        android:src="@drawable/ic_pencil_green"
+        android:backgroundTint="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/eraserBtn"
+        app:layout_constraintLeft_toLeftOf="@id/eraserBtn"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

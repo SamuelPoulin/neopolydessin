@@ -18,6 +18,7 @@ import { AvatarController } from './controllers/avatar.controller';
 import { AvatarService } from './services/avatar.service';
 import { PictureWordController } from './controllers/picture-word.controller';
 import { PictureWordService } from './services/picture-word.service';
+import { DrawingSequenceService } from './services/drawing-sequence.service';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {
   const container: Container = new Container();
@@ -37,6 +38,7 @@ export const containerBootstrapper: () => Promise<Container> = async () => {
   container.bind(Types.AvatarService).to(AvatarService);
   container.bind(Types.PictureWordController).to(PictureWordController);
   container.bind(Types.PictureWordService).to(PictureWordService);
+  container.bind(Types.DrawingSequenceService).to(DrawingSequenceService);
 
   return container;
 };

@@ -15,9 +15,9 @@ export abstract class Tool implements MouseHandler {
     this._mousePosition = new Coordinate();
     this.keyboardListener = new KeyboardListenerService();
 
-    if (this.initMouseHandler && editorService.gameService.isDrawer) {
+    if (this.initMouseHandler && editorService.gameService.canDraw) {
       this.initMouseHandler();
-    } else if (this.initListeners && !editorService.gameService.isDrawer) {
+    } else if (this.initListeners && !editorService.gameService.canDraw) {
       this.initListeners();
     }
 

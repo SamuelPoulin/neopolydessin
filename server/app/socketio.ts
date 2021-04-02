@@ -14,7 +14,7 @@ import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
-import { Difficulty, GameType, LobbyInfo, PlayerStatus } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
@@ -35,6 +35,7 @@ export enum FriendsListEvent {
 export class SocketIo {
 
   static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
+  static UPDATE_GAME_LIST: Observable<void> = new Observable();
   static CLIENT_CONNECTED: Observable<Socket> = new Observable();
   static CLIENT_DISCONNECTED: Observable<Socket> = new Observable();
 
@@ -62,6 +63,16 @@ export class SocketIo {
       console.log(`Connected with ${socket.id} \n`);
     });
 
+    SocketIo.UPDATE_GAME_LIST.subscribe(() => {
+      const updatedLobbies = this.lobbyList
+        .filter((lobby) => {
+          return !lobby.privateLobby;
+        }).map((lobby) => {
+          return lobby.getLobbySummary();
+        });
+      this.io.emit(SocketLobby.UPDATE_LOBBIES, updatedLobbies);
+    });
+
     SocketIo.CLIENT_DISCONNECTED.subscribe((socket: Socket) => {
       console.log(`Disconnected : ${socket.id} \n`);
     });
@@ -72,6 +83,7 @@ export class SocketIo {
       if (index > -1) {
         this.lobbyList.splice(index, 1);
       }
+      SocketIo.UPDATE_GAME_LIST.notify();
     });
 
     DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { friends: Friend[]; event: FriendsListEvent }) => {
@@ -120,9 +132,9 @@ export class SocketIo {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
-          lobbyToJoin.addPlayer(playerId, PlayerStatus.PASSIVE, socket);
+          lobbyToJoin.addPlayer(playerId, socket);
         } else {
-          console.error('coudln\'t add player to lobby');
+          console.error('couldn\'t add player to lobby');
         }
       });
 
@@ -134,21 +146,21 @@ export class SocketIo {
             switch (gametype) {
               case GameType.CLASSIC: {
                 lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_SOLO: {
                 lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
               case GameType.SPRINT_COOP: {
                 lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  playerId, difficulty, privacySetting, lobbyName);
+                  difficulty, privacySetting, lobbyName);
                 break;
               }
             }
-            lobby.addPlayer(playerId, PlayerStatus.DRAWER, socket);
+            lobby.addPlayer(playerId, socket);
             this.lobbyList.push(lobby);
           } else {
             console.error('player doesn\'t exist');

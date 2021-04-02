@@ -22,9 +22,13 @@ export class CommandReceiver extends EventEmitter {
   }
 
   add(command: Command): void {
+    this.push(command);
+    command.execute();
+  }
+
+  push(command: Command): void {
     this._revertedCommands = new Array<Command>();
     this._commands.push(command);
-    command.execute();
     this.emit(CommandReceiver.EVENT_TEXT);
   }
 

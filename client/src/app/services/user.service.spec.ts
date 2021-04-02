@@ -4,7 +4,11 @@ import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
 import { UserService } from './user.service';
 
-export const MockUserService = jasmine.createSpyObj('UserService', { login: null, refreshToken: null });
+export const MockUserService = jasmine.createSpyObj('UserService', {
+  login: null,
+  refreshToken: null,
+  fetchAvatar: Promise.resolve(),
+});
 
 describe('UserService', () => {
   let service: UserService;

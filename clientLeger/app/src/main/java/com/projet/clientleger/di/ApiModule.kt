@@ -6,11 +6,13 @@ import com.google.gson.GsonBuilder
 import com.projet.clientleger.BuildConfig
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
+import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.api.socket.DrawingSocketService
 import com.projet.clientleger.data.api.socket.FriendslistSocketService
 import com.projet.clientleger.data.api.socket.SocketService
+import com.projet.clientleger.data.service.AvatarStorageService
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides
@@ -77,4 +79,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideLobbySocketService(socketService:SocketService): LobbySocketService = LobbySocketService(socketService)
+
+    @Provides
+    @Singleton
+    fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
 }

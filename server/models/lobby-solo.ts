@@ -3,36 +3,33 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { CurrentGameState, Difficulty, GameType, PlayerStatus, PlayerRole } from '../../common/communication/lobby';
+import { Difficulty, GameType, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { Lobby } from './lobby';
 
 @injectable()
 export class LobbySolo extends Lobby {
 
-  private readonly SOLO_TEAM_SIZE: number = 2;
   private guessLeft: number;
-  private clockTimeout: NodeJS.Timeout;
 
   constructor(
     socketIdService: SocketIdService,
     databaseService: DatabaseService,
     pictureWordService: PictureWordService,
     io: Server,
-    accountId: string,
     difficulty: Difficulty,
     privateGame: boolean,
     lobbyName: string
   ) {
-    super(socketIdService, databaseService, pictureWordService, io, accountId, difficulty, privateGame, lobbyName);
-    this.size = this.SOLO_TEAM_SIZE;
+    super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_SOLO;
+    this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = 3;
     this.privateLobby = true;
   }
 
-  addPlayer(playerId: string, status: PlayerStatus, socket: Socket) {
-    this.addPlayerToTeam(playerId, status, socket, 0)
+  addPlayer(playerId: string, socket: Socket) {
+    this.addPlayerToTeam(playerId, socket, 0)
       .then(() => {
         this.bindLobbyEndPoints(socket);
       })
@@ -41,15 +38,21 @@ export class LobbySolo extends Lobby {
       });
   }
 
+  protected startGame(): void {
+    this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
+    this.startRoundTimer();
+  }
+
   protected bindLobbyEndPoints(socket: Socket) {
 
     super.bindLobbyEndPoints(socket);
 
     socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
       const guesserValues = this.findPlayerBySocket(socket);
-      if (guesserValues?.playerStatus === PlayerStatus.GUESSER) {
+      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
         if (word === this.wordToGuess) {
-          this.teams[0].currentScore++;
+          this.teamScores[0]++;
           this.timeLeftSeconds += 30;
           this.addTimeOnCorrectGuess();
           // EMIT NEW TIME
@@ -68,33 +71,20 @@ export class LobbySolo extends Lobby {
         }
       }
     });
-
-    socket.on(SocketLobby.START_GAME_SERVER, () => {
-      const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (senderAccountId === this.ownerAccountId) {
-        const roleArray: PlayerRole[] = [];
-        this.players.forEach((player) => {
-          roleArray.push({ playerName: player.username, playerStatus: PlayerStatus.GUESSER });
-        });
-        this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, roleArray);
-        this.currentGameState = CurrentGameState.IN_GAME;
-      }
-    });
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
     super.unbindLobbyEndPoints(socket);
     socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
   }
 
   protected startRoundTimer() {
     // CHOOSE WORD TO DRAW BY BOT
     // START DRAWING BY BOT
+    this.drawingCommands.resetDrawing();
     this.sendStartTimeToClient();
     this.clockTimeout = setInterval(() => {
       --this.timeLeftSeconds;
-      console.log(this.timeLeftSeconds);
       if (this.timeLeftSeconds <= 0) {
         this.timeRunOut();
       }
@@ -103,8 +93,7 @@ export class LobbySolo extends Lobby {
 
   private timeRunOut() {
     clearInterval(this.clockTimeout);
-    console.log('game over');
-    this.endGame();
+    this.endGame(ReasonEndGame.TIME_RUN_OUT);
   }
 
   private addTimeOnCorrectGuess() {

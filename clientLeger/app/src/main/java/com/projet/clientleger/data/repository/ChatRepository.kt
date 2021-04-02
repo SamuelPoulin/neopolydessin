@@ -4,7 +4,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.socket.ChatSocketService
 import com.projet.clientleger.data.model.chat.Message
 import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.MessageGuess
+import com.projet.clientleger.data.model.chat.GuessMessageInfo
 import com.projet.clientleger.data.model.chat.MessageSystem
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
@@ -30,7 +30,11 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         return sessionManager.getUsername()
     }
 
-    fun sendGuess(guess: String): Observable<MessageGuess>{
+    fun sendGuess(guess: String){
         return  chatSocketService.sendGuess(guess)
+    }
+
+    fun receiveGuessClassic(): Observable<GuessMessageInfo> {
+        return chatSocketService.receiveGuessClassic()
     }
 }
