@@ -21,14 +21,16 @@ export class PictureWordService {
     this.picturePath = PICTURE_WORD_PATH;
   }
 
-  setPicturePath(path: string) {
-    this.picturePath = path;
+  setPicturePath(picturePath: string) {
+    this.picturePath = picturePath;
     this.checkForPictureFolder();
   }
 
   async uploadPicture(body: PictureWordPicture): Promise<Response<string>> {
     return new Promise<Response<string>>((resolve, reject) => {
       const toSave = new pictureWordModel(body);
+      // const file = fs.readFileSync(path.resolve('C:/Users/mort_/Pictures/stealin.png'));
+      // const uploadedPicture: Buffer = Buffer.from(file);
       const uploadedPicture: Buffer = Buffer.from(body.picture);
       this.posterizePromise(uploadedPicture, body.color)
         .then(async (svg) => {

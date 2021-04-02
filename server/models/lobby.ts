@@ -130,7 +130,7 @@ export abstract class Lobby {
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
-      if (removedPlayer.isOwner) {
+      if (removedPlayer.isOwner && this.players.length === 1) {
         this.players[0].isOwner = true;
       }
       socket.leave(this.lobbyId);
