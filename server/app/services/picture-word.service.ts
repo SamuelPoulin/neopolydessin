@@ -6,10 +6,18 @@ import Types from '../types';
 import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
 import pictureWordModel, { PictureWord } from '../../models/schemas/picture-word-pair';
 import { DrawingSequence } from '../../../common/communication/drawing-sequence';
+import { Difficulty } from '../../../common/communication/lobby';
 import { DatabaseService, Response } from './database.service';
 import { DrawingSequenceService } from './drawing-sequence.service';
 
 const PICTURE_WORD_PATH: string = '/var/www/Polydessin/picture';
+interface RandomWord {
+  word: string;
+  hints: string[];
+  difficulty: Difficulty;
+  sequence: DrawingSequence;
+}
+
 @injectable()
 export class PictureWordService {
 
@@ -90,8 +98,8 @@ export class PictureWordService {
     });
   }
 
-  async getRandomWord(): Promise<PictureWord> {
-    return new Promise<PictureWord>((resolve, reject) => {
+  async getRandomWord(): Promise<RandomWord> {
+    return new Promise<RandomWord>((resolve, reject) => {
       pictureWordModel.countDocuments()
         .then((count) => {
           const random = Math.floor(Math.random() * count);
@@ -99,7 +107,13 @@ export class PictureWordService {
         })
         .then((pictureWord) => {
           if (!pictureWord) throw new Error(NOT_FOUND.toString());
-          resolve(pictureWord);
+          const drawingSequence = this.drawingSequenceService.sequence(pictureWord);
+          resolve({
+            word: pictureWord.word,
+            hints: pictureWord.hints,
+            difficulty: pictureWord.difficulty,
+            sequence: drawingSequence,
+          });
         })
         .catch((err) => {
           reject(err);

@@ -26,6 +26,7 @@ import {
 } from '../../common/communication/lobby';
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from '../../common/communication/drawing-sequence';
+import { BotService } from '../app/services/bot.service';
 
 
 export interface ServerPlayer extends Player {
@@ -65,6 +66,8 @@ export abstract class Lobby {
   protected players: Entity[];
   protected teamScores: number[];
 
+  protected botService: BotService;
+
   constructor(
     @inject(Types.SocketIdService) protected socketIdService: SocketIdService,
     @inject(Types.DatabaseService) protected databaseService: DatabaseService,
@@ -85,6 +88,7 @@ export abstract class Lobby {
     this.timeLeftSeconds = 0;
     this.players = [];
     this.teamScores = [];
+    this.botService = new BotService(this.io, this.lobbyId);
   }
 
   toLobbyInfo(): Player[] {
@@ -205,15 +209,13 @@ export abstract class Lobby {
         if (this.gameType === GameType.CLASSIC && this.getTeamLength(teamNumber) >= this.size / 2) {
           console.error(`already enough players in team ${teamNumber}`);
         } else {
-          const bot: Entity = {
-            username: 'bob',
-            playerRole: PlayerRole.PASSIVE,
-            teamNumber,
-            isBot: true,
-            isOwner: false
-          };
-          this.players.push(bot);
-          this.emitJoinInfo(bot, socket);
+          if (this.soloOrCoopGameAlreadyHasBot()) {
+            console.error(`Lobby - ${this.lobbyId} - already has a bot in it!`);
+          } else {
+            const bot = this.getBotInfo(teamNumber);
+            this.players.push(bot);
+            this.emitJoinInfo(bot, socket);
+          }
         }
       }
     });
@@ -241,7 +243,7 @@ export abstract class Lobby {
       if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.startPath(startPoint, brushInfo)
           .then((startedPath) => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startedPath.id, startPoint, startedPath.brushInfo);
+            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, startedPath.id, startedPath.id, startPoint, startedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to start path for ${this.lobbyId}`);
@@ -376,6 +378,22 @@ export abstract class Lobby {
       });
     }
     return teamScoreArray;
+  }
+
+  protected getBotInfo(teamNumber: number): Entity {
+    return {
+      username: 'bob',
+      playerRole: PlayerRole.PASSIVE,
+      teamNumber,
+      isBot: true,
+      isOwner: false
+    };
+  }
+
+  private soloOrCoopGameAlreadyHasBot(): boolean {
+    return this.gameType === GameType.SPRINT_COOP
+      || this.gameType === GameType.SPRINT_SOLO
+      && !this.players.find((player) => player.isBot);
   }
 
   private gameIsInDrawPhase(): boolean {

@@ -27,6 +27,6 @@ export enum SocketLobby {
     UPDATE_TEAMS_SCORE = 'updateTeamsScore',
     UPDATE_GAME_STATE = 'updateGameState',
 
-    COOP_GUESS_BROADCAST = 'coopGuessBroadcast',
+    SOLO_COOP_GUESS_BROADCAST = 'soloCoopGuessBroadcast',
     CLASSIQUE_GUESS_BROADCAST = 'classiqueGuessBroadcast'
 }
