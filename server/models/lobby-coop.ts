@@ -28,6 +28,7 @@ export class LobbyCoop extends Lobby {
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = this.NB_GUESS;
     this.timeLeftSeconds = 60;
+    this.players.push(this.getBotInfo(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {

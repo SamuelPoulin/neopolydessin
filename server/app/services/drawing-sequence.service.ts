@@ -26,7 +26,7 @@ export class DrawingSequenceService {
   }
 
   sequencePicture(picture: PictureWord): DrawingSequence {
-    const paths = this.parsePictureToDrawnPaths(picture, 'C:/var/www/Polydessin/picture/parsedPicture.svg');
+    const paths = this.parsePictureToDrawnPaths(picture);
     return this.sequenceUsingDrawMode(paths, picture.drawMode);
   }
 

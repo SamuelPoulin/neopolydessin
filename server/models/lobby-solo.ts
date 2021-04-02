@@ -26,6 +26,7 @@ export class LobbySolo extends Lobby {
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = 3;
     this.privateLobby = true;
+    this.players.push(this.getBotInfo(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {
