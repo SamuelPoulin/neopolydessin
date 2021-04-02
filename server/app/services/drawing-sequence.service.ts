@@ -137,7 +137,7 @@ export class DrawingSequenceService {
         brushInfo: { color: picture.color as string, strokeWidth: 1 },
         path: this.toCoordArray(path.data)
       });
-      convertedSVGFile += `\n<path stroke="black" fill="none" d="${path.data}"/>`;
+      convertedSVGFile += `\n<path stroke="${picture.color}" fill="none" d="${path.data}"/>`;
     });
     convertedSVGFile += '\n</svg>';
 
@@ -158,7 +158,7 @@ export class DrawingSequenceService {
   private toCoordArray(svgData: string): Coord[] {
     const split = svgData.split(/M | L | ,/);
     const coords: Coord[] = [];
-    split.forEach((values, index) => {
+    split.forEach((values) => {
       if (values.length !== 0) {
         const coordValues = values.split(' ');
         coords.push({
