@@ -52,11 +52,6 @@ class MainmenuActivity : AppCompatActivity() {
             true
         }
 
-        vm.connectSocket(getSharedPreferences(
-                getString(R.string.user_creds),
-                Context.MODE_PRIVATE
-        ).getString("accessToken", "")!!)
-
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }

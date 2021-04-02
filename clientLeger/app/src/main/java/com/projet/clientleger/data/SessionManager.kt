@@ -13,6 +13,7 @@ import com.projet.clientleger.data.api.http.ApiErrorMessages
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.model.account.Account
+import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.utils.BitmapConversion
@@ -38,7 +39,8 @@ open class SessionManager @Inject constructor(
         private val context: Context?,
         private val tokenInterceptor: TokenInterceptor,
         private val apiSessionManagerInterface: ApiSessionManagerInterface,
-        private val apiAvatarInterface: ApiAvatarInterface
+        private val apiAvatarInterface: ApiAvatarInterface,
+        private val socketService: SocketService
 ) {
     companion object{
         const val ERROR_MESSAGE = "errorMessage"
@@ -66,6 +68,7 @@ open class SessionManager @Inject constructor(
         }
         tokenInterceptor.setAccessToken(accessToken)
         val res = apiSessionManagerInterface.getAccountInfo()
+        socketService.connect(accessToken)
         when(res.code()){
             HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body())
             HttpsURLConnection.HTTP_UNAUTHORIZED -> logout(SESSION_EXPIRED)
@@ -178,6 +181,7 @@ open class SessionManager @Inject constructor(
     fun logout(errorMessage: String?){
         tokenInterceptor.clearToken()
         clearCred()
+        socketService.disconnect()
         val intent = Intent(context, ConnexionActivity::class.java)
         val bundle = Bundle()
         errorMessage.let {

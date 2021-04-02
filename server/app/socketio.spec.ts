@@ -15,7 +15,6 @@ import { Login } from '../models/schemas/logins';
 import { otherAccountInfo } from './services/friends.service.spec';
 import { Difficulty, GameType, LobbyInfo, Player, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
 import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
-import { Coord } from '../models/commands/path';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
@@ -27,6 +26,7 @@ import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { PictureWordService } from './services/picture-word.service';
 import { DrawMode } from '../../common/communication/draw-mode';
+import { Coord } from '../../common/communication/drawing-sequence';
 
 export const accountInfo3: Register = {
     firstName: 'a',

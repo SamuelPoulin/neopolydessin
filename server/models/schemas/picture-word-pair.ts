@@ -33,15 +33,17 @@ export const pictureWordSchema = new Schema<PictureWord, PictureWordModel>({
   drawnPaths: {
     type: [
       {
+        _id: false,
         id: Number,
-        path: [{ x: Number, y: Number }],
+        path: [{ _id: false, x: Number, y: Number }],
         brushInfo: {
           color: String,
           strokeWidth: Number
         }
       }
     ],
-    required: false
+    required: false,
+    _id: false
   },
   hints: [String],
   difficulty: {
