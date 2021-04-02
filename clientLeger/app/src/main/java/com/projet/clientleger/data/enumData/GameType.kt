@@ -23,5 +23,14 @@ enum class GameType(val value:String) {
                 else -> CLASSIC
             }
         }
+
+        fun stringToEnum(gameType: String): GameType{
+            return when(gameType) {
+                CLASSIC.value -> CLASSIC
+                SPRINT_SOLO.value ->SPRINT_SOLO
+                else -> SPRINT_COOP
+            }
+
+        }
     }
 }

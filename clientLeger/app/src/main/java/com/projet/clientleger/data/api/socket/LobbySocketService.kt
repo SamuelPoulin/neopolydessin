@@ -2,10 +2,10 @@ package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.lobby.Lobby
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
-import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
@@ -36,16 +36,16 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.LEAVE_LOBBY.value)
     }
 
-    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<LobbyList>{
+    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
         return Observable.create{
             emitter -> socketService.socket.emit("getListLobby",gameType.value, difficulty.value, Ack{ res ->
-            println(res[0])
             val jsonList = res[0] as JSONArray
-            val list = ArrayList<Lobby>()
+            val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){
-                list.add(Json.decodeFromString(Lobby.serializer(), jsonList.get(i).toString()))
+                val lobby = Json.decodeFromString(Lobby.serializer(), jsonList.get(i).toString())
+                list.add(lobby.toInfo())
             }
-            emitter.onNext(LobbyList(list))
+            emitter.onNext(list)
         })
         }
     }

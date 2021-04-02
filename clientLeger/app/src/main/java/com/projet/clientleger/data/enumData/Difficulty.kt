@@ -21,5 +21,13 @@ enum class Difficulty(val value: String) {
                 else -> HARD
             }
         }
+
+        fun stringToEnum(difficulty: String): Difficulty{
+            return when(difficulty) {
+                EASY.value -> EASY
+                INTERMEDIATE.value -> INTERMEDIATE
+                else -> HARD
+            }
+        }
     }
 }

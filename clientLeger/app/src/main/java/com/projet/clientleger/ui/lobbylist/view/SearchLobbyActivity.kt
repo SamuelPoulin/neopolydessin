@@ -12,6 +12,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Lobby
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
 class SearchLobbyActivity : AppCompatActivity() {
 
     private val vm: SearchLobbyViewModel by viewModels()
-    private var lobbyList = ArrayList<Lobby>()
+    private var lobbyList = ArrayList<LobbyInfo>()
     private lateinit var selectedGameType: GameType
     private lateinit var selectedDifficulty: Difficulty
 
@@ -48,7 +49,7 @@ class SearchLobbyActivity : AppCompatActivity() {
         lifecycleScope.launch {
             vm.receiveAllLobbies(selectedGameType, selectedDifficulty).subscribe({
                 lifecycleScope.launch {
-                    lobbyList.addAll(it.list)
+                    lobbyList.addAll(it)
                     rvGames.adapter?.notifyDataSetChanged()
                 }
             },
@@ -69,11 +70,11 @@ class SearchLobbyActivity : AppCompatActivity() {
         }
     }
 
-    private fun addGameLobby(lobby: Lobby){
-        lobbyList.add(lobby)
-        rvGames.adapter?.notifyItemInserted(lobbyList.size-1)
-        rvGames.scrollToPosition(lobbyList.size-1)
-    }
+//    private fun addGameLobby(lobby: Lobby){
+//        lobbyList.add(lobby)
+//        rvGames.adapter?.notifyItemInserted(lobbyList.size-1)
+//        rvGames.scrollToPosition(lobbyList.size-1)
+//    }
 
     private fun joinLobby(lobbyId: String){
         val intent = Intent(this, LobbyActivity::class.java).apply{

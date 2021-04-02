@@ -42,6 +42,15 @@
             android:textColor="@color/black"
             android:text="@string/game_mode"
             android:textAlignment="center"/>
+        <TextView
+            android:id="@+id/difficulty"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:text="@string/difficulty"
+            android:textAlignment="center"/>
 
         <Button
             android:id="@+id/joinGamebtn"

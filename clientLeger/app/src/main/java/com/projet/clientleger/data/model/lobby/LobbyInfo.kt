@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class Lobby(val lobbyId:String,
+data class LobbyInfo(val lobbyId:String,
                  val lobbyName:String,
                  val ownerUsername:String,
                  val nbPlayerInLobby:Int,

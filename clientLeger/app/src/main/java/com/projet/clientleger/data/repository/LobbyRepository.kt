@@ -5,8 +5,8 @@ import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
-import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.AvatarStorageService
 import io.reactivex.rxjava3.core.Observable
@@ -29,7 +29,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.receivePlayerLeave()
     }
 
-    fun receivedAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<LobbyList>{
+    fun receivedAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
         return lobbySocketService.receiveAllLobbies(gameType,difficulty)
     }
 

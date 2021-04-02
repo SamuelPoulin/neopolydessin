@@ -8,10 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Lobby
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 
 const val MAX_GAME_SIZE:Int = 4
 
-class GameLobbyInfoAdapter(private val lobbyList: List<Lobby>,
+class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
                            private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
         val lobbyNameTextView: TextView = itemView.findViewById(R.id.lobbyName)
@@ -29,7 +30,7 @@ class GameLobbyInfoAdapter(private val lobbyList: List<Lobby>,
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
-        viewHolder.gameModeTextView.text = lobbyList[position].gameType
+        viewHolder.gameModeTextView.text = lobbyList[position].gameType.value
         viewHolder.gameCapacityTextView.text = "${lobbyList[position].nbPlayerInLobby} / ${lobbyList[position].maxSize}"
         viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
         disableFullGame(viewHolder,position)
