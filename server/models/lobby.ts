@@ -102,6 +102,7 @@ export abstract class Lobby {
       ownerUsername: owner ? owner.username : 'Jesus',
       nbPlayerInLobby: this.players.length,
       gameType: this.gameType,
+      difficulty: this.difficulty,
       maxSize: gameSize ? gameSize : DEFAULT_TEAM_SIZE
     };
   }
@@ -183,6 +184,7 @@ export abstract class Lobby {
       this.io.in(this.lobbyId).emit(SocketMessages.PLAYER_DISCONNECTION, this.toPlayer(removedPlayer), Date.now());
     }
     this.io.in(this.lobbyId).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+    SocketIo.UPDATE_GAME_LIST.notify();
   }
 
   protected emitJoinInfo(player: Entity, socket: Socket): void {
@@ -192,6 +194,7 @@ export abstract class Lobby {
       this.io.in(this.lobbyId).emit(SocketMessages.PLAYER_CONNECTION, this.toPlayer(player), Date.now());
     }
     this.io.in(this.lobbyId).emit(SocketLobby.RECEIVE_LOBBY_INFO, this.toLobbyInfo());
+    SocketIo.UPDATE_GAME_LIST.notify();
   }
 
   protected bindLobbyEndPoints(socket: Socket) {
