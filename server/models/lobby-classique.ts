@@ -143,6 +143,7 @@ export class LobbyClassique extends Lobby {
 
     clearInterval(this.clockTimeout);
 
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
     this.currentGameState = CurrentGameState.DRAWING;
     this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
     this.startTimerGuessToClient();
@@ -166,6 +167,7 @@ export class LobbyClassique extends Lobby {
     clearInterval(this.clockTimeout);
     this.setReplyRoles();
 
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.REPLY);
     this.currentGameState = CurrentGameState.REPLY;
     this.timeLeftSeconds = this.REPLY_TIME;
     this.startTimerReplyToClient();
