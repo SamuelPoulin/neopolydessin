@@ -44,6 +44,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         lobbySocketService.leaveLobby()
     }
 
+    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
+        lobbySocketService.createGame(gameName, gameType, difficulty, isPrivate)
+    }
+
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
         return Observable.create { emitter ->
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
@@ -82,6 +86,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun kickPlayer(){
 
+    }
+
+    fun getAccountInfo(): AccountInfo{
+        return sessionManager.getAccountInfo()
     }
 
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {

@@ -21,4 +21,7 @@
     <color name="green">#FF38B000</color>
     <color name="red">#FF0000</color>
     <color name="mustard_yellow">#FFB703</color>
+    <color name="milk_white">#FBFBFB</color>
+    <color name="shadow_grey">#EEEEEE</color>
+    <color name="team_blue">#0000FF</color>
 </resources>

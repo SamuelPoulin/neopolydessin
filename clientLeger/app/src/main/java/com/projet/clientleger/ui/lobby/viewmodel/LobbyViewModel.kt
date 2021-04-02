@@ -3,6 +3,9 @@ package com.projet.clientleger.ui.lobby.viewmodel
 import android.graphics.Bitmap
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,53 +23,18 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
         }
-        lobbyRepository.receivePlayerJoin().subscribe{
-            if(it.avatar == null)
-                it.avatar = defaultImage
-            addPlayer(it)
-        }
-        lobbyRepository.receivePlayerLeave().subscribe{
-            removePlayer(it)
-        }
+    }
+
+    fun getAccountInfo(): AccountInfo{
+        return lobbyRepository.getAccountInfo()
+    }
+
+    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
+        lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
     }
 
     fun unsubscribe(){
         lobbyRepository.unsubscribeLobby()
-    }
-
-    private fun addPlayer(player: PlayerInfo){
-        var indexToAdd = realPlayerTeams[player.teamNumber].size - 1
-        if(indexToAdd < 0)
-            indexToAdd = 0
-
-        val playerTeam = teams[player.teamNumber].value!!
-        if(playerTeam.isNotEmpty())
-            playerTeam.removeAt(indexToAdd)
-        playerTeam.add(indexToAdd, player)
-
-        realPlayerTeams[player.teamNumber].add(player)
-        teams[player.teamNumber].postValue(playerTeam)
-    }
-
-    private fun removePlayer(username: String){
-        var playerToRemove: PlayerInfo? = null
-        for(team in realPlayerTeams){
-            for(player in team){
-                if(player.username == username){
-                    playerToRemove = player
-                }
-            }
-        }
-        if(playerToRemove != null)
-            removePlayer(playerToRemove)
-    }
-
-    private fun removePlayer(player: PlayerInfo){
-        realPlayerTeams[player.teamNumber].remove(player)
-        val team = teams[player.teamNumber].value!!
-        team.remove(player)
-        team.add(PlayerInfo(avatar = defaultImage))
-        teams[player.teamNumber].postValue(team)
     }
 
     fun startGame(){
@@ -89,7 +57,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         this.defaultImage = defaultImage
         for(team in teams){
             for (i in 0 until 2) {
-                team.value!!.add(PlayerInfo(avatar = defaultImage))
+                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
             }
         }
         teams[0].postValue(teams[0].value!!)
@@ -99,6 +67,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     private fun updatePlayers(list: ArrayList<PlayerInfo>){
         teams[0].value!!.clear()
         teams[1].value!!.clear()
+
+        for (team in realPlayerTeams)
+            team.clear()
+
         for(i in 0 until list.size){
             val player = list[i]
             if(player.avatar == null)
@@ -108,7 +80,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         }
         for(team in teams){
             for(i in 1 downTo team.value!!.size)
-                team.value!!.add(PlayerInfo(avatar = defaultImage))
+                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
         }
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)
