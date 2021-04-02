@@ -66,7 +66,7 @@ export class SocketIo {
     SocketIo.UPDATE_GAME_LIST.subscribe(() => {
       const updatedLobbies = this.lobbyList
         .filter((lobby) => {
-          return !lobby.privateLobby;
+          return !lobby.privateLobby && lobby.gameType !== GameType.SPRINT_SOLO && lobby.lobbyHasRoom();
         }).map((lobby) => {
           return lobby.getLobbySummary();
         });
