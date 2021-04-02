@@ -3,25 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:gravity="center"
-    android:background="@drawable/drawboard_background">
-    <TextView
-        android:id="@+id/username"
-        android:tag="playerName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/base_player_name"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:textColor="@color/teal_700"
-        android:layout_margin="10dp"/>
+    android:background="@drawable/red_team_playerinfo_background">
     <ImageView
         android:id="@+id/avatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_margin="10dp"
         android:contentDescription= "@string/avatar_description" />
+    <TextView
+        android:id="@+id/username"
+        android:tag="playerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/base_player_name"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_margin="10dp"/>
     <Button
         android:id="@+id/removePlayerBtn"
         android:layout_width="wrap_content"

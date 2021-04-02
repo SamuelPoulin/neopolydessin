@@ -20,6 +20,7 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
         val lobbyNameTextView: TextView = itemView.findViewById(R.id.lobbyName)
         val gameModeTextView: TextView = itemView.findViewById(R.id.gameMode)
         val gameCapacityTextView: TextView = itemView.findViewById(R.id.gameCapacity)
+        val difficultyTextView: TextView = itemView.findViewById(R.id.difficulty)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,10 +32,12 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        viewHolder.lobbyNameTextView.text = lobbyList[position].lobbyName
-        viewHolder.gameModeTextView.text = lobbyList[position].gameType.value
-        viewHolder.gameCapacityTextView.text = "${lobbyList[position].nbPlayerInLobby} / ${lobbyList[position].maxSize}"
-        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyList[position].lobbyId) }
+        val lobbyInfo = lobbyList[position]
+        viewHolder.lobbyNameTextView.text = lobbyInfo.lobbyName
+        viewHolder.gameModeTextView.text = lobbyInfo.gameType.toFrenchString()
+        viewHolder.difficultyTextView.text = lobbyInfo.difficulty.toFrenchString()
+        viewHolder.gameCapacityTextView.text = "${lobbyInfo.nbPlayerInLobby} / ${lobbyInfo.maxSize}"
+        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyInfo.lobbyId) }
         disableFullGame(viewHolder,position)
     }
 

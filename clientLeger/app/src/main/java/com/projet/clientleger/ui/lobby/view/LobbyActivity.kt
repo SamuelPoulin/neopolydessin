@@ -55,9 +55,9 @@ class LobbyActivity : AppCompatActivity() {
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for(i in rvTeams.indices){
             val manager = LinearLayoutManager(this)
-            manager.orientation = RecyclerView.HORIZONTAL
+            manager.orientation = RecyclerView.VERTICAL
             rvTeams[i].layoutManager = manager
-            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer)
+            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer, i)
 
             vm.teams[i].observe(this){
                 teams[i].clear()
@@ -67,7 +67,7 @@ class LobbyActivity : AppCompatActivity() {
         }
         vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
         intent.getSerializableExtra("gameType") as GameType
-        binding.gamemode.text = (intent.getSerializableExtra("gameType") as GameType).toFrenchString()
+        binding.gameType.text = (intent.getSerializableExtra("gameType") as GameType).toFrenchString()
         binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
         binding.startGameButton.visibility = View.INVISIBLE
         setSubscriptions()
@@ -86,10 +86,10 @@ class LobbyActivity : AppCompatActivity() {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
-        binding.exitGame.setOnClickListener {
-            vm.leaveLobby()
-            goToMainMenu()
-        }
+//        binding.exitGame.setOnClickListener {
+//            vm.leaveLobby()
+//            goToMainMenu()
+//        }
     }
     private fun startGame(){
         vm.startGame()

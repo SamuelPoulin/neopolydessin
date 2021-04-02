@@ -8,12 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.lobby.PlayerInfo
-import kotlin.random.Random
 
 class TeamAdapter(private val players: List<PlayerInfo>,
-                  private val removePlayerCallback: (PlayerInfo) -> Unit) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>(){
+                  private val removePlayerCallback: (PlayerInfo) -> Unit,
+                  private val teamNumber: Int) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>(){
 
     class ViewHolderPlayer(view: View) : RecyclerView.ViewHolder(view){
         val avatarView: ImageView = itemView.findViewById(R.id.avatar)
@@ -23,7 +22,11 @@ class TeamAdapter(private val players: List<PlayerInfo>,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPlayer {
         val inflater = LayoutInflater.from(parent.context)
-        return ViewHolderPlayer(inflater.inflate(R.layout.item_playerinfo, parent, false))
+        val layoutId = when(teamNumber){
+            0 -> R.layout.item_blue_playerinfo
+            else -> R.layout.item_red_playerinfo
+        }
+        return ViewHolderPlayer(inflater.inflate(layoutId, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolderPlayer, position: Int) {

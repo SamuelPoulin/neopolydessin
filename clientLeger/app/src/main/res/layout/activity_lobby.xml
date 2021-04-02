@@ -13,6 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/milk_white"
         tools:context=".ui.lobby.view.LobbyActivity">
 
         <androidx.appcompat.widget.Toolbar
@@ -24,175 +25,139 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:menu="@menu/friendslist_menu"/>
+            app:menu="@menu/friendslist_menu" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/gamemodeBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_corner_outlined"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/toolbar">
-
-            <ImageView
-                android:id="@+id/logo"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:contentDescription="@string/logo"
-                android:src="@mipmap/polydessin_icon_round"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintDimensionRatio="1:1"
-                android:padding="5dp"/>
-
-            <TextView
-                android:id="@+id/gamemode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/game_mode_base_text"
-                android:textColor="@color/black"
-                android:textSize="40sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/logo" />
-
-            <TextView
-                android:id="@+id/difficulty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:text="@string/difficulty"
-                android:textColor="@color/black"
-                android:textSize="40sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/gamemode" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/teamContainer1"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="@drawable/round_corner_outlined"
-                app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
-                app:layout_constraintBottom_toTopOf="@id/buttonPanel"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintWidth_percent="0.5">
-
-                <TextView
-                    android:id="@+id/teamLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/team_1_base_name"
-                    android:textColor="@color/black"
-                    android:textSize="60sp"
-                    android:textStyle="bold"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/teamContent1"/>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/teamContent1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:overScrollMode="never"
-                    app:layout_constraintTop_toBottomOf="@+id/teamLabel"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"/>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/teamContainer2"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="@drawable/round_corner_outlined"
-                app:layout_constraintTop_toBottomOf="@id/gamemodeBar"
-                app:layout_constraintBottom_toTopOf="@id/buttonPanel"
-                app:layout_constraintLeft_toRightOf="@id/teamContainer1"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintWidth_percent="0.5">
-
-                <TextView
-                    android:id="@+id/teamLabel2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/team_2_base_name"
-                    android:textColor="@color/black"
-                    android:textSize="60sp"
-                    android:textStyle="bold"
-                    app:layout_constraintHeight_percent="0.1"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/teamContent2"/>
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/teamContent2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:overScrollMode="never"
-                    app:layout_constraintTop_toBottomOf="@id/teamLabel2"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:id="@+id/buttonPanel"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHeight_percent="0.4"
-            app:layout_constraintLeft_toLeftOf="parent">
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/teamsContainer"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintWidth_percent="0.3">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/gameType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/game_mode_base_text" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleX="-1"
+                        android:src="@drawable/ic_people" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_paint" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_people" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/startGameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:backgroundTint="@color/lightGreen"
+                    android:drawableEnd="@drawable/ic_right_arrow"
+                    android:text="@string/start_game_button_text"
+                    android:textAllCaps="false"
+                    android:textSize="15sp" />
 
-                    <Button
-                        android:id="@+id/startGameButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/start_game_button_text"
-                        android:textSize="40sp"
-                        app:layout_constraintBottom_toTopOf="@id/exitGame"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/difficulty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/difficulty" />
+            </LinearLayout>
+        </FrameLayout>
 
-                    <Button
-                        android:id="@+id/exitGame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="52dp"
-                        android:text="@string/exit_game_button_text"
-                        android:textSize="40sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/startGameButton" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/teamsContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/team_background"
+            android:layout_margin="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/buttonPanel"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintWidth_percent="0.7">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/teamLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/team_1_base_name"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/teamContent1"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-<!--            <androidx.fragment.app.FragmentContainerView-->
-<!--                android:id="@+id/chat_root"-->
-<!--                android:name="com.projet.clientleger.ui.chat.ChatFragment"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="match_parent"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintWidth_percent="0.5" />-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/teamContent1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                app:layout_constraintBottom_toTopOf="@+id/teamLabel2"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/teamLabel" />
 
+            <TextView
+                android:id="@+id/teamLabel2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/team_2_base_name"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/teamContent2"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/teamContent1" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/teamContent2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/teamLabel2" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--            <androidx.fragment.app.FragmentContainerView-->
+        <!--                android:id="@+id/chat_root"-->
+        <!--                android:name="com.projet.clientleger.ui.chat.ChatFragment"-->
+        <!--                android:layout_width="0dp"-->
+        <!--                android:layout_height="match_parent"-->
+        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--                app:layout_constraintEnd_toEndOf="parent"-->
+        <!--                app:layout_constraintWidth_percent="0.5" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
