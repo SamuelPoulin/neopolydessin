@@ -1,32 +1,26 @@
 package com.projet.clientleger.data.repository
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
-import com.projet.clientleger.data.api.model.Difficulty
-import com.projet.clientleger.data.api.model.GameType
 import com.projet.clientleger.data.api.socket.LobbySocketService
-import com.projet.clientleger.data.model.LobbyList
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
+import com.projet.clientleger.data.service.AvatarStorageService
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
-import javax.net.ssl.HttpsURLConnection
 
 class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService,
                                           private val sessionManager: SessionManager,
-                                          private val apiAvatarInterface: ApiAvatarInterface) {
+                                          private val apiAvatarInterface: ApiAvatarInterface,
+                                          private val avatarStorageService: AvatarStorageService) {
     fun receivePlayerJoin(): Observable<PlayerInfo> {
         return Observable.create { emitter ->
             lobbySocketService.receivePlayerJoin().subscribe{
-                var avatar: Bitmap? = null
-                if(it.avatarId != null){
-                    val resAvatar = sessionManager.request(it.avatarId, apiAvatarInterface::getAvatar)
-                    if(resAvatar.code() == HttpsURLConnection.HTTP_OK)
-                        avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
-                }
-                emitter.onNext(it.toPlayerInfo(avatar))
+                avatarStorageService.addPlayer(it)
+                emitter.onNext(it.toPlayerInfo(avatarStorageService.getAvatar(it.accountId)))
             }
         }
     }
@@ -35,8 +29,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.receivePlayerLeave()
     }
 
-    fun receivedAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
-        return lobbySocketService.receiveAllLobbies(gameMode,difficulty)
+    fun receivedAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
+        return lobbySocketService.receiveAllLobbies(gameType,difficulty)
     }
 
     fun leaveLobby(){
@@ -47,18 +41,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return Observable.create { emitter ->
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
-                println(it)
                 for(player in it){
-                    var avatar: Bitmap? = null
-                    if(player.avatarId!= null){
-                        val res = sessionManager.request(player.avatarId, apiAvatarInterface::getAvatar)
-                        if(res.code() == HttpsURLConnection.HTTP_OK){
-                            avatar = BitmapFactory.decodeStream(res.body()!!.byteStream())
-                        }
-                    }
-                    list.add(player.toPlayerInfo(avatar))
+                    avatarStorageService.addPlayer(player)
+                    list.add(player.toPlayerInfo(avatarStorageService.getAvatar(player.accountId)))
                 }
-                println("emit next: $list")
                 emitter.onNext(list)
             }
         }
@@ -81,5 +67,17 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun getUserInfo(): AccountInfo{
         return sessionManager.getAccountInfo()
+    }
+
+    fun clearAvatarStorage(){
+        avatarStorageService.clear()
+    }
+
+    fun kickPlayer(){
+
+    }
+
+    fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
+        return lobbySocketService.receiveUpdateLobbyList()
     }
 }

@@ -6,18 +6,16 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.model.game.PlayerAvatar
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
-import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,6 +27,7 @@ class LobbyActivity : AppCompatActivity() {
     private val playersView = ArrayList<ConstraintLayout>()
     private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     private lateinit var rvTeams: Array<RecyclerView>
+    var nextActivityIntent: Intent? = null
 
     private fun setSubscriptions() {
 //        vm.receivePlayersInfo()
@@ -47,11 +46,9 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.lifecycleOwner = this
         setupButtons()
         if(intent.getBooleanExtra("isJoining", false)){
-            vm.receiveJoinedLobbyInfo().subscribe{
-                println("lobby list received $it")
-            }
             intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }
         }
 
@@ -69,18 +66,11 @@ class LobbyActivity : AppCompatActivity() {
             }
         }
         vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
-        val gameInfo:GameCreationInfosModel = intent.getSerializableExtra("GAME_INFO") as GameCreationInfosModel
-        val username = vm.getUsername()
-        //intent.getParcelableExtra<LobbyInfo>("LOBBY_INFO")?.let { fillLobbyInfo(it) }
-        binding.gamemode.text = getFrenchGameMode(gameInfo.gameMode)
-        binding.difficulty.text = getFrenchDifficulty(gameInfo.difficulty)
-        //addPlayerToGame(gameInfo.gameCreator)
+        intent.getSerializableExtra("gameType") as GameType
+        binding.gamemode.text = (intent.getSerializableExtra("gameType") as GameType).toFrenchString()
+        binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
+        binding.startGameButton.visibility = View.INVISIBLE
         setSubscriptions()
-        if(gameInfo.gameCreator != username){
-            binding.startGameButton.visibility = View.INVISIBLE
-        } else{
-            vm.setUserInfo()
-        }
 
 //        val fragment :ChatFragment = ChatFragment.newInstance()
 //
@@ -91,28 +81,6 @@ class LobbyActivity : AppCompatActivity() {
 //                .commit()
 //        }
     }
-    private fun getFrenchGameMode(englishMode:String):String{
-        when(englishMode){
-            "classic" -> return "Classique"
-            "solo" -> return "Solo"
-            "coop" -> return "Coop"
-        }
-        return "Classique"
-    }
-    private fun getFrenchDifficulty(englishDifficulty:String):String{
-        when(englishDifficulty){
-            "easy" -> return "Facile"
-            "intermediate" -> return "Intermediaire"
-            "hard" -> return "Difficile"
-        }
-        return "Facile"
-    }
-
-    /*private fun fillLobbyInfo(lobbyInfo: LobbyInfo){
-        for(i in lobbyInfo.playerInfo.indices){
-            playersView[i].text = lobbyInfo.playerInfo[i].playerName
-        }
-    }*/
 
     private fun setupButtons(){
         binding.startGameButton.setOnClickListener {
@@ -122,52 +90,26 @@ class LobbyActivity : AppCompatActivity() {
             vm.leaveLobby()
             goToMainMenu()
         }
-//        binding.removePlayer1Button.setOnClickListener {
-//            kickPlayer(1)
-//        }
-//        binding.removePlayer2Button.setOnClickListener {
-//            kickPlayer(2)
-//        }
-//        binding.removePlayer3Button.setOnClickListener {
-//            kickPlayer(3)
-//        }
-//        binding.removePlayer4Button.setOnClickListener {
-//            kickPlayer(4)
-//        }
-        disableAllRemoveButtons()
     }
     private fun startGame(){
         vm.startGame()
     }
     private fun goToMainMenu(){
-        val intent = Intent(this, MainmenuActivity::class.java)
-        startActivity(intent)
+        finish()
     }
     private fun goToGame(){
         val intent = Intent(this, GameActivity::class.java)
+        nextActivityIntent = intent
         startActivity(intent)
+        finish()
     }
     private fun kickPlayer(player:PlayerInfo){
         println("kic: ${player.username}")
     }
-    /*private fun addPlayerToGame(info: Player){
-        playerCount++
-        val textView = playersView[playerCount].findViewWithTag<TextView>("playerView")
-        textView.text = info.playerName
-        textView.isEnabled = true
-    }*/
-    private fun disableRemoveButtonWithIndex(index:Int){
-        when(index){
-//            1-> binding.removePlayer1Button.isEnabled = false
-//            2-> binding.removePlayer2Button.isEnabled = false
-//            3-> binding.removePlayer3Button.isEnabled = false
-//            4-> binding.removePlayer4Button.isEnabled = false
-        }
-    }
-    private fun disableAllRemoveButtons(){
-//        binding.removePlayer1Button.isEnabled = false
-//        binding.removePlayer2Button.isEnabled = false
-//        binding.removePlayer3Button.isEnabled = false
-//        binding.removePlayer4Button.isEnabled = false
+
+    override fun onDestroy() {
+        if(nextActivityIntent == null)
+            vm.clearAvatarStorage()
+        super.onDestroy()
     }
 }

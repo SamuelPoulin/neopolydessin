@@ -62,7 +62,7 @@
     <string name="game_owner">Game Owner</string>
     <string name="lobby_name">Lobby Name</string>
     <string name="game_capacity">Game Capacity</string>
-    <string name="join_game">Join</string>
+    <string name="join_game">Rejoindre</string>
     <string name="title_activity_game">GameActivity</string>
     <string name="timer_over">0:00</string>
     <string name="logout_button">logout button</string>
