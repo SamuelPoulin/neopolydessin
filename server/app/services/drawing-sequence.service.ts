@@ -25,12 +25,12 @@ export class DrawingSequenceService {
       : this.sequenceDrawing(pictureWord);
   }
 
-  sequencePicture(picture: PictureWord): DrawingSequence {
+  private sequencePicture(picture: PictureWord): DrawingSequence {
     const paths = this.parsePictureToDrawnPaths(picture);
     return this.sequenceUsingDrawMode(paths, picture.drawMode);
   }
 
-  sequenceDrawing(drawing: PictureWord): DrawingSequence {
+  private sequenceDrawing(drawing: PictureWord): DrawingSequence {
     const paths = (drawing.drawnPaths as Path[]).map((path) => this.toSegment(path));
     const dimensions = this.findDrawingDimensions(paths);
 
@@ -41,7 +41,7 @@ export class DrawingSequenceService {
     }, drawing.drawMode);
   }
 
-  sequenceUsingDrawMode(paths: DrawingSequence, drawMode: DrawMode): DrawingSequence {
+  private sequenceUsingDrawMode(paths: DrawingSequence, drawMode: DrawMode): DrawingSequence {
     switch (drawMode) {
 
       case DrawMode.CONVENTIONAL:
@@ -81,7 +81,7 @@ export class DrawingSequenceService {
     return paths;
   }
 
-  parsePictureToDrawnPaths(picture: PictureWord, exportPath?: string): DrawingSequence {
+  private parsePictureToDrawnPaths(picture: PictureWord, exportPath?: string): DrawingSequence {
     const filePath = picture.uploadedPicturePath as string;
     const svg = fs.readFileSync(filePath).toString();
     const strippedSvg = svg.replace(/[\n\t]/g, '');
