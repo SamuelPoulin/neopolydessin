@@ -49,4 +49,10 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
             }
         }
     }
+    fun receiveEndGameNotice():Observable<String>{
+        return gameRepository.receiveEndGameNotice()
+    }
+    fun unsubscribe(){
+        gameRepository.unsubscribe()
+    }
 }

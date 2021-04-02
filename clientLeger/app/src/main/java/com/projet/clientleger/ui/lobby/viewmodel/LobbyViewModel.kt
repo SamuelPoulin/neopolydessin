@@ -37,8 +37,12 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         return lobbyRepository.getAccountInfo()
     }
 
-    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean){
+    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
         lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
+    }
+
+    fun unsubscribe(){
+        lobbyRepository.unsubscribeLobby()
     }
 
     private fun addPlayer(player: PlayerInfo){

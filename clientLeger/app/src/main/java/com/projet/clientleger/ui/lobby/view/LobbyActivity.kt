@@ -105,9 +105,15 @@ class LobbyActivity : AppCompatActivity() {
             }
         }
         vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
+
         binding.gameType.text = selectedGameType.toFrenchString()
         binding.difficulty.text = selectedDifficulty.toFrenchString()
         binding.startGameButton.visibility = View.INVISIBLE
+
+        if(selectedGameType == GameType.SPRINT_SOLO){
+            println("MODE DE JEU SOLOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+
+        }
         setSubscriptions()
 
         binding.toolbar.setOnMenuItemClickListener { item ->
@@ -134,18 +140,18 @@ class LobbyActivity : AppCompatActivity() {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
+
 //        binding.exitGame.setOnClickListener {
 //            vm.leaveLobby()
-//            goToMainMenu()
+//            finish()
 //        }
+
     }
     private fun startGame(){
         vm.startGame()
     }
-    private fun goToMainMenu(){
-        finish()
-    }
     private fun goToGame(){
+        vm.unsubscribe()
         val intent = Intent(this, GameActivity::class.java)
         nextActivityIntent = intent
         startActivity(intent)
@@ -156,6 +162,8 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        println("Lobby détruit")
+        vm.unsubscribe()
         if(nextActivityIntent == null)
             vm.clearAvatarStorage()
         super.onDestroy()

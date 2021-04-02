@@ -27,7 +27,7 @@ export class PictureWordController {
       [
         header('Content-Type').contains('application/json'),
         body('word').exists(),
-        body('picture').isArray({ min: 1 }),
+        body('picture').exists(),
         body('hints').isArray({ min: 3, max: 3 }),
         body('difficulty').isIn([
           Difficulty.EASY,
@@ -43,7 +43,6 @@ export class PictureWordController {
           DrawMode.PAN_B_TO_T,
           DrawMode.CENTER_FIRST,
         ])
-
       ],
       validationCheck,
       jwtVerify,
