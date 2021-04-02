@@ -46,6 +46,7 @@ class LobbyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.lifecycleOwner = this
         setupButtons()
         if(intent.getBooleanExtra("isJoining", false)){
             intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }

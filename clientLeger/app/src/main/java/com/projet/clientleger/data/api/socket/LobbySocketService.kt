@@ -72,4 +72,17 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun receiveStartGame() : Observable<String>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_START_GAME.value) {""}
     }
+
+    fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>>{
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_UPDATE_LOBBY_LIST.value){(lobbies) ->
+            val jsonList = lobbies as JSONArray
+            val list = ArrayList<LobbyInfo>()
+            for(i in 0 until jsonList.length()){
+                val lobby = Json.decodeFromString(Lobby.serializer(), jsonList.get(i).toString())
+                list.add(lobby.toInfo())
+            }
+            list
+        }
+    }
+
 }

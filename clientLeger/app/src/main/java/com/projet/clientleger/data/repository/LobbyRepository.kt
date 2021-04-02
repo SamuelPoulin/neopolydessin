@@ -76,4 +76,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
     fun kickPlayer(){
 
     }
+
+    fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
+        return lobbySocketService.receiveUpdateLobbyList()
+    }
 }

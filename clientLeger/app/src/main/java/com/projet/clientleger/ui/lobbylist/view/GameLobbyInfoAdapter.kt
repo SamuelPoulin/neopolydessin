@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Lobby
 import com.projet.clientleger.data.model.lobby.LobbyInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 const val MAX_GAME_SIZE:Int = 4
 
