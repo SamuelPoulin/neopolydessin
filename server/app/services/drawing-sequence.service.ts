@@ -6,13 +6,13 @@ import { PictureWord } from '../../models/schemas/picture-word-pair';
 import { Coord, DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
 import { DrawMode } from '../../../common/communication/draw-mode';
 
-const SVG_DATA_FIELD: string = 'd="';
 const X1: number = 0;
 const Y1: number = 1;
 const X2: number = 2;
 const Y2: number = 3;
 const X3: number = 4;
 const Y3: number = 5;
+
 const COORD_PRECISION: number = 3;
 const BEZIER_PRECISION: number = 6;
 
@@ -31,65 +31,71 @@ export class DrawingSequenceService {
   }
 
   sequenceDrawing(drawing: PictureWord): DrawingSequence {
-    const paths = drawing.drawnPaths as Path[];
-    return this.sequenceUsingDrawMode(paths.map((path) => this.toSegment(path)), drawing.drawMode);
+    const paths = (drawing.drawnPaths as Path[]).map((path) => this.toSegment(path));
+    const dimensions = this.findDrawingDimensions(paths);
+
+    return this.sequenceUsingDrawMode({
+      height: dimensions.y,
+      width: dimensions.x,
+      stack: paths
+    }, drawing.drawMode);
   }
 
-  sequenceUsingDrawMode(paths: Segment[], drawMode: DrawMode): DrawingSequence {
-    let stack: Segment[] = [];
-
+  sequenceUsingDrawMode(paths: DrawingSequence, drawMode: DrawMode): DrawingSequence {
     switch (drawMode) {
 
       case DrawMode.CONVENTIONAL:
-        stack = paths;
         break;
 
       case DrawMode.CENTER_FIRST:
-        const center = this.findCenterPointOfDrawing(paths);
-        stack = paths.sort((a, b) => this.getCenterMost(a.path, center) - this.getCenterMost(b.path, center));
+        const center = { x: paths.width / 2, y: paths.height / 2 };
+        paths.stack.sort((a, b) => this.getCenterMost(a.path, center) - this.getCenterMost(b.path, center));
         break;
 
       case DrawMode.RANDOM:
-        while (paths.length > 0) {
-          const randomIndex = Math.floor(Math.random() * paths.length);
-          const randomPath = paths.splice(randomIndex, 1)[0];
-          stack.push(randomPath);
+        const segments: Segment[] = [];
+        while (paths.stack.length > 0) {
+          const randomIndex = Math.floor(Math.random() * paths.stack.length);
+          const randomPath = paths.stack.splice(randomIndex, 1)[0];
+          segments.push(randomPath);
         }
+        paths.stack = segments;
         break;
 
       case DrawMode.PAN_B_TO_T:
-        stack = paths.sort((a, b) => this.getTopMost(b.path) - this.getTopMost(a.path));
+        paths.stack.sort((a, b) => this.getTopMost(b.path) - this.getTopMost(a.path));
         break;
 
       case DrawMode.PAN_T_TO_B:
-        stack = paths.sort((a, b) => this.getTopMost(a.path) - this.getTopMost(b.path));
+        paths.stack.sort((a, b) => this.getTopMost(a.path) - this.getTopMost(b.path));
         break;
 
       case DrawMode.PAN_L_TO_R:
-        stack = paths.sort((a, b) => this.getLeftMost(a.path) - this.getLeftMost(b.path));
+        paths.stack.sort((a, b) => this.getLeftMost(a.path) - this.getLeftMost(b.path));
         break;
 
       case DrawMode.PAN_R_TO_L:
-        stack = paths.sort((a, b) => this.getLeftMost(b.path) - this.getLeftMost(a.path));
+        paths.stack.sort((a, b) => this.getLeftMost(b.path) - this.getLeftMost(a.path));
         break;
     }
-    return { stack };
+    return paths;
   }
 
-  parsePictureToDrawnPaths(picture: PictureWord, exportPath?: string): Segment[] {
+  parsePictureToDrawnPaths(picture: PictureWord, exportPath?: string): DrawingSequence {
     const filePath = picture.uploadedPicturePath as string;
     const svg = fs.readFileSync(filePath).toString();
     const strippedSvg = svg.replace(/[\n\t]/g, '');
     const layers = strippedSvg.split('><');
 
     let convertedSVGFile: string = `${layers[0]}>`;
+
+    let width: number = 0;
+    let height: number = 0;
     const paths: { layer: number; data: string }[] = [];
 
     layers.forEach((layer, layerIndex) => {
       if (layerIndex !== 0) {
-        const start = layer.indexOf(SVG_DATA_FIELD) + SVG_DATA_FIELD.length;
-        const end = layer.indexOf('"', start);
-        const curvesData = layer.substring(start, end);
+        const curvesData = this.getDataFromSvg('d', layer);
         const curves = curvesData.split('C');
 
         let currentPath: string = '';
@@ -118,6 +124,9 @@ export class DrawingSequenceService {
             }
           }
         });
+      } else {
+        width = Number.parseInt(this.getDataFromSvg('width', layer), 10);
+        height = Number.parseInt(this.getDataFromSvg('height', layer), 10);
       }
     });
 
@@ -139,7 +148,11 @@ export class DrawingSequenceService {
         }
       });
     }
-    return segments;
+    return {
+      height,
+      width,
+      stack: segments,
+    };
   }
 
   private toCoordArray(svgData: string): Coord[] {
@@ -156,6 +169,13 @@ export class DrawingSequenceService {
     });
     return coords;
   };
+
+  private getDataFromSvg(fieldName: string, svgNode: string): string {
+    const selector = `${fieldName}="`;
+    const start = svgNode.indexOf(selector) + selector.length;
+    const end = svgNode.indexOf('"', start);
+    return svgNode.substring(start, end);
+  }
 
   private getLeftMost(path: Coord[]): number {
     return this.minOf(path, true);
@@ -174,14 +194,14 @@ export class DrawingSequenceService {
     return ((coord2.x - coord1.x) * (coord2.x - coord1.x)) + ((coord2.y - coord1.y) * (coord2.y - coord1.y));
   }
 
-  private findCenterPointOfDrawing(paths: Segment[]): Coord {
+  private findDrawingDimensions(paths: Segment[]): Coord {
     let allCoords: Coord[] = [];
     paths.forEach((path: Segment) => {
       allCoords = allCoords.concat(allCoords, path.path);
     });
     const maxX = this.maxOf(allCoords, true);
     const maxY = this.maxOf(allCoords, false);
-    return { x: maxX / 2, y: maxY / 2 };
+    return { x: maxX, y: maxY };
   }
 
   private toSegment(path: Path): Segment {

@@ -11,5 +11,7 @@ export interface Segment {
 }
 
 export interface DrawingSequence {
+    height: number;
+    width: number;
     stack: Segment[];
 }
