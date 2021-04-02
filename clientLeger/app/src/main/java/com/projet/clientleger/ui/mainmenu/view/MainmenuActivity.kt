@@ -14,9 +14,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.Difficulty
-import com.projet.clientleger.data.api.model.GameCreationInfosModel
-import com.projet.clientleger.data.api.model.GameType
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
@@ -25,14 +24,13 @@ import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
-import kotlinx.android.synthetic.main.item_lobbyinfo.*
-import java.io.Serializable
 import javax.inject.Inject
+
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
-    var selectedGameMode:GameType = GameType.CLASSIC
-    var selectedDifficulty:Difficulty = Difficulty.EASY
+    var selectedGameType: GameType = GameType.CLASSIC
+    var selectedDifficulty: Difficulty = Difficulty.EASY
     //val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityMainmenuBinding
     @Inject
@@ -58,11 +56,6 @@ class MainmenuActivity : AppCompatActivity() {
                 getString(R.string.user_creds),
                 Context.MODE_PRIVATE
         ).getString("accessToken", "")!!)
-
-        //To remove before PR --------------------------------------------------------------------------
-//        val intent = Intent(this, GameActivity::class.java)
-//        startActivity(intent)
-
 
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
@@ -105,21 +98,19 @@ class MainmenuActivity : AppCompatActivity() {
         setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            val gameInfo = GameCreationInfosModel(vm.getUsername(), selectedGameMode.value, selectedDifficulty.value, false)
-            if(isCreating){
-                vm.createGame(getGameName(dialog), selectedGameMode , selectedDifficulty, false)
-                val intent = Intent(this,LobbyActivity::class.java).apply{
-                    putExtra("GAME_INFO",gameInfo as Serializable)
-                }
-                startActivity(intent)
+            val intent: Intent
+            if(isCreating) {
+                intent = Intent(this, LobbyActivity::class.java)
+                vm.createGame(getGameName(dialog), selectedGameType, selectedDifficulty, false)
             }
-            else{
-                val intent = Intent(this, SearchLobbyActivity::class.java).apply{
-                    putExtra("GAME_INFO",gameInfo as Serializable)
-                }
-                startActivity(intent)
-            }
+            else
+                intent = Intent(this, SearchLobbyActivity::class.java)
+
+            intent.putExtra("gameType",selectedGameType)
+            intent.putExtra("difficulty", selectedDifficulty)
+            startActivity(intent)
         }
+
         dialogView.cancelButton.setOnClickListener {
             dialog.dismiss()
         }
@@ -141,13 +132,7 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-
-                selectedGameMode = when(adapterGamemode.getItem(position).toString()){
-                        "Classique" -> GameType.CLASSIC
-                    "Solo" -> GameType.SPRINT_SOLO
-                    "Coop" -> GameType.SPRINT_COOP
-                    else -> GameType.CLASSIC
-                }
+                selectedGameType = GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -165,13 +150,8 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
-                selectedDifficulty = when(adapterDifficulty.getItem(position).toString()){
-                    "Facile" -> Difficulty.EASY
-                    "Intermediaire" -> Difficulty.INTERMEDIATE
-                    "Difficile" -> Difficulty.HARD
-                    else -> Difficulty.EASY
+                selectedDifficulty = Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
                 }
-            }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // write code to perform some action

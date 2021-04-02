@@ -1,11 +1,11 @@
 package com.projet.clientleger.data.api.socket
 
-import com.projet.clientleger.data.api.model.Difficulty
-import com.projet.clientleger.data.api.model.GameType
-import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.api.model.lobby.Lobby
 import com.projet.clientleger.data.endpoint.LobbySocketEndpoints
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
@@ -16,8 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class LobbySocketService @Inject constructor(private val socketService: SocketService) {
 
-    fun createGame(lobbyName: String, gameMode:GameType,difficulty:Difficulty, isPrivate:Boolean) {
-        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, lobbyName,gameMode.value, difficulty.value, isPrivate)
+    fun createGame(lobbyName: String, gameType: GameType, difficulty: Difficulty, isPrivate:Boolean) {
+        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, lobbyName, gameType.value, difficulty.value, isPrivate)
     }
     //deja dans le lobby, un joueur rejoins le lobby
     fun receivePlayerJoin(): Observable<Player> {
@@ -36,14 +36,14 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.LEAVE_LOBBY.value)
     }
 
-    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
+    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<LobbyList>{
         return Observable.create{
-            emitter -> socketService.socket.emit("getListLobby",gameMode.value, difficulty.value, Ack{ res ->
+            emitter -> socketService.socket.emit("getListLobby",gameType.value, difficulty.value, Ack{ res ->
             println(res[0])
             val jsonList = res[0] as JSONArray
-            val list = ArrayList<LobbyInfo>()
+            val list = ArrayList<Lobby>()
             for(i in 0 until jsonList.length()){
-                list.add(Json.decodeFromString(LobbyInfo.serializer(), jsonList.get(i).toString()))
+                list.add(Json.decodeFromString(Lobby.serializer(), jsonList.get(i).toString()))
             }
             emitter.onNext(LobbyList(list))
         })

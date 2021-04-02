@@ -1,9 +1,8 @@
 package com.projet.clientleger.ui.lobbylist.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.projet.clientleger.data.api.model.Difficulty
-import com.projet.clientleger.data.api.model.GameType
-import com.projet.clientleger.data.api.model.LobbyInfo
+import com.projet.clientleger.data.enumData.Difficulty
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.LobbyList
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
@@ -13,8 +12,8 @@ import io.reactivex.rxjava3.core.Observable
 
 @HiltViewModel
 class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
-    fun receiveAllLobbies(gameMode: GameType, difficulty: Difficulty) : Observable<LobbyList>{
-        return lobbyRepository.receivedAllLobbies(gameMode, difficulty)
+    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<LobbyList>{
+        return lobbyRepository.receivedAllLobbies(gameType, difficulty)
     }
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{

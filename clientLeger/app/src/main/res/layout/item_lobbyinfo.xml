@@ -23,13 +23,13 @@
             />
 
         <TextView
-            android:id="@+id/gameOwner"
+            android:id="@+id/gameCapacity"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
             android:textSize="20dp"
             android:textColor="@color/black"
-            android:text="@string/game_owner"
+            android:text="@string/game_capacity"
             android:textAlignment="center"
             />
 
@@ -43,16 +43,6 @@
             android:text="@string/game_mode"
             android:textAlignment="center"/>
 
-        <TextView
-            android:id="@+id/gameCapacity"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.25"
-            android:textSize="20dp"
-            android:textColor="@color/black"
-            android:text="@string/game_capacity"
-            android:textAlignment="center"
-            />
         <Button
             android:id="@+id/joinGamebtn"
             android:layout_width="0dp"
