@@ -63,7 +63,6 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<Player>>{
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
-            println("socket info received ---------------------------------")
             val list = ArrayList<Player>()
             val jsonList = players as JSONArray
             for(i in 0 until jsonList.length())

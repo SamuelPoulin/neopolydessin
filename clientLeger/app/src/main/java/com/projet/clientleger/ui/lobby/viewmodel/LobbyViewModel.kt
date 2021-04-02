@@ -23,14 +23,14 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
         }
-        lobbyRepository.receivePlayerJoin().subscribe{
-            if(it.avatar == null)
-                it.avatar = defaultImage
-            addPlayer(it)
-        }
-        lobbyRepository.receivePlayerLeave().subscribe{
-            removePlayer(it)
-        }
+//        lobbyRepository.receivePlayerJoin().subscribe{
+//            if(it.avatar == null)
+//                it.avatar = defaultImage
+//            addPlayer(it)
+//        }
+//        lobbyRepository.receivePlayerLeave().subscribe{
+//            removePlayer(it)
+//        }
     }
 
     fun getAccountInfo(): AccountInfo{
@@ -46,6 +46,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     }
 
     private fun addPlayer(player: PlayerInfo){
+        println(realPlayerTeams[player.teamNumber])
         var indexToAdd = realPlayerTeams[player.teamNumber].size - 1
         if(indexToAdd < 0)
             indexToAdd = 0
@@ -110,6 +111,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     private fun updatePlayers(list: ArrayList<PlayerInfo>){
         teams[0].value!!.clear()
         teams[1].value!!.clear()
+
+        for (team in realPlayerTeams)
+            team.clear()
+
         for(i in 0 until list.size){
             val player = list[i]
             if(player.avatar == null)
