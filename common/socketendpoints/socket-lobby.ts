@@ -2,6 +2,7 @@ export enum SocketLobby {
     CREATE_LOBBY = 'createLobby',
     GET_ALL_LOBBIES = 'getListLobby',
     RECEIVE_LOBBY_INFO = 'receiveLobbyInfo',
+    UPDATE_LOBBIES = 'updateLobbies',
 
     JOIN_LOBBY = 'joinLobby',
     LEAVE_LOBBY = 'leaveLobby',
