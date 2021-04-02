@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Rect
@@ -22,6 +23,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
@@ -57,6 +59,12 @@ class GameActivity : AppCompatActivity() {
 
         binding.playersRv.layoutManager = LinearLayoutManager(this)
         binding.playersRv.adapter = PlayersAdapter(players)
+
+        binding.logoutBtn.setOnClickListener {
+            //val intent = Intent(this, MainmenuActivity::class.java)
+            //startActivity(intent)
+            finish()
+        }
 
         vm.onPlayerReady()
     }

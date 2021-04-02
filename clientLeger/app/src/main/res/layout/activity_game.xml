@@ -18,18 +18,24 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/drawboardContainer"
             >
-
-            <ImageView
-                android:id="@+id/logo"
+            <Button
+                android:id="@+id/logoutBtn"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:src="@mipmap/polydessin_icon_round"
-                app:layout_constraintWidth_percent="0.1"
+                android:text="@string/quit_label"
+                android:textColor="@color/white"
+                android:backgroundTint="#FF7246"
+                app:layout_constraintWidth_percent="0.15"
                 app:layout_constraintHeight_percent="1"
-                app:layout_constraintTop_toBottomOf="parent"
+                android:layout_marginStart="10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:contentDescription="@string/logo" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:icon="@drawable/ic_logout"
+                app:iconTint="@color/white"
+                app:iconSize="30dp"
+                app:iconGravity="start"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"/>
+
 
             <ImageView
                 android:id="@+id/timerIcon"
@@ -38,9 +44,10 @@
                 android:src="@drawable/ic_timer_green"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHeight_percent="1"
-                app:layout_constraintLeft_toRightOf="@id/logo"
+                app:layout_constraintLeft_toRightOf="@id/logoutBtn"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.1" />
+                app:layout_constraintWidth_percent="0.06"
+                android:contentDescription="@string/timer_icon_des" />
 
             <TextView
                 android:id="@+id/timer"

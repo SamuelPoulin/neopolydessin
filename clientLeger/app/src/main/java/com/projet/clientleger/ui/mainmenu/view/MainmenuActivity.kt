@@ -104,6 +104,7 @@ class MainmenuActivity : AppCompatActivity() {
             intent.putExtra("gameType",selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
             startActivity(intent)
+            dialog.dismiss()
         }
 
         dialogView.cancelButton.setOnClickListener {
