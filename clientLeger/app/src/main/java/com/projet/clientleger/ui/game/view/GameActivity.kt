@@ -83,12 +83,16 @@ class GameActivity : AppCompatActivity() {
         dialog.title.text = message
 
         dialog.quitBtn.setOnClickListener {
+            vm.unsubscribe()
+            dialog.dismiss()
             finish()
         }
 
         if(isMessageFromServer){
             dialog.continueBtn.visibility = View.GONE
-            dialog.setOnDismissListener { finish() }
+            dialog.setOnDismissListener {
+                vm.unsubscribe()
+                finish() }
         }
         else{
             dialog.continueBtn.setOnClickListener {
@@ -179,5 +183,11 @@ class GameActivity : AppCompatActivity() {
             }
         }
         timer?.start()
+    }
+
+    override fun onDestroy() {
+        println("Partie Détruite")
+        vm.unsubscribe()
+        super.onDestroy()
     }
 }

@@ -88,16 +88,14 @@ class LobbyActivity : AppCompatActivity() {
         }
         binding.exitGame.setOnClickListener {
             vm.leaveLobby()
-            goToMainMenu()
+            finish()
         }
     }
     private fun startGame(){
         vm.startGame()
     }
-    private fun goToMainMenu(){
-        finish()
-    }
     private fun goToGame(){
+        vm.unsubscribe()
         val intent = Intent(this, GameActivity::class.java)
         nextActivityIntent = intent
         startActivity(intent)
@@ -108,6 +106,8 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        println("Lobby détruit")
+        vm.unsubscribe()
         if(nextActivityIntent == null)
             vm.clearAvatarStorage()
         super.onDestroy()

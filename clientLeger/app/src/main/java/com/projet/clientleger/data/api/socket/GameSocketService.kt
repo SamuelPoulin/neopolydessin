@@ -45,6 +45,12 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
             message as String
         }
     }
+    fun unsubscribe(){
+        socketService.socket.off(GameSocketEndPoints.END_GAME_TRIGGER.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_ROLES.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
+        socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
+    }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{
 //        for(player in players)

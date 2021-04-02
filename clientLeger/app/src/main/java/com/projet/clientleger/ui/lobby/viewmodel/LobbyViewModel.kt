@@ -30,6 +30,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         }
     }
 
+    fun unsubscribe(){
+        lobbyRepository.unsubscribeLobby()
+    }
+
     private fun addPlayer(player: PlayerInfo){
         var indexToAdd = realPlayerTeams[player.teamNumber].size - 1
         if(indexToAdd < 0)
