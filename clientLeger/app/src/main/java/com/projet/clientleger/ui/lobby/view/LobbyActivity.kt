@@ -1,11 +1,13 @@
 package com.projet.clientleger.ui.lobby.view
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
@@ -13,6 +15,7 @@ import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
+import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
@@ -30,13 +33,6 @@ class LobbyActivity : AppCompatActivity() {
     var nextActivityIntent: Intent? = null
 
     private fun setSubscriptions() {
-//        vm.receivePlayersInfo()
-//                .subscribe { username ->
-//                    lifecycleScope.launch {
-//                        addPlayerToGame(username.toString())
-//                    }
-//                }
-
         vm.receiveStartGame().subscribe{
             goToGame()
         }
@@ -57,11 +53,27 @@ class LobbyActivity : AppCompatActivity() {
             val manager = LinearLayoutManager(this)
             manager.orientation = RecyclerView.VERTICAL
             rvTeams[i].layoutManager = manager
-            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer, i)
+            val teamBackground = when(i){
+                0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
+                else -> ContextCompat.getDrawable(this, R.drawable.red_team_playerinfo_background)!!
+            }
+            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer,
+                    vm.getAccountInfo(),
+                    ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
+                    ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
+                    teamBackground)
 
-            vm.teams[i].observe(this){
+            vm.teams[i].observe(this){ players ->
+                val owner = players.find { it.isOwner }
+                if(owner != null) {
+                    for (team in rvTeams) {
+                        team.adapter?.let { teamAdapter ->
+                            (teamAdapter as TeamAdapter).updateGameOwner(owner)
+                        }
+                    }
+                }
                 teams[i].clear()
-                teams[i].addAll(it)
+                teams[i].addAll(players)
                 rvTeams[i].adapter?.notifyDataSetChanged()
             }
         }
@@ -71,15 +83,6 @@ class LobbyActivity : AppCompatActivity() {
         binding.difficulty.text = (intent.getSerializableExtra("difficulty") as Difficulty).toFrenchString()
         binding.startGameButton.visibility = View.INVISIBLE
         setSubscriptions()
-
-//        val fragment :ChatFragment = ChatFragment.newInstance()
-//
-//        if(savedInstanceState == null){
-//            supportFragmentManager
-//                .beginTransaction()
-//                .add(R.id.chat_root,fragment,"chat_fragment")
-//                .commit()
-//        }
     }
 
     private fun setupButtons(){

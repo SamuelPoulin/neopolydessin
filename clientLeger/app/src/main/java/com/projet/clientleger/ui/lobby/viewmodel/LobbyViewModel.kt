@@ -3,6 +3,7 @@ package com.projet.clientleger.ui.lobby.viewmodel
 import android.graphics.Bitmap
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receivePlayerLeave().subscribe{
             removePlayer(it)
         }
+    }
+
+    fun getAccountInfo(): AccountInfo{
+        return lobbyRepository.getAccountInfo()
     }
 
     private fun addPlayer(player: PlayerInfo){
@@ -85,7 +90,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         this.defaultImage = defaultImage
         for(team in teams){
             for (i in 0 until 2) {
-                team.value!!.add(PlayerInfo(avatar = defaultImage))
+                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
             }
         }
         teams[0].postValue(teams[0].value!!)
@@ -104,7 +109,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         }
         for(team in teams){
             for(i in 1 downTo team.value!!.size)
-                team.value!!.add(PlayerInfo(avatar = defaultImage))
+                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
         }
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)

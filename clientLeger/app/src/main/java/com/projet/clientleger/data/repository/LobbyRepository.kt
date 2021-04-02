@@ -77,6 +77,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     }
 
+    fun getAccountInfo(): AccountInfo{
+        return sessionManager.getAccountInfo()
+    }
+
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
     }
