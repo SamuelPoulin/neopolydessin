@@ -9,17 +9,21 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class Player(val accountId: String = "",
+data class Player(var accountId: String? = "",
                   val username: String = "",
                   val avatarId: String? = "",
                   val playerRole: String = "",
                   val teamNumber: Int = 0,
                   val isBot: Boolean = false,
                   val isOwner: Boolean = false,
-                  val finishedLoading: Boolean = false) : Parcelable {
+                  var finishedLoading: Boolean? = false) : Parcelable {
     fun toPlayerInfo(avatarBitmap: Bitmap?): PlayerInfo {
-        return PlayerInfo(accountId, username,
+        if(accountId == null)
+            accountId = ""
+        if(finishedLoading == null)
+            finishedLoading = true
+        return PlayerInfo(accountId!!, username,
                 avatarBitmap, avatarId, PlayerRole.stringToRole(playerRole),
-                teamNumber, isBot, isOwner, finishedLoading)
+                teamNumber, isBot, isOwner, finishedLoading!!)
     }
 }

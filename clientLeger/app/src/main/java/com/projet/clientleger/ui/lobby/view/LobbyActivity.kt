@@ -103,8 +103,9 @@ class LobbyActivity : AppCompatActivity() {
                     loadingDialog.dismiss()
                 }
             }
+
+            vm.defaultImage = BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player)
         }
-        vm.fillTeams(BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player))
 
         binding.gameType.text = selectedGameType.toFrenchString()
         binding.difficulty.text = selectedDifficulty.toFrenchString()
@@ -126,6 +127,7 @@ class LobbyActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
+//        binding.toolbar.setNavigationIcon(R.drawable.back)
     }
 
     private fun setupLoadingDialog(): AlertDialog {
