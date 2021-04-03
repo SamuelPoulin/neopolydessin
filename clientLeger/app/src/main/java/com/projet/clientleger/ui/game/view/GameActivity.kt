@@ -147,6 +147,8 @@ class GameActivity : AppCompatActivity() {
         vm.teamScores.observe(this){
             println("score équipe 1 : ${it[0].score}")
             println("score équipe 2 : ${it[1].score}")
+            binding.team1Label.text = "Équipe 1 - ${it[0].score}"
+            binding.team2Label.text = "Équipe 1 - ${it[1].score}"
         }
 
         vm.receiveEndGameNotice().subscribe(){

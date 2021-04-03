@@ -71,6 +71,6 @@
     <string name="quit_label">Quitter</string>
     <string name="timer_icon_des">timer icon</string>
     <string name="continuer_partie">Continuer</string>
-    <string name="team1_label">Équipe 1 -</string>
-    <string name="team2_label">Équipe 2 -</string>
+    <string name="team1_label">Équipe 1 - 0</string>
+    <string name="team2_label">Équipe 2 - 0</string>
 </resources>
