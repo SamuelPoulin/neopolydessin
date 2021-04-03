@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { SocketService } from '@services/socket-service.service';
-import { Observable } from 'rxjs';
 import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
 
 @Component({
