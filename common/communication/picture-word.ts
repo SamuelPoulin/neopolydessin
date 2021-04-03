@@ -2,23 +2,22 @@ import { DrawMode } from './draw-mode';
 import { BrushInfo } from './brush-info';
 import { Difficulty } from './lobby';
 
-export interface PictureWordDrawing {
+export interface PictureWord {
     word: string,
-    drawnPaths: {
-        brushInfo: BrushInfo
-        path: { x: number, y: number }[]
-        id: string
-    }[],
     hints: string[],
     difficulty: Difficulty,
     drawMode: DrawMode
 }
 
-export interface PictureWordPicture {
-    word: string,
-    picture: ArrayBuffer,
+export interface PictureWordDrawing extends PictureWord {
+    drawnPaths: {
+        brushInfo: BrushInfo
+        path: { x: number, y: number }[]
+        id: string
+    }[],
+}
+
+export interface PictureWordPicture extends PictureWord {
+    picture: string,
     color: string,
-    hints: string[],
-    difficulty: Difficulty,
-    drawMode: DrawMode
 }

@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Account } from '@models/account';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
+import { PictureWordPicture } from '@common/communication/picture-word';
 import { LoginResponse } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
@@ -19,6 +20,7 @@ export class APIService {
 
   private static API_BASE_URL: string;
   private static API_DATABASE_ROUTE: string;
+  private static API_PICTUREWORD_ROUTE: string;
   private static API_DRAWINGS_ROUTE: string;
   private static API_DRAWING_ROUTE: string;
   private static API_EMAIL_ROUTE: string;
@@ -35,6 +37,7 @@ export class APIService {
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
     APIService.API_DATABASE_ROUTE = APIService.API_BASE_URL + '/database';
+    APIService.API_PICTUREWORD_ROUTE = APIService.API_BASE_URL + '/pictureword';
     APIService.API_AUTH_ROUTE = APIService.API_DATABASE_ROUTE + '/auth';
     APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
     APIService.API_REFRESH_ROUTE = APIService.API_AUTH_ROUTE + '/refresh';
@@ -84,15 +87,17 @@ export class APIService {
     });
   }
 
-  async uploadDrawing(drawing: Drawing): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + APIService.API_DRAWINGS_ROUTE;
+  async uploadDrawing() {
+    // todo - redo
+  }
 
-      const reqHeaders = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
-      this.http.post(url, drawing, { responseType: 'text', headers: reqHeaders }).subscribe(() => {
-        resolve();
-      });
-    });
+  async uploadPicture(data: PictureWordPicture): Promise<number> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+    headers = headers.set('authorization', this.localSaveService.accessToken);
+    const url = APIService.API_PICTUREWORD_ROUTE + '/upload/picture';
+    return this.http
+      .post<number>(url, data, { headers })
+      .toPromise();
   }
 
   async getAllDrawings(): Promise<Drawing[]> {

@@ -39,7 +39,7 @@ export class PictureWordService {
       const toSave = new pictureWordModel(body);
       // const file = fs.readFileSync(path.resolve('C:/Users/mort_/Pictures/stealin.png'));
       // const uploadedPicture: Buffer = Buffer.from(file);
-      const uploadedPicture: Buffer = Buffer.from(body.picture);
+      const uploadedPicture: Buffer = Buffer.from(body.picture, 'base64');
       this.posterizePromise(uploadedPicture, body.color)
         .then(async (svg) => {
           return this.writeSVG(toSave.id, svg);
