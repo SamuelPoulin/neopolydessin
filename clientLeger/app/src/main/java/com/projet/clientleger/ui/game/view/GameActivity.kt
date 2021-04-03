@@ -117,7 +117,6 @@ class GameActivity : AppCompatActivity() {
             team1.clear()
             team2.clear()
             for(player in it){
-                println(player.playerRole)
                 when(player.teamNumber){
                     0 -> {team1.add(player)
                         binding.team1Rv.adapter?.notifyDataSetChanged()
@@ -130,7 +129,6 @@ class GameActivity : AppCompatActivity() {
         }
 
         vm.activeWord.observe(this){
-            println("Nouveau Mot : $it")
             if(vm.currentRoleLiveData.value == PlayerRole.DRAWER){
                 binding.wordGuess.text = "Mot : ${vm.activeWord.value}"
                 binding.wordGuess.visibility = View.VISIBLE
@@ -141,12 +139,9 @@ class GameActivity : AppCompatActivity() {
             }
         }
         vm.activeTimer.observe(this){
-            println("Nouveau timer recu : $it")
             setTimer(it)
         }
         vm.teamScores.observe(this){
-            println("score équipe 1 : ${it[0].score}")
-            println("score équipe 2 : ${it[1].score}")
             binding.team1Label.text = "Équipe 1 - ${it[0].score}"
             binding.team2Label.text = "Équipe 1 - ${it[1].score}"
         }
@@ -204,7 +199,6 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        println("Partie Détruite")
         vm.unsubscribe()
         super.onDestroy()
     }
