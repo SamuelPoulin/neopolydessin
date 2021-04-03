@@ -88,7 +88,7 @@ export class SocketService {
   receiveGuess(): Observable<GuessMessage> {
     return new Observable<GuessMessage>((msgObs) => {
       this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
-      this.socket.on(SocketLobby.COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
+      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
     });
   }
 

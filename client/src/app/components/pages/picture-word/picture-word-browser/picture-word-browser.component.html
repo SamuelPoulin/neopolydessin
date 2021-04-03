@@ -1,0 +1,19 @@
+<div id="home-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
+  <div id="menu-container">
+    <app-status-bar quit previousPage=""></app-status-bar>
+    <div id="menu-container-title">
+      <img src="assets/icon.png">
+      <div>Création paire mot-image</div>
+    </div>
+    <div id="menu-container-buttons">
+      <button mat-flat-button class="menu-button menu-main-button">
+        <mat-icon class="menu-button-icon menu-button-main-icon">edit</mat-icon>
+        Création manuelle
+      </button>
+      <button mat-flat-button class="menu-button menu-main-button" (click)="openUpload()">
+        <mat-icon class="menu-button-icon menu-button-main-icon">image</mat-icon>
+        Création assistée
+      </button>
+    </div>
+  </div>
+</div>
