@@ -1,5 +1,6 @@
 package com.projet.clientleger.ui.game.viewmodel
 
+import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -38,6 +39,12 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
 
         gameRepository.receiveTeamScores().subscribe{
             teamScores.postValue(it)
+        }
+        gameRepository.receiveGameState().subscribe{
+            if(it == "draw"){
+                println("WIPE THE BOARD HERE --------------------------------------")
+                fragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            }
         }
     }
     private fun findTimeLeft(finishTime:Long):Long{

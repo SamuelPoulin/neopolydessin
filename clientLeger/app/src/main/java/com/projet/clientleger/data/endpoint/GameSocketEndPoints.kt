@@ -7,5 +7,6 @@ enum class GameSocketEndPoints(val value:String) {
     RECEIVE_ROLES("updateRoles"),
     PLAYER_READY("loadingOver"),
     END_GAME_TRIGGER("endGame"),
-    RECEIVE_TEAM_SCORES("updateTeamsScore")
+    RECEIVE_TEAM_SCORES("updateTeamsScore"),
+    UPDATE_GAME_STATE("updateGameState")
 }

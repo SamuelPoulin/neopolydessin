@@ -63,6 +63,11 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
             list
         }
     }
+    fun receiveGameState():Observable<String>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.UPDATE_GAME_STATE.value){ (state) ->
+            state as String
+        }
+    }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{
 //        for(player in players)

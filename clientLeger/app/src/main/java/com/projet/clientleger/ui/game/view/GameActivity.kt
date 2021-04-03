@@ -111,8 +111,6 @@ class GameActivity : AppCompatActivity() {
         vm.playersLiveData.observe(this){
             if(players.isEmpty())
                 updatePlayersAvatar(it)
-            if(boardwipeNeeded(it))
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             players.clear()
             players.addAll(it)
             binding.playersRv.adapter?.notifyDataSetChanged()
@@ -145,12 +143,12 @@ class GameActivity : AppCompatActivity() {
         
     }
 
-    private fun boardwipeNeeded(newPlayersInfo: ArrayList<PlayerInfo>): Boolean{
+    /*private fun boardwipeNeeded(newPlayersInfo: ArrayList<PlayerInfo>): Boolean{
         val newDrawer = newPlayersInfo.find { it.playerRole == PlayerRole.DRAWER }
         val oldDrawer = players.find { it.playerRole == PlayerRole.DRAWER }
         return newDrawer != oldDrawer
 
-    }
+    }*/
 
     private fun getFrenchRole(role:String):String{
         return when (role){
