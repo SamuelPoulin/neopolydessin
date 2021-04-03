@@ -47,7 +47,8 @@ class GameActivity : AppCompatActivity() {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     //private var currentKeyWord : String = ""
-    private val players: ArrayList<PlayerInfo> = ArrayList()
+    private val team1: ArrayList<PlayerInfo> = ArrayList()
+    private val team2:ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,8 +67,10 @@ class GameActivity : AppCompatActivity() {
         //clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
 
-        binding.playersRv.layoutManager = LinearLayoutManager(this)
-        binding.playersRv.adapter = PlayersAdapter(players)
+        binding.team1Rv.layoutManager = LinearLayoutManager(this)
+        binding.team1Rv.adapter = PlayersAdapter(team1)
+        binding.team2Rv.layoutManager = LinearLayoutManager(this)
+        binding.team2Rv.adapter = PlayersAdapter(team2)
 
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
@@ -109,11 +112,21 @@ class GameActivity : AppCompatActivity() {
         }
 
         vm.playersLiveData.observe(this){
-            if(players.isEmpty())
+            if(team1.isEmpty())
                 updatePlayersAvatar(it)
-            players.clear()
-            players.addAll(it)
-            binding.playersRv.adapter?.notifyDataSetChanged()
+            team1.clear()
+            team2.clear()
+            for(player in it){
+                println(player.playerRole)
+                when(player.teamNumber){
+                    0 -> {team1.add(player)
+                        binding.team1Rv.adapter?.notifyDataSetChanged()
+                    }
+                    1 ->{team2.add(player)
+                        binding.team2Rv.adapter?.notifyDataSetChanged()
+                    }
+                }
+            }
         }
 
         vm.activeWord.observe(this){
