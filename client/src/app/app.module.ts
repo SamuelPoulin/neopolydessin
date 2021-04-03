@@ -23,6 +23,8 @@ import { AuthGuard } from '@services/auth-guard';
 import { LoggedInGuard } from '@services/logged-in-guard';
 import { ServerBrowserModule } from '@components/pages/server-browser/server-browser.module';
 import { ServerBrowserComponent } from '@components/pages/server-browser/server-browser/server-browser.component';
+import { PictureWordBrowserComponent } from '@components/pages/picture-word/picture-word-browser/picture-word-browser.component';
+import { PictureWordModule } from '@components/pages/picture-word/picture-word.module';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -36,6 +38,7 @@ import { AppComponent } from './app.component';
     LoginModule,
     LobbyModule,
     ServerBrowserModule,
+    PictureWordModule,
     RouterModule.forRoot(
       [
         { path: '', component: HomeComponent, canActivate: [AuthGuard] },
@@ -44,6 +47,7 @@ import { AppComponent } from './app.component';
         { path: 'lobby', redirectTo: 'lobby/', pathMatch: 'full', canActivate: [AuthGuard] },
         { path: 'lobby/:id', component: LobbyComponent, canActivate: [AuthGuard] },
         { path: 'browser', component: ServerBrowserComponent, canActivate: [AuthGuard] },
+        { path: 'picture-word', component: PictureWordBrowserComponent, canActivate: [AuthGuard] },
         { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
         { path: 'register', component: RegisterComponent, canActivate: [LoggedInGuard] },
         { path: 'password-recovery', component: PasswordRecoveryComponent, canActivate: [LoggedInGuard] },

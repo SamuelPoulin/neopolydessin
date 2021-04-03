@@ -48,16 +48,6 @@ describe('APIService', () => {
     });
   });
 
-  it('should get call http post on uploadDrawing', async () => {
-    const postSpy = spyOn(apiService['http'], 'post').and.returnValue(of(Drawing));
-
-    const drawing = new Drawing('test drawing', [], '', '', 0, 0, 'www');
-
-    apiService.uploadDrawing(drawing).then(() => {
-      expect(postSpy).toHaveBeenCalled();
-    });
-  });
-
   it('should get call http get on searchDrawings', async () => {
     const getSpy = spyOn(apiService['http'], 'get').and.returnValue(of(Drawing));
 

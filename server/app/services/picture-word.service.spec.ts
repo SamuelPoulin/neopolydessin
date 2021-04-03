@@ -40,7 +40,7 @@ describe.only('Picture word service', () => {
     });
 
     it('uploadPicture should correctly store produced svg', (done: Mocha.Done) => {
-        const pictureBuffer = fs.readFileSync(path.resolve(testIconPath));
+        const pictureBuffer = fs.readFileSync(path.resolve(testIconPath)).toString('base64');
         const pwp: PictureWordPicture = {
             word: 'word',
             picture: pictureBuffer,
