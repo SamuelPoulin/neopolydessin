@@ -16,7 +16,7 @@ export class AvatarComponent implements OnInit {
   @Input() fontSize: number;
 
   color: string;
-  url: string;
+  url: string | undefined;
 
   constructor(private apiService: APIService, private userService: UserService) {
     this.color = '';
@@ -24,7 +24,6 @@ export class AvatarComponent implements OnInit {
     this.fontSize = 25;
   }
 
-  // TODO: REMOVE ANY
   ngOnInit() {
     this.color = randomColor({ seed: this.username, luminosity: 'bright' });
 
@@ -38,30 +37,37 @@ export class AvatarComponent implements OnInit {
           }
         };
       } else {
-        this.userService.fetchAvatar().then(() => {
-          if (this.userService.avatarBlob) {
-            reader.readAsDataURL(this.userService.avatarBlob);
+        this.userService
+          .fetchAvatar()
+          .then((avatarBlob) => {
+            reader.readAsDataURL(avatarBlob);
+            reader.onloadend = () => {
+              if (reader.result) {
+                this.url = reader.result.toString();
+              }
+            };
+          })
+          .catch(() => {
+            this.url = undefined;
+          });
+      }
+    }
+    if (this.avatarId) {
+      this.apiService
+        .getAvatarById(this.avatarId)
+        .then((blob: Blob) => {
+          if (blob) {
+            reader.readAsDataURL(blob);
             reader.onloadend = () => {
               if (reader.result) {
                 this.url = reader.result.toString();
               }
             };
           }
+        })
+        .catch(() => {
+          this.url = undefined;
         });
-      }
-    }
-    if (this.avatarId) {
-      // eslint-disable-next-line
-      this.apiService.getAvatarById(this.avatarId).then((blob: any) => {
-        if (blob) {
-          reader.readAsDataURL(blob);
-          reader.onloadend = () => {
-            if (reader.result) {
-              this.url = reader.result.toString();
-            }
-          };
-        }
-      });
     }
   }
 

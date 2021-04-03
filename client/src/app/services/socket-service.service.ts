@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
 import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
 import { BrushInfo } from '../../../../common/communication/brush-info';
@@ -19,23 +18,19 @@ import {
   TeamScore,
   TimeInfo,
 } from '../../../../common/communication/lobby';
-import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
-import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private static API_BASE_URL: string;
-  private jwtService: JwtHelperService;
 
   socket: Socket;
   manager: Manager;
 
-  constructor(private localSaveService: LocalSaveService, private userService: UserService) {
+  constructor(private localSaveService: LocalSaveService) {
     SocketService.API_BASE_URL = environment.socketUrl;
-    this.jwtService = new JwtHelperService();
 
     this.manager = new Manager(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
@@ -47,23 +42,11 @@ export class SocketService {
         token: this.localSaveService.accessToken,
       },
     });
-
-    this.refreshToken();
-
-    setInterval(() => {
-      this.refreshToken();
-    }, ACCESS_TOKEN_REFRESH_INTERVAL);
-  }
-
-  refreshToken(): void {
-    if (this.jwtService.isTokenExpired(this.localSaveService.accessToken)) {
-      this.userService.refreshToken(this.localSaveService.refreshToken);
-    }
   }
 
   receiveMessage(): Observable<ChatMessage> {
-    return new Observable<ChatMessage>((msgObs) => {
-      this.socket.on(SocketMessages.RECEIVE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
+    return new Observable<ChatMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_MESSAGE, (content: ChatMessage) => obs.next(content));
     });
   }
 
@@ -86,9 +69,9 @@ export class SocketService {
   }
 
   receiveGuess(): Observable<GuessMessage> {
-    return new Observable<GuessMessage>((msgObs) => {
-      this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => msgObs.next(content));
-      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => msgObs.next(content));
+    return new Observable<GuessMessage>((obs) => {
+      this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => obs.next(content));
+      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => obs.next(content));
     });
   }
 
@@ -99,8 +82,8 @@ export class SocketService {
   }
 
   receivePrivateMessage(): Observable<ChatMessage> {
-    return new Observable<ChatMessage>((msgObs) => {
-      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => msgObs.next(content));
+    return new Observable<ChatMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => obs.next(content));
     });
   }
 
@@ -111,9 +94,9 @@ export class SocketService {
   }
 
   receivePlayerConnections(): Observable<SystemMessage> {
-    return new Observable<SystemMessage>((msgObs) => {
+    return new Observable<SystemMessage>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: Player, timeStamp: number) =>
-        msgObs.next({
+        obs.next({
           timestamp: timeStamp,
           content: `${playerInfo.username} a rejoint la discussion.`,
         }),
@@ -126,9 +109,9 @@ export class SocketService {
   }
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
-    return new Observable<SystemMessage>((msgObs) => {
+    return new Observable<SystemMessage>((obs) => {
       this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string, timeStamp: number) =>
-        msgObs.next({ timestamp: timeStamp, content: `${username} a quitté la discussion.` }),
+        obs.next({ timestamp: timeStamp, content: `${username} a quitté la discussion.` }),
       );
     });
   }
@@ -138,10 +121,9 @@ export class SocketService {
   }
 
   getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
-    return new Observable<LobbyInfo[]>((msgObs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => {
-        msgObs.next(lobbies);
-      });
+    return new Observable<LobbyInfo[]>((obs) => {
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+      this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
     });
   }
 
