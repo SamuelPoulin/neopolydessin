@@ -97,7 +97,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveStartPath(startPoint: PathData) {
-        val newPath = BufferedPathData(PathData(startPoint.pathId,startPoint.brushInfo))
+        val newPath = BufferedPathData(startPoint)
         newPath.addStartCoord(startPoint.coords.first())
         paths.value?.add(newPath)
         paths.postValue(paths.value)

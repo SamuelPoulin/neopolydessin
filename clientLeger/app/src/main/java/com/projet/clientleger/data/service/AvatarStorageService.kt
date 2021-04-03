@@ -18,16 +18,16 @@ class AvatarStorageService @Inject constructor(val sessionManager: SessionManage
         if (gameAvatars.containsKey(player.accountId))
             return
 
-        if (player.avatarId != null) {
+        if (player.avatarId != null && player.accountId != null) {
             val resAvatar = sessionManager.request(player.avatarId, apiAvatarInterface::getAvatar)
             if (resAvatar.code() == HttpsURLConnection.HTTP_OK) {
                 val avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
-                gameAvatars[player.accountId] = BitmapConversion.toRoundedBitmap(avatar)
+                gameAvatars[player.accountId!!] = BitmapConversion.toRoundedBitmap(avatar)
             }
         }
     }
 
-    fun getAvatar(accountId: String): Bitmap?{
+    fun getAvatar(accountId: String?): Bitmap?{
         return gameAvatars[accountId]
     }
 
