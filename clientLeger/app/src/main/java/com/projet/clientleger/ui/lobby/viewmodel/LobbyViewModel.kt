@@ -53,16 +53,16 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         return lobbyRepository.getUsername()
     }
 
-    fun fillTeams(defaultImage: Bitmap){
-        this.defaultImage = defaultImage
-        for(team in teams){
-            for (i in 0 until 2) {
-                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
-            }
-        }
-        teams[0].postValue(teams[0].value!!)
-        teams[1].postValue(teams[1].value!!)
-    }
+//    fun fillTeams(defaultImage: Bitmap){
+//        this.defaultImage = defaultImage
+//        for(team in teams){
+//            for (i in 0 until 2) {
+//                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
+//            }
+//        }
+//        teams[0].postValue(teams[0].value!!)
+//        teams[1].postValue(teams[1].value!!)
+//    }
 
     private fun updatePlayers(list: ArrayList<PlayerInfo>){
         teams[0].value!!.clear()
@@ -78,10 +78,10 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
             teams[player.teamNumber].value!!.add(player)
             realPlayerTeams[player.teamNumber].add(player)
         }
-        for(team in teams){
-            for(i in 1 downTo team.value!!.size)
-                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
-        }
+//        for(team in teams){
+//            for(i in 1 downTo team.value!!.size)
+//                team.value!!.add(PlayerInfo(avatar = defaultImage, isBot = true))
+//        }
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)
     }

@@ -65,8 +65,10 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_LOBBY_INFO.value) { (players) ->
             val list = ArrayList<Player>()
             val jsonList = players as JSONArray
-            for(i in 0 until jsonList.length())
+            for(i in 0 until jsonList.length()) {
                 list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
+            }
+            println(list)
             list
         }
     }

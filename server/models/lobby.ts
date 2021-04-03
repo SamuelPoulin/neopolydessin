@@ -291,7 +291,7 @@ export abstract class Lobby {
       if (this.isActivePlayer(socket) && this.gameIsInDrawPhase()) {
         this.drawingCommands.addPath(id)
           .then((addedPath) => {
-            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.path, addedPath.brushInfo);
+            this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.id, addedPath.path, addedPath.brushInfo);
           })
           .catch(() => {
             console.log(`failed to update erase for ${this.lobbyId}`);
