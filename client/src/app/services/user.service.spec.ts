@@ -10,6 +10,8 @@ export const MockUserService = jasmine.createSpyObj('UserService', {
   fetchAvatar: Promise.resolve(),
 });
 
+MockUserService.account = { firstName: '', lastName: '', username: '', avatar: { _id: '' } };
+
 describe('UserService', () => {
   let service: UserService;
 
