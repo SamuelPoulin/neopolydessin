@@ -1,6 +1,7 @@
 package com.projet.clientleger.data.api.socket
 
 import android.graphics.Bitmap
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
@@ -51,13 +52,13 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
     }
-    fun receiveTeamScores():Observable<ArrayList<Int>>{
+    fun receiveTeamScores():Observable<ArrayList<TeamScore>>{
         return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value){ res ->
             println("Scores d'équipes recus dans socket : ${res.toString()}")
             val receivedList = res[0] as JSONArray
-            val list = ArrayList<Int>()
+            val list = ArrayList<TeamScore>()
             for(i in 0 until receivedList.length()){
-                val score = receivedList.get(i).toString().toInt()
+                val score = Json.decodeFromString(TeamScore.serializer(), receivedList.get(i).toString())
                 list.add(score)
             }
             list

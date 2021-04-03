@@ -132,8 +132,10 @@ class GameActivity : AppCompatActivity() {
             setTimer(it)
         }
         vm.teamScores.observe(this){
-            println("Nouveau Scores recus: $it")
+            println("score équipe 1 : ${it[0].score}")
+            println("score équipe 2 : ${it[1].score}")
         }
+
         vm.receiveEndGameNotice().subscribe(){
             showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
         }
