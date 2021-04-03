@@ -12,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { OK } from 'http-status-codes';
 
-describe.only('Picture word service', () => {
+describe('Picture word service', () => {
 
     const testOutputPath = 'test/pictures'
     const testIconPath = './test/icon.png';
