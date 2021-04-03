@@ -11,8 +11,6 @@ import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/com
   styleUrls: ['./server-browser.component.scss'],
 })
 export class ServerBrowserComponent implements OnInit {
-  private readonly refreshInterval: number = 2000;
-
   displayedColumns: string[] = ['lobbyName', 'playerInfo', 'gameType', 'joinButton'];
   dataSource: MatTableDataSource<LobbyInfo>;
   lobbyCount: number;
@@ -25,24 +23,6 @@ export class ServerBrowserComponent implements OnInit {
     this.socketService.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
       this.dataSource.data = lobbies;
       this.lobbyCount = lobbies.length;
-    });
-  }
-
-  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
-    // todo - remove
-    return new Observable<LobbyInfo[]>((msgObs) => {
-      setInterval(() => {
-        this.dummyLobbies().then((lobbies) => {
-          msgObs.next(lobbies);
-        });
-      }, this.refreshInterval);
-    });
-  }
-
-  async dummyLobbies(): Promise<LobbyInfo[]> {
-    // todo - remove
-    return new Promise<LobbyInfo[]>((resolve, reject) => {
-      resolve([]);
     });
   }
 
