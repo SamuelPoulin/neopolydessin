@@ -26,6 +26,9 @@
       "dom"
     ],
     "paths": {
+      "@common/*": [
+        "../common/*"
+      ],
       "@services/*": [
         "src/app/services/*"
       ],

@@ -3,10 +3,21 @@ import { Server, Socket } from 'socket.io';
 import { PictureWordService } from '../app/services/picture-word.service';
 import { DatabaseService } from '../app/services/database.service';
 import { SocketIdService } from '../app/services/socket-id.service';
-import { Difficulty, GameType, PlayerRole, ReasonEndGame } from '../../common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  GuessMessageCoop,
+  GuessResponse,
+  PlayerRole,
+  ReasonEndGame
+} from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
+import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby } from './lobby';
 
+const NB_GUESSES: number = 3;
+const SOLO_START_TIME: number = 60;
 @injectable()
 export class LobbySolo extends Lobby {
 
@@ -24,8 +35,10 @@ export class LobbySolo extends Lobby {
     super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_SOLO;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
-    this.guessLeft = 3;
+    this.guessLeft = NB_GUESSES;
+    this.timeLeftSeconds = SOLO_START_TIME;
     this.privateLobby = true;
+    this.players.push(this.getBotInfo(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {
@@ -39,7 +52,7 @@ export class LobbySolo extends Lobby {
   }
 
   protected startGame(): void {
-    this.players.forEach((player) => player.playerRole = PlayerRole.GUESSER);
+    this.players.forEach((player) => player.playerRole = player.isBot ? PlayerRole.DRAWER : PlayerRole.GUESSER);
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
     this.startRoundTimer();
   }
@@ -48,26 +61,53 @@ export class LobbySolo extends Lobby {
 
     super.bindLobbyEndPoints(socket);
 
-    socket.on(SocketLobby.PLAYER_GUESS, (word: string, callback: (guessResponse: boolean) => void) => {
-      const guesserValues = this.findPlayerBySocket(socket);
-      if (guesserValues?.playerRole === PlayerRole.GUESSER) {
-        if (word === this.wordToGuess) {
-          this.teamScores[0]++;
-          this.timeLeftSeconds += 30;
-          this.addTimeOnCorrectGuess();
-          // EMIT NEW TIME
-          // SELECT NEW WORD
-          // EMIT NEW DRAWING BY BOT
-          callback(true);
+    socket.on(SocketLobby.PLAYER_GUESS, async (word: string) => {
+      const player = this.findPlayerBySocket(socket);
+      if (player) {
+        const distance = levenshtein(word, this.wordToGuess);
+        let guessStatus: GuessResponse;
+        switch (distance) {
+          case 0:
+            guessStatus = GuessResponse.CORRECT;
+            this.teamScores[0]++;
+            this.io.in(this.lobbyId)
+              .emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
+            this.addTimeOnCorrectGuess();
+            break;
+
+          case 1:
+          case 2:
+            guessStatus = GuessResponse.CLOSE;
+            this.guessLeft--;
+            break;
+
+          default:
+            guessStatus = GuessResponse.WRONG;
+            this.guessLeft--;
+            break;
         }
-        else {
-          this.guessLeft--;
-          if (this.guessLeft === 0) {
-            // SELECT NEW WORD
-            // EMIT NEW DRAWING BY BOT
-            this.guessLeft = 3;
-          }
-          callback(false);
+        const guessMessage: GuessMessageCoop = {
+          content: word,
+          timestamp: Date.now(),
+          guessStatus,
+          senderUsername: player.username,
+          nbGuessLeft: this.guessLeft
+        };
+        this.io.in(this.lobbyId)
+          .emit(SocketLobby.SOLO_COOP_GUESS_BROADCAST, guessMessage);
+
+        if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
+          this.botService.resetDrawing();
+          this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
+          this.pictureWordService.getRandomWord()
+            .then((pictureWord) => {
+              this.wordToGuess = pictureWord.word;
+              this.botService.draw(pictureWord.sequence);
+            })
+            .catch((err) => {
+              this.endGame(ReasonEndGame.NO_WORDS_FOUND);
+            });
+          this.guessLeft = NB_GUESSES;
         }
       }
     });
@@ -79,16 +119,24 @@ export class LobbySolo extends Lobby {
   }
 
   protected startRoundTimer() {
-    // CHOOSE WORD TO DRAW BY BOT
-    // START DRAWING BY BOT
-    this.drawingCommands.resetDrawing();
-    this.sendStartTimeToClient();
-    this.clockTimeout = setInterval(() => {
-      --this.timeLeftSeconds;
-      if (this.timeLeftSeconds <= 0) {
-        this.timeRunOut();
-      }
-    }, this.MS_PER_SEC);
+    this.pictureWordService.getRandomWord()
+      .then((pictureWord) => {
+        this.wordToGuess = pictureWord.word;
+        this.sendStartTimeToClient();
+
+        this.botService.draw(pictureWord.sequence);
+
+        this.clockTimeout = setInterval(() => {
+          --this.timeLeftSeconds;
+          if (this.timeLeftSeconds <= 0) {
+            this.botService.resetDrawing();
+            this.timeRunOut();
+          }
+        }, this.MS_PER_SEC);
+      })
+      .catch((err) => {
+        this.endGame(ReasonEndGame.NO_WORDS_FOUND);
+      });
   }
 
   private timeRunOut() {

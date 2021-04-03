@@ -65,7 +65,8 @@ export enum GuessResponse {
 export enum ReasonEndGame {
   PLAYER_DISCONNECT = 'playerDisconnected',
   WINNING_SCORE_REACHED = 'winningScoreReached',
-  TIME_RUN_OUT = 'timeRunOut'
+  TIME_RUN_OUT = 'timeRunOut',
+  NO_WORDS_FOUND = 'noWordsFound'
 }
 
 export enum Difficulty {
