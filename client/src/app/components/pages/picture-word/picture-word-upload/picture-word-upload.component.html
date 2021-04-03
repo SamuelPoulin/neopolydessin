@@ -9,12 +9,12 @@
 
   </div>
   <div actions>
-      <button id="btn-image" mat-stroked-button (click)="upload()">
+      <button id="btn-image" mat-stroked-button>
     <label for="upload-input" id="btn-image-label">
         <mat-icon id="btn-image-icon">image</mat-icon>
     </label>
       </button>
-    <input (change)="acceptFile($event.target.file)" type="file" id="upload-input"/>
+    <input (change)="acceptFile($event.target.files)" type="file" id="upload-input"/>
     <button id="btn-confirm" mat-stroked-button (click)="upload()">
       Enregistrer
     </button>
