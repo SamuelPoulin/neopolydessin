@@ -145,8 +145,8 @@ export abstract class Lobby {
     }
   }
 
-  findPlayerById(accountId: string): Player | undefined {
-    return this.players.find((player) => !player.isBot && (player as Player).accountId === accountId) as Player;
+  findPlayerById(accountId: string): ServerPlayer | undefined {
+    return this.players.find((player) => !player.isBot && (player as Player).accountId === accountId) as ServerPlayer;
   }
 
   lobbyHasRoom(): boolean {
@@ -227,6 +227,17 @@ export abstract class Lobby {
         if (indexOfBotToRemove > -1) {
           const removedBot = this.players.splice(indexOfBotToRemove, 1)[0];
           this.emitLeaveInfo(removedBot, socket);
+        }
+      }
+    });
+
+    socket.on(SocketLobby.REMOVE_PLAYER, (accountId: string) => {
+      const owner = this.getLobbyOwner();
+      if (owner && owner.socket.id === socket.id) {
+        const playerToRemove = this.findPlayerById(accountId);
+        if (playerToRemove && playerToRemove.accountId) {
+          this.io.to(playerToRemove.socket.id).emit(SocketLobby.PLAYER_REMOVED);
+          this.removePlayer(playerToRemove.accountId, playerToRemove.socket);
         }
       }
     });
