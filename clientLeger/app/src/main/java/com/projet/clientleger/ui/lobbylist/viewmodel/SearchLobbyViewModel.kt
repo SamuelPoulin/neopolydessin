@@ -17,19 +17,14 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
     lateinit var selectedGameType: GameType
     lateinit var selectedDifficulty: Difficulty
 
-    fun init(gameType: GameType, difficulty: Difficulty) {
-        selectedGameType = gameType
-        selectedDifficulty = difficulty
-
+    fun init() {
         lobbyRepository.receiveUpdateLobbyList().subscribe {
             filterLobbies(it)
             lobbies.postValue(it)
         }
-
-        lobbyRepository.receivedAllLobbies(gameType, difficulty).subscribe{
+        lobbyRepository.receivedAllLobbies(selectedGameType, selectedDifficulty).subscribe{
             lobbies.postValue(it)
         }
-
     }
 
     fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
