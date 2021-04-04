@@ -8,7 +8,7 @@
     <ng-container *ngFor="let message of chatService.messages">
       <ng-container *ngIf="!isSystem(message)">
         <chat-message [message]="message"
-          [ngStyle]="{'align-self': message.senderUsername === userService.username && 'flex-end'}"></chat-message>
+          [ngStyle]="{'align-self': message.senderUsername === userService.account.username && 'flex-end'}"></chat-message>
       </ng-container>
       <ng-container *ngIf="isSystem(message)">
         <system-message [message]="message"></system-message>

@@ -1,74 +1,60 @@
 import { Injectable } from '@angular/core';
+import { Account } from '@models/account';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocalSaveService {
-  private static LOCAL_USER_ID: string = 'username';
-  private static LOCAL_REFRESH_TOKEN_ID: string = 'refreshToken';
-  private static LOCAL_ACCESS_TOKEN_ID: string = 'accessToken';
+  private static STORAGE_ACCOUNT_KEY: string = 'account';
+  private static STORAGE_REFRESH_TOKEN_KEY: string = 'refreshToken';
+  private static STORAGE_ACCESS_TOKEN_KEY: string = 'accessToken';
 
-  private _username: string;
-  private _refreshToken: string;
-  private _accessToken: string;
+  clearData() {
+    this.account = undefined;
+    this.accessToken = undefined;
+    this.refreshToken = undefined;
+  }
 
-  loadUsername(): void {
-    const localUser: string | null = localStorage.getItem(LocalSaveService.LOCAL_USER_ID);
-    if (localUser) {
-      this._username = localUser;
+  set account(account: Account | undefined) {
+    if (account) {
+      localStorage.setItem(LocalSaveService.STORAGE_ACCOUNT_KEY, JSON.stringify(account));
+    } else {
+      localStorage.removeItem(LocalSaveService.STORAGE_ACCOUNT_KEY);
     }
   }
 
-  loadRefreshToken(): void {
-    const localRefreshToken: string | null = localStorage.getItem(LocalSaveService.LOCAL_REFRESH_TOKEN_ID);
-    if (localRefreshToken) {
-      this._refreshToken = localRefreshToken;
+  get account(): Account | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_ACCOUNT_KEY);
+    if (value) {
+      return JSON.parse(value) as Account;
+    } else {
+      return undefined;
     }
   }
 
-  loadAccessToken(): void {
-    const localAccessToken: string | null = localStorage.getItem(LocalSaveService.LOCAL_ACCESS_TOKEN_ID);
-    if (localAccessToken) {
-      this._accessToken = localAccessToken;
-    }
+  get accessToken(): string | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY);
+    return value ? value : undefined;
   }
 
-  get accessToken(): string {
-    this.loadAccessToken();
-    return this._accessToken;
-  }
-
-  set accessToken(accessToken: string) {
+  set accessToken(accessToken: string | undefined) {
     if (accessToken) {
-      localStorage.setItem(LocalSaveService.LOCAL_ACCESS_TOKEN_ID, accessToken);
+      localStorage.setItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY, accessToken);
     } else {
-      localStorage.removeItem(LocalSaveService.LOCAL_ACCESS_TOKEN_ID);
+      localStorage.removeItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY);
     }
   }
 
-  get refreshToken(): string {
-    this.loadRefreshToken();
-    return this._refreshToken;
+  get refreshToken(): string | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY);
+    return value ? value : undefined;
   }
 
-  set refreshToken(refreshToken: string) {
+  set refreshToken(refreshToken: string | undefined) {
     if (refreshToken) {
-      localStorage.setItem(LocalSaveService.LOCAL_REFRESH_TOKEN_ID, refreshToken);
+      localStorage.setItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY, refreshToken);
     } else {
-      localStorage.removeItem(LocalSaveService.LOCAL_REFRESH_TOKEN_ID);
-    }
-  }
-
-  get username(): string {
-    this.loadUsername();
-    return this._username;
-  }
-
-  set username(username: string) {
-    if (username) {
-      localStorage.setItem(LocalSaveService.LOCAL_USER_ID, username);
-    } else {
-      localStorage.removeItem(LocalSaveService.LOCAL_USER_ID);
+      localStorage.removeItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY);
     }
   }
 }

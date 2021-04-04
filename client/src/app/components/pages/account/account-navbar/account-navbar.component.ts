@@ -18,9 +18,9 @@ export class AccountNavbarComponent {
   username: string;
 
   constructor(private mediaMatcher: MediaMatcher, public userService: UserService) {
-    this.firstName = 'Samuel';
-    this.lastName = 'Poulin';
-    this.username = this.userService.username;
+    this.firstName = this.userService.account.firstName;
+    this.lastName = this.userService.account.lastName;
+    this.username = this.userService.account.username;
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
