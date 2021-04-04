@@ -42,27 +42,27 @@ export class BotService {
   }
 
   private drawPath(segment: Segment, startAt: number): void {
-    this.pathTimer = setInterval(() => {
-      segment.path.forEach((coord, index) => {
-        this.currentCoordIndex = index;
-        if (this.currentCoordIndex >= startAt) {
-          if (this.currentCoordIndex === 0) {
-            this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, index, segment.zIndex, coord, segment.brushInfo);
-          } else if (index === segment.path.length - 1) {
-            this.io.in(this.lobbyId).emit(SocketDrawing.END_PATH_BC, coord);
-          } else {
-            this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, coord);
-            clearInterval(this.pathTimer);
+    this.currentCoordIndex = -1;
 
-            this.currentSegmentIndex++;
-            if (this.currentSegmentIndex < this.drawing.stack.length) {
-              this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
-            } else {
-              this.resetDrawing();
-            }
+    this.pathTimer = setInterval(() => {
+      this.currentCoordIndex++;
+      if (this.currentCoordIndex >= startAt) {
+        const coord = this.drawing.stack[this.currentSegmentIndex].path[this.currentCoordIndex];
+        if (this.currentCoordIndex === 0) {
+          this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, this.currentCoordIndex, segment.zIndex, coord, segment.brushInfo);
+        } else if (this.currentCoordIndex < segment.path.length - 1) {
+          this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, coord);
+        } else {
+          this.io.in(this.lobbyId).emit(SocketDrawing.END_PATH_BC, coord);
+          clearInterval(this.pathTimer);
+          this.currentSegmentIndex++;
+          if (this.currentSegmentIndex < this.drawing.stack.length) {
+            this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
+          } else {
+            this.resetDrawing();
           }
         }
-      });
+      };
     }, this.DRAW_SPEED);
   }
 }
