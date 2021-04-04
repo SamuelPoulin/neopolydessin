@@ -168,7 +168,7 @@ export abstract class Lobby {
             teamNumber,
             isBot: false,
             finishedLoading: false,
-            isOwner: this.players.filter((p) => p.isBot).length === 0 ? true : false
+            isOwner: this.players.filter((p) => !p.isBot).length === 0 ? true : false
           };
           this.players.push(player);
           socket.join(this.lobbyId);
