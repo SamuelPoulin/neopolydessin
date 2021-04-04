@@ -50,6 +50,11 @@ export interface GuessMessageCoop extends GuessMessage {
   nbGuessLeft: number,
 }
 
+export interface LobbyOpts {
+  difficulty?: Difficulty;
+  gameType?: GameType;
+}
+
 export enum GameType {
   CLASSIC = 'classic',
   SPRINT_SOLO = 'sprintSolo',
