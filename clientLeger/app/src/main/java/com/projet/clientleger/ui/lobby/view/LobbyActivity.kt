@@ -1,15 +1,12 @@
 package com.projet.clientleger.ui.lobby.view
 
-import android.app.Dialog
-import android.app.ProgressDialog
-import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,15 +14,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
-import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.Serializable
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,6 +33,7 @@ class LobbyActivity : AppCompatActivity() {
     private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     private lateinit var rvTeams: Array<RecyclerView>
     var nextActivityIntent: Intent? = null
+    var loadingDialog: AlertDialog? = null
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
 
@@ -51,31 +50,94 @@ class LobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.lifecycleOwner = this
 
+        binding.chatRoot.visibility = View.GONE
+
+        fetchIntentData()
 
         setupButtons()
-
-        val selectedGameType = (intent.getSerializableExtra("gameType") as GameType)
-        val selectedDifficulty = (intent.getSerializableExtra("difficulty") as Difficulty)
+        setSubscriptions()
 
         if(intent.getBooleanExtra("isJoining", false)){
-            intent.getStringExtra("lobbyId")?.let { vm.joinGame(it) }
+            vm.joinGame()
         } else{
-            val gameName = intent.getStringExtra("gameName")
-            val isPrivate = intent.getBooleanExtra("isPrivate", false)
-            vm.createGame(gameName!!, selectedGameType, selectedDifficulty, isPrivate)
+            vm.createGame()
+        }
+        setupToolbar()
+        setupTeamsRv()
+
+        setupUiMode()
+
+        supportFragmentManager.commit{
+            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
+        }
+    }
+
+    private fun setupToolbar(){
+        binding.toolbar.title = vm.gameName
+        binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
+                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
+            }
+            true
         }
 
-        val loadingDialog = setupLoadingDialog()
+        binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
+        binding.toolbar.setNavigationOnClickListener {
+            leaveLobby()
+        }
+    }
+
+    private fun fetchIntentData(){
+        vm.lobbyId = intent.getStringExtra("lobbyId") ?: ""
+        vm.gameName = intent.getStringExtra("gameName") ?: "partie inconnue"
+        vm.gameType = (intent.getSerializableExtra("gameType") as GameType?) ?: GameType.CLASSIC
+        vm.difficulty = (intent.getSerializableExtra("difficulty") as Difficulty?) ?: Difficulty.EASY
+        vm.isPrivate = intent.getBooleanExtra("isPrivate", false)
+    }
+
+    override fun onBackPressed() {
+        loadingDialog?.let {
+            leaveLobby()
+        }
+    }
+
+    private fun setupUiMode(){
+        if(vm.gameType != GameType.CLASSIC){
+            binding.leftPeopleIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_coop_group))
+            binding.rightPeopleIcon.visibility = View.GONE
+            binding.teamLabel.text = getString(R.string.coopTeamLabel)
+            binding.teamLabel2.visibility = View.GONE
+            binding.teamContent2.visibility = View.GONE
+        }
+
+        binding.gameType.text = vm.gameType.toFrenchString()
+        binding.difficulty.text = vm.difficulty.toFrenchString()
+        binding.startGameButton.visibility = View.INVISIBLE
+    }
+
+    private fun leaveLobby(){
+        vm.leaveLobby()
+        finish()
+    }
+
+    private fun setupTeamsRv(){
+        loadingDialog = setupLoadingDialog()
 
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for(i in rvTeams.indices){
-            val manager = LinearLayoutManager(this)
-            manager.orientation = RecyclerView.VERTICAL
-            rvTeams[i].layoutManager = manager
-            val teamBackground = when(i){
-                0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
-                else -> ContextCompat.getDrawable(this, R.drawable.red_team_playerinfo_background)!!
+            rvTeams[i].layoutManager = LinearLayoutManager(this)
+            val teamBackground: Drawable? = if(vm.gameType != GameType.CLASSIC)
+                null
+            else{
+                when(i){
+                    0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
+                    else -> ContextCompat.getDrawable(this, R.drawable.red_team_playerinfo_background)!!
+                }
             }
+
             rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer,
                     vm.getAccountInfo(),
                     ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
@@ -98,36 +160,17 @@ class LobbyActivity : AppCompatActivity() {
                 teams[i].clear()
                 teams[i].addAll(players)
                 rvTeams[i].adapter?.notifyDataSetChanged()
-                if(loadingDialog.isShowing && players.find { it.accountId.isNotEmpty() } != null)
-                {
-                    loadingDialog.dismiss()
+                loadingDialog?.let { dialog ->
+                    if(dialog.isShowing && players.find { it.accountId.isNotEmpty() } != null)
+                    {
+                        dialog.dismiss()
+                    }
                 }
+
             }
 
             vm.defaultImage = BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player)
         }
-
-        binding.gameType.text = selectedGameType.toFrenchString()
-        binding.difficulty.text = selectedDifficulty.toFrenchString()
-        binding.startGameButton.visibility = View.INVISIBLE
-
-        if(selectedGameType == GameType.SPRINT_SOLO){
-            println("MODE DE JEU SOLOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-
-        }
-        setSubscriptions()
-
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
-                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
-            }
-            true
-        }
-        supportFragmentManager.commit{
-            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        }
-//        binding.toolbar.setNavigationIcon(R.drawable.back)
     }
 
     private fun setupLoadingDialog(): AlertDialog {
@@ -142,11 +185,6 @@ class LobbyActivity : AppCompatActivity() {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
-
-//        binding.exitGame.setOnClickListener {
-//            vm.leaveLobby()
-//            finish()
-//        }
 
     }
     private fun startGame(){
@@ -164,7 +202,6 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        println("Lobby détruit")
         vm.unsubscribe()
         if(nextActivityIntent == null)
             vm.clearAvatarStorage()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/blue_team_playerinfo_background"
     android:orientation="horizontal">
@@ -11,8 +11,10 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="start|center_vertical"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
         android:contentDescription="@string/avatar_description"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -23,7 +25,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|center_vertical"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:tag="playerName"
         android:text="@string/base_player_name"
         android:textColor="@color/black"
@@ -46,7 +49,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/removePlayerBtn"/>
 
-    <Button
+    <ImageButton
         android:id="@+id/removePlayerBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -54,6 +57,8 @@
         android:layout_margin="10dp"
         android:text="@string/remove_player_button_text"
         android:textSize="15sp"
+        android:src="@drawable/ic_baseline_close_24"
+        android:background="?android:selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>

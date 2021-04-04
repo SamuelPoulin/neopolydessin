@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,11 +16,13 @@ import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.databinding.ActivitySearchLobbyBinding
+import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchLobbyActivity : AppCompatActivity() {
@@ -26,6 +30,8 @@ class SearchLobbyActivity : AppCompatActivity() {
     private val vm: SearchLobbyViewModel by viewModels()
     private var lobbyList = ArrayList<LobbyInfo>()
     private lateinit var binding: ActivitySearchLobbyBinding
+    @Inject
+    lateinit var friendslistFragment: FriendslistFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +39,9 @@ class SearchLobbyActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.lifecycleOwner = this
 
-        val selectedGameType = intent.getSerializableExtra("gameType") as GameType
-        val selectedDifficulty = intent.getSerializableExtra("difficulty") as Difficulty
-        binding.rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
-        binding.rvGames.adapter = GameLobbyInfoAdapter(lobbyList, ::joinLobby)
+        getIntentData()
+        setupLobbiesRv()
+        setupToolbar()
 
         vm.lobbies.observe(this){
             lobbyList.clear()
@@ -44,46 +49,54 @@ class SearchLobbyActivity : AppCompatActivity() {
             binding.rvGames.adapter?.notifyDataSetChanged()
         }
 
-        binding.logoutBtn.setOnClickListener {
-            val intent = Intent(this,MainmenuActivity::class.java)
-            startActivity(intent)
+        supportFragmentManager.commit{
+            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
+        }
+
+        vm.init()
+    }
+
+    private fun setupLobbiesRv(){
+        binding.rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
+        binding.rvGames.adapter = GameLobbyInfoAdapter(lobbyList, ::joinLobby)
+    }
+
+    private fun getIntentData(){
+        vm.selectedGameType = intent.getSerializableExtra("gameType") as GameType? ?: GameType.CLASSIC
+        vm.selectedDifficulty = intent.getSerializableExtra("difficulty") as Difficulty? ?: Difficulty.EASY
+    }
+
+    private fun setupToolbar(){
+        binding.toolbar.title = "Liste de parties"
+        binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
+                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
+            }
+            true
+        }
+
+        binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
+        binding.toolbar.setNavigationOnClickListener {
             finish()
         }
-        vm.init(selectedGameType, selectedDifficulty)
-
     }
 
-    private fun removeGameWithID(id:String){
-        //algo pour trouver les items par tag (pour remove). sera plus facile lorsqu'on aura une map
-        for((index,lobby) in lobbyList.withIndex()){
-            if(lobby.lobbyId == id){
-                lobbyList.remove(lobby)
-                binding.rvGames.adapter?.notifyItemRemoved(index)
-                binding.rvGames.adapter?.notifyItemRangeChanged(index,lobbyList.size)
-                break
-            }
-        }
-    }
-
-//    private fun addGameLobby(lobby: Lobby){
-//        lobbyList.add(lobby)
-//        rvGames.adapter?.notifyItemInserted(lobbyList.size-1)
-//        rvGames.scrollToPosition(lobbyList.size-1)
-//    }
-
-    private fun joinLobby(lobbyId: String){
+    private fun joinLobby(lobbyInfo: LobbyInfo){
         val intent = Intent(this, LobbyActivity::class.java).apply{
             putExtra("isJoining", true)
-            putExtra("lobbyId", lobbyId)
-            putExtra("gameType",vm.selectedGameType)
-            putExtra("difficulty", vm.selectedDifficulty)
+            putExtra("lobbyId", lobbyInfo.lobbyId)
+            putExtra("gameType", lobbyInfo.gameType)
+            putExtra("difficulty", lobbyInfo.difficulty)
+            putExtra("gameName", lobbyInfo.lobbyName)
         }
         startActivity(intent)
         finish()
     }
 
     override fun onDestroy() {
-        println("Search Lobby détruit")
         vm.unsubscribe()
         super.onDestroy()
     }
