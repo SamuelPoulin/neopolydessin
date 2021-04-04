@@ -47,7 +47,7 @@ export class HomeComponent {
   }
 
   createLobby(): void {
-    this.socketService.createLobby('Partie de ' + this.userService.username);
+    this.socketService.createLobby('Partie de ' + this.userService.account.username);
     this.router.navigate(['lobby']);
   }
 }

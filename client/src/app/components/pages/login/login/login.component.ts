@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { APIService } from '@services/api.service';
 import { UserService } from '@services/user.service';
 
 @Component({
@@ -14,18 +13,16 @@ export class LoginComponent {
   password: string = '';
   currentError: string = '';
 
-  constructor(private apiService: APIService, private userService: UserService, private snackBar: MatSnackBar, private router: Router) {}
+  constructor(private userService: UserService, private snackBar: MatSnackBar, private router: Router) {}
 
   login() {
-    this.apiService
+    this.userService
       .login(this.username, this.password)
       .then(() => {
-        this.userService.login(this.username);
         this.router.navigate(['']);
       })
-      .catch((err) => {
-        console.error(err);
-        this.snackBar.open('Erreur de connexion', 'Ok', {
+      .catch(() => {
+        this.snackBar.open("Erreur lors de l'authentification", 'Ok', {
           duration: 2000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',

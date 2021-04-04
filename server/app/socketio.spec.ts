@@ -203,7 +203,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
                         clients[0].emit(SocketLobby.ADD_BOT, 1);
                     });
@@ -293,9 +293,9 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.CLASSIC, difficulty: Difficulty.EASY }, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                    })
+                    });
 
                 });
 

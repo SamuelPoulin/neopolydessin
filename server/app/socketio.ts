@@ -14,7 +14,7 @@ import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
-import { Difficulty, GameType, LobbyInfo } from '../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
@@ -118,14 +118,11 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketLobby.GET_ALL_LOBBIES, (gameMode: GameType, difficulty: Difficulty,
-        callback: (lobbies: LobbyInfo[]) => void) => {
-        callback(this.lobbyList
-          .filter((lobby) => {
-            return !lobby.privateLobby && lobby.difficulty === difficulty && gameMode === lobby.gameType;
-          }).map((lobby) => {
-            return lobby.getLobbySummary();
-          }));;
+      socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbies: LobbyInfo[]) => void) => {
+        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby);
+        lobbies = lobbyOpts.gameType ? this.lobbyList.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
+        lobbies = lobbyOpts.difficulty ? lobbies.filter((lobby) => lobby.difficulty === lobbyOpts.difficulty) : lobbies;
+        callback(lobbies.map((lobby) => lobby.getLobbySummary()));
       });
 
       socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string) => {

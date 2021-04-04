@@ -23,7 +23,7 @@ export class ChatMessageComponent implements OnInit {
       this.guessStatus = (this.message as GuessMessage).guessStatus;
     }
 
-    if (this.message.senderUsername !== this.userService.username) {
+    if (this.message.senderUsername !== this.userService.account.username) {
       this.foreign = true;
     }
   }

@@ -8,12 +8,17 @@ import { UserService } from './user.service';
 export class LoggedInGuard implements CanActivate {
   constructor(private userService: UserService, private router: Router) {}
 
-  canActivate() {
-    if (this.userService.loggedIn) {
-      this.router.navigate(['']);
-      return false;
-    } else {
-      return true;
-    }
+  async canActivate(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.userService
+        .validateAuth()
+        .then(() => {
+          this.router.navigate(['']);
+          resolve(false);
+        })
+        .catch(() => {
+          resolve(true);
+        });
+    });
   }
 }

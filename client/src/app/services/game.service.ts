@@ -45,7 +45,7 @@ export class GameService {
     this.lobbySubscription = this.socketService.getLobbyInfo().subscribe((players) => {
       this.resetTeams();
       for (const player of players) {
-        if (player.username === this.userService.username) {
+        if (player.username === this.userService.account.username) {
           this.isHost = player.isOwner;
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
         }
@@ -68,7 +68,8 @@ export class GameService {
     this.rolesSubscription = this.socketService.receiveRoles().subscribe((players) => {
       this.resetTeams();
       for (const player of players) {
-        if (player.username === this.userService.username) {
+        if (player.playerRole === PlayerRole.DRAWER) this.drawer = player;
+        if (player.username === this.userService.account.username) {
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
         }

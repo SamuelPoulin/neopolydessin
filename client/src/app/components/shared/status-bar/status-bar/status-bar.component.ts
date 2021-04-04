@@ -16,7 +16,7 @@ export class StatusBarComponent {
   username: string;
 
   constructor(private router: Router, public userService: UserService, private gameService: GameService) {
-    this.username = this.userService.username;
+    this.username = this.userService.account.username;
   }
 
   navigateBack() {

@@ -1,9 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Account } from '@models/account';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
 import { PictureWordPicture } from '@common/communication/picture-word';
+import { LoginResponse } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
 @Injectable({
@@ -44,33 +46,45 @@ export class APIService {
     APIService.API_ACCOUNT_ROUTE = APIService.API_DATABASE_ROUTE + '/account';
   }
 
-  async login(username: string, password: string) {
-    return this.http
-      .post(APIService.API_LOGIN_ROUTE, { username, password })
-      .toPromise()
-      .then((reply: { accessToken: string; refreshToken: string }) => {
-        this.localSaveService.accessToken = reply.accessToken;
-        this.localSaveService.refreshToken = reply.refreshToken;
-      });
+  async login(username: string, password: string): Promise<LoginResponse> {
+    return new Promise<LoginResponse>((resolve, reject) => {
+      this.http.post(APIService.API_LOGIN_ROUTE, { username, password }).subscribe(
+        (loginResponse: LoginResponse) => {
+          resolve(loginResponse);
+        },
+        (e) => {
+          reject(e);
+        },
+      );
+    });
   }
 
-  async refreshToken(refreshToken: string) {
-    return this.http
-      .post(APIService.API_REFRESH_ROUTE, { refreshToken })
-      .toPromise()
-      .then((reply: { accessToken: string }) => {
-        this.localSaveService.accessToken = reply.accessToken;
-      });
+  async register(firstName: string, lastName: string, username: string, email: string, password: string): Promise<LoginResponse> {
+    return new Promise<LoginResponse>((resolve, reject) => {
+      this.http
+        .post(APIService.API_REGISTER_ROUTE, { firstName, lastName, username, email, password, passwordConfirm: password })
+        .subscribe(
+          (loginResponse: LoginResponse) => {
+            resolve(loginResponse);
+          },
+          (e) => {
+            reject(e);
+          },
+        );
+    });
   }
 
-  async register(firstName: string, lastName: string, username: string, email: string, password: string) {
-    return this.http
-      .post(APIService.API_REGISTER_ROUTE, { firstName, lastName, username, email, password, passwordConfirm: password })
-      .toPromise()
-      .then((reply: { accessToken: string; refreshToken: string }) => {
-        this.localSaveService.accessToken = reply.accessToken;
-        this.localSaveService.refreshToken = reply.refreshToken;
-      }); // todo - fix duplicate password
+  async refreshAccessToken(refreshToken: string | undefined): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      this.http.post(APIService.API_REFRESH_ROUTE, { refreshToken }).subscribe(
+        (response: { accessToken: string }) => {
+          resolve(response.accessToken);
+        },
+        (e) => {
+          reject(e);
+        },
+      );
+    });
   }
 
   async uploadDrawing() {
@@ -78,12 +92,23 @@ export class APIService {
   }
 
   async uploadPicture(data: PictureWordPicture): Promise<number> {
-    let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
-    headers = headers.set('authorization', this.localSaveService.accessToken);
-    const url = APIService.API_PICTUREWORD_ROUTE + '/upload/picture';
-    return this.http
-      .post<number>(url, data, { headers })
-      .toPromise();
+    return new Promise<number>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/upload/picture';
+        this.http.post(url, data, { headers }).subscribe(
+          (response: number) => {
+            resolve(response);
+          },
+          (e) => {
+            reject(e);
+          },
+        );
+      } else {
+        reject();
+      }
+    });
   }
 
   async getAllDrawings(): Promise<Drawing[]> {
@@ -105,27 +130,38 @@ export class APIService {
     });
   }
 
-  // TODO: REMOVE ANYs
-  // eslint-disable-next-line
-  async getAvatarById(id: string): Promise<any> {
-    // eslint-disable-next-line
-    return new Promise<any>((resolve) => {
-      const url = APIService.API_AVATAR_ROUTE + `/${id}`;
-      this.http.get(url, { headers: { authorization: this.localSaveService.accessToken }, responseType: 'blob' }).subscribe((blob) => {
-        resolve(blob);
-      });
+  async getAvatarById(id: string): Promise<Blob> {
+    return new Promise<Blob>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        const url = APIService.API_AVATAR_ROUTE + `/${id}`;
+        this.http.get(url, { headers: { authorization: this.localSaveService.accessToken }, responseType: 'blob' }).subscribe(
+          (blob: Blob) => {
+            resolve(blob);
+          },
+          (e) => {
+            reject(e);
+          },
+        );
+      } else {
+        reject();
+      }
     });
   }
 
-  // eslint-disable-next-line
-  async getAccount(): Promise<any> {
-    // eslint-disable-next-line
-    return new Promise<any>((resolve) => {
-      this.http
-        .get(APIService.API_ACCOUNT_ROUTE, { headers: { authorization: this.localSaveService.accessToken } })
-        .subscribe((account) => {
-          resolve(account);
-        });
+  async getAccount(): Promise<Account> {
+    return new Promise<Account>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http.get(APIService.API_ACCOUNT_ROUTE, { headers: { authorization: this.localSaveService.accessToken } }).subscribe(
+          (account: Account) => {
+            resolve(account);
+          },
+          (e) => {
+            reject(e);
+          },
+        );
+      } else {
+        reject();
+      }
     });
   }
 
