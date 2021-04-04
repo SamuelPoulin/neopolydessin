@@ -12,6 +12,7 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
+    val tabs: MutableLiveData<ArrayList<String>> = MutableLiveData(ArrayList())
     val username: String = chatRepository.getUsername()
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
@@ -23,6 +24,17 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             messagesLiveData.value!!.add(it)
             messagesLiveData.postValue(messagesLiveData.value)
         }
+        tabs.value!!.add("allo")
+        tabs.value!!.add("dsadsadsa")
+        tabs.value!!.add("dddddddddddd")
+        tabs.value!!.add("cccccccccccccccc")
+        tabs.value!!.add("vvvvvvvvvvvv")
+        tabs.value!!.add("aaaaaaaaaaa")
+        tabs.value!!.add("ggggggggggggggggg")
+        tabs.value!!.add("bbbbbbbbbbbbbb")
+        tabs.value!!.add("nnnnnnnnnnnnnnnn")
+
+        tabs.postValue(tabs.value!!)
     }
 
     fun sendMessage(){

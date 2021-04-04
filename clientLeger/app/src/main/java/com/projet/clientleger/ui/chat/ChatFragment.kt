@@ -17,7 +17,6 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.IMessage
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_chat.*
 import java.util.regex.Pattern
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FragmentChatBinding
@@ -61,6 +60,13 @@ class ChatFragment @Inject constructor() : Fragment() {
         vm.isGuesser.observe(requireActivity()){
             updateGuessingBtnVisibility(it)
         }
+
+        vm.tabs.observe(requireActivity()){ newTabs ->
+            binding?.let { mBinding ->
+                mBinding.rvTabs.adapter?.notifyDataSetChanged()
+                mBinding.rvTabs.scrollToPosition(newTabs.size - 1)
+            }
+        }
     }
 
     private fun resize(height: Int){
@@ -69,16 +75,20 @@ class ChatFragment @Inject constructor() : Fragment() {
         if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
             val params = binding!!.root.layoutParams
             params.height = height
-            binding!!.root.requestLayout()
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            }
 
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
-            binding!!.root.requestLayout()
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(0)
+            }
         }
     }
 
@@ -95,8 +105,10 @@ class ChatFragment @Inject constructor() : Fragment() {
         binding!!.sendButton.setOnClickListener { sendMessage() }
         binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
         vm.messagesLiveData.observe(requireActivity()){
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(it.size - 1)
+            binding?.let { mBinding ->
+                mBinding.rvMessages.adapter?.notifyDataSetChanged()
+                mBinding.rvMessages.scrollToPosition(it.size - 1)
+            }
         }
         binding!!.vm = vm
         return binding!!.root
@@ -111,6 +123,13 @@ class ChatFragment @Inject constructor() : Fragment() {
         mLinearLayoutManager.stackFromEnd = true
         rvMessages.layoutManager = LinearLayoutManager(activity)
         rvMessages.adapter = adapter
+
+        binding?.let {
+            val manager = LinearLayoutManager(activity)
+            manager.orientation = LinearLayoutManager.HORIZONTAL
+            it.rvTabs.layoutManager = manager
+            it.rvTabs.adapter = TabAdapter(vm.tabs.value!!)
+        }
     }
 
     private fun sendMessage() {
@@ -118,7 +137,7 @@ class ChatFragment @Inject constructor() : Fragment() {
 
         //TODO show loading message
 
-        chatBox.text?.clear()
+        binding?.chatBox?.text?.clear()
     }
     private fun isMessageValidFormat(message: String): Boolean {
         return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()

@@ -13,12 +13,42 @@
     android:background="@drawable/chat_background"
     android:orientation="vertical"
     tools:context=".ui.chat.ChatFragment">
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:background="@color/chat_header_black">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_chat"
+                android:layout_marginEnd="10dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chat"
+                android:textColor="@color/white"
+                android:textStyle="bold"/>
+        </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTabs"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@color/tabs_black"/>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMessages"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/chatSendBox"/>
+        android:layout_height="0dp"
+        android:layout_below="@id/header"/>
     <!--    <androidx.core.widget.NestedScrollView-->
     <!--        android:id="@+id/scrollbar"-->
     <!--        android:layout_width="fill_parent"-->
