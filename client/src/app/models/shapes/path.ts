@@ -75,6 +75,7 @@ export class Path extends BaseShape {
     this.svgNode.style.fill = Path.CSS_NONE;
 
     this.svgNode.style.stroke = this.primaryColor.rgbString;
+    // TODO default a 1 opacity if no Alpha term.
     this.svgNode.style.strokeOpacity = this.primaryColor.a.toString();
 
     this.svgNode.style.strokeLinecap = Path.PATH_STYLE;

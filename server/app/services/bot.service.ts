@@ -5,7 +5,7 @@ import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 
 export class BotService {
 
-  readonly DRAW_SPEED: number = 25;
+  readonly DRAW_SPEED: number = 10;
 
   private io: Server;
   private drawing: DrawingSequence;
