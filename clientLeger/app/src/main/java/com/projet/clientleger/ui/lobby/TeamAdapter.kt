@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -17,13 +18,13 @@ class TeamAdapter(private val players: List<PlayerInfo>,
                   private val userInfo: AccountInfo,
                   private val isOwnerIcon: Drawable,
                   private val isBotIcon: Drawable,
-                  private val teamColor: Drawable) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>() {
+                  private val teamColor: Drawable?) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>() {
     var userIsOwner = false
 
     class ViewHolderPlayer(view: View) : RecyclerView.ViewHolder(view) {
         val avatarView: ImageView = itemView.findViewById(R.id.avatar)
         val usernameTextView: TextView = itemView.findViewById(R.id.username)
-        val removePlayerBtn: Button = itemView.findViewById(R.id.removePlayerBtn)
+        val removePlayerBtn: ImageButton = itemView.findViewById(R.id.removePlayerBtn)
         val attributeIcon: ImageView = itemView.findViewById(R.id.attributeIcon)
     }
 

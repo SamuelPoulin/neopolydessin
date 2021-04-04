@@ -19,16 +19,16 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
             updateFriends(friendslistRepository.getFriends())
         }
         friendslistRepository.friendRequestReceived().subscribe{
-            updateFriends(it)
+            updateFriends(it.friends as ArrayList<Friend>)
         }
         friendslistRepository.updateFriendslist().subscribe{
-            updateFriends(it)
+            updateFriends(it.friends as ArrayList<Friend>)
         }
         friendslistRepository.friendRequestAccepted().subscribe{
-            updateFriends(it)
+            updateFriends(it.friends as ArrayList<Friend>)
         }
         friendslistRepository.friendRequestRefused().subscribe{
-            updateFriends(it)
+            updateFriends(it.friends as ArrayList<Friend>)
         }
     }
 
@@ -44,10 +44,10 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
         updateFriends(friendslistRepository.refuseFriend(idOfFriend))
     }
 
-    private fun updateFriends(friendslist: Friendslist){
+    private fun updateFriends(friendslist: ArrayList<Friend>){
 
         val friendSimplifiedList = ArrayList<FriendSimplified>()
-        for(friend in friendslist.friends){
+        for(friend in friendslist){
             if(friend.friendId != null)
                 friendSimplifiedList.add(FriendSimplified(friend))
         }
