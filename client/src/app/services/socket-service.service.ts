@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Manager, Socket } from 'socket.io-client';
+import { Observable, Subscription } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
 import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
@@ -18,7 +18,7 @@ import {
   TeamScore,
   TimeInfo,
 } from '../../../../common/communication/lobby';
-import { LocalSaveService } from './localsave.service';
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,21 +27,32 @@ export class SocketService {
   private static API_BASE_URL: string;
 
   socket: Socket;
-  manager: Manager;
 
-  constructor(private localSaveService: LocalSaveService) {
+  tokensChanged: Subscription;
+
+  constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
-    this.manager = new Manager(SocketService.API_BASE_URL, {
-      reconnectionDelayMax: 10000,
-      transports: ['websocket'],
-    });
+    this.initSocket();
 
-    this.socket = this.manager.socket('/', {
-      auth: {
-        token: this.localSaveService.accessToken,
-      },
-    });
+    this.tokensChanged = this.userService.tokensChanged.subscribe(() => this.initSocket());
+  }
+
+  initSocket() {
+    console.log(this.userService.accessToken);
+    console.log(localStorage.getItem('accessToken'));
+    console.log(this.userService.account);
+    if (this.socket) this.socket.disconnect();
+
+    if (this.userService.accessToken) {
+      console.log(SocketService.API_BASE_URL);
+      this.socket = io(SocketService.API_BASE_URL, {
+        reconnectionDelayMax: 10000,
+        transports: ['websocket'],
+        auth: { token: this.userService.accessToken },
+      });
+      console.log(this.socket);
+    }
   }
 
   receiveMessage(): Observable<ChatMessage> {
