@@ -157,8 +157,9 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
+                    expect(zIndex).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
                 });
@@ -202,7 +203,7 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
                         clients[0].emit(SocketLobby.ADD_BOT, 1);
                     });
@@ -212,8 +213,9 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketLobby.LOADING_OVER);
                 });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
+                    expect(zIndex).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
 
@@ -246,8 +248,9 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
                 })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
+                    expect(zIndex).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     testClient.socket.close();
                 })
@@ -280,8 +283,9 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketLobby.LOADING_OVER);
                 });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
+                    expect(zIndex).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                 })
 
@@ -289,9 +293,9 @@ describe('Socketio', () => {
             })
             .then((testClient) => {
                 testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, GameType.CLASSIC, Difficulty.EASY, (lobbies: LobbyInfo[]) => {
+                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.CLASSIC, difficulty: Difficulty.EASY }, (lobbies: LobbyInfo[]) => {
                         testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                    })
+                    });
 
                 });
 
@@ -299,8 +303,9 @@ describe('Socketio', () => {
                     testClient.socket.emit(SocketLobby.LOADING_OVER);
                 });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coord, brushInfo: BrushInfo) => {
+                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                     expect(id).to.be.equal(0);
+                    expect(zIndex).to.be.equal(0);
                     expect(coord).to.deep.equal({ x: 0, y: 0 });
                     testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
                     testClient.socket.close();

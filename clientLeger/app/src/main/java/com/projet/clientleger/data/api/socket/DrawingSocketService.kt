@@ -49,14 +49,14 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
     }
 
     fun receivePath(): Observable<PathData> {
-        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_PATH.endpoint){ (id, resCoords, resBrushInfo) ->
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_PATH.endpoint){ (id, zIndex, resCoords, resBrushInfo) ->
             val coords: ArrayList<Coordinate> = ArrayList()
             val JSONcoords = resCoords as JSONArray
             for(i in 0 until JSONcoords.length()){
                 coords.add(Json.decodeFromString(Coordinate.serializer(),JSONcoords.get(i).toString()))
             }
             val brushInfo = Json.decodeFromString(BrushInfo.serializer(), resBrushInfo.toString())
-            PathData(id as Int, brushInfo, coords)
+            PathData(id as Int, zIndex as Int, brushInfo, coords)
         }
     }
 
@@ -67,11 +67,12 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
     }
 
     fun receiveStartPath() : Observable<PathData> {
-        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ (id, coordReceive, info) ->
+        return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ (id, zIndex, coordReceive, info) ->
+            println("coordReceivfe: $coordReceive")
             val coord = ArrayList<Coordinate>()
             coord.add(Json.decodeFromString(Coordinate.serializer(),coordReceive.toString()))
             val brushInfo = Json.decodeFromString(BrushInfo.serializer(), info.toString())
-            PathData(id as Int,brushInfo, coord)
+            PathData(id as Int,zIndex as Int, brushInfo, coord)
         }
     }
 

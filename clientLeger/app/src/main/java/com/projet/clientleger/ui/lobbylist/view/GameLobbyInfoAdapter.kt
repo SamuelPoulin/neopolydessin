@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 const val MAX_GAME_SIZE:Int = 4
 
 class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
-                           private val joinLobbyCallback: (String) -> Unit): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
+                           private val joinLobbyCallback: (LobbyInfo) -> Unit): RecyclerView.Adapter<GameLobbyInfoAdapter.ViewHolder>() {
     class ViewHolder(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
         val lobbyNameTextView: TextView = itemView.findViewById(R.id.lobbyName)
         val gameModeTextView: TextView = itemView.findViewById(R.id.gameMode)
@@ -39,7 +39,7 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
         viewHolder.gameModeTextView.text = lobbyInfo.gameType.toFrenchString()
         viewHolder.difficultyTextView.text = lobbyInfo.difficulty.toFrenchString()
         viewHolder.gameCapacityTextView.text = "${lobbyInfo.nbPlayerInLobby} / ${lobbyInfo.maxSize}"
-        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyInfo.lobbyId) }
+        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyInfo) }
         disableFullGame(viewHolder,position)
     }
 

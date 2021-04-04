@@ -59,17 +59,21 @@
                         android:textStyle="bold"/>
 
                     <ImageView
+                        android:id="@+id/leftPeopleIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:scaleX="-1"
-                        android:src="@drawable/ic_people" />
+                        android:layout_marginStart="15dp"
+                        android:src="@drawable/ic_people"/>
 
                     <ImageView
+                        android:id="@+id/paintIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_paint" />
 
                     <ImageView
+                        android:id="@+id/rightPeopleIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_people" />
@@ -111,9 +115,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/team_1_base_name"
-                android:textColor="@color/black"
-                android:textSize="30sp"
-                android:textStyle="bold"
+                style="@style/teamLabel"
                 app:layout_constraintBottom_toTopOf="@id/teamContent1"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -136,9 +138,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/team_2_base_name"
-                android:textColor="@color/black"
-                android:textSize="30sp"
-                android:textStyle="bold"
+                style="@style/teamLabel"
                 app:layout_constraintBottom_toTopOf="@id/teamContent2"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"

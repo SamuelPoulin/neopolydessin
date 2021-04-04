@@ -103,6 +103,16 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/chatRoot"
             app:layout_constraintWidth_percent="0.3"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/team2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:overScrollMode="never"
+            app:layout_constraintTop_toBottomOf="@id/drawboardContainer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/chatRoot"
+            app:layout_constraintWidth_percent="0.3"/>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/chatRoot"

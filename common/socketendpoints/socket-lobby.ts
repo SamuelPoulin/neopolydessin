@@ -9,6 +9,8 @@ export enum SocketLobby {
 
     ADD_BOT = 'addBot',
     REMOVE_BOT = 'removeBot',
+    REMOVE_PLAYER = 'removePlayer',
+    PLAYER_REMOVED = 'playerRemoved',
 
     CHANGE_PRIVACY_SETTING = 'privacySetting',
     CHANGED_PRIVACY_SETTING = 'changedPrivacy',

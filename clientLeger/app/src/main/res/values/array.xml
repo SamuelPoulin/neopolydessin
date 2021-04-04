@@ -2,8 +2,8 @@
 <resources>
     <array name="gamemodes">
         <item>Classique</item>
-        <item>Solo</item>
-        <item>Coop</item>
+        <item>Sprint Solo</item>
+        <item>Sprint Co-op</item>
     </array>
     <array name="difficulty">
         <item>Facile</item>

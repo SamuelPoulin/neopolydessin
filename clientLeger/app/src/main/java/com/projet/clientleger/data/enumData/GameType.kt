@@ -9,17 +9,21 @@ enum class GameType(val value:String) {
 
     fun toFrenchString(): String{
         return when(this){
-            CLASSIC -> "Classique"
-            SPRINT_SOLO -> "Solo"
-            SPRINT_COOP -> "Coop"
+            CLASSIC -> FR_CLASSIC
+            SPRINT_SOLO -> FR_SOLO
+            SPRINT_COOP -> FR_COOP
         }
     }
 
     companion object{
+        const val FR_CLASSIC = "Classique"
+        const val FR_SOLO = "Sprint Solo"
+        const val FR_COOP = "Sprint Co-op"
+
         fun fromFrenchToEnum(gameType: String): GameType{
             return when (gameType){
-                "Solo" -> SPRINT_SOLO
-                "Coop" -> SPRINT_COOP
+                FR_SOLO -> SPRINT_SOLO
+                FR_COOP -> SPRINT_COOP
                 else -> CLASSIC
             }
         }
