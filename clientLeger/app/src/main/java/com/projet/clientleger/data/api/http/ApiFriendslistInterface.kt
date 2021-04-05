@@ -15,4 +15,7 @@ interface ApiFriendslistInterface {
 
     @POST("api/database/friends/")
     suspend fun sendFriendRequest(@Body request: FriendRequestModel): Response<Friendslist>
+
+    @GET("api/database/friends/history/")
+    suspend fun getFriendChatHistory()
 }

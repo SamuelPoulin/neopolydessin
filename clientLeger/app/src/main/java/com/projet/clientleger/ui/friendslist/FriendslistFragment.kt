@@ -60,6 +60,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
     }
 
     private fun openFriendChat(friendSimplified: FriendSimplified) {
+        println("friend: ${friendSimplified.friendId}")
         setFragmentResult("openFriendChat", bundleOf("friend" to friendSimplified))
     }
 

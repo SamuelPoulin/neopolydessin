@@ -23,6 +23,7 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     }
 
     override fun getItemViewType(position: Int): Int {
+        println("getType : ${mMessages[position]}")
         val type: MessageType
         when {
             mMessages[position] is MessageChat -> {
@@ -58,21 +59,21 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessagesAdapter.ViewHolderMessage {
         val inflater = LayoutInflater.from(parent.context)
         // Inflate the custom layout
-        val messageView: View = when (viewType) {
-            MessageType.USER.ordinal -> inflater.inflate(R.layout.item_user_message, parent, false)
-            MessageType.OTHER.ordinal -> inflater.inflate(R.layout.item_message, parent, false)
-            MessageType.GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_wrong_message, parent, false)
-            MessageType.GUESS_CLOSE.ordinal -> inflater.inflate(R.layout.item_guess_close_message, parent, false)
-            MessageType.GUESS_CORRECT.ordinal -> inflater.inflate(R.layout.item_guess_correct_message, parent, false)
-            MessageType.USER_GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_wrong_user_message, parent, false)
-            MessageType.USER_GUESS_CLOSE.ordinal -> inflater.inflate(R.layout.item_guess_close_user_message, parent, false)
-            MessageType.USER_GUESS_CORRECT.ordinal -> inflater.inflate(R.layout.item_guess_correct_user_message, parent, false)
-            else -> inflater.inflate(R.layout.item_system_message, parent, false)
+        val layoutId = when (viewType) {
+            MessageType.USER.ordinal -> R.layout.item_user_message
+            MessageType.OTHER.ordinal -> R.layout.item_message
+            MessageType.GUESS_WRONG.ordinal -> R.layout.item_guess_wrong_message
+            MessageType.GUESS_CLOSE.ordinal -> R.layout.item_guess_close_message
+            MessageType.GUESS_CORRECT.ordinal -> R.layout.item_guess_correct_message
+            MessageType.USER_GUESS_WRONG.ordinal -> R.layout.item_guess_wrong_user_message
+            MessageType.USER_GUESS_CLOSE.ordinal -> R.layout.item_guess_close_user_message
+            MessageType.USER_GUESS_CORRECT.ordinal -> R.layout.item_guess_correct_user_message
+            else -> R.layout.item_system_message
             // Return a new holder instance
         }
 
-
-        return MessagesAdapter.ViewHolderMessage(messageView)
+        println("createViewHolder: $viewType")
+        return ViewHolderMessage(inflater.inflate(layoutId, parent, false))
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolderMessage, position: Int) {
@@ -91,6 +92,7 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
             viewHolder.messageTimeTextView.text = time
         }
         viewHolder.messageTextView.text = mMessages[position].content
+        println("new message view: ${mMessages[position].content}")
     }
 
     override fun getItemCount(): Int {

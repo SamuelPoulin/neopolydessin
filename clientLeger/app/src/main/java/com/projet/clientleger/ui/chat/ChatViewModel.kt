@@ -7,15 +7,19 @@ import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
-    val tabs: MutableLiveData<ArrayList<String>> = MutableLiveData(ArrayList())
+    val convosData: HashMap<String, ArrayList<IMessage>> = HashMap()
+    val tabs: MutableLiveData<ArrayList<TabInfo>> = MutableLiveData(ArrayList())
     val username: String = chatRepository.getUsername()
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
+    private var currentConvoId: String = ""
+    val selectedTab: MutableLiveData<TabInfo> = MutableLiveData()
     init {
         receiveMessage()
         receivePlayerConnection()
@@ -24,17 +28,42 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             messagesLiveData.value!!.add(it)
             messagesLiveData.postValue(messagesLiveData.value)
         }
-        tabs.value!!.add("allo")
-        tabs.value!!.add("dsadsadsa")
-        tabs.value!!.add("dddddddddddd")
-        tabs.value!!.add("cccccccccccccccc")
-        tabs.value!!.add("vvvvvvvvvvvv")
-        tabs.value!!.add("aaaaaaaaaaa")
-        tabs.value!!.add("ggggggggggggggggg")
-        tabs.value!!.add("bbbbbbbbbbbbbb")
-        tabs.value!!.add("nnnnnnnnnnnnnnnn")
-
         tabs.postValue(tabs.value!!)
+    }
+
+    fun addNewTab(convoName: String, convoId: String, hasHistory: Boolean){
+        if(convosData[convoId] != null)
+            changeSelectedTab(TabInfo(convoName, convoId))
+        else{
+            val oldMessages = ArrayList<IMessage>()
+            oldMessages.addAll(messagesLiveData.value!!)
+            convosData[currentConvoId] = oldMessages
+            currentConvoId = convoId
+            val newMessages: ArrayList<IMessage> = ArrayList()
+            if(hasHistory){// TODO get history
+                newMessages.add(MessageChat(Random.nextInt().toString(), 0, "notMe"))
+            }
+            messagesLiveData.value!!.clear()
+            messagesLiveData.value!!.addAll(newMessages)
+            messagesLiveData.postValue(messagesLiveData.value!!)
+
+            val newTab = TabInfo(convoName, convoId)
+            tabs.value!!.add(newTab)
+            tabs.postValue(tabs.value!!)
+            selectedTab.postValue(newTab)
+
+            convosData[newTab.convoId] = messagesLiveData.value!!
+        }
+    }
+
+    fun changeSelectedTab(tabInfo: TabInfo){
+        convosData[tabInfo.convoId]?.let{
+            selectedTab.postValue(tabInfo)
+
+            messagesLiveData.value!!.clear()
+            messagesLiveData.value!!.addAll(it)
+            messagesLiveData.postValue(messagesLiveData.value!!)
+        }
     }
 
     fun sendMessage(){
