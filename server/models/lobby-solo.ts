@@ -17,7 +17,7 @@ import { levenshtein } from '../app/utils/levenshtein-distance';
 import { Lobby } from './lobby';
 
 const NB_GUESSES: number = 3;
-const SOLO_START_TIME: number = 60;
+const SOLO_START_TIME: number = 120;
 @injectable()
 export class LobbySolo extends Lobby {
 
