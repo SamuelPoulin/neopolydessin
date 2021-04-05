@@ -14,12 +14,13 @@ export class UserService {
   private intervalId: number;
 
   avatarBlob: Blob | undefined;
-  tokensChanged: EventEmitter<void>;
+  loggedOut: EventEmitter<void>;
+  loggedIn: EventEmitter<void>;
 
   constructor(private localSaveService: LocalSaveService, private apiService: APIService, private router: Router) {
     this.jwtService = new JwtHelperService();
-
-    this.tokensChanged = new EventEmitter<void>();
+    this.loggedOut = new EventEmitter<void>();
+    this.loggedIn = new EventEmitter<void>();
 
     this.intervalId = window.setInterval(() => {
       this.validateAuth().catch(() => {
@@ -59,7 +60,7 @@ export class UserService {
         .then((loginResponse) => {
           this.localSaveService.accessToken = loginResponse.accessToken;
           this.localSaveService.refreshToken = loginResponse.refreshToken;
-          this.tokensChanged.emit();
+          this.loggedIn.emit();
           resolve();
         })
         .catch(() => reject());
@@ -73,7 +74,7 @@ export class UserService {
         .then((loginResponse) => {
           this.localSaveService.accessToken = loginResponse.accessToken;
           this.localSaveService.refreshToken = loginResponse.refreshToken;
-          this.tokensChanged.emit();
+          this.loggedIn.emit();
           resolve();
         })
         .catch(() => reject());
@@ -84,7 +85,7 @@ export class UserService {
     this.avatarBlob = undefined;
     clearInterval(this.intervalId);
     this.localSaveService.clearData();
-    this.tokensChanged.emit();
+    this.loggedOut.emit();
     this.router.navigate(['login']);
   }
 

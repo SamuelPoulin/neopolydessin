@@ -20,39 +20,29 @@ import {
 } from '../../../../common/communication/lobby';
 import { UserService } from './user.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class SocketService {
   private static API_BASE_URL: string;
 
   socket: Socket;
-
-  tokensChanged: Subscription;
+  loggedOutSubscription: Subscription;
+  loggedInSubscription: Subscription;
 
   constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.initSocket();
 
-    this.tokensChanged = this.userService.tokensChanged.subscribe(() => this.initSocket());
+    this.loggedOutSubscription = this.userService.loggedOut.subscribe(() => this.socket.disconnect());
+    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSocket());
   }
 
   initSocket() {
-    console.log(this.userService.accessToken);
-    console.log(localStorage.getItem('accessToken'));
-    console.log(this.userService.account);
-    if (this.socket) this.socket.disconnect();
-
-    if (this.userService.accessToken) {
-      console.log(SocketService.API_BASE_URL);
-      this.socket = io(SocketService.API_BASE_URL, {
-        reconnectionDelayMax: 10000,
-        transports: ['websocket'],
-        auth: { token: this.userService.accessToken },
-      });
-      console.log(this.socket);
-    }
+    this.socket = io(SocketService.API_BASE_URL, {
+      reconnectionDelayMax: 10000,
+      transports: ['websocket'],
+      auth: { token: this.userService.accessToken },
+    });
   }
 
   receiveMessage(): Observable<ChatMessage> {
