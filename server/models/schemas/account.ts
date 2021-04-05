@@ -4,7 +4,7 @@ import { Friend, FriendsList, FriendStatus } from '../../../common/communication
 
 export interface Account extends Document {
   _id: ObjectId;
-  avatar: string | undefined;
+  avatar: string;
   firstName: string;
   lastName: string;
   username: string;

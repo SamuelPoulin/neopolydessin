@@ -93,7 +93,6 @@ export class DatabaseService {
   async getAccountById(id: string): Promise<Response<AccountInfo>> {
     return new Promise<Response<AccountInfo>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
-        .populate('avatar', 'avatar')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });

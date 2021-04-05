@@ -9,11 +9,11 @@ export interface AccountInfo {
     email: string;
     friends: Friend[];
     createdDate: number;
-    avatar: string | undefined;
+    avatar: string;
 }
 
 export interface PublicAccountInfo {
     accountId: string;
     username: string;
-    avatar: string | undefined;
+    avatar: string;
 }
