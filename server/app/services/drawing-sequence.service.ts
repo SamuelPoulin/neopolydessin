@@ -1,10 +1,11 @@
 import fs from 'fs';
 import fsPath from 'path';
 import { injectable } from 'inversify';
+import { Coord, DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
+import { VIEWPORT_DIMENSION } from '../../../common/communication/viewport';
+import { DrawMode } from '../../../common/communication/draw-mode';
 import { DEFAULT_BRUSH_INFO, Path } from '../../models/commands/path';
 import { PictureWord } from '../../models/schemas/picture-word-pair';
-import { Coord, DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
-import { DrawMode } from '../../../common/communication/draw-mode';
 
 const X1: number = 0;
 const Y1: number = 1;
@@ -78,6 +79,10 @@ export class DrawingSequenceService {
         paths.stack.sort((a, b) => this.getLeftMost(b.path) - this.getLeftMost(a.path));
         break;
     }
+
+    const xRatio = VIEWPORT_DIMENSION / paths.height;
+    const yRatio = VIEWPORT_DIMENSION / paths.width;
+    paths.stack = paths.stack.map((segment) => this.scaleSegment(segment, (xRatio > yRatio) ? yRatio : xRatio));
     return paths;
   }
 
@@ -186,7 +191,7 @@ export class DrawingSequenceService {
   }
 
   private getCenterMost(path: Coord[], center: Coord): number {
-    const closestToCenter = path.sort((a, b) => this.distanceBetween(a, center) - this.distanceBetween(b, center))[0];
+    const closestToCenter = path.slice(0).sort((a, b) => this.distanceBetween(a, center) - this.distanceBetween(b, center))[0];
     return this.distanceBetween(closestToCenter, center);
   }
 
@@ -209,6 +214,14 @@ export class DrawingSequenceService {
       zIndex: path.id,
       brushInfo: path.brushInfo ? path.brushInfo : DEFAULT_BRUSH_INFO,
       path: path.path
+    };
+  }
+
+  private scaleSegment(segment: Segment, factor: number): Segment {
+    return {
+      zIndex: segment.zIndex,
+      brushInfo: segment.brushInfo,
+      path: segment.path.map((coord) => { return { x: coord.x * factor, y: coord.y * factor }; })
     };
   }
 
