@@ -191,7 +191,7 @@ export class DrawingSequenceService {
   }
 
   private getCenterMost(path: Coord[], center: Coord): number {
-    const closestToCenter = path.sort((a, b) => this.distanceBetween(a, center) - this.distanceBetween(b, center))[0];
+    const closestToCenter = path.slice(0).sort((a, b) => this.distanceBetween(a, center) - this.distanceBetween(b, center))[0];
     return this.distanceBetween(closestToCenter, center);
   }
 
