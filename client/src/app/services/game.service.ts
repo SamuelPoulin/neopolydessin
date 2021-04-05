@@ -5,9 +5,7 @@ import { Player, PlayerRole, TeamScore } from '../../../../common/communication/
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class GameService {
   static readonly SECOND: number = 1000;
   canDraw: boolean = false;
@@ -32,7 +30,10 @@ export class GameService {
   timeRemaining: number;
   canGuess: boolean;
 
+  loggedInSubscription: Subscription;
+
   constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
+    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
     this.scores = [
       { teamNumber: 0, score: 0 },
