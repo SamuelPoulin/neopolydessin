@@ -47,21 +47,12 @@ class ChatFragment @Inject constructor() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         screenSize = displayMetrics.widthPixels
         baseWidth = screenSize/2
-        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
-            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
-            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
-        }
-        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
-            resize(bundle["height"] as Int)
-        }
-        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
-            val friend = (bundle["friend"] as FriendSimplified)
-            vm.addNewTab(friend.username, friend.friendId, true)
-        }
+
         vm.isGuessing.observe(requireActivity()){
             updateTheme(it)
         }
@@ -69,18 +60,8 @@ class ChatFragment @Inject constructor() : Fragment() {
             updateGuessingBtnVisibility(it)
         }
 
-        vm.tabs.observe(requireActivity()){ newTabs ->
-            binding?.let { mBinding ->
-                mBinding.rvTabs.adapter?.notifyDataSetChanged()
-                mBinding.rvTabs.scrollToPosition(0)
-            }
-        }
-
-        vm.selectedTab.observe(requireActivity()){ tab ->
-            binding?.let { mBinding ->
-                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
-            }
-        }
+        setupFragmentListeners()
+        setupTabsObservers()
     }
 
 
@@ -142,45 +123,26 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChatBinding.inflate(inflater, container, false)
+
         binding!!.sendButton.setOnClickListener { sendMessage() }
         binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
-        vm.messagesLiveData.observe(requireActivity()){
-            binding?.let { mBinding ->
-                if(it.isEmpty()) {
-                    mBinding.noMessagesView.visibility = View.VISIBLE
-                    mBinding.rvMessages.visibility = View.GONE
-                } else {
-                    mBinding.noMessagesView.visibility = View.GONE
-                    mBinding.rvMessages.visibility = View.VISIBLE
-                }
 
-                mBinding.rvMessages.adapter?.notifyDataSetChanged()
-                mBinding.rvMessages.scrollToPosition(it.size - 1)
-            }
-        }
         binding!!.vm = vm
         return binding!!.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
-        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
-        val mLinearLayoutManager = LinearLayoutManager(activity)
-        mLinearLayoutManager.stackFromEnd = true
-        rvMessages.layoutManager = mLinearLayoutManager
-        rvMessages.adapter = adapter
+        setupRvMessages()
+
+        setupMessagesObserver()
 
         binding?.let {
             it.iconsHeader.setOnClickListener {
@@ -192,6 +154,60 @@ class ChatFragment @Inject constructor() : Fragment() {
             it.rvTabs.layoutManager = manager
             it.rvTabs.adapter = TabAdapter(vm.tabs.value!!, vm::changeSelectedTab)
         }
+    }
+
+    private fun setupFragmentListeners(){
+        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
+            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
+            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
+        }
+        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
+            resize(bundle["height"] as Int)
+        }
+        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
+            val friend = (bundle["friend"] as FriendSimplified)
+            vm.addNewTab(friend.username, friend.friendId, true)
+        }
+    }
+
+    private fun setupTabsObservers(){
+        vm.tabs.observe(requireActivity()){ newTabs ->
+            binding?.let { mBinding ->
+                mBinding.rvTabs.adapter?.notifyDataSetChanged()
+                mBinding.rvTabs.scrollToPosition(0)
+            }
+        }
+
+        vm.selectedTab.observe(requireActivity()){ tab ->
+            binding?.let { mBinding ->
+                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
+            }
+        }
+    }
+
+    private fun setupMessagesObserver(){
+        vm.messagesLiveData.observe(requireActivity()){
+            binding?.let { mBinding ->
+                if(it.isEmpty()) {
+                    mBinding.noMessagesView.visibility = View.VISIBLE
+                    mBinding.rvMessages.visibility = View.GONE
+                } else {
+                    mBinding.noMessagesView.visibility = View.GONE
+                    mBinding.rvMessages.visibility = View.VISIBLE
+                }
+                println("observe messages update: ${it.size}")
+                mBinding.rvMessages.adapter?.notifyDataSetChanged()
+                mBinding.rvMessages.scrollToPosition(it.size - 1)
+            }
+        }
+    }
+
+    private fun setupRvMessages(){
+        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
+        val mLinearLayoutManager = LinearLayoutManager(activity)
+        mLinearLayoutManager.stackFromEnd = true
+        binding!!.rvMessages.layoutManager = mLinearLayoutManager
+        binding!!.rvMessages.adapter = adapter
     }
 
     private fun sendMessage() {
@@ -241,5 +257,10 @@ class ChatFragment @Inject constructor() : Fragment() {
         else{
             binding!!.guessingToggleBtn.visibility = View.INVISIBLE
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
     }
 }

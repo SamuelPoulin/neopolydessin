@@ -17,6 +17,9 @@ import java.util.*
 class MessagesAdapter(private val mMessages: List<IMessage>, private val username: String) : RecyclerView.Adapter<MessagesAdapter.ViewHolderMessage>() {
 
     class ViewHolderMessage(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
+        init {
+            println("viewHolder creation")
+        }
         val messageTextView: TextView = itemView.findViewById(R.id.message_content)
         val messageUsernameTextView: TextView = itemView.findViewById(R.id.message_username)
         val messageTimeTextView: TextView = itemView.findViewById(R.id.message_time)

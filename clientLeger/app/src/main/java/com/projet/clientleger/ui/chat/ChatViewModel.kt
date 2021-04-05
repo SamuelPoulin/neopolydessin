@@ -29,6 +29,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             messagesLiveData.postValue(messagesLiveData.value)
         }
         tabs.postValue(tabs.value!!)
+
+        messagesLiveData.value!!.add(MessageChat("content", 0, "guiboy"))
     }
 
     fun addNewTab(convoName: String, convoId: String, hasHistory: Boolean){
