@@ -29,8 +29,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             messagesLiveData.postValue(messagesLiveData.value)
         }
         tabs.postValue(tabs.value!!)
-
-        messagesLiveData.value!!.add(MessageChat("content", 0, "guiboy"))
     }
 
     fun addNewTab(convoName: String, convoId: String, hasHistory: Boolean){
@@ -53,13 +51,15 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             tabs.value!!.add(newTab)
             tabs.postValue(tabs.value!!)
             selectedTab.postValue(newTab)
-
-            convosData[newTab.convoId] = messagesLiveData.value!!
         }
     }
 
     fun changeSelectedTab(tabInfo: TabInfo){
         convosData[tabInfo.convoId]?.let{
+            val oldMessages = ArrayList<IMessage>()
+            oldMessages.addAll(messagesLiveData.value!!)
+            convosData[currentConvoId] = oldMessages
+
             selectedTab.postValue(tabInfo)
 
             messagesLiveData.value!!.clear()

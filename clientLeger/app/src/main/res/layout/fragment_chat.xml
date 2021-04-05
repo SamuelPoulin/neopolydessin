@@ -5,22 +5,28 @@
             name="vm"
             type="com.projet.clientleger.ui.chat.ChatViewModel" />
     </data>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/chat_background"
-    android:animateLayoutChanges="false"
     android:orientation="vertical"
     tools:context=".ui.chat.ChatFragment">
+    <View
+        android:id="@+id/headerSpaceBuffer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"/>
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:background="@color/chat_header_black">
+        android:background="@color/chat_header_black"
+        android:layout_weight="0">
+        <!--        android:layout_alignParentTop="true"-->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/iconsHeader"
             android:layout_width="match_parent"
@@ -66,13 +72,14 @@
 
     <FrameLayout
         android:id="@+id/messageContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/chatSendBox">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+<!--        android:layout_above="@id/chatSendBox"-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMessages"
             android:layout_width="match_parent"
-            android:layout_height="0dp"/>
+            android:layout_height="match_parent"/>
         <TextView
             android:id="@+id/noMessagesView"
             android:layout_width="wrap_content"
@@ -86,12 +93,13 @@
         android:id="@+id/chatSendBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:background="@drawable/chat_input_background"
-        android:layout_centerHorizontal="true"
         android:padding="10dp"
         android:layout_margin="20dp"
-        android:elevation="15dp">
+        android:elevation="15dp"
+        android:layout_weight="0">
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_centerHorizontal="true"-->
 
         <ImageButton
             android:id="@+id/guessingToggleBtn"
@@ -128,5 +136,5 @@
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</RelativeLayout>
+</LinearLayout>
 </layout>

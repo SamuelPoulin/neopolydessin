@@ -76,27 +76,19 @@ class ChatFragment @Inject constructor() : Fragment() {
             mBinding.messageContainer.visibility = newVisibility
             mBinding.chatSendBox.visibility = newVisibility
 
-            val layout = (mBinding.header.layoutParams as RelativeLayout.LayoutParams)
-            val ruleToRemove: Int
-            val ruleToAdd: Int
             when(newVisibility) {
                 View.VISIBLE ->{
-                    ruleToRemove = RelativeLayout.ALIGN_PARENT_BOTTOM
-                    ruleToAdd = RelativeLayout.ALIGN_PARENT_TOP
                     mBinding.root.setBackgroundResource(R.drawable.chat_background)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_hide_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.GONE
                 }
                 else -> {
-                    ruleToAdd = RelativeLayout.ALIGN_PARENT_BOTTOM
-                    ruleToRemove = RelativeLayout.ALIGN_PARENT_TOP
                     mBinding.root.setBackgroundColor(Color.TRANSPARENT)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.VISIBLE
 
                 }
             }
-            layout.removeRule(ruleToRemove)
-            layout.addRule(ruleToAdd)
-            mBinding.header.layoutParams = layout
         }
     }
 
@@ -203,11 +195,10 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun setupRvMessages(){
-        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
         binding!!.rvMessages.layoutManager = mLinearLayoutManager
-        binding!!.rvMessages.adapter = adapter
+        binding!!.rvMessages.adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
     }
 
     private fun sendMessage() {

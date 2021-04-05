@@ -17,9 +17,6 @@ import java.util.*
 class MessagesAdapter(private val mMessages: List<IMessage>, private val username: String) : RecyclerView.Adapter<MessagesAdapter.ViewHolderMessage>() {
 
     class ViewHolderMessage(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
-        init {
-            println("viewHolder creation")
-        }
         val messageTextView: TextView = itemView.findViewById(R.id.message_content)
         val messageUsernameTextView: TextView = itemView.findViewById(R.id.message_username)
         val messageTimeTextView: TextView = itemView.findViewById(R.id.message_time)
@@ -80,14 +77,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolderMessage, position: Int) {
-        // Get the data model based on position
-        //val message: MessageChat = mMessages[position]
-        // Set item views based on your views and data model
-        //val textView = viewHolder.messageTextView
-        //textView.text = message.content
-        //val button = viewHolder.messageButton
-        //button.text = if (contact.isOnline) "Message" else "Offline"
-        //button.isEnabled = contact.isOnline
         if (getItemViewType(position) == MessageType.OTHER.ordinal) {
             val msg = mMessages[position] as MessageChat
             val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(msg.timestamp))
