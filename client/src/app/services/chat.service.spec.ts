@@ -10,9 +10,11 @@ export const MockChatService = jasmine.createSpyObj('ChatService', {
   sendGuess: null,
   closeRoom: null,
   focusRoom: null,
-  messages: [],
   roomName: '',
+  resetGameMessages: null,
 });
+
+MockChatService.messages = [];
 
 describe('ChatService', () => {
   let service: ChatService;
