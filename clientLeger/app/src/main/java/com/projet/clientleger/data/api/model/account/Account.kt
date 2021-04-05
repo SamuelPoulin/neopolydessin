@@ -14,30 +14,27 @@ data class Account(val _id: String,
                    val lastName: String,
                    val username: String,
                    val email: String,
-                   val password: String,
-                   val createdDate: String,
                    val friends: ArrayList<FriendInfo>,
-                   val avatar: Avatar?,
-                   val logins: Logins,
-                   val __v: Int){
+                   val createdDate: Long,
+                   val avatar: String){
     fun toAccountInfo(avatarBitMap: Bitmap?): AccountInfo{
 
         return if(avatarBitMap == null){
-            AccountInfo(_id, firstName,
+            AccountInfo(_id,
+                    firstName,
                     lastName,
                     username,
                     email,
-                    DateFormatter.stringToDate(createdDate),
-                    logins = logins.toLoginList())
+                    Date(createdDate))
         }
         else{
-            AccountInfo(_id, firstName,
+            AccountInfo(_id,
+                    firstName,
                     lastName,
                     username,
                     email,
-                    DateFormatter.stringToDate(createdDate),
-                    avatarBitMap,
-                    logins.toLoginList())
+                    Date(createdDate),
+                    avatarBitMap)
         }
     }
 }

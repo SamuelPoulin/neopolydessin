@@ -10,11 +10,11 @@ import { DatabaseService, Response } from '../services/database.service';
 import { FriendsController } from './friends.controller';
 import { FriendsService } from '../services/friends.service';
 import { BAD_REQUEST, NOT_FOUND, OK } from 'http-status-codes';
-import { FriendsList, FriendStatus } from '../../models/schemas/account';
 import { Application } from '../app';
 import { expect } from 'chai';
 import express from 'express';
 import { Decision } from '../../../common/communication/friend-request';
+import { FriendsList, FriendStatus } from '../../../common/communication/friends';
 
 describe('friends controller', () => {
 
