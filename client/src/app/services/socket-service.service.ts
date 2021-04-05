@@ -3,12 +3,13 @@ import { Observable } from 'rxjs';
 import { Manager, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
-import { SocketMessages } from '../../../../common/socketendpoints/socket-messages';
-import { SocketDrawing } from '../../../../common/socketendpoints/socket-drawing';
-import { BrushInfo } from '../../../../common/communication/brush-info';
-import { ChatMessage, SystemMessage } from '../../../../common/communication/chat-message';
-import { SocketLobby } from '../../../../common/socketendpoints/socket-lobby';
+import { SocketMessages } from '@common/socketendpoints/socket-messages';
+import { SocketDrawing } from '@common/socketendpoints/socket-drawing';
+import { BrushInfo } from '@common/communication/brush-info';
+import { ChatMessage, SystemMessage } from '@common/communication/chat-message';
+import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import {
+  CurrentGameState,
   Difficulty,
   GameType,
   GuessMessage,
@@ -17,7 +18,7 @@ import {
   Player,
   TeamScore,
   TimeInfo,
-} from '../../../../common/communication/lobby';
+} from '@common/communication/lobby';
 import { LocalSaveService } from './localsave.service';
 
 @Injectable({
@@ -141,7 +142,7 @@ export class SocketService {
 
   async createLobby(name: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, 'classic', 'easy', false, (data: string) => resolve(data));
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, GameType.SPRINT_SOLO, Difficulty.EASY, false, (data: string) => resolve(data));
     });
   }
 
@@ -174,9 +175,17 @@ export class SocketService {
     this.socket.emit(SocketLobby.START_GAME_SERVER);
   }
 
+  receiveGameState(): Observable<CurrentGameState> {
+    return new Observable<CurrentGameState>((obs) => {
+      this.socket.on(SocketLobby.UPDATE_GAME_STATE, (gameState: CurrentGameState) => {
+        obs.next(gameState);
+      });
+    });
+  }
+
   receiveStartPath(): Observable<{ id: number; coord: Coordinate; brush: BrushInfo }> {
     return new Observable<{ id: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
-      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, coord: Coordinate, brush: BrushInfo) => {
+      this.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coordinate, brush: BrushInfo) => {
         obs.next({ id, coord, brush });
       });
     });

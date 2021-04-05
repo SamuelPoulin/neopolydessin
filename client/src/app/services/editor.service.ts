@@ -10,6 +10,7 @@ import { ToolType } from '@tools/tool-type.enum';
 import { Color } from '@utils/color/color';
 import { EditorUtils } from '@utils/color/editor-utils';
 import { Coordinate } from '@utils/math/coordinate';
+import { VIEWPORT_DIMENSION } from '@common/communication/viewport';
 import { Subscription } from 'rxjs';
 import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing-surface/drawing-surface.component';
 import { BaseShape } from 'src/app/models/shapes/base-shape';
@@ -22,7 +23,6 @@ import { SocketService } from './socket-service.service';
   providedIn: 'root',
 })
 export class EditorService {
-  private static readonly SERVER_RESOLUTION: number = 1000;
   readonly tools: Map<ToolType, Tool>;
   readonly shapes: BaseShape[];
   private shapesBuffer: BaseShape[];
@@ -41,11 +41,11 @@ export class EditorService {
   }
 
   get scalingToClient(): number {
-    return this.view ? this.view.width / EditorService.SERVER_RESOLUTION : 1;
+    return this.view ? this.view.width / VIEWPORT_DIMENSION : 1;
   }
 
   get scalingToServer(): number {
-    return this.view ? EditorService.SERVER_RESOLUTION / this.view.width : 1;
+    return this.view ? VIEWPORT_DIMENSION / this.view.width : 1;
   }
 
   constructor(public colorsService: ColorsService, public socketService: SocketService, public gameService: GameService) {
