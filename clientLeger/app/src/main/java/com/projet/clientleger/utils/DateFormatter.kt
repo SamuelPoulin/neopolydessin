@@ -10,6 +10,10 @@ object DateFormatter {
         return dateObject ?: Date(System.currentTimeMillis())
     }
 
+    fun longToDate(lDate: Long): Date{
+        return Date(lDate)
+    }
+
     fun now(): Date{
         return Date(System.currentTimeMillis())
     }

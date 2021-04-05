@@ -27,9 +27,9 @@ class FriendSimplified() : Parcelable{
             !friend.received && friend.status == "pending" -> FriendStatus.PENDING_SENT
             else -> FriendStatus.ACCEPTED
         }
-        if(friend.friendId!!.id == null)
-            friend.friendId!!.id = "0"
-        friendId = friend.friendId!!.id!!
+        if(friend.friendId!!._id == null)
+            friend.friendId!!._id = "0"
+        friendId = friend.friendId!!._id!!
         username = friend.friendId!!.username
         status = buffStatus
     }
