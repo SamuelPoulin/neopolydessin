@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -9,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import androidx.activity.viewModels
@@ -77,7 +79,6 @@ class GameActivity : AppCompatActivity() {
     private fun showQuitGameDialog(message:String, isMessageFromServer:Boolean){
         val dialogView = layoutInflater.inflate(R.layout.dialog_button_quit_game, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.title.text = message
@@ -111,8 +112,6 @@ class GameActivity : AppCompatActivity() {
         vm.playersLiveData.observe(this){
             if(players.isEmpty())
                 updatePlayersAvatar(it)
-            if(boardwipeNeeded(it))
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             players.clear()
             players.addAll(it)
             binding.playersRv.adapter?.notifyDataSetChanged()
@@ -133,8 +132,14 @@ class GameActivity : AppCompatActivity() {
             println("Nouveau timer recu : $it")
             setTimer(it)
         }
-        vm.receiveEndGameNotice().subscribe(){
-            showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+        vm.receiveEndGameNotice().subscribe{
+            lifecycleScope.launch {
+                showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+            }
+        }
+        vm.receiveEndGameNotice().subscribe{
+            println("MESSAGE DU BOARDWIPE RECU")
+            supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
         }
     }
 
@@ -178,15 +183,12 @@ class GameActivity : AppCompatActivity() {
                     binding.timer.text = "$minRemaining:$secRemaining"
                 }
             }
-            override fun onFinish(){
-
-            }
+            override fun onFinish(){}
         }
         timer?.start()
     }
 
     override fun onDestroy() {
-        println("Partie Détruite")
         vm.unsubscribe()
         super.onDestroy()
     }

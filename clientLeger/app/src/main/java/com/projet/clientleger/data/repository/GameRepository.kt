@@ -39,6 +39,9 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun receiveEndGameNotice():Observable<String>{
         return gameSocketService.receiveEndGameNotice()
     }
+    fun receiveBoardwipeNotice():Observable<String>{
+        return gameSocketService.receiveBoardwipeNotice()
+    }
     fun unsubscribe(){
         gameSocketService.unsubscribe()
     }

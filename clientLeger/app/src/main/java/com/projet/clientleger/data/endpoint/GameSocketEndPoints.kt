@@ -6,5 +6,6 @@ enum class GameSocketEndPoints(val value:String) {
     SET_TIME("setTime"),
     RECEIVE_ROLES("updateRoles"),
     PLAYER_READY("loadingOver"),
-    END_GAME_TRIGGER("endGame")
+    END_GAME_TRIGGER("endGame"),
+    RECEIVE_BOARDWIPE_NOTICE("updateGameState")
 }

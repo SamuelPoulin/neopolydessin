@@ -3,6 +3,7 @@ package com.projet.clientleger.data.api.socket
 import android.graphics.Bitmap
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.endpoint.DrawingSocketEndpoints
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
 import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.model.lobby.PlayerInfo
@@ -47,6 +48,9 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_ROLES.value)
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
+    }
+    fun receiveBoardwipeNotice():Observable<String>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){""}
     }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{

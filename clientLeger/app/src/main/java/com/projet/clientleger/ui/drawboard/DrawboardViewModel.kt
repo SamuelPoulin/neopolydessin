@@ -56,6 +56,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     fun boardwipe(){
+        println("BOARDWIPE ICI")
         paths.value!!.clear()
         paths.postValue(paths.value)
         drawingCommandsService.clear()
