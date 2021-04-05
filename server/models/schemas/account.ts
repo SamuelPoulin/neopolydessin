@@ -1,28 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model, model, Query, Schema } from 'mongoose';
+import { Friend, FriendsList, FriendStatus } from '../../../common/communication/friends';
 
-export enum FriendStatus {
-  PENDING = 'pending',
-  FRIEND = 'friend'
-}
-
-export interface FriendWithConnection extends Friend {
-  isOnline: boolean;
-}
-
-export interface Friend {
-  friendId: string | {
-    _id: string;
-    username: string;
-    avatar: string;
-  } | null;
-  status: FriendStatus;
-  received: boolean;
-}
-
-export interface FriendsList {
-  friends: FriendWithConnection[];
-}
 export interface Account extends Document {
   _id: ObjectId;
   avatar: string | undefined;
@@ -33,6 +12,7 @@ export interface Account extends Document {
   password: string;
   friends: [Friend];
   logins: string;
+  createdDate: number;
 }
 
 export interface UpdateOneQueryResult {
@@ -70,7 +50,7 @@ export const accountSchema = new Schema<Account, AccountModel>({
     required: true
   },
   createdDate: {
-    type: Date,
+    type: Number,
     default: Date.now
   },
   logins: {
@@ -78,6 +58,7 @@ export const accountSchema = new Schema<Account, AccountModel>({
   },
   friends: [
     {
+      _id: false,
       friendId: String,
       status: {
         type: String,
