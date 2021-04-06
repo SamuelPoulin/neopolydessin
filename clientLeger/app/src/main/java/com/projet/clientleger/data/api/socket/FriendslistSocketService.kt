@@ -18,8 +18,9 @@ class FriendslistSocketService @Inject constructor(val socketService: SocketServ
     }
 
     fun friendRequestReceived(): Observable<Friendslist>{
-        return socketService.receiveFromSocket(FriendslistSocketEndpoint.FRIEND_REQUEST_RECEIVED.endpoint) { res ->
-            Json.decodeFromString(Friendslist.serializer(), (res[0] as JSONObject)["documents"].toString())
+        return socketService.receiveFromSocket(FriendslistSocketEndpoint.FRIEND_REQUEST_RECEIVED.endpoint) { (friends) ->
+            println("friendRequest: $friends")
+            Json.decodeFromString(Friendslist.serializer(), (friends as JSONObject)["documents"].toString())
         }
     }
 
