@@ -121,8 +121,6 @@ export class DatabaseService {
     });
   }
 
-  // async addGameById(id: string, )
-
 
   async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
     return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
