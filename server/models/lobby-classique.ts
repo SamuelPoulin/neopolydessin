@@ -95,17 +95,20 @@ export class LobbyClassique extends Lobby {
               }
               this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
               this.startRoundTimer();
+              this.botService.playerCorrectGuess();
               break;
             }
             case 1:
             case 2: {
               guessStatus = GuessResponse.CLOSE;
               this.startReply();
+              this.botService.playerCloseGuess();
               break;
             }
             default: {
               guessStatus = GuessResponse.WRONG;
               this.startReply();
+              this.botService.playerIncorrectGuess();
               break;
             }
           }

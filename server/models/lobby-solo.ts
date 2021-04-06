@@ -38,7 +38,7 @@ export class LobbySolo extends Lobby {
     this.guessLeft = NB_GUESSES;
     this.timeLeftSeconds = SOLO_START_TIME;
     this.privateLobby = true;
-    this.players.push(this.getBotInfo(0));
+    this.players.push(this.botService.getBot(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {
@@ -73,17 +73,20 @@ export class LobbySolo extends Lobby {
             this.io.in(this.lobbyId)
               .emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.addTimeOnCorrectGuess();
+            this.botService.playerCorrectGuess();
             break;
 
           case 1:
           case 2:
             guessStatus = GuessResponse.CLOSE;
             this.guessLeft--;
+            this.botService.playerCloseGuess();
             break;
 
           default:
             guessStatus = GuessResponse.WRONG;
             this.guessLeft--;
+            this.botService.playerIncorrectGuess();
             break;
         }
         const guessMessage: GuessMessageCoop = {
