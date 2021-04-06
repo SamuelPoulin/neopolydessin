@@ -37,7 +37,7 @@ export const accountInfo3: Register = {
     passwordConfirm: 'abcabc',
 }
 
-describe.only('Socketio', () => {
+describe('Socketio', () => {
 
     let mongoMemoryServer: MongoMemoryServer;
     let databaseService: DatabaseService;
@@ -531,17 +531,17 @@ describe.only('Socketio', () => {
     });
 
     it('private message history should be deleted when deleting account', (done: Mocha.Done) => {
-        let accountId: string;
+        let accountId1: string;
         let accountId2: string;
         let accountId3: string;
         testDoneWhenAllClientsAreDisconnected(done);
         createClient(accountInfo)
             .then((testClient) => {
-                accountId = testClient.accountId;
+                accountId1 = testClient.accountId;
 
                 testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
                     if (notif === NotificationType.requestReceived) {
-                        friendService.acceptFriendship(accountId, accountId3);
+                        friendService.acceptFriendship(testClient.accountId, accountId3);
                     }
                 });
 
@@ -555,7 +555,7 @@ describe.only('Socketio', () => {
 
                 testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
                     if (notif === NotificationType.requestReceived) {
-                        friendService.acceptFriendship(accountId, accountId3);
+                        friendService.acceptFriendship(testClient.accountId, accountId3);
                     }
                 });
 
@@ -590,7 +590,7 @@ describe.only('Socketio', () => {
                                     timestamp: Date.now(),
                                 }
                             };
-                            testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId))
+                            testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId1))
                             testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId2));
                         }
                     }
@@ -600,27 +600,28 @@ describe.only('Socketio', () => {
                     if (msg.senderAccountId != accountId3) {
                         clients[1].close();
                         expect(msg.senderAccountId).to.be.equal(accountId2);
+
+                        friendService.getMessageHistory(accountId3, accountId2, 1, 5)
+                            .then((history) => {
+                                expect(history.documents.messages).to.be.lengthOf(2);
+                                return friendService.getMessageHistory(accountId1, accountId3, 1, 5);
+                            })
+                            .then((history) => {
+                                expect(history.documents.messages).to.be.lengthOf(1);
+                                return databaseService.deleteAccount(accountId3);
+                            })
+                            .then((result) => {
+                                return friendService.getMessageHistory(accountId3, accountId2, 1, 5)
+                            })
+                            .catch((err: ErrorMsg) => {
+                                expect(err.statusCode).to.be.equal(NOT_FOUND);
+                                return friendService.getMessageHistory(accountId3, accountId1, 1, 5)
+                            })
+                            .catch((err: ErrorMsg) => {
+                                expect(err.statusCode).to.be.equal(NOT_FOUND);
+                                testClient.socket.close();
+                            });
                     }
-                    friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
-                        .then((history) => {
-                            expect(history.documents.messages).to.be.lengthOf(2);
-                            return friendService.getMessageHistory(accountId, testClient.accountId, 1, 5);
-                        })
-                        .then((history) => {
-                            expect(history.documents.messages).to.be.lengthOf(1);
-                            return databaseService.deleteAccount(accountId3);
-                        })
-                        .then((result) => {
-                            return friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
-                        })
-                        .catch((err: ErrorMsg) => {
-                            expect(err.statusCode).to.be.equal(NOT_FOUND);
-                            return friendService.getMessageHistory(testClient.accountId, accountId, 1, 5)
-                        })
-                        .catch((err: ErrorMsg) => {
-                            expect(err.statusCode).to.be.equal(NOT_FOUND);
-                            testClient.socket.close();
-                        });
                 });
             });
     });
