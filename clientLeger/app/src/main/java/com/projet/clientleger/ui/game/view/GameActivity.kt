@@ -139,7 +139,9 @@ class GameActivity : AppCompatActivity() {
         }
         vm.receiveEndGameNotice().subscribe{
             println("MESSAGE DU BOARDWIPE RECU")
-            supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            lifecycleScope.launch {
+                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            }
         }
     }
 
