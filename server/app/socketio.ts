@@ -3,12 +3,12 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
 import { Message } from '../../common/communication/chat-message';
-import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { Friend, FriendsList } from '../../common/communication/friends';
+import { FriendsList } from '../../common/communication/friends';
 import { Lobby } from '../models/lobby';
-import { SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
+import { NotificationType, SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
 import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
@@ -16,6 +16,7 @@ import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
 import { Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
+import { AccountFriend } from '../../common/communication/account';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -24,16 +25,10 @@ import { Observable } from './utils/observable';
 import { PictureWordService } from './services/picture-word.service';
 import { AvatarService } from './services/avatar.service';
 
-export enum FriendsListEvent {
-  userConnected = 'userConn',
-  userDisconnected = 'userDisconn',
-  userUploadAvatar = 'uploadAvatar',
-  userUpdatedAccount = 'updateAcc',
-}
-
 @injectable()
 export class SocketIo {
 
+  static FRIEND_LIST_NOTIFICATION: Observable<{ accountId: string; friendId: string; type: NotificationType }> = new Observable();
   static GAME_SUCCESSFULLY_ENDED: Observable<string> = new Observable();
   static UPDATE_GAME_LIST: Observable<void> = new Observable();
   static CLIENT_CONNECTED: Observable<Socket> = new Observable();
@@ -86,14 +81,23 @@ export class SocketIo {
       SocketIo.UPDATE_GAME_LIST.notify();
     });
 
-    DatabaseService.UPDATE_FRIEND_LIST.subscribe(async (obj: { friends: Friend[]; event: FriendsListEvent }) => {
-      obj.friends.forEach((friend) => {
-        const socketId = this.socketIdService.GetSocketIdOfAccountId(friend.friendId as string);
+    DatabaseService.FRIEND_LIST_NOTIFICATION.subscribe(
+      (obj: { accountId: string; friends: AccountFriend[]; type: NotificationType }) => {
+        obj.friends.forEach((friend) => {
+          const socketId = this.socketIdService.GetSocketIdOfAccountId(friend.friendId);
+          if (socketId) {
+            this.io.to(socketId).emit(SocketFriendListNotifications.NOTIFICATION_RECEIVED, obj.type, obj.accountId);
+          }
+        });
+      });
+
+    SocketIo.FRIEND_LIST_NOTIFICATION.subscribe(
+      (obj: { accountId: string; friendId: string; type: NotificationType }) => {
+        const socketId = this.socketIdService.GetSocketIdOfAccountId(obj.friendId);
         if (socketId) {
-          this.io.to(socketId).emit(SocketFriendListNotifications.UPDATE);
+          this.io.to(socketId).emit(SocketFriendListNotifications.NOTIFICATION_RECEIVED, obj.type, obj.accountId);
         }
       });
-    });
 
     AvatarService.USER_UPDATED_AVATAR.subscribe(async (obj: { accountId: string; avatarId: string }) => {
       const account = await this.databaseService.getAccountById(obj.accountId);
@@ -164,21 +168,22 @@ export class SocketIo {
           }
         });
 
-      socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
+      socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessageTo) => {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
             const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
             if (senderAccountId) {
               const timestamp = Date.now();
-              const msgToSend: ReceivedPrivateMessage = {
+              const msgToSend: PrivateMessage = {
                 content: sentMsg.content,
                 senderAccountId,
                 timestamp,
               };
               messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, timestamp).then((result) => {
                 if (result.nModified === 0) throw new Error('couldn\'t update history');
-                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
+                socket.to(socketOfFriend).emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
+                socket.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
               }).catch((err) => {
                 console.log(err);
               });

@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -9,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import androidx.activity.viewModels
@@ -27,6 +29,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
+import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -47,7 +50,8 @@ class GameActivity : AppCompatActivity() {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     //private var currentKeyWord : String = ""
-    private val players: ArrayList<PlayerInfo> = ArrayList()
+    private val team1: ArrayList<PlayerInfo> = ArrayList()
+    private val team2:ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,8 +70,10 @@ class GameActivity : AppCompatActivity() {
         //clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
 
-        binding.playersRv.layoutManager = LinearLayoutManager(this)
-        binding.playersRv.adapter = PlayersAdapter(players)
+        binding.team1Rv.layoutManager = LinearLayoutManager(this)
+        binding.team1Rv.adapter = PlayersAdapter(team1)
+        binding.team2Rv.layoutManager = LinearLayoutManager(this)
+        binding.team2Rv.adapter = PlayersAdapter(team2)
 
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
@@ -77,21 +83,23 @@ class GameActivity : AppCompatActivity() {
     private fun showQuitGameDialog(message:String, isMessageFromServer:Boolean){
         val dialogView = layoutInflater.inflate(R.layout.dialog_button_quit_game, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.title.text = message
 
         dialog.quitBtn.setOnClickListener {
-            vm.unsubscribe()
             dialog.dismiss()
+            supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
             finish()
         }
 
         if(isMessageFromServer){
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
-                vm.unsubscribe()
+                dialog.dismiss()
+                supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+                supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
                 finish() }
         }
         else{
@@ -109,17 +117,23 @@ class GameActivity : AppCompatActivity() {
         }
 
         vm.playersLiveData.observe(this){
-            if(players.isEmpty())
+            if(team1.isEmpty())
                 updatePlayersAvatar(it)
-            if(boardwipeNeeded(it))
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
-            players.clear()
-            players.addAll(it)
-            binding.playersRv.adapter?.notifyDataSetChanged()
+            team1.clear()
+            team2.clear()
+            for(player in it){
+                when(player.teamNumber){
+                    0 -> {team1.add(player)
+                        binding.team1Rv.adapter?.notifyDataSetChanged()
+                    }
+                    1 ->{team2.add(player)
+                        binding.team2Rv.adapter?.notifyDataSetChanged()
+                    }
+                }
+            }
         }
 
         vm.activeWord.observe(this){
-            println("Nouveau Mot : $it")
             if(vm.currentRoleLiveData.value == PlayerRole.DRAWER){
                 binding.wordGuess.text = "Mot : ${vm.activeWord.value}"
                 binding.wordGuess.visibility = View.VISIBLE
@@ -130,25 +144,29 @@ class GameActivity : AppCompatActivity() {
             }
         }
         vm.activeTimer.observe(this){
-            println("Nouveau timer recu : $it")
             setTimer(it)
         }
-        vm.receiveEndGameNotice().subscribe(){
-            showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+        vm.teamScores.observe(this){
+            if(it.size > 0)
+                binding.team1Label.text = "Équipe 1 - ${it[0].score}"
+            if(it.size > 1)
+                binding.team2Label.text = "Équipe 1 - ${it[1].score}"
+        }
+        vm.receiveEndGameNotice().subscribe{
+            lifecycleScope.launch {
+                showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+            }
+        }
+        vm.reveiceBoardwipeNotice().subscribe{
+            lifecycleScope.launch {
+                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            }
         }
     }
 
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
         
     }
-
-    private fun boardwipeNeeded(newPlayersInfo: ArrayList<PlayerInfo>): Boolean{
-        val newDrawer = newPlayersInfo.find { it.playerRole == PlayerRole.DRAWER }
-        val oldDrawer = players.find { it.playerRole == PlayerRole.DRAWER }
-        return newDrawer != oldDrawer
-
-    }
-
     private fun getFrenchRole(role:String):String{
         return when (role){
             PlayerRole.DRAWER.value -> "Dessinateur"
@@ -178,15 +196,13 @@ class GameActivity : AppCompatActivity() {
                     binding.timer.text = "$minRemaining:$secRemaining"
                 }
             }
-            override fun onFinish(){
-
-            }
+            override fun onFinish(){}
         }
         timer?.start()
     }
 
     override fun onDestroy() {
-        println("Partie Détruite")
+        vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
     }

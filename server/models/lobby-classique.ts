@@ -116,6 +116,7 @@ export class LobbyClassique extends Lobby {
             senderUsername: guesser.username
           };
           this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
+          this.botService.playerGuess(guessStatus);
         }
       }
     });
@@ -127,17 +128,15 @@ export class LobbyClassique extends Lobby {
   }
 
   protected startRoundTimer() {
-    // DECIDE ROLES
-    // SEND ROLES TO CLIENT
-    // SEND WORD TO DRAWER
-    // START TIMER AND SEND TIME TO CLIENT
     this.setRoles();
     this.drawingCommands.resetDrawing();
-    this.pictureWordService.getRandomWord().then((wordStructure) => {
-      this.wordToGuess = wordStructure.word;
+    this.pictureWordService.getRandomWord().then((pictureWord) => {
+      this.wordToGuess = pictureWord.word;
       const drawer = this.drawers[this.drawingTeamNumber];
       if (instanceOfPlayer(drawer)) {
-        this.io.to((drawer as ServerPlayer).socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, wordStructure.word);
+        this.io.to((drawer as ServerPlayer).socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, pictureWord.word);
+      } else {
+        this.botService.draw(pictureWord.sequence);
       }
     });
 
@@ -164,6 +163,10 @@ export class LobbyClassique extends Lobby {
   private startReply() {
     // SEND REPLY PHASE TO CLIENTS WITH ROLES (GUESS-GUESS / PASSIVE-PASSIVE)
     // SEND TIME TO CLIENT (10 SECONDS)
+    if (this.drawers[this.drawingTeamNumber].isBot) {
+      this.botService.resetDrawing();
+    }
+
     clearInterval(this.clockTimeout);
     this.setReplyRoles();
 
@@ -198,39 +201,28 @@ export class LobbyClassique extends Lobby {
   }
 
   private setRoles() {
-    let newDrawer: Entity | undefined;
-    this.players.forEach((player) => {
-      if (player.teamNumber === this.drawingTeamNumber) {
-        if (player.isBot) {
-          player.playerRole = PlayerRole.DRAWER;
-          newDrawer = player;
-        } else {
-          player.playerRole = PlayerRole.PASSIVE;
-        }
+    const teams: Entity[][] = [];
+    teams[0] = this.players.filter((player) => player.teamNumber === 0);
+    teams[1] = this.players.filter((player) => player.teamNumber === 1);
+
+    teams[(this.drawingTeamNumber + 1) % 2].forEach((player) => player.playerRole = PlayerRole.PASSIVE);
+
+    const botInDrawingTeam = teams[this.drawingTeamNumber].findIndex((player) => player.isBot);
+    if (botInDrawingTeam > -1) {
+      teams[this.drawingTeamNumber][botInDrawingTeam].playerRole = PlayerRole.DRAWER;
+      this.drawers[this.drawingTeamNumber] = teams[this.drawingTeamNumber][botInDrawingTeam];
+      teams[this.drawingTeamNumber][(botInDrawingTeam + 1) % 2].playerRole = PlayerRole.GUESSER;
+    } else {
+      const previousDrawerIndex = teams[this.drawingTeamNumber].findIndex((player) => player === this.drawers[this.drawingTeamNumber]);
+      if (previousDrawerIndex > -1) {
+        teams[this.drawingTeamNumber][previousDrawerIndex].playerRole = PlayerRole.GUESSER;
+        teams[this.drawingTeamNumber][(previousDrawerIndex + 1) % 2].playerRole = PlayerRole.DRAWER;
+        this.drawers[this.drawingTeamNumber] = teams[this.drawingTeamNumber][(previousDrawerIndex + 1) % 2];
+      } else {
+        teams[this.drawingTeamNumber][0].playerRole = PlayerRole.DRAWER;
+        this.drawers[this.drawingTeamNumber] = teams[this.drawingTeamNumber][0];
+        teams[this.drawingTeamNumber][1].playerRole = PlayerRole.GUESSER;
       }
-    });
-    this.players.forEach((player) => {
-      if (!player.isBot && player.teamNumber === this.drawingTeamNumber) {
-        if (!newDrawer) {
-          const previousDrawer = this.drawers[this.drawingTeamNumber];
-          if (previousDrawer) {
-            if (previousDrawer.username !== player.username) {
-              player.playerRole = PlayerRole.DRAWER;
-              newDrawer = player;
-            } else {
-              player.playerRole = PlayerRole.GUESSER;
-            }
-          } else {
-            player.playerRole = PlayerRole.DRAWER;
-            newDrawer = player;
-          }
-        } else {
-          player.playerRole = PlayerRole.GUESSER;
-        }
-      }
-    });
-    if (newDrawer) {
-      this.drawers[this.drawingTeamNumber] = newDrawer;
     }
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
   }

@@ -8,11 +8,9 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
-import com.projet.clientleger.data.api.socket.LobbySocketService
-import com.projet.clientleger.data.api.socket.DrawingSocketService
-import com.projet.clientleger.data.api.socket.FriendslistSocketService
-import com.projet.clientleger.data.api.socket.SocketService
+import com.projet.clientleger.data.api.socket.*
 import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides
@@ -50,8 +48,8 @@ object ApiModule {
         okHttp: OkHttpClient,
         gson: Gson
     ): Retrofit = Retrofit.Builder()
-            //.baseUrl(BuildConfig.SERVER_URL)
-            .baseUrl("http://10.0.2.2:3205")
+            .baseUrl(BuildConfig.SERVER_URL)
+            //.baseUrl("http://10.0.2.2:3205")
             .client(okHttp)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
@@ -74,6 +72,10 @@ object ApiModule {
 
     @Provides
     @Singleton
+    fun provideAccountManagementSocketService(socketService: SocketService): AccountManagementSocketService = AccountManagementSocketService(socketService)
+
+    @Provides
+    @Singleton
     fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)
 
     @Provides
@@ -83,4 +85,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
+
+    @Provides
+    @Singleton
+    fun provideChatStorageService(): ChatStorageService = ChatStorageService()
 }

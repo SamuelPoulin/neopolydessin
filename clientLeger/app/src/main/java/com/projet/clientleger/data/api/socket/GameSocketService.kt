@@ -1,8 +1,10 @@
 package com.projet.clientleger.data.api.socket
 
 import android.graphics.Bitmap
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.endpoint.DrawingSocketEndpoints
 import com.projet.clientleger.data.endpoint.GameSocketEndPoints
 import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.model.lobby.PlayerInfo
@@ -47,6 +49,33 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_ROLES.value)
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
+        socketService.socket.off(GameSocketEndPoints.END_GAME_TRIGGER.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value)
+    }
+    fun receiveBoardwipeNotice():Observable<String>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){ (gamestatus) ->
+            gamestatus as String
+        }
+    }
+    fun onLeaveGame(){
+        socketService.socket.emit(GameSocketEndPoints.ON_LEAVE.value)
+    }
+    fun receiveTeamScores():Observable<ArrayList<TeamScore>>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value){ res ->
+            val receivedList = res[0] as JSONArray
+            val list = ArrayList<TeamScore>()
+            for(i in 0 until receivedList.length()){
+                val score = Json.decodeFromString(TeamScore.serializer(), receivedList.get(i).toString())
+                list.add(score)
+            }
+            list
+        }
+    }
+    fun receiveGameState():Observable<String>{
+        return socketService.receiveFromSocket(GameSocketEndPoints.UPDATE_GAME_STATE.value){ (state) ->
+            state as String
+        }
     }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{

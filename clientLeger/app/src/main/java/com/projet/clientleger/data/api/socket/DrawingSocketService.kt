@@ -68,7 +68,6 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
 
     fun receiveStartPath() : Observable<PathData> {
         return socketService.receiveFromSocket(DrawingSocketEndpoints.RECEIVE_START_PATH.endpoint){ (id, zIndex, coordReceive, info) ->
-            println("coordReceivfe: $coordReceive")
             val coord = ArrayList<Coordinate>()
             coord.add(Json.decodeFromString(Coordinate.serializer(),coordReceive.toString()))
             val brushInfo = Json.decodeFromString(BrushInfo.serializer(), info.toString())
