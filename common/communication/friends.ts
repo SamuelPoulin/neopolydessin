@@ -8,7 +8,7 @@ export interface FriendWithConnection extends Friend {
 }
 
 export interface Friend {
-    friendId: string | {
+    friendId: {
         _id: string;
         username: string;
         avatar: string;
