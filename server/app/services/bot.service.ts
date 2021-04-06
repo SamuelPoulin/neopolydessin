@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { BotPersonnality, BOT_NAMES } from '../utils/botinfo';
 import { ChatMessage } from '../../../common/communication/chat-message';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
-import { Entity, PlayerRole } from '../../../common/communication/lobby';
+import { Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
@@ -102,16 +102,18 @@ export class BotService {
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], this.currentCoordIndex + 1);
   }
 
-  playerCorrectGuess(): void {
-    this.personnality.onPlayerCorrectGuess();
-  }
-
-  playerCloseGuess(): void {
-    this.personnality.onPlayerCloseGuess();
-  }
-
-  playerIncorrectGuess(): void {
-    this.personnality.onPlayerIncorrectGuess();
+  playerGuess(guessStatus: GuessResponse): void {
+    switch (guessStatus) {
+      case GuessResponse.CORRECT:
+        this.playerCorrectGuess();
+        break;
+      case GuessResponse.CLOSE:
+        this.playerCloseGuess();
+        break;
+      case GuessResponse.WRONG:
+        this.playerIncorrectGuess();
+        break;
+    }
   }
 
   getBot(teamNumber: number): Entity {
@@ -124,6 +126,18 @@ export class BotService {
       isBot: true,
       isOwner: false
     };
+  }
+
+  private playerCorrectGuess(): void {
+    this.personnality.onPlayerCorrectGuess();
+  }
+
+  private playerCloseGuess(): void {
+    this.personnality.onPlayerCloseGuess();
+  }
+
+  private playerIncorrectGuess(): void {
+    this.personnality.onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {

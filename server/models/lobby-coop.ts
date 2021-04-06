@@ -73,20 +73,17 @@ export class LobbyCoop extends Lobby {
             this.io.in(this.lobbyId)
               .emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
             this.addTimeOnCorrectGuess();
-            this.botService.playerCorrectGuess();
             break;
 
           case 1:
           case 2:
             guessStatus = GuessResponse.CLOSE;
             this.guessLeft--;
-            this.botService.playerCloseGuess();
             break;
 
           default:
             guessStatus = GuessResponse.WRONG;
             this.guessLeft--;
-            this.botService.playerIncorrectGuess();
             break;
         }
         const guessMessage: GuessMessageCoop = {
@@ -98,6 +95,8 @@ export class LobbyCoop extends Lobby {
         };
         this.io.in(this.lobbyId)
           .emit(SocketLobby.SOLO_COOP_GUESS_BROADCAST, guessMessage);
+        this.botService.playerGuess(guessStatus);
+
 
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
           this.botService.resetDrawing();
