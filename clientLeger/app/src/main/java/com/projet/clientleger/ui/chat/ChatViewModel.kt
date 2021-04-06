@@ -41,13 +41,13 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }
         chatRepository.receiveGuessSoloCoop().subscribe{
-            println("guess received")
             receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }
         receivePrivateMessageSubscription()
     }
 
     fun fetchSavedData(){
+
         convosData.clear()
         convosData.putAll(chatStorageService.getConvos())
 
@@ -178,7 +178,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
                 addNewTab(tabInfo)
             }
         } else {
-            println("receive message : ${newMessage}-----------")
             messagesLiveData.value!!.add(newMessage)
             messagesLiveData.postValue(messagesLiveData.value)
         }

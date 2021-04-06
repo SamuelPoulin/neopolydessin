@@ -60,7 +60,6 @@ class ChatFragment @Inject constructor() : Fragment() {
     override fun onResume() {
         super.onResume()
         vm.fetchSavedData()
-        println("resumseFragment")
     }
 
     private fun toggleVisibilityChat(){
@@ -160,7 +159,6 @@ class ChatFragment @Inject constructor() : Fragment() {
         setFragmentResultListener("openGameChat"){requestKey, bundle ->
             val tabName = (bundle["tabName"] as String)
             vm.addNewTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
-            println("tab received--------------------")
         }
         setFragmentResultListener("closeGameChat"){requestKey, bundle ->
             val tabName = (bundle["tabName"] as String)

@@ -48,6 +48,7 @@ class LobbyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        vm.defaultImage = BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player)
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this
@@ -121,6 +122,7 @@ class LobbyActivity : AppCompatActivity() {
     private fun leaveLobby(){
         vm.leaveLobby()
         supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
         finish()
     }
 
@@ -169,8 +171,6 @@ class LobbyActivity : AppCompatActivity() {
                 }
 
             }
-
-            vm.defaultImage = BitmapConversion.vectorDrawableToBitmap(this, R.drawable.ic_missing_player)
         }
     }
 

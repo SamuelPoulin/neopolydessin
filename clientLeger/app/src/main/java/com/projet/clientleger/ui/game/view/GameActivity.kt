@@ -29,6 +29,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
+import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -88,6 +89,8 @@ class GameActivity : AppCompatActivity() {
 
         dialog.quitBtn.setOnClickListener {
             dialog.dismiss()
+            supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
             finish()
         }
 
@@ -95,6 +98,8 @@ class GameActivity : AppCompatActivity() {
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 dialog.dismiss()
+                supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+                supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
                 finish() }
         }
         else{

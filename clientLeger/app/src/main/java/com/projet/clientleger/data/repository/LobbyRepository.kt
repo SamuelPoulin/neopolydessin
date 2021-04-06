@@ -18,6 +18,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
                                           private val sessionManager: SessionManager,
                                           private val avatarStorageService: AvatarStorageService,
                                           private val chatStorageService: ChatStorageService) {
+    val accountInfo = sessionManager.getAccountInfo()
     fun receivePlayerJoin(): Observable<PlayerInfo> {
         return Observable.create { emitter ->
             lobbySocketService.receivePlayerJoin().subscribe{
@@ -55,7 +56,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
                 for(player in it){
-                    avatarStorageService.addPlayer(player)
+                    if(accountInfo.accountId == player.accountId)
+                        avatarStorageService.addPlayer(accountInfo)
+                    else
+                        avatarStorageService.addPlayer(player)
                     list.add(player.toPlayerInfo(avatarStorageService.getAvatar(player.accountId)))
                 }
                 emitter.onNext(list)
@@ -88,10 +92,6 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun kickPlayer(){
 
-    }
-
-    fun getAccountInfo(): AccountInfo{
-        return sessionManager.getAccountInfo()
     }
 
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {

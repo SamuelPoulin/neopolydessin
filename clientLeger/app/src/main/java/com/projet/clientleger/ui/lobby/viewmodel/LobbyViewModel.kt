@@ -40,7 +40,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     }
 
     fun getAccountInfo(): AccountInfo{
-        return lobbyRepository.getAccountInfo()
+        return lobbyRepository.accountInfo
     }
 
     fun createGame() {

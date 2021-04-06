@@ -21,8 +21,6 @@ class ChatStorageService @Inject constructor() {
 
     fun saveData(convosToSave: HashMap<String, ArrayList<IMessage>>, tabsToSave: ArrayList<TabInfo>, selectedTab: TabInfo) {
 
-        println("save data: ${tabsToSave.size}")
-
         convos.clear()
         convos.putAll(convosToSave)
 

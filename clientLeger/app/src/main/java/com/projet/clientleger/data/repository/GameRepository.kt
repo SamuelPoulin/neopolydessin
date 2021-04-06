@@ -9,11 +9,13 @@ import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.api.socket.GameSocketService
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
-open class GameRepository @Inject constructor(private val gameSocketService: GameSocketService, private val sessionManager: SessionManager) {
+open class GameRepository @Inject constructor(private val gameSocketService: GameSocketService,
+                                              private val sessionManager: SessionManager) {
     fun receiveTimer():Observable<Timer>{
         return  gameSocketService.receiveTimer()
     }
