@@ -5,6 +5,7 @@ import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.repository.LobbyRepository
 import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,5 +17,5 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object ViewModelLobbyModule {
     @Provides
     @ViewModelScoped
-    fun provideRepo(lobbySocketService: LobbySocketService, sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface, avatarStorageService: AvatarStorageService) = LobbyRepository(lobbySocketService, sessionManager, apiAvatarInterface, avatarStorageService)
+    fun provideRepo(lobbySocketService: LobbySocketService, sessionManager: SessionManager, avatarStorageService: AvatarStorageService, chatStorageService: ChatStorageService) = LobbyRepository(lobbySocketService, sessionManager, avatarStorageService, chatStorageService)
 }

@@ -15,6 +15,8 @@ import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.utils.BitmapConversion
 import kotlinx.coroutines.*
@@ -28,6 +30,7 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.reflect.KFunction
 import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KSuspendFunction1
+import kotlin.reflect.KSuspendFunction3
 
 
 private const val ACCESS_TOKEN = "accessToken"
@@ -40,7 +43,8 @@ open class SessionManager @Inject constructor(
         private val tokenInterceptor: TokenInterceptor,
         private val apiSessionManagerInterface: ApiSessionManagerInterface,
         private val apiAvatarInterface: ApiAvatarInterface,
-        private val socketService: SocketService
+        private val socketService: SocketService,
+        private val chatStorageService: ChatStorageService
 ) {
     companion object {
         const val ERROR_MESSAGE = "errorMessage"
@@ -59,7 +63,6 @@ open class SessionManager @Inject constructor(
             userPrefs = context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
         }
     }
-
 
     suspend fun saveCreds(accessToken: String, refreshToken: String) {
         userPrefs?.edit {
@@ -176,9 +179,18 @@ open class SessionManager @Inject constructor(
         return res
     }
 
+    open suspend fun <Q,R,S,T> request(qSend: Q, rSend: R, sSend: S, callback: KSuspendFunction3<Q, R, S, Response<T>>): Response<T>{
+        var res = callback.invoke(qSend, rSend, sSend)
+        if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
+            refreshAccessToken()
+            res = callback.invoke(qSend, rSend, sSend)
+        }
+        return res
+    }
 
     fun logout(errorMessage: String?) {
         tokenInterceptor.clearToken()
+        chatStorageService.clear()
         clearCred()
         socketService.disconnect()
         val intent = Intent(context, ConnexionActivity::class.java)

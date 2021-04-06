@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.enumData.MessageType
-import com.projet.clientleger.data.model.chat.IMessage
-import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.GuessMessageInfo
+import com.projet.clientleger.data.model.chat.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,8 +30,12 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
                     else -> MessageType.OTHER
                 }
             }
-            mMessages[position] is GuessMessageInfo -> {
-                val msg = mMessages[position] as GuessMessageInfo
+            mMessages[position] is GuessMessageInfo || mMessages[position] is GuessMessageSoloCoopInfo -> {
+                val msg: IGuessMessageInfo = if(mMessages[position] is GuessMessageInfo)
+                    mMessages[position] as GuessMessageInfo
+                else
+                    mMessages[position] as GuessMessageSoloCoopInfo
+
                 type = if (msg.senderUsername == username) {
                     when (msg.guessStatus) {
                         GuessStatus.WRONG -> MessageType.USER_GUESS_WRONG
@@ -58,32 +60,22 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessagesAdapter.ViewHolderMessage {
         val inflater = LayoutInflater.from(parent.context)
         // Inflate the custom layout
-        val messageView: View = when (viewType) {
-            MessageType.USER.ordinal -> inflater.inflate(R.layout.item_user_message, parent, false)
-            MessageType.OTHER.ordinal -> inflater.inflate(R.layout.item_message, parent, false)
-            MessageType.GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_wrong_message, parent, false)
-            MessageType.GUESS_CLOSE.ordinal -> inflater.inflate(R.layout.item_guess_close_message, parent, false)
-            MessageType.GUESS_CORRECT.ordinal -> inflater.inflate(R.layout.item_guess_correct_message, parent, false)
-            MessageType.USER_GUESS_WRONG.ordinal -> inflater.inflate(R.layout.item_guess_wrong_user_message, parent, false)
-            MessageType.USER_GUESS_CLOSE.ordinal -> inflater.inflate(R.layout.item_guess_close_user_message, parent, false)
-            MessageType.USER_GUESS_CORRECT.ordinal -> inflater.inflate(R.layout.item_guess_correct_user_message, parent, false)
-            else -> inflater.inflate(R.layout.item_system_message, parent, false)
+        val layoutId = when (viewType) {
+            MessageType.USER.ordinal -> R.layout.item_user_message
+            MessageType.OTHER.ordinal -> R.layout.item_message
+            MessageType.GUESS_WRONG.ordinal -> R.layout.item_guess_wrong_message
+            MessageType.GUESS_CLOSE.ordinal -> R.layout.item_guess_close_message
+            MessageType.GUESS_CORRECT.ordinal -> R.layout.item_guess_correct_message
+            MessageType.USER_GUESS_WRONG.ordinal -> R.layout.item_guess_wrong_user_message
+            MessageType.USER_GUESS_CLOSE.ordinal -> R.layout.item_guess_close_user_message
+            MessageType.USER_GUESS_CORRECT.ordinal -> R.layout.item_guess_correct_user_message
+            else -> R.layout.item_system_message
             // Return a new holder instance
         }
-
-
-        return MessagesAdapter.ViewHolderMessage(messageView)
+        return ViewHolderMessage(inflater.inflate(layoutId, parent, false))
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolderMessage, position: Int) {
-        // Get the data model based on position
-        //val message: MessageChat = mMessages[position]
-        // Set item views based on your views and data model
-        //val textView = viewHolder.messageTextView
-        //textView.text = message.content
-        //val button = viewHolder.messageButton
-        //button.text = if (contact.isOnline) "Message" else "Offline"
-        //button.isEnabled = contact.isOnline
         if (getItemViewType(position) == MessageType.OTHER.ordinal) {
             val msg = mMessages[position] as MessageChat
             val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(msg.timestamp))

@@ -6,19 +6,18 @@ import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import gameHistoryModel, { GameHistory, GameResult } from '../../models/schemas/game-history';
 import { Observable } from '../utils/observable';
-import { FriendsListEvent } from '../socketio';
 import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
-import { AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
+import { AccountFriend, AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
 import accountModel, { Account } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
-import { Friend } from '../../../common/communication/friends';
 import { DashBoardInfo, GameHistoryDashBoard } from '../../../common/communication/dashboard';
 import { GameType } from '../../../common/communication/lobby';
+import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
 
 export interface Response<T> {
   statusCode: number;
@@ -33,7 +32,7 @@ export interface ErrorMsg {
 @injectable()
 export class DatabaseService {
 
-  static UPDATE_FRIEND_LIST: Observable<{ accountId?: string; friends: Friend[]; event: FriendsListEvent }> = new Observable();
+  static FRIEND_LIST_NOTIFICATION: Observable<{ accountId: string; friends: AccountFriend[]; type: NotificationType }> = new Observable();
 
   static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
@@ -235,7 +234,7 @@ export class DatabaseService {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
-      let friends: Friend[];
+      let friends: AccountFriend[];
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
@@ -257,10 +256,7 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
-            friends,
-            event: FriendsListEvent.userConnected
-          });
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({ accountId: account.id, friends, type: NotificationType.userConnected });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -308,9 +304,10 @@ export class DatabaseService {
           return this.getAccountById(doc.accountId);
         })
         .then((account) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: account.documents._id,
             friends: account.documents.friends,
-            event: FriendsListEvent.userDisconnected,
+            type: NotificationType.userDisconnected,
           });
           resolve(true);
         })
@@ -341,9 +338,10 @@ export class DatabaseService {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: account.id,
             friends: account.friends,
-            event: FriendsListEvent.userUpdatedAccount
+            type: NotificationType.userUpdatedAccount
           });
           resolve({ statusCode: OK, documents: account });
         })
@@ -372,9 +370,10 @@ export class DatabaseService {
         })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: doc.id,
             friends: doc.friends,
-            event: FriendsListEvent.userUpdatedAccount
+            type: NotificationType.userUpdatedAccount
           });
           resolve({ statusCode: OK, documents: doc });
         })
