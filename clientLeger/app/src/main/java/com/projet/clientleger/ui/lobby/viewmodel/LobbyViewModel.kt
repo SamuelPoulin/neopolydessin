@@ -6,15 +6,22 @@ import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
+import com.projet.clientleger.ui.chat.ChatViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
+
+    companion object {
+        const val GAME_TAB_NAME = "Partie"
+    }
+
     val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
             arrayOf(MutableLiveData(ArrayList()),
             MutableLiveData(ArrayList()))
@@ -29,10 +36,11 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
         }
+        lobbyRepository.addGameTabToStorage(TabInfo(GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID, false))
     }
 
     fun getAccountInfo(): AccountInfo{
-        return lobbyRepository.getAccountInfo()
+        return lobbyRepository.accountInfo
     }
 
     fun createGame() {

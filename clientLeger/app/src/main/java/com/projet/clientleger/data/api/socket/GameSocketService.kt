@@ -63,7 +63,6 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
     }
     fun receiveTeamScores():Observable<ArrayList<TeamScore>>{
         return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value){ res ->
-            println("Scores d'équipes recus dans socket : ${res.toString()}")
             val receivedList = res[0] as JSONArray
             val list = ArrayList<TeamScore>()
             for(i in 0 until receivedList.length()){

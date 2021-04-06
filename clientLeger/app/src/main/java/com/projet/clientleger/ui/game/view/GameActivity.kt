@@ -29,6 +29,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
+import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -55,7 +56,6 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -89,6 +89,8 @@ class GameActivity : AppCompatActivity() {
 
         dialog.quitBtn.setOnClickListener {
             dialog.dismiss()
+            supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
             finish()
         }
 
@@ -96,6 +98,8 @@ class GameActivity : AppCompatActivity() {
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 dialog.dismiss()
+                supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+                supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
                 finish() }
         }
         else{
@@ -143,8 +147,10 @@ class GameActivity : AppCompatActivity() {
             setTimer(it)
         }
         vm.teamScores.observe(this){
-            binding.team1Label.text = "Équipe 1 - ${it[0].score}"
-            binding.team2Label.text = "Équipe 1 - ${it[1].score}"
+            if(it.size > 0)
+                binding.team1Label.text = "Équipe 1 - ${it[0].score}"
+            if(it.size > 1)
+                binding.team2Label.text = "Équipe 1 - ${it[1].score}"
         }
         vm.receiveEndGameNotice().subscribe{
             lifecycleScope.launch {

@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TeamScore(
         val teamNumber:Int,
-        val  score:Int,
+        val  score:Int?,
 ):Parcelable

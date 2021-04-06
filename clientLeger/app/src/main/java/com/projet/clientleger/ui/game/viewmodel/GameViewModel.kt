@@ -46,7 +46,6 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
         }
         gameRepository.receiveGameState().subscribe{
             if(it == "draw"){
-                println("WIPE THE BOARD HERE --------------------------------------")
                 fragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             }
         }

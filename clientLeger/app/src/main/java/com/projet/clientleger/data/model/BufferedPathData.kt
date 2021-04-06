@@ -12,7 +12,6 @@ data class BufferedPathData(val data: PathData, val graphicPath: Path = Path(), 
             fillExtendedCoords()
 
             fillGraphicPath()
-            println(extendedCoords)
         }
     }
 
