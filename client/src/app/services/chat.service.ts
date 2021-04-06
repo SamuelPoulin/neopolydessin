@@ -17,8 +17,11 @@ export class ChatService {
   playerDisconnectionSubscription: Subscription;
 
   rooms: ChatRoom[] = [];
+  friends: any[] = [];
+  friendRequests: any[] = [];
   currentRoomIndex: number = 0;
   guessing: boolean = false;
+  friendslistOpened: boolean = false;
 
   constructor(private socketService: SocketService, private gameService: GameService) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, type: ChatRoomType.GAME, messages: [] });

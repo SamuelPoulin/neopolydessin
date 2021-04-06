@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
   background-color: #f8f8f8;
+  overflow: hidden;
 }
 
 #chat-messages {
@@ -117,4 +118,23 @@ system-message {
   height: 75px;
 
   transition: background-color 0.5s;
+}
+
+#chat-friendslist-toggler-container {
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+#chat-friendslist-toggler {
+  height: 50%;
+  margin-right: 15px;
+  padding: 0px 5px;
+  color: white;
+
+  transition: background-color 0.25s;
+}
+
+#chat-friendslist-anchor {
+  position: relative;
 }
