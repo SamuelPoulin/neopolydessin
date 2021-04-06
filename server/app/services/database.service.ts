@@ -114,6 +114,21 @@ export class DatabaseService {
     });
   }
 
+  async getDashboardById(id: string): Promise<Response<Account>> {
+    return new Promise<Response<Account>>((resolve, reject) => {
+      accountModel.findById(new ObjectId(id))
+        .populate('logins', 'logins')
+        .populate('avatar', 'avatar')
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: doc });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
   async getPublicAccount(id: string): Promise<Response<AccountInfo>> {
     return new Promise<Response<AccountInfo>>((resolve, reject) => {
       console.log(id);

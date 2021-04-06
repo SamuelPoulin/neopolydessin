@@ -93,6 +93,18 @@ export class DatabaseController {
           });
       });
 
+    this.router.get('/dashboard',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.getAccountById(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
     this.router.get('/account/:id',
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
