@@ -5,7 +5,7 @@ import accountModel, { Account, UpdateOneQueryResult } from '../../models/schema
 import Types from '../types';
 import { SocketIo } from '../socketio';
 import { NotificationType, SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
-import messagesHistoryModel, { MessageHistory } from '../../models/schemas/messages-history';
+import messagesHistoryModel, { MessageHistory, Messages } from '../../models/schemas/messages-history';
 import { FriendsList } from '../../../common/communication/friends';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
@@ -20,9 +20,9 @@ export class FriendsService {
     return new Promise<Response<MessageHistory>>((resolve, reject) => {
       messagesHistoryModel
         .findHistory(id, otherId, page, limit)
-        .then((messages: MessageHistory | null) => {
+        .then((messages: Messages | null) => {
           if (!messages) throw new Error(NOT_FOUND.toString());
-          resolve({ statusCode: OK, documents: messages });
+          resolve({ statusCode: OK, documents: { messages: messages.messages } });
         })
         .catch((err) => {
           reject(DatabaseService.rejectErrorMessage(err));
