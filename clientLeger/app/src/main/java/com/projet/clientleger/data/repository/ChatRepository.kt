@@ -53,4 +53,8 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
     suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): Response<ArrayList<MessageChat>> {
         return sessionManager.request(pageNumberWanted, friendId, messagePerPage,apiFriendslistInterface::getFriendChatHistory)
     }
+
+    fun clearSocketSubscriptions(){
+        chatSocketService.clearSubscriptions()
+    }
 }

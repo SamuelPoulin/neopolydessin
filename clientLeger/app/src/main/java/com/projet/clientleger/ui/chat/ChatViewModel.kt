@@ -6,18 +6,20 @@ import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.internal.artificialFrame
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
+class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val chatStorageService: ChatStorageService):ViewModel() {
     companion object {
         const val NB_MESSAGES_PER_PAGE = 20
         const val GAME_TAB_ID = "GAME"
@@ -36,10 +38,25 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         receivePlayerConnection()
         receivePlayerDisconnect()
         chatRepository.receiveGuessClassic().subscribe{
-            messagesLiveData.value!!.add(it)
-            messagesLiveData.postValue(messagesLiveData.value)
+            println("guess received")
+            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }
         receivePrivateMessageSubscription()
+    }
+
+    fun fetchSavedData(){
+        convosData.clear()
+        convosData.putAll(chatStorageService.getConvos())
+
+        tabs.value!!.clear()
+        tabs.value!!.addAll(chatStorageService.getTabs())
+        tabs.value?.let {
+            if(it.isNotEmpty())
+                changeSelectedTab(tabs.value!!.first())
+            tabs.postValue(it)
+        }
+
+        currentTab.postValue(chatStorageService.selectedTab)
     }
 
     fun addNewTab(tabInfo: TabInfo){
@@ -54,7 +71,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             if(tabInfo.isDM){
                 CoroutineScope(Job() + Dispatchers.Main).launch {
                     val res = chatRepository.getChatFriendHistory(1, tabInfo.convoId, NB_MESSAGES_PER_PAGE)
-                    println("History received with code: ${res.code()}")
                     if(res.code() == HttpsURLConnection.HTTP_OK){
                         newMessages.addAll(res.body()!!)
                     }
@@ -67,6 +83,19 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             tabs.value!!.add(tabInfo)
             tabs.postValue(tabs.value!!)
             currentTab.postValue(tabInfo)
+        }
+    }
+
+    fun removeTab(tabInfo: TabInfo){
+        val newSelectedTab = tabs.value!!.find { it.convoId != tabInfo.convoId }
+        if(newSelectedTab != null){
+
+        } else{
+            messagesLiveData.value!!.clear()
+            messagesLiveData.postValue(messagesLiveData.value!!)
+            tabs.value!!.clear()
+            tabs.postValue(tabs.value!!)
+            currentTab.postValue(TabInfo())
         }
     }
 
@@ -106,7 +135,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     private fun receivePrivateMessageSubscription(){
         chatRepository.receivePrivateMessage().subscribe{ msg ->
-            println("private message received: ${msg.senderAccountId}")
             val convoId: String =
                     if(msg.receiverAccountId != accountInfo.accountId)
                         msg.receiverAccountId
@@ -147,6 +175,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
                 addNewTab(tabInfo)
             }
         } else {
+            println("receive message : ${newMessage}-----------")
             messagesLiveData.value!!.add(newMessage)
             messagesLiveData.postValue(messagesLiveData.value)
         }
@@ -154,5 +183,13 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     private fun notifyUpdateTab(convoId: String){
         // TODO
+    }
+
+    fun saveData(){
+        chatStorageService.saveData(convosData, tabs.value!!, currentTab.value!!)
+    }
+
+    fun clear(){
+        chatRepository.clearSocketSubscriptions()
     }
 }

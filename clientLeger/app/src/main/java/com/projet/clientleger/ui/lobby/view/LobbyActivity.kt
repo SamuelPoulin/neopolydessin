@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +20,7 @@ import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.game.view.GameActivity
+import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import com.projet.clientleger.ui.lobby.TeamAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.utils.BitmapConversion
@@ -49,8 +51,6 @@ class LobbyActivity : AppCompatActivity() {
         binding = ActivityLobbyBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this
-
-        binding.chatRoot.visibility = View.GONE
 
         fetchIntentData()
 
@@ -120,6 +120,7 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun leaveLobby(){
         vm.leaveLobby()
+        supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
         finish()
     }
 
@@ -192,6 +193,7 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun goToGame(){
         vm.unsubscribe()
+        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
         val intent = Intent(this, GameActivity::class.java)
         nextActivityIntent = intent
         startActivity(intent)

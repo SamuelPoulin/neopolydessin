@@ -10,6 +10,7 @@ import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.socket.*
 import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.data.service.DrawingCommandsService
 import dagger.Module
 import dagger.Provides
@@ -84,4 +85,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
+
+    @Provides
+    @Singleton
+    fun provideChatStorageService(): ChatStorageService = ChatStorageService()
 }

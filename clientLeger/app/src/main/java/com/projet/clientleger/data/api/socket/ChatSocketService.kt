@@ -65,4 +65,9 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         }
     }
 
+    fun clearSubscriptions(){
+        for(endpoint in ChatSocketEndpoints.values())
+            socketService.socket.off(endpoint.value)
+    }
+
 }

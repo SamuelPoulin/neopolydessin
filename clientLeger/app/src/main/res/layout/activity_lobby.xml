@@ -166,6 +166,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.4"
             app:layout_constraintHeight_percent="0.5"/>
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/friendslistContainer"
             android:layout_width="0dp"

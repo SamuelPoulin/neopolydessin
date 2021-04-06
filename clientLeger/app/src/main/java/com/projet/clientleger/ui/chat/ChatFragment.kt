@@ -1,34 +1,25 @@
 package com.projet.clientleger.ui.chat
 
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.Html
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RelativeLayout
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.FriendSimplified
-import com.projet.clientleger.data.model.chat.IMessage
 import com.projet.clientleger.data.model.chat.TabInfo
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FragmentChatBinding
-import kotlin.random.Random
 
 private const val MESSAGE_CONTENT_ERROR: String =
     "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
@@ -66,6 +57,11 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        vm.fetchSavedData()
+        println("resumseFragment")
+    }
 
     private fun toggleVisibilityChat(){
         binding?.let { mBinding ->
@@ -160,6 +156,20 @@ class ChatFragment @Inject constructor() : Fragment() {
             val friend = (bundle["friend"] as FriendSimplified)
             vm.addNewTab(TabInfo(friend.username, friend.friendId, true))
         }
+
+        setFragmentResultListener("openGameChat"){requestKey, bundle ->
+            val tabName = (bundle["tabName"] as String)
+            vm.addNewTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+            println("tab received--------------------")
+        }
+        setFragmentResultListener("closeGameChat"){requestKey, bundle ->
+            val tabName = (bundle["tabName"] as String)
+            vm.removeTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+        }
+        setFragmentResultListener("activityChange"){requestKey, bundle ->
+            vm.saveData()
+            vm.clear()
+        }
     }
 
     private fun setupTabsObservers(){
@@ -250,7 +260,7 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         binding = null
+        super.onDestroy()
     }
 }

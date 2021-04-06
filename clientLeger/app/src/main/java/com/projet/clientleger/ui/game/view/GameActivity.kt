@@ -55,7 +55,6 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -15,6 +15,8 @@ import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.utils.BitmapConversion
 import kotlinx.coroutines.*
@@ -41,7 +43,8 @@ open class SessionManager @Inject constructor(
         private val tokenInterceptor: TokenInterceptor,
         private val apiSessionManagerInterface: ApiSessionManagerInterface,
         private val apiAvatarInterface: ApiAvatarInterface,
-        private val socketService: SocketService
+        private val socketService: SocketService,
+        private val chatStorageService: ChatStorageService
 ) {
     companion object {
         const val ERROR_MESSAGE = "errorMessage"
@@ -187,6 +190,7 @@ open class SessionManager @Inject constructor(
 
     fun logout(errorMessage: String?) {
         tokenInterceptor.clearToken()
+        chatStorageService.clear()
         clearCred()
         socketService.disconnect()
         val intent = Intent(context, ConnexionActivity::class.java)
