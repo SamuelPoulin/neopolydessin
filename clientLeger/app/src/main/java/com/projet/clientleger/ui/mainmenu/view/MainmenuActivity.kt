@@ -17,6 +17,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
+import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
@@ -50,6 +51,10 @@ class MainmenuActivity : AppCompatActivity() {
                 R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
             }
             true
+        }
+        binding.accountBtn.setOnClickListener {
+            val intent = Intent(this, AccountManagementActivity::class.java)
+            startActivity(intent)
         }
 
         supportFragmentManager.commit{

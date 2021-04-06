@@ -3,6 +3,7 @@ package com.projet.clientleger.data.repository
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.api.socket.GameSocketService
@@ -39,7 +40,19 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun receiveEndGameNotice():Observable<String>{
         return gameSocketService.receiveEndGameNotice()
     }
+    fun receiveBoardwipeNotice():Observable<String>{
+        return gameSocketService.receiveBoardwipeNotice()
+    }
     fun unsubscribe(){
         gameSocketService.unsubscribe()
+    }
+    fun receiveTeamScores():Observable<ArrayList<TeamScore>>{
+        return gameSocketService.receiveTeamScores()
+    }
+    fun receiveGameState():Observable<String> {
+        return gameSocketService.receiveGameState()
+    }
+    fun onLeaveGame() {
+        gameSocketService.onLeaveGame()
     }
 }

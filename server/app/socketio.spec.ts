@@ -416,13 +416,15 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    expect(msg.content).to.equal('bonjourhi');
-                    expect(msg.senderAccountId).to.equal(accountId2);
-                    const otherMsg: PrivateMessage = {
-                        receiverAccountId: accountId2,
-                        content: 'eyo what up',
+                    if (msg.senderAccountId != accountId) {
+                        expect(msg.content).to.equal('bonjourhi');
+                        expect(msg.senderAccountId).to.equal(accountId2);
+                        const otherMsg: PrivateMessage = {
+                            receiverAccountId: accountId2,
+                            content: 'eyo what up',
+                        }
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                     }
-                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                 })
                 return createClient(otherAccountInfo);
             })
@@ -434,15 +436,17 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    expect(msg.content).to.equal('eyo what up');
-                    expect(msg.senderAccountId).to.equal(accountId);
-                    friendService.getMessageHistory(accountId, accountId2, 1, 5)
-                        .then((history) => {
-                            expect(history.statusCode).to.equal(OK);
-                            expect(history.documents.messages).to.be.lengthOf(2);
-                            clients[0].close();
-                            clients[1].close();
-                        })
+                    if (msg.senderAccountId != accountId2) {
+                        expect(msg.content).to.equal('eyo what up');
+                        expect(msg.senderAccountId).to.equal(accountId);
+                        friendService.getMessageHistory(accountId, accountId2, 1, 5)
+                            .then((history) => {
+                                expect(history.statusCode).to.equal(OK);
+                                expect(history.documents.messages).to.be.lengthOf(2);
+                                clients[0].close();
+                                clients[1].close();
+                            })
+                    }
                 });
 
                 testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
@@ -561,8 +565,10 @@ describe('Socketio', () => {
                 });
 
                 testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    clients[1].close();
-                    expect(msg.senderAccountId).to.be.equal(accountId2);
+                    if (msg.senderAccountId != accountId3) {
+                        clients[1].close();
+                        expect(msg.senderAccountId).to.be.equal(accountId2);
+                    }
                     friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
                         .then((history) => {
                             expect(history.documents.messages).to.be.lengthOf(2);

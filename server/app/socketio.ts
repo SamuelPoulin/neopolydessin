@@ -178,7 +178,8 @@ export class SocketIo {
               };
               messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, timestamp).then((result) => {
                 if (result.nModified === 0) throw new Error('couldn\'t update history');
-                socket.to(socketOfFriend).broadcast.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
+                socket.to(socketOfFriend).emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
+                socket.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
               }).catch((err) => {
                 console.log(err);
               });
