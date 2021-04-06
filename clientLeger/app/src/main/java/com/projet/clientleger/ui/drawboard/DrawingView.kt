@@ -32,7 +32,8 @@ class DrawingView : View {
     }
 
     fun updatePaths(newList: ArrayList<BufferedPathData>){
-        paths = newList
+        paths.clear()
+        paths.addAll(newList)
         invalidate()
     }
 

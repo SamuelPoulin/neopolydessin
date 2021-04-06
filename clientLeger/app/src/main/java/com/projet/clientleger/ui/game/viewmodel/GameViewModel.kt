@@ -1,8 +1,10 @@
 package com.projet.clientleger.ui.game.viewmodel
 
+import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.PlayerRole
@@ -12,7 +14,8 @@ import com.projet.clientleger.data.repository.GameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
-
+const val FIRST_TEAM = 0
+const val SECOND_TEAM = 0
 @HiltViewModel
 class GameViewModel @Inject constructor(private val gameRepository: GameRepository): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
@@ -20,6 +23,9 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
     val activeWord: MutableLiveData<String> = MutableLiveData()
     val activeTimer: MutableLiveData<Long> = MutableLiveData()
+    val teamScores:MutableLiveData<ArrayList<TeamScore>> = MutableLiveData()
+    //val firstTeamScores:MutableLiveData<Int> = MutableLiveData()
+    //val secondTeamScore:MutableLiveData<Int> = MutableLiveData()
     val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
@@ -35,6 +41,15 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
             val timer = System.currentTimeMillis() - it.serverTime + it.timestamp
             activeTimer.postValue(findTimeLeft(timer)) }
 
+        gameRepository.receiveTeamScores().subscribe{
+            teamScores.postValue(it)
+        }
+        gameRepository.receiveGameState().subscribe{
+            if(it == "draw"){
+                println("WIPE THE BOARD HERE --------------------------------------")
+                fragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            }
+        }
     }
     private fun findTimeLeft(finishTime:Long):Long{
         return finishTime - System.currentTimeMillis()
@@ -52,7 +67,13 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun receiveEndGameNotice():Observable<String>{
         return gameRepository.receiveEndGameNotice()
     }
+    fun reveiceBoardwipeNotice():Observable<String>{
+        return gameRepository.receiveBoardwipeNotice()
+    }
     fun unsubscribe(){
         gameRepository.unsubscribe()
+    }
+    fun onLeaveGame(){
+        gameRepository.onLeaveGame()
     }
 }
