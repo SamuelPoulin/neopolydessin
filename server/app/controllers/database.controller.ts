@@ -97,7 +97,7 @@ export class DatabaseController {
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
       async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        this.databaseService.getAccountById(req.params._id)
+        this.databaseService.getDashboardById(req.params._id)
           .then((results) => {
             res.status(results.statusCode).json(results.documents);
           }).catch((err: ErrorMsg) => {

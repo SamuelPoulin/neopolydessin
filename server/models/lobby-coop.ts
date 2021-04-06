@@ -9,7 +9,7 @@ import {
   GameType,
   PlayerRole,
   GuessResponse,
-  GuessMessageCoop,
+  GuessMessageSoloCoop,
   ReasonEndGame,
   CurrentGameState
 } from '../../common/communication/lobby';
@@ -86,7 +86,7 @@ export class LobbyCoop extends Lobby {
             this.guessLeft--;
             break;
         }
-        const guessMessage: GuessMessageCoop = {
+        const guessMessage: GuessMessageSoloCoop = {
           content: word,
           timestamp: Date.now(),
           guessStatus,
@@ -150,6 +150,7 @@ export class LobbyCoop extends Lobby {
 
   private addTimeOnCorrectGuess() {
     const timeCorrectGuess = this.TIME_ADD_CORRECT_GUESS * this.MS_PER_SEC;
+    this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
     const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }

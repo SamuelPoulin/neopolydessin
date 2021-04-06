@@ -1,5 +1,5 @@
-import { Login } from '../../server/models/schemas/logins';
-import { GameHistory } from '../../server/models/schemas/game-history';
+import { Logins } from '../../server/models/schemas/logins';
+import { Game } from '../../server/models/schemas/game-history';
 
 export interface DashBoardInfo {
     _id: string;
@@ -7,13 +7,14 @@ export interface DashBoardInfo {
     lastName: string;
     username: string;
     email: string;
-    logins: Login[];
+    logins: Logins;
     gameHistory: GameHistoryDashBoard;
     createdDate: number;
     avatar: string;
 }
 
-export interface GameHistoryDashBoard extends GameHistory {
+export interface GameHistoryDashBoard {
+    games: Game[];
     nbGamePlayed: number;
     winPercentage: number;
     averageGameTime: number;

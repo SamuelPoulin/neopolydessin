@@ -47,7 +47,10 @@ export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
       type: Number,
       required: true,
     },
-    gameType: GameType,
+    gameType: {
+      type: GameType,
+      required: true,
+    },
     team: [{
       _id: false,
       score: Number,
