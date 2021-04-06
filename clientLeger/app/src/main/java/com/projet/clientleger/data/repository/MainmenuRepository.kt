@@ -18,4 +18,7 @@ class MainmenuRepository @Inject constructor(private val socketService: SocketSe
     fun getUsername():String{
         return sessionManager.getUsername()
     }
+    fun disconnect(){
+        socketService.disconnect()
+    }
 }

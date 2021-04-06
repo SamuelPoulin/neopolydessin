@@ -60,6 +60,10 @@ class MainmenuActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
+        binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
+        }
     }
 
     fun showGameDialog(isCreating: Boolean) {
@@ -152,4 +156,10 @@ class MainmenuActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onDestroy() {
+        vm.disconnect()
+        super.onDestroy()
+    }
+
 }
