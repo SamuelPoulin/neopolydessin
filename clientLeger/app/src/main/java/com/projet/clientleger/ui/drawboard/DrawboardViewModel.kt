@@ -98,6 +98,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveStartPath(startPoint: PathData) {
+        println("RECEIVE START ---------------------------")
         val newPath = BufferedPathData(startPoint)
         newPath.addStartCoord(startPoint.coords.first())
         paths.value?.add(newPath)
@@ -122,8 +123,13 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveUpdateCurrentPath(coord: Coordinate) {
-        paths.value?.last()?.addCoord(coord)
-        paths.postValue(paths.value)
+        println("RECEIVE UPDATE --------------------------- : ${paths.value!!.size}")
+        if(paths.value!!.isNotEmpty()){
+            paths.value?.last()?.addCoord(coord)
+            paths.postValue(paths.value)
+        }
+        //paths.value?.last()?.addCoord(coord)
+        //paths.postValue(paths.value)
     }
 
     fun updateCurrentPath(coords: Coordinate) {

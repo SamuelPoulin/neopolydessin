@@ -50,7 +50,9 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
     }
     fun receiveBoardwipeNotice():Observable<String>{
-        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){""}
+        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){ (gamestatus) ->
+            gamestatus as String
+        }
     }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{

@@ -137,7 +137,7 @@ class GameActivity : AppCompatActivity() {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
         }
-        vm.receiveEndGameNotice().subscribe{
+        vm.reveiceBoardwipeNotice().subscribe{
             println("MESSAGE DU BOARDWIPE RECU")
             lifecycleScope.launch {
                 supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
