@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import accountModel, { Account, UpdateOneQueryResult } from '../../models/schemas/account';
 import Types from '../types';
 import { SocketIo } from '../socketio';
-import { SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
+import { NotificationType, SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
 import messagesHistoryModel, { MessageHistory } from '../../models/schemas/messages-history';
 import { FriendsList } from '../../../common/communication/friends';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
@@ -60,7 +60,8 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then((friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_RECEIVED, friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.UPDATE, friendId, friendList);
+          SocketIo.FRIEND_LIST_NOTIFICATION.notify({ accountId: id, friendId, type: NotificationType.requestReceived });
           return accountModel.addFriendrequestToSenderWithId(id, friendId);
         })
         .then(async (doc) => {
@@ -97,7 +98,8 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.UPDATE, friendId, friendList);
+          SocketIo.FRIEND_LIST_NOTIFICATION.notify({ accountId: myId, friendId, type: NotificationType.requestAccepted });
           return this.getFriendsOfUser(myId);
         })
         .then((updatedList: Response<FriendsList>) => {
@@ -121,7 +123,8 @@ export class FriendsService {
           return this.getFriendsOfUser(friendId);
         })
         .then(async (friendList: Response<FriendsList>) => {
-          this.socketIo.sendFriendListTo(SocketFriendActions.FRIEND_REQUEST_REFUSED, friendId, friendList);
+          this.socketIo.sendFriendListTo(SocketFriendActions.UPDATE, friendId, friendList);
+          SocketIo.FRIEND_LIST_NOTIFICATION.notify({ accountId: myId, friendId, type: NotificationType.requestRefused });
           return this.getFriendsOfUser(myId);
         })
         .then((updateList: Response<FriendsList>) => {
@@ -152,6 +155,7 @@ export class FriendsService {
         })
         .then(async (friendList: Response<FriendsList>) => {
           this.socketIo.sendFriendListTo(SocketFriendActions.UPDATE, toUnfriendId, friendList);
+          SocketIo.FRIEND_LIST_NOTIFICATION.notify({ accountId: myId, friendId: toUnfriendId, type: NotificationType.unfriended });
           return this.getFriendsOfUser(myId);
         })
         .then((updatedList: Response<FriendsList>) => {

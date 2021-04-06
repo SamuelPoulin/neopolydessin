@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model, model, Query, Schema } from 'mongoose';
-import { Friend, FriendsList, FriendStatus } from '../../../common/communication/friends';
+import { AccountFriend } from '../../../common/communication/account';
+import { FriendsList, FriendStatus } from '../../../common/communication/friends';
 
 export interface Account extends Document {
   _id: ObjectId;
@@ -10,7 +11,7 @@ export interface Account extends Document {
   username: string;
   email: string;
   password: string;
-  friends: [Friend];
+  friends: [AccountFriend];
   logins: string;
   createdDate: number;
 }
