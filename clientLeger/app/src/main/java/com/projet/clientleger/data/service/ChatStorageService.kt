@@ -25,7 +25,7 @@ class ChatStorageService @Inject constructor() {
         convos.putAll(convosToSave)
 
         tabs.clear()
-        tabs.addAll(tabsToSave)
+        tabs.addAll(tabs.distinctBy { it.convoId })
 
         this.selectedTab = selectedTab
     }
