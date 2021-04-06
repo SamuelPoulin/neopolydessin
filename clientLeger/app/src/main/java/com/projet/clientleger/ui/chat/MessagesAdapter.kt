@@ -23,7 +23,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     }
 
     override fun getItemViewType(position: Int): Int {
-        println("getType : ${mMessages[position]}")
         val type: MessageType
         when {
             mMessages[position] is MessageChat -> {
@@ -71,8 +70,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
             else -> R.layout.item_system_message
             // Return a new holder instance
         }
-
-        println("createViewHolder: $viewType")
         return ViewHolderMessage(inflater.inflate(layoutId, parent, false))
     }
 
@@ -84,7 +81,6 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
             viewHolder.messageTimeTextView.text = time
         }
         viewHolder.messageTextView.text = mMessages[position].content
-        println("new message view: ${mMessages[position].content}")
     }
 
     override fun getItemCount(): Int {

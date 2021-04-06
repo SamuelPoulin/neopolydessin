@@ -2,6 +2,7 @@ package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.chat.GuessMessage
 import com.projet.clientleger.data.api.model.chat.PrivateMessage
+import com.projet.clientleger.data.api.model.chat.ReceivedPrivateMessage
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.chat.Message
@@ -35,10 +36,17 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         }
     }
 
-    fun sendPrivateMessage(privateMessage: PrivateMessage){
+    fun receivePrivateMessage(): Observable<ReceivedPrivateMessage> {
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PRIVATE_MSG.value){ (privateMsg) ->
+            Json.decodeFromString(ReceivedPrivateMessage.serializer(), privateMsg.toString())
+        }
+    }
+
+    fun sendPrivateMessage(msgContent: String, friendId: String){
         val obj = JSONObject()
-        obj.put("content", privateMessage.content)
-        obj.put("receiverAccountId", privateMessage.receiverAccountId)
+        obj.put("content", msgContent)
+        obj.put("receiverAccountId", friendId)
+        println("private message sent")
         socketService.socket.emit(ChatSocketEndpoints.SEND_PRIVATE_MSG.value, obj)
     }
 

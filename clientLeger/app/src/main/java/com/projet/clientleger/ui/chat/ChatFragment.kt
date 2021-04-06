@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.IMessage
+import com.projet.clientleger.data.model.chat.TabInfo
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -157,7 +158,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             val friend = (bundle["friend"] as FriendSimplified)
-            vm.addNewTab(friend.username, friend.friendId, true)
+            vm.addNewTab(TabInfo(friend.username, friend.friendId, true))
         }
     }
 
@@ -186,7 +187,6 @@ class ChatFragment @Inject constructor() : Fragment() {
                     mBinding.noMessagesView.visibility = View.GONE
                     mBinding.rvMessages.visibility = View.VISIBLE
                 }
-                println("observe messages update: ${it.size}")
                 mBinding.rvMessages.adapter?.notifyDataSetChanged()
                 mBinding.rvMessages.scrollToPosition(it.size - 1)
             }

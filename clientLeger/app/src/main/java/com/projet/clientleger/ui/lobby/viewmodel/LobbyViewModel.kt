@@ -15,6 +15,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
+
+    companion object {
+        const val GAME_TAB_NAME = "Partie"
+    }
+
     val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
             arrayOf(MutableLiveData(ArrayList()),
             MutableLiveData(ArrayList()))
