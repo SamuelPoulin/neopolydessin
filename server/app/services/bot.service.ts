@@ -1,35 +1,38 @@
 /* eslint-disable no-invalid-this */
-import { BotPersonnality, BOT_NAMES } from 'app/utils/botinfo';
 import { Server } from 'socket.io';
+import { BotPersonnality, BOT_NAMES } from '../utils/botinfo';
 import { ChatMessage } from '../../../common/communication/chat-message';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
 import { Entity, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
+const PERCENT_5: number = 0.05;
 const PERCENT_20: number = 0.2;
 const PERCENT_30: number = 0.3;
 const PERCENT_50: number = 0.5;
 
 export class BotService {
 
-  private readonly DEFAULT_DRAW_DELAY: number = 10;
+  private readonly SPEED_DRAW_DELAY: number = 5;
+  private readonly DEFAULT_DRAW_DELAY: number = 15;
+  // private readonly SLOW_DRAW_DELAY: number = 30;
 
   private readonly AGGRESSIVE: BotPersonnality = {
     onStartDraw: () => {
       if (Math.random() < PERCENT_20) {
         this.sendBotMessage('Êtes-vous prêts?');
-        this.drawDelay = 5;
+        this.drawDelay = this.SPEED_DRAW_DELAY;
       }
     },
 
     onStartSegment: () => {
-      if (Math.random() < PERCENT_20) {
+      if (Math.random() < PERCENT_5 && this.drawDelay === this.SPEED_DRAW_DELAY) {
         this.sendBotMessage('Bon, je vais me calmer');
-        this.drawDelay = 10;
-      } else if (Math.random() < PERCENT_20 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
+        this.drawDelay = this.DEFAULT_DRAW_DELAY;
+      } else if (Math.random() < PERCENT_5 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
         this.sendBotMessage('On va plus vite!!');
-        this.drawDelay = 5;
+        this.drawDelay = this.SPEED_DRAW_DELAY;
       }
     },
 
