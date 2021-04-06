@@ -14,7 +14,7 @@ const Y2: number = 3;
 const X3: number = 4;
 const Y3: number = 5;
 
-const COORD_PRECISION: number = 3;
+const ROUND_PRECISION_FACTOR: number = 100;
 const BEZIER_PRECISION: number = 6;
 
 @injectable()
@@ -221,7 +221,12 @@ export class DrawingSequenceService {
     return {
       zIndex: segment.zIndex,
       brushInfo: segment.brushInfo,
-      path: segment.path.map((coord) => { return { x: coord.x * factor, y: coord.y * factor }; })
+      path: segment.path.map((coord) => {
+        return {
+          x: Math.round(((coord.x * factor) + Number.EPSILON) * ROUND_PRECISION_FACTOR) / ROUND_PRECISION_FACTOR,
+          y: Math.round(((coord.y * factor) + Number.EPSILON) * ROUND_PRECISION_FACTOR) / ROUND_PRECISION_FACTOR
+        };
+      })
     };
   }
 
@@ -240,7 +245,7 @@ export class DrawingSequenceService {
         + 2 * (1 - t) * t * Number.parseFloat(controlPoints[Y2])
         + (t * t) * Number.parseFloat(controlPoints[Y3]);
 
-      lines += `L ${x.toFixed(COORD_PRECISION)} ${y.toFixed(COORD_PRECISION)}, `;
+      lines += `L ${x} ${y}, `;
       t += 1 / BEZIER_PRECISION;
     }
     return lines;

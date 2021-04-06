@@ -40,10 +40,12 @@ class PlayersAdapter(private val players: List<PlayerInfo>) : RecyclerView.Adapt
             PlayerRole.GUESSER -> R.drawable.ic_guessing
             else -> 0
         }
-        if(icon != 0)
+        if(icon != 0){
             holder.actionIcon.setImageResource(icon)
+            holder.actionIcon.visibility = View.VISIBLE
+        }
         else
-            holder.actionIcon.visibility = View.GONE
+            holder.actionIcon.visibility = View.INVISIBLE
     }
 
     override fun getItemCount(): Int {
