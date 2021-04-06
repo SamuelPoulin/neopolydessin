@@ -12,6 +12,7 @@ export interface Account extends Document {
   password: string;
   friends: [Friend];
   logins: string;
+  gameHistory: string;
   createdDate: number;
 }
 
@@ -55,6 +56,9 @@ export const accountSchema = new Schema<Account, AccountModel>({
   },
   logins: {
     type: ObjectId, ref: 'Logins'
+  },
+  gameHistory: {
+    type: ObjectId, ref: 'GameHistory'
   },
   friends: [
     {
