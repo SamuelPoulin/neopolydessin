@@ -45,7 +45,7 @@ describe('SocketService', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      providers: [{ provide: UserService, useValue: MockUserService }],
+      providers: [{ provide: UserService, useValue: MockUserService }, SocketService],
     }).compileComponents();
   }));
 

@@ -12,5 +12,4 @@ data class AccountInfo(val accountId: String = "",
                        val username: String = "",
                        val email: String = "",
                        val createdDate: Date = DateFormatter.now(),
-                       val avatar: Bitmap= Bitmap.createBitmap(0, 0, Bitmap.Config.RGBA_F16),
-                       val logins: ArrayList<LoginInfo> = ArrayList())
+                       val avatar: Bitmap= Bitmap.createBitmap(1, 1, Bitmap.Config.RGBA_F16))

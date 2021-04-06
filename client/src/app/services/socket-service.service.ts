@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Manager, Socket } from 'socket.io-client';
+import { Observable, Subscription } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { Coordinate } from '@utils/math/coordinate';
 import { SocketMessages } from '@common/socketendpoints/socket-messages';
@@ -18,30 +18,31 @@ import {
   Player,
   TeamScore,
   TimeInfo,
-} from '@common/communication/lobby';
-import { LocalSaveService } from './localsave.service';
+} from '../../../../common/communication/lobby';
+import { UserService } from './user.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class SocketService {
   private static API_BASE_URL: string;
 
   socket: Socket;
-  manager: Manager;
+  loggedOutSubscription: Subscription;
+  loggedInSubscription: Subscription;
 
-  constructor(private localSaveService: LocalSaveService) {
+  constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
-    this.manager = new Manager(SocketService.API_BASE_URL, {
+    this.initSocket();
+
+    this.loggedOutSubscription = this.userService.loggedOut.subscribe(() => this.socket.disconnect());
+    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSocket());
+  }
+
+  initSocket() {
+    this.socket = io(SocketService.API_BASE_URL, {
       reconnectionDelayMax: 10000,
       transports: ['websocket'],
-    });
-
-    this.socket = this.manager.socket('/', {
-      auth: {
-        token: this.localSaveService.accessToken,
-      },
+      auth: { token: this.userService.accessToken },
     });
   }
 

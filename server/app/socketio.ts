@@ -6,7 +6,7 @@ import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { Friend, FriendsList } from '../models/schemas/account';
+import { Friend, FriendsList } from '../../common/communication/friends';
 import { Lobby } from '../models/lobby';
 import { SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';

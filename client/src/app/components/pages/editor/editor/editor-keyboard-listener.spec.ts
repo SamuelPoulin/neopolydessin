@@ -6,9 +6,13 @@ import { keyDown } from '@components/pages/editor/editor/editor.component.spec';
 import { SharedModule } from '@components/shared/shared.module';
 import { APIService } from '@services/api.service';
 import { MockAPIService } from '@services/api.service.spec';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { Tool } from '@tools/tool';
@@ -26,6 +30,8 @@ describe('EditorKeyboardListener', () => {
         { provide: EditorService, useClass: MockEditorService },
         { provide: APIService, useValue: MockAPIService },
         { provide: UserService, useValue: MockUserService },
+        { provide: GameService, useValue: MockGameService },
+        { provide: ChatService, useValue: MockChatService },
       ],
     }).compileComponents();
   }));

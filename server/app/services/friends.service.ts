@@ -1,11 +1,12 @@
 import { inject, injectable } from 'inversify';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from 'http-status-codes';
 import { ObjectId } from 'mongodb';
-import accountModel, { Account, FriendsList, UpdateOneQueryResult } from '../../models/schemas/account';
+import accountModel, { Account, UpdateOneQueryResult } from '../../models/schemas/account';
 import Types from '../types';
 import { SocketIo } from '../socketio';
 import { SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
 import messagesHistoryModel, { MessageHistory } from '../../models/schemas/messages-history';
+import { FriendsList } from '../../../common/communication/friends';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
 @injectable()
