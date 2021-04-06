@@ -56,7 +56,6 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     fun boardwipe(){
-        println("BOARDWIPE ICI")
         paths.value!!.clear()
         paths.postValue(paths.value)
         drawingCommandsService.clear()
@@ -98,7 +97,6 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveStartPath(startPoint: PathData) {
-        println("RECEIVE START ---------------------------")
         val newPath = BufferedPathData(startPoint)
         newPath.addStartCoord(startPoint.coords.first())
         paths.value?.add(newPath)
@@ -123,7 +121,6 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveUpdateCurrentPath(coord: Coordinate) {
-        println("RECEIVE UPDATE --------------------------- : ${paths.value!!.size}")
         if(paths.value!!.isNotEmpty()){
             paths.value?.last()?.addCoord(coord)
             paths.postValue(paths.value)

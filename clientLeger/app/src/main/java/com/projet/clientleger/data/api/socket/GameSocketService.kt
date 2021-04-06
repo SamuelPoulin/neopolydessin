@@ -48,11 +48,16 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_ROLES.value)
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
+        socketService.socket.off(GameSocketEndPoints.END_GAME_TRIGGER.value)
+        socketService.socket.off(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value)
     }
     fun receiveBoardwipeNotice():Observable<String>{
         return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){ (gamestatus) ->
             gamestatus as String
         }
+    }
+    fun onLeaveGame(){
+        socketService.socket.emit(GameSocketEndPoints.ON_LEAVE.value)
     }
 
 //    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{

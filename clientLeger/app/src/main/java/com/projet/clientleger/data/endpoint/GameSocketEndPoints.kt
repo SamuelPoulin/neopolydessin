@@ -7,5 +7,6 @@ enum class GameSocketEndPoints(val value:String) {
     RECEIVE_ROLES("updateRoles"),
     PLAYER_READY("loadingOver"),
     END_GAME_TRIGGER("endGame"),
-    RECEIVE_BOARDWIPE_NOTICE("updateGameState")
+    RECEIVE_BOARDWIPE_NOTICE("updateGameState"),
+    ON_LEAVE("leaveLobby")
 }

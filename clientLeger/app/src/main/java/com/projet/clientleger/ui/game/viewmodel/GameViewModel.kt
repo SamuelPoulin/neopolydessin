@@ -58,4 +58,7 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun unsubscribe(){
         gameRepository.unsubscribe()
     }
+    fun onLeaveGame(){
+        gameRepository.onLeaveGame()
+    }
 }

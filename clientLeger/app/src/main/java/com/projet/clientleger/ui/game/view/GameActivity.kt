@@ -54,6 +54,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -84,7 +85,6 @@ class GameActivity : AppCompatActivity() {
         dialog.title.text = message
 
         dialog.quitBtn.setOnClickListener {
-            vm.unsubscribe()
             dialog.dismiss()
             finish()
         }
@@ -92,7 +92,7 @@ class GameActivity : AppCompatActivity() {
         if(isMessageFromServer){
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
-                vm.unsubscribe()
+                dialog.dismiss()
                 finish() }
         }
         else{
@@ -118,7 +118,6 @@ class GameActivity : AppCompatActivity() {
         }
 
         vm.activeWord.observe(this){
-            println("Nouveau Mot : $it")
             if(vm.currentRoleLiveData.value == PlayerRole.DRAWER){
                 binding.wordGuess.text = "Mot : ${vm.activeWord.value}"
                 binding.wordGuess.visibility = View.VISIBLE
@@ -133,12 +132,12 @@ class GameActivity : AppCompatActivity() {
             setTimer(it)
         }
         vm.receiveEndGameNotice().subscribe{
+            println("PARTIE TERMINÉE")
             lifecycleScope.launch {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
         }
         vm.reveiceBoardwipeNotice().subscribe{
-            println("MESSAGE DU BOARDWIPE RECU")
             lifecycleScope.launch {
                 supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             }
@@ -147,13 +146,6 @@ class GameActivity : AppCompatActivity() {
 
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
         
-    }
-
-    private fun boardwipeNeeded(newPlayersInfo: ArrayList<PlayerInfo>): Boolean{
-        val newDrawer = newPlayersInfo.find { it.playerRole == PlayerRole.DRAWER }
-        val oldDrawer = players.find { it.playerRole == PlayerRole.DRAWER }
-        return newDrawer != oldDrawer
-
     }
 
     private fun getFrenchRole(role:String):String{
@@ -191,6 +183,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
     }
