@@ -19,11 +19,10 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('Hi');
-    // this.socketService.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
-    //   this.dataSource.data = lobbies;
-    //   this.lobbyCount = lobbies.length;
-    // });
+    this.socketService.getLobbyList({}).subscribe((lobbies) => {
+      this.dataSource.data = lobbies;
+      this.lobbyCount = lobbies.length;
+    });
   }
 
   joinLobby(lobbyId: string): void {

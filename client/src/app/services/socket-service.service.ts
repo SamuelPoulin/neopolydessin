@@ -130,9 +130,11 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
-  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+  getLobbyList(query: { gameType?: GameType; difficulty?: Difficulty }): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: query.gameType, difficulty: query.difficulty }, (lobbies: LobbyInfo[]) =>
+        obs.next(lobbies),
+      );
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
     });
   }
@@ -151,7 +153,7 @@ export class SocketService {
 
   async createLobby(name: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, GameType.SPRINT_SOLO, Difficulty.EASY, false, (data: string) => resolve(data));
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, GameType.CLASSIC, Difficulty.EASY, false, (data: string) => resolve(data));
     });
   }
 

@@ -133,6 +133,10 @@ system-message {
   color: white;
 
   transition: background-color 0.25s;
+
+  &:hover {
+    background-color: #464646 !important;
+  }
 }
 
 #chat-friendslist-anchor {
