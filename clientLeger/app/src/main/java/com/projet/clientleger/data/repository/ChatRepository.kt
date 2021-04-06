@@ -5,6 +5,7 @@ import com.projet.clientleger.data.api.http.ApiFriendslistInterface
 import com.projet.clientleger.data.api.model.chat.PrivateMessage
 import com.projet.clientleger.data.api.model.chat.ReceivedPrivateMessage
 import com.projet.clientleger.data.api.socket.ChatSocketService
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
@@ -37,8 +38,8 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         chatSocketService.sendMessage(msg)
     }
 
-    fun getUsername(): String{
-        return sessionManager.getUsername()
+    fun getAccountInfo(): AccountInfo {
+        return sessionManager.getAccountInfo()
     }
 
     fun sendGuess(guess: String){

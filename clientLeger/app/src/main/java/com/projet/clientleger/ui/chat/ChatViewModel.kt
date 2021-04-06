@@ -3,6 +3,7 @@ package com.projet.clientleger.ui.chat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
@@ -25,7 +26,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
     val convosData: HashMap<String, ArrayList<IMessage>> = HashMap()
     val tabs: MutableLiveData<ArrayList<TabInfo>> = MutableLiveData(ArrayList())
-    val username: String = chatRepository.getUsername()
+    val accountInfo: AccountInfo = chatRepository.getAccountInfo()
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
     val currentTab: MutableLiveData<TabInfo> = MutableLiveData(TabInfo())
@@ -52,7 +53,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             val newMessages: ArrayList<IMessage> = ArrayList()
             if(tabInfo.isDM){
                 CoroutineScope(Job() + Dispatchers.Main).launch {
-                    val res = chatRepository.getChatFriendHistory(0, tabInfo.convoId, NB_MESSAGES_PER_PAGE)
+                    val res = chatRepository.getChatFriendHistory(1, tabInfo.convoId, NB_MESSAGES_PER_PAGE)
                     println("History received with code: ${res.code()}")
                     if(res.code() == HttpsURLConnection.HTTP_OK){
                         newMessages.addAll(res.body()!!)
@@ -104,9 +105,16 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     }
 
     private fun receivePrivateMessageSubscription(){
-        chatRepository.receivePrivateMessage().subscribe{
-            println("private message received: ${it.senderAccountId}")
-            receiveMessage(it, TabInfo("", it.senderAccountId, true))
+        chatRepository.receivePrivateMessage().subscribe{ msg ->
+            println("private message received: ${msg.senderAccountId}")
+            val convoId: String =
+                    if(msg.receiverAccountId != accountInfo.accountId)
+                        msg.receiverAccountId
+                    else
+                        msg.senderAccountId
+
+            val convoName = (tabs.value!!.find { it.convoId == convoId } as TabInfo).convoName
+            receiveMessage(msg.toMessageChat(), TabInfo(convoName, convoId, true))
         }
     }
 

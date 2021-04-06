@@ -46,7 +46,6 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         val obj = JSONObject()
         obj.put("content", msgContent)
         obj.put("receiverAccountId", friendId)
-        println("private message sent")
         socketService.socket.emit(ChatSocketEndpoints.SEND_PRIVATE_MSG.value, obj)
     }
 

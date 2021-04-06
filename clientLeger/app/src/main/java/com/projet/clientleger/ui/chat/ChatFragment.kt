@@ -197,7 +197,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
         binding!!.rvMessages.layoutManager = mLinearLayoutManager
-        binding!!.rvMessages.adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
+        binding!!.rvMessages.adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.accountInfo.username)
     }
 
     private fun sendMessage() {
