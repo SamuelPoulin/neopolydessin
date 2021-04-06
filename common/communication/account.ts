@@ -1,5 +1,10 @@
-import { Friend } from "./friends";
+import { FriendStatus } from "./friends";
 
+export interface AccountFriend {
+    friendId: string,
+    status: FriendStatus,
+    received: boolean
+}
 
 export interface AccountInfo {
     _id: string;
@@ -7,7 +12,7 @@ export interface AccountInfo {
     lastName: string;
     username: string;
     email: string;
-    friends: Friend[];
+    friends: AccountFriend[];
     createdDate: number;
     avatar: string;
 }

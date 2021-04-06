@@ -1,11 +1,19 @@
 export enum SocketFriendActions {
-    FRIEND_REQUEST_RECEIVED = 'friendRequestReceived',
-    FRIEND_REQUEST_ACCEPTED = 'friendRequestAccept',
-    FRIEND_REQUEST_REFUSED = 'friendRequestRefused',
-    UPDATE = 'updateFriendList'
+    UPDATE = 'updateFriendList'                 // (friendList: FriendList)
 }
 
 export enum SocketFriendListNotifications {
-    UPDATE = 'fetchFriendList',
-    INVALIDATE_AVATAR = 'invalidateAvatar'
+    NOTIFICATION_RECEIVED = 'notification',     // (type: NotificationType, accountId: String)
+    INVALIDATE_AVATAR = 'invalidateAvatar'      // (accountId: string, avatarId: string)
+}
+
+export enum NotificationType {
+    userConnected = 'userConn',
+    userDisconnected = 'userDisconn',
+    userUploadedAvatar = 'uploadAvatar',
+    userUpdatedAccount = 'updateAcc',
+    requestReceived = 'request',
+    requestAccepted = 'requestAccepted',
+    requestRefused = 'requestRefused',
+    unfriended = 'unfriended'
 }
