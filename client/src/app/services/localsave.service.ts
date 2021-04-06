@@ -10,9 +10,7 @@ export class LocalSaveService {
   private static STORAGE_ACCESS_TOKEN_KEY: string = 'accessToken';
 
   clearData() {
-    this.account = undefined;
-    this.accessToken = undefined;
-    this.refreshToken = undefined;
+    localStorage.clear();
   }
 
   set account(account: Account | undefined) {

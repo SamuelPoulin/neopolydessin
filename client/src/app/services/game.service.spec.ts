@@ -13,6 +13,11 @@ export const MockGameService = jasmine.createSpyObj('GameService', {
 });
 
 MockGameService.roleChanged = new EventEmitter<PlayerRole>();
+MockGameService.teams = [[], []];
+MockGameService.scores = [
+  { teamNumber: 0, score: 0 },
+  { teamNumber: 1, score: 0 },
+];
 
 describe('GameService', () => {
   let service: GameService;
@@ -23,6 +28,7 @@ describe('GameService', () => {
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: UserService, useValue: MockUserService },
+        GameService,
       ],
     }).compileComponents();
   }));

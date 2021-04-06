@@ -24,6 +24,10 @@ import { StatusBarModule } from '@components/shared/status-bar/status-bar.module
 import { MockEditorService } from '@services/editor.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 
 export const keyDown = (key: string, shiftKey: boolean = false, ctrlKey: boolean = false, altKey: boolean = false): KeyboardEvent => {
   return {
@@ -71,6 +75,8 @@ describe('EditorComponent', () => {
       providers: [
         { provide: EditorService, useClass: MockEditorService },
         { provide: UserService, useValue: MockUserService },
+        { provide: GameService, useValue: MockGameService },
+        { provide: ChatService, useValue: MockChatService },
         {
           provide: ModalDialogService,
           useValue: modalDialogServiceSpy,

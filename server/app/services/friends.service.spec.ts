@@ -4,15 +4,17 @@ import { describe } from 'mocha';
 import jwt from 'jsonwebtoken';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
-import { DatabaseService, ErrorMsg, LoginTokens, Response } from './database.service';
+import { DatabaseService, ErrorMsg, Response } from './database.service';
 import { connectMS, disconnectMS } from './database.service.spec';
 import { accountInfo } from './database.service.spec';
 import { FriendsService } from './friends.service';
-import { Account, FriendsList, FriendStatus } from '../../models/schemas/account';
+import { Account } from '../../models/schemas/account';
 import { Register } from '../../../common/communication/register';
 import { SocketIo } from '../socketio';
 import { AccessToken } from '../utils/jwt-util';
 import MongoMemoryServer from 'mongodb-memory-server-core';
+import { LoginResponse } from '../../../common/communication/login';
+import { FriendsList, FriendStatus } from '../../../common/communication/friends';
 
 export const otherAccountInfo: Register = {
     firstName: 'name',
@@ -73,7 +75,7 @@ describe('Friends Service', () => {
 
     it('getFriendsOfUser should resolve to OK if user exists and has no friends', (done: Mocha.Done) => {
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const secret_key = process.env.JWT_KEY ? process.env.JWT_KEY : 'wrong key';
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 return friendsService.getFriendsOfUser(decodedJwt._id)
@@ -89,12 +91,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -128,7 +130,7 @@ describe('Friends Service', () => {
     it('requestFriendship should resolve to BAD_REQUEST if trying to friend yourself', (done: Mocha.Done) => {
         let myId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -143,12 +145,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -169,12 +171,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -206,12 +208,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -230,12 +232,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -274,12 +276,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -297,12 +299,12 @@ describe('Friends Service', () => {
         let myId: string;
         let otherId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return databaseService.createAccount(otherAccountInfo);
             })
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 otherId = decodedJwt._id;
                 return friendsService.requestFriendship(myId, 'username1');
@@ -328,7 +330,7 @@ describe('Friends Service', () => {
     it('unfriend should resolve to NOT_FOUND if friend isn\'t there', (done: Mocha.Done) => {
         let myId: string;
         databaseService.createAccount(accountInfo)
-            .then((tokens: Response<LoginTokens>) => {
+            .then((tokens: Response<LoginResponse>) => {
                 const decodedJwt = jwt.verify(tokens.documents.accessToken, secret_key) as AccessToken;
                 myId = decodedJwt._id;
                 return friendsService.unfriend(myId, '123456789012345678901234');

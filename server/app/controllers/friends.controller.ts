@@ -8,7 +8,7 @@ import { ErrorMsg, Response } from '../services/database.service';
 import { Decision, FriendRequest } from '../../../common/communication/friend-request';
 import { validationCheck } from '../middlewares/validation-check';
 import { LoggedIn } from '../middlewares/logged-in';
-import { FriendsList } from '../../models/schemas/account';
+import { FriendsList } from '../../../common/communication/friends';
 
 @injectable()
 export class FriendsController {

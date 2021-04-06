@@ -27,11 +27,12 @@ export const loginSchema = new Schema<Logins, LoginsModel>({
     unique: true
   },
   logins: [{
+    _id: false,
     start: {
-      type: Date,
+      type: Number,
       required: true,
     },
-    end: Date
+    end: Number
   }]
 });
 
