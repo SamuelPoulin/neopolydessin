@@ -6,20 +6,17 @@ import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import { Observable } from '../utils/observable';
 import { FriendsListEvent } from '../socketio';
-import { login } from '../../../common/communication/login';
+import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
-import accountModel, { Account, Friend } from '../../models/schemas/account';
+import { AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
+import accountModel, { Account } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
+import { Friend } from '../../../common/communication/friends';
 
-export interface AccountInfo {
-  accountId: string;
-  username: string;
-  avatar: string | undefined;
-}
 export interface Response<T> {
   statusCode: number;
   documents: T;
@@ -28,11 +25,6 @@ export interface Response<T> {
 export interface ErrorMsg {
   statusCode: number;
   message: string | undefined;
-}
-
-export interface LoginTokens {
-  accessToken: string;
-  refreshToken: string;
 }
 
 @injectable()
@@ -61,7 +53,6 @@ export class DatabaseService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static rejectMessage(errorCode: number, msg?: string): ErrorMsg {
     let rejectionMsg: string | undefined = msg;
     if (!rejectionMsg) {
@@ -99,14 +90,12 @@ export class DatabaseService {
     await mongoose.disconnect();
   }
 
-  async getAccountById(id: string): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve, reject) => {
+  async getAccountById(id: string): Promise<Response<AccountInfo>> {
+    return new Promise<Response<AccountInfo>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
-        .populate('logins', 'logins')
-        .populate('avatar', 'avatar')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
-          resolve({ statusCode: OK, documents: doc });
+          resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -114,19 +103,13 @@ export class DatabaseService {
     });
   }
 
-  async getPublicAccount(id: string): Promise<Response<AccountInfo>> {
-    return new Promise<Response<AccountInfo>>((resolve, reject) => {
-      console.log(id);
+  async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
+    return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
       try {
         accountModel.findById(new ObjectId(id))
           .then((account: Account) => {
             if (!account) throw new Error(NOT_FOUND.toString());
-            const publicAccount: AccountInfo = {
-              accountId: account._id.toHexString(),
-              username: account.username,
-              avatar: account.avatar
-            };
-            resolve({ statusCode: OK, documents: publicAccount });
+            resolve({ statusCode: OK, documents: this.accountToPublicAccountInfo(account) });
           })
           .catch((err: Error) => {
             reject(DatabaseService.rejectErrorMessage(err));
@@ -164,8 +147,8 @@ export class DatabaseService {
     });
   }
 
-  async createAccount(body: Register): Promise<Response<LoginTokens>> {
-    return new Promise<Response<LoginTokens>>((resolve, reject) => {
+  async createAccount(body: Register): Promise<Response<LoginResponse>> {
+    return new Promise<Response<LoginResponse>>((resolve, reject) => {
       const account = {
         firstName: body.firstName,
         lastName: body.lastName,
@@ -209,7 +192,7 @@ export class DatabaseService {
         .then(async (acc: Account) => {
           return this.login({ username: body.username, password: body.password });
         })
-        .then((tokens: Response<LoginTokens>) => {
+        .then((tokens: Response<LoginResponse>) => {
           resolve(tokens);
         })
         .catch((err: Error) => {
@@ -218,8 +201,8 @@ export class DatabaseService {
     });
   }
 
-  async login(loginInfo: login): Promise<Response<LoginTokens>> {
-    return new Promise<Response<LoginTokens>>((resolve, reject) => {
+  async login(loginInfo: login): Promise<Response<LoginResponse>> {
+    return new Promise<Response<LoginResponse>>((resolve, reject) => {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
@@ -370,5 +353,26 @@ export class DatabaseService {
           reject(DatabaseService.rejectErrorMessage(err));
         });
     });
+  }
+
+  private accountToAccountInfo(account: Account): AccountInfo {
+    return {
+      _id: account.id,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      username: account.username,
+      email: account.email,
+      friends: account.friends,
+      createdDate: account.createdDate,
+      avatar: account.avatar,
+    };
+  }
+
+  private accountToPublicAccountInfo(account: Account): PublicAccountInfo {
+    return {
+      accountId: account.id,
+      username: account.username,
+      avatar: account.avatar
+    };
   }
 }

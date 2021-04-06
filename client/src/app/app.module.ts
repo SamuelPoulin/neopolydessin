@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AccountModule } from '@components/pages/account/account.module';
 import { AccountComponent } from '@components/pages/account/account/account.component';
@@ -29,7 +28,6 @@ import { AppComponent } from './app.component';
 
 @NgModule({
   imports: [
-    BrowserModule,
     SharedModule,
     HomeModule,
     ChatModule,

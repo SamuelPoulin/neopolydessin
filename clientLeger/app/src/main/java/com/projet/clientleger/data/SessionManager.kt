@@ -42,7 +42,7 @@ open class SessionManager @Inject constructor(
         private val apiAvatarInterface: ApiAvatarInterface,
         private val socketService: SocketService
 ) {
-    companion object{
+    companion object {
         const val ERROR_MESSAGE = "errorMessage"
         const val SESSION_EXPIRED = "Session expirée"
     }
@@ -53,8 +53,9 @@ open class SessionManager @Inject constructor(
 
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
+
     init {
-        if(context != null){
+        if (context != null) {
             userPrefs = context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
         }
     }
@@ -69,49 +70,47 @@ open class SessionManager @Inject constructor(
         tokenInterceptor.setAccessToken(accessToken)
         val res = apiSessionManagerInterface.getAccountInfo()
         socketService.connect(accessToken)
-        when(res.code()){
+        when (res.code()) {
             HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body())
             HttpsURLConnection.HTTP_UNAUTHORIZED -> logout(SESSION_EXPIRED)
             else -> logout(ApiErrorMessages.UNKNOWN_ERROR)
         }
     }
 
-    private fun saveAccountInfo(info: Account?){
+    private fun saveAccountInfo(info: Account?) {
         if (info != null) {
-            if(info.avatar != null){
-                apiAvatarInterface.getAvatar(info.avatar._id).enqueue(object : Callback<ResponseBody> {
-                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+            apiAvatarInterface.getAvatar(info.avatar).enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    val avatar: Bitmap? = if (response.code() == HttpsURLConnection.HTTP_OK) {
                         val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
-                        val roundedBitmap = BitmapConversion.toRoundedBitmap(bitmap)
-                        accountInfo = info.toAccountInfo(roundedBitmap)
+                        BitmapConversion.toRoundedBitmap(bitmap)
+                    } else {
+                        if (context != null) {
+                            BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
+                        } else {
+                            null
+                        }
                     }
-
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        TODO("Not yet implemented")
-                    }
-                })
-            }
-            else{
-                accountInfo = if (context != null) {
-                    val avatar = BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
-                    info.toAccountInfo(avatar)
-                } else{
-                    info.toAccountInfo(null)
+                    accountInfo = info.toAccountInfo(avatar)
                 }
-            }
+
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    TODO("Not yet implemented")
+                }
+            })
         }
     }
 
-    fun getAccountInfo(): AccountInfo{
+    fun getAccountInfo(): AccountInfo {
         return accountInfo ?: AccountInfo()
     }
 
-    fun getUsername(): String{
+    fun getUsername(): String {
         return accountInfo?.username ?: "utilisateur"
     }
 
-    fun clearCred(){
-        userPrefs?.edit{
+    fun clearCred() {
+        userPrefs?.edit {
             clear()
             apply()
         }
@@ -136,7 +135,7 @@ open class SessionManager @Inject constructor(
 
     open suspend fun refreshAccessToken() {
         val res = apiSessionManagerInterface.refreshToken(RefreshTokenModel(getRefreshToken()))
-        return when(res.code()){
+        return when (res.code()) {
             HttpsURLConnection.HTTP_OK -> {
                 updateAccessToken(res.body()!!.accessToken)
             }
@@ -147,7 +146,7 @@ open class SessionManager @Inject constructor(
         }
     }
 
-    open suspend fun <S, T> request(toSend: S, callback: KSuspendFunction1<S, Response<T>>): Response<T>{
+    open suspend fun <S, T> request(toSend: S, callback: KSuspendFunction1<S, Response<T>>): Response<T> {
         var res = callback.invoke(toSend)
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
@@ -157,7 +156,7 @@ open class SessionManager @Inject constructor(
     }
 
 
-    open suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T>{
+    open suspend fun <T> request(callback: KSuspendFunction0<Response<T>>): Response<T> {
         var res = callback.invoke()
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
@@ -166,9 +165,9 @@ open class SessionManager @Inject constructor(
         return res
     }
 
-    open fun <S, T> request(toSend: S, callBack: KFunction<Call<T>>): Response<T>{
+    open fun <S, T> request(toSend: S, callBack: KFunction<Call<T>>): Response<T> {
         var res = callBack.call(toSend).execute()
-        if(res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN){
+        if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             scope.launch {
                 refreshAccessToken()
             }
@@ -178,7 +177,7 @@ open class SessionManager @Inject constructor(
     }
 
 
-    fun logout(errorMessage: String?){
+    fun logout(errorMessage: String?) {
         tokenInterceptor.clearToken()
         clearCred()
         socketService.disconnect()

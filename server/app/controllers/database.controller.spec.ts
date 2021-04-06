@@ -14,6 +14,7 @@ import express from 'express';
 import { expect } from 'chai';
 import { BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
 import { ObjectId } from 'mongodb';
+import { AccountInfo } from '../../../common/communication/account';
 
 describe('Database Controller', () => {
   let databaseController: DatabaseController;
@@ -163,12 +164,15 @@ describe('Database Controller', () => {
 
   it('should call getAccountById when sending a query get request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: new ObjectId('123456789012345678901234'),
+      _id: '123456789012345678901234',
       firstName: 'user',
+      lastName: 'name',
       username: 'username',
       email: 'email@email.email',
-      password: 'admin123'
-    } as Account
+      friends: [],
+      createdDate: 1,
+      avatar: '1',
+    } as AccountInfo
 
     const stub = sinon.stub(DatabaseService.prototype, 'getAccountById').resolves({ statusCode: 200, documents: account });
     chai

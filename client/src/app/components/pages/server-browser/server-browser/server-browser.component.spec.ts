@@ -8,6 +8,8 @@ import { SocketService } from '@services/socket-service.service';
 import { MockSocketService } from '@services/socket-service.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
 
 describe('BrowserComponent', () => {
   let component: ServerBrowserComponent;
@@ -19,6 +21,7 @@ describe('BrowserComponent', () => {
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: UserService, useValue: MockUserService },
+        { provide: GameService, useValue: MockGameService },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(ServerBrowserComponent);
