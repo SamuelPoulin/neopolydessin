@@ -37,6 +37,7 @@ export class LobbyCoop extends Lobby {
     this.gameType = GameType.SPRINT_COOP;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = NB_GUESSES;
+    this.teamScores = [0];
     this.timeLeftSeconds = COOP_START_TIME;
     this.players.push(this.botService.getBot(0));
   }

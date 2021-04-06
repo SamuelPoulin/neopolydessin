@@ -37,6 +37,7 @@ export class LobbySolo extends Lobby {
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = NB_GUESSES;
     this.timeLeftSeconds = SOLO_START_TIME;
+    this.teamScores = [0];
     this.privateLobby = true;
     this.players.push(this.botService.getBot(0));
   }
