@@ -212,7 +212,7 @@ export abstract class Lobby {
           if (this.soloOrCoopGameAlreadyHasBot()) {
             console.error(`Lobby - ${this.lobbyId} - already has a bot in it!`);
           } else {
-            const bot = this.getBotInfo(teamNumber);
+            const bot = this.botService.getBot(teamNumber);
             this.players.push(bot);
             this.emitJoinInfo(bot, socket);
           }
@@ -389,16 +389,6 @@ export abstract class Lobby {
       });
     }
     return teamScoreArray;
-  }
-
-  protected getBotInfo(teamNumber: number): Entity {
-    return {
-      username: 'bob',
-      playerRole: PlayerRole.PASSIVE,
-      teamNumber,
-      isBot: true,
-      isOwner: false
-    };
   }
 
   private soloOrCoopGameAlreadyHasBot(): boolean {

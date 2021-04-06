@@ -146,172 +146,229 @@ describe('Socketio', () => {
     it('clients should be able to receive path information', (done: Mocha.Done) => {
         pictureWordService.uploadDrawing({
             word: 'TestWord1',
-            drawnPaths: [],
+            drawnPaths: [{
+                id: '0',
+                brushInfo: {
+                    color: "#000000",
+                    strokeWidth: 1
+                },
+                path: [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 2 },
+                    { x: 3, y: 3 }
+                ]
+            }],
             hints: ['Clue1', 'Clue2', 'Clue3'],
             difficulty: Difficulty.EASY,
             drawMode: DrawMode.CONVENTIONAL
-        });
-        testDoneWhenAllClientsAreDisconnected(done);
-        createClient(accountInfo)
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
-                })
+        }).then(() => {
+            testDoneWhenAllClientsAreDisconnected(done);
+            createClient(accountInfo)
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
+                    })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        console.log('started');
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
+                    });
 
-                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
-                    expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                });
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
 
-                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                    expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    testClient.socket.close();
-                });
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.close();
+                    });
 
-                let nbConnections = 0;
-                testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
-                    nbConnections++;
-                    if (nbConnections === 3) {
-                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                    }
-                });
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
-                    players.forEach((player) => {
-                        if (player.teamNumber === 0) {
-                            expect(player.playerRole).to.equal(PlayerRole.DRAWER);
-
-                        } else {
-                            expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
+                    let nbConnections = 0;
+                    testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+                        nbConnections++;
+                        if (nbConnections === 3) {
+                            testClient.socket.emit(SocketLobby.START_GAME_SERVER);
                         }
                     });
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                    testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                    testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
-                })
 
-                return createClient(otherAccountInfo);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                        clients[0].emit(SocketLobby.ADD_BOT, 1);
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
                     });
-                });
 
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
+                    testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                        console.log(players);
+                        players.forEach((player) => {
+                            if (player.teamNumber === 0) {
+                                if (player.isBot) {
+                                    expect(player.playerRole).to.equal(PlayerRole.DRAWER);
+                                } else {
+                                    expect(player.playerRole).to.equal(PlayerRole.GUESSER);
+                                }
+                            } else {
+                                expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
+                            }
+                        });
+                    });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
+                    return createClient(otherAccountInfo);
+                })
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                            clients[0].emit(SocketLobby.ADD_BOT, 1);
+                            clients[0].emit(SocketLobby.ADD_BOT, 0);
+                        });
+                    });
 
-                });
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
 
-                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
-                    expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
 
-                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                    expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
-                    testClient.socket.close();
-                });
-            })
+                    });
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
+                        testClient.socket.close();
+                    });
+                })
+        });
     })
 
     it('multiple lobbies should work correctly', (done: Mocha.Done) => {
         pictureWordService.uploadDrawing({
             word: 'TestWord2',
-            drawnPaths: [],
+            drawnPaths: [{
+                id: '0',
+                brushInfo: {
+                    color: "#000000",
+                    strokeWidth: 1
+                },
+                path: [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 2 },
+                    { x: 3, y: 3 }
+                ]
+            }],
             hints: ['Clue1', 'Clue2', 'Clue3'],
             difficulty: Difficulty.EASY,
             drawMode: DrawMode.CONVENTIONAL
-        });
-        testDoneWhenAllClientsAreDisconnected(done);
-        createClient(accountInfo)
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
-                })
-
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.close();
-                })
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                })
-
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
-                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                })
-                return createClient(otherAccountInfo);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.CLASSIC, Difficulty.EASY, false);
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                    testClient.socket.close();
-                })
-
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
-                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                })
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                })
-
-                return createClient(accountInfo3);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.CLASSIC, difficulty: Difficulty.EASY }, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+        }).then(() => {
+            testDoneWhenAllClientsAreDisconnected(done);
+            createClient(accountInfo)
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
                     });
 
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    });
 
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
-                    testClient.socket.close();
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        console.log('end path received')
+                        testClient.socket.close();
+                    });
+
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                        players.forEach((player) => {
+                            if (player.isBot) {
+                                expect(player.playerRole).to.equal(PlayerRole.DRAWER);
+                            } else {
+                                expect(player.playerRole).to.equal(PlayerRole.GUESSER);
+                            }
+                        })
+                    });
+
+                    testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                    });
+                    return createClient(otherAccountInfo);
                 })
-            });
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.SPRINT_SOLO, Difficulty.EASY, false);
+                    })
+
+                    testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (lobbyInfo: LobbyInfo) => {
+                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                    });
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    })
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.close();
+                    });
+
+                    return createClient(accountInfo3);
+                })
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.SPRINT_COOP }, (lobbies: LobbyInfo[]) => {
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                        });
+                    });
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    })
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        console.log('end path received')
+                        testClient.socket.close();
+                    });
+                });
+        })
     });
 
     it('friendship notifications should work correctly', (done: Mocha.Done) => {
