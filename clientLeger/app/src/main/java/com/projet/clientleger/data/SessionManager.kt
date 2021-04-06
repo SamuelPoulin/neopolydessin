@@ -28,6 +28,7 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.reflect.KFunction
 import kotlin.reflect.KSuspendFunction0
 import kotlin.reflect.KSuspendFunction1
+import kotlin.reflect.KSuspendFunction3
 
 
 private const val ACCESS_TOKEN = "accessToken"
@@ -59,7 +60,6 @@ open class SessionManager @Inject constructor(
             userPrefs = context.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
         }
     }
-
 
     suspend fun saveCreds(accessToken: String, refreshToken: String) {
         userPrefs?.edit {
@@ -176,6 +176,14 @@ open class SessionManager @Inject constructor(
         return res
     }
 
+    open suspend fun <Q,R,S,T> request(qSend: Q, rSend: R, sSend: S, callback: KSuspendFunction3<Q, R, S, Response<T>>): Response<T>{
+        var res = callback.invoke(qSend, rSend, sSend)
+        if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
+            refreshAccessToken()
+            res = callback.invoke(qSend, rSend, sSend)
+        }
+        return res
+    }
 
     fun logout(errorMessage: String?) {
         tokenInterceptor.clearToken()

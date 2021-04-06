@@ -1,6 +1,7 @@
 package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.chat.GuessMessage
+import com.projet.clientleger.data.api.model.chat.PrivateMessage
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.chat.Message
@@ -32,6 +33,13 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_DISCONNECT.value){ (username, timestamp) ->
             MessageSystem(username.toString(), timestamp as Long)
         }
+    }
+
+    fun sendPrivateMessage(privateMessage: PrivateMessage){
+        val obj = JSONObject()
+        obj.put("content", privateMessage.content)
+        obj.put("receiverAccountId", privateMessage.receiverAccountId)
+        socketService.socket.emit(ChatSocketEndpoints.SEND_PRIVATE_MSG.value, obj)
     }
 
     fun sendMessage(msg: Message){

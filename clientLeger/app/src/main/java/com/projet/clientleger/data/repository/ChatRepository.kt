@@ -1,15 +1,16 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
+import com.projet.clientleger.data.api.http.ApiFriendslistInterface
 import com.projet.clientleger.data.api.socket.ChatSocketService
-import com.projet.clientleger.data.model.chat.Message
-import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.GuessMessageInfo
-import com.projet.clientleger.data.model.chat.MessageSystem
+import com.projet.clientleger.data.model.chat.*
 import io.reactivex.rxjava3.core.Observable
+import retrofit2.Response
 import javax.inject.Inject
 
-class ChatRepository @Inject constructor(private val sessionManager: SessionManager, private val chatSocketService: ChatSocketService){
+class ChatRepository @Inject constructor(private val sessionManager: SessionManager,
+                                         private val chatSocketService: ChatSocketService,
+                                         private val apiFriendslistInterface: ApiFriendslistInterface){
     fun receiveMessage(): Observable<MessageChat> {
         return chatSocketService.receiveMessage()
     }
@@ -20,6 +21,10 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
 
     fun receivePlayerDisconnection(): Observable<MessageSystem>{
         return chatSocketService.receivePlayerDisconnection()
+    }
+
+    fun sendPrivateMessage(msg:Message){
+
     }
 
     fun sendMessage(msg: Message){
@@ -36,5 +41,9 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
 
     fun receiveGuessClassic(): Observable<GuessMessageInfo> {
         return chatSocketService.receiveGuessClassic()
+    }
+
+    suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): Response<ArrayList<MessageChat>> {
+        return sessionManager.request(pageNumberWanted, friendId, messagePerPage,apiFriendslistInterface::getFriendChatHistory)
     }
 }

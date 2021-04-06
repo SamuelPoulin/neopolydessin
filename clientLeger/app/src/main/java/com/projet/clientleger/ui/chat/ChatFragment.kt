@@ -86,7 +86,6 @@ class ChatFragment @Inject constructor() : Fragment() {
                     mBinding.root.setBackgroundColor(Color.TRANSPARENT)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
                     mBinding.headerSpaceBuffer.visibility = View.VISIBLE
-
                 }
             }
         }
@@ -170,7 +169,7 @@ class ChatFragment @Inject constructor() : Fragment() {
             }
         }
 
-        vm.selectedTab.observe(requireActivity()){ tab ->
+        vm.currentTab.observe(requireActivity()){ tab ->
             binding?.let { mBinding ->
                 (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
             }

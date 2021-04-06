@@ -6,11 +6,19 @@ import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
+    companion object {
+        const val NB_MESSAGES_PER_PAGE = 20
+    }
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
     val convosData: HashMap<String, ArrayList<IMessage>> = HashMap()
@@ -19,7 +27,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
     private var currentConvoId: String = ""
-    val selectedTab: MutableLiveData<TabInfo> = MutableLiveData()
+    val currentTab: MutableLiveData<TabInfo> = MutableLiveData()
+
     init {
         receiveMessage()
         receivePlayerConnection()
@@ -40,7 +49,13 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             convosData[currentConvoId] = oldMessages
             currentConvoId = convoId
             val newMessages: ArrayList<IMessage> = ArrayList()
-            if(hasHistory){// TODO get history
+            if(hasHistory){
+                CoroutineScope(Job() + Dispatchers.Main).launch {
+                    val res = chatRepository.getChatFriendHistory(0, convoId, NB_MESSAGES_PER_PAGE)
+                    if(res.code() == HttpsURLConnection.HTTP_OK){
+                        newMessages.addAll(res.body()!!)
+                    }
+                }
                 newMessages.add(MessageChat(Random.nextInt().toString(), 0, "notMe"))
             }
             messagesLiveData.value!!.clear()
@@ -50,7 +65,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             val newTab = TabInfo(convoName, convoId)
             tabs.value!!.add(newTab)
             tabs.postValue(tabs.value!!)
-            selectedTab.postValue(newTab)
+            currentTab.postValue(newTab)
         }
     }
 
@@ -60,7 +75,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             oldMessages.addAll(messagesLiveData.value!!)
             convosData[currentConvoId] = oldMessages
 
-            selectedTab.postValue(tabInfo)
+            currentTab.postValue(tabInfo)
 
             messagesLiveData.value!!.clear()
             messagesLiveData.value!!.addAll(it)
@@ -70,6 +85,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     fun sendMessage(){
         messageContentLiveData.value?.let{
+            if(!currentTab.value!!.isGame)
+
             if(isGuessing.value!!) {
                 chatRepository.sendGuess(it)
                 } else {
