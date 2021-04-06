@@ -335,6 +335,9 @@ export class DatabaseService {
           return avatarModel.removeAvatar(id);
         })
         .then((result) => {
+          return gameHistoryModel.findOneAndDelete( { accountId: id});
+        })
+        .then((result) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
