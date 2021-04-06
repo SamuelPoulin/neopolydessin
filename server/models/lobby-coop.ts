@@ -38,7 +38,7 @@ export class LobbyCoop extends Lobby {
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = NB_GUESSES;
     this.timeLeftSeconds = COOP_START_TIME;
-    this.players.push(this.getBotInfo(0));
+    this.players.push(this.botService.getBot(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {
@@ -95,6 +95,8 @@ export class LobbyCoop extends Lobby {
         };
         this.io.in(this.lobbyId)
           .emit(SocketLobby.SOLO_COOP_GUESS_BROADCAST, guessMessage);
+        this.botService.playerGuess(guessStatus);
+
 
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
           this.botService.resetDrawing();

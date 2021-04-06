@@ -27,21 +27,21 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Name Name"
-                    android:textAlignment="center"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
                     android:id="@+id/username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="username"
+                    android:text="Bobino"
                     android:textAlignment="center"
-                    android:textSize="10sp" />
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="bob"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButtonToggleGroup

@@ -121,8 +121,12 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
 
     private fun receiveUpdateCurrentPath(coord: Coordinate) {
-        paths.value?.last()?.addCoord(coord)
-        paths.postValue(paths.value)
+        if(paths.value!!.isNotEmpty()){
+            paths.value?.last()?.addCoord(coord)
+            paths.postValue(paths.value)
+        }
+        //paths.value?.last()?.addCoord(coord)
+        //paths.postValue(paths.value)
     }
 
     fun updateCurrentPath(coords: Coordinate) {
