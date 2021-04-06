@@ -67,7 +67,13 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun receiveEndGameNotice():Observable<String>{
         return gameRepository.receiveEndGameNotice()
     }
+    fun reveiceBoardwipeNotice():Observable<String>{
+        return gameRepository.receiveBoardwipeNotice()
+    }
     fun unsubscribe(){
         gameRepository.unsubscribe()
+    }
+    fun onLeaveGame(){
+        gameRepository.onLeaveGame()
     }
 }

@@ -6,6 +6,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ChatModule } from '@components/pages/chat/chat.module';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
 
 describe('LobbyComponent', () => {
   let component: LobbyComponent;
@@ -15,7 +17,10 @@ describe('LobbyComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SharedModule, StatusBarModule, RouterTestingModule, ChatModule],
       declarations: [LobbyComponent],
-      providers: [{ provide: UserService, useValue: MockUserService }],
+      providers: [
+        { provide: UserService, useValue: MockUserService },
+        { provide: GameService, useValue: MockGameService },
+      ],
     }).compileComponents();
   });
 

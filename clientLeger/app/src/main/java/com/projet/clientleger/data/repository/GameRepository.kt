@@ -40,13 +40,19 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun receiveEndGameNotice():Observable<String>{
         return gameSocketService.receiveEndGameNotice()
     }
+    fun receiveBoardwipeNotice():Observable<String>{
+        return gameSocketService.receiveBoardwipeNotice()
+    }
     fun unsubscribe(){
         gameSocketService.unsubscribe()
     }
     fun receiveTeamScores():Observable<ArrayList<TeamScore>>{
         return gameSocketService.receiveTeamScores()
     }
-    fun receiveGameState():Observable<String>{
+    fun receiveGameState():Observable<String> {
         return gameSocketService.receiveGameState()
+    }
+    fun onLeaveGame() {
+        gameSocketService.onLeaveGame()
     }
 }

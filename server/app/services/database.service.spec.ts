@@ -3,14 +3,15 @@ import httpStatus from 'http-status-codes';
 import mongoose from 'mongoose';
 import { Response } from './database.service';
 import { describe, beforeEach } from 'mocha';
-import { DatabaseService, ErrorMsg, LoginTokens } from './database.service';
+import { DatabaseService, ErrorMsg } from './database.service';
 import { testingContainer } from '../../test/test-utils';
 import Types from '../types';
 import { Register } from '../../../common/communication/register';
-import { login } from '../../../common/communication/login';
+import { login, LoginResponse } from '../../../common/communication/login';
 import jwt from 'jsonwebtoken';
 import { Account } from '../../models/schemas/account';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { AccountInfo } from '../../../common/communication/account';
 
 export const accountInfo: Register = {
   firstName: 'name',
@@ -93,7 +94,7 @@ describe('Database Service', () => {
     databaseService.createAccount(accountInfo).then((result) => {
       return databaseService.createAccount(accountInfo);
     })
-      .then((response: Response<LoginTokens>) => {
+      .then((response: Response<LoginResponse>) => {
         expect(response.statusCode).not.to.equal(httpStatus.OK);
       })
       .catch((err: ErrorMsg) => {
@@ -131,7 +132,7 @@ describe('Database Service', () => {
 
   it('should login successfully', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginResponse>) => {
         expect(tokens.documents.accessToken).to.not.be.null;
         expect(tokens.documents.refreshToken).to.not.be.null;
         done();
@@ -148,7 +149,7 @@ describe('Database Service', () => {
   });
 
   it('should return a new acces token correctly when calling refreshToken', (done: Mocha.Done) => {
-    databaseService.createAccount(accountInfo).then((created: Response<LoginTokens>) => {
+    databaseService.createAccount(accountInfo).then((created: Response<LoginResponse>) => {
       databaseService.refreshToken(created.documents.refreshToken).then((token: string) => {
         expect(token).to.not.be.null;
         done();
@@ -166,7 +167,7 @@ describe('Database Service', () => {
 
   it('checkIfLoggedIn should resolve if the user is logged in', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginResponse>) => {
         if (process.env.JWT_KEY) {
           const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.checkIfLoggedIn(decodedJwt['_id']).then(() => {
@@ -189,7 +190,7 @@ describe('Database Service', () => {
 
   it('should resolve to true if user logout successfull', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginResponse>) => {
         databaseService.logout(tokens.documents.refreshToken).then((successfull) => {
           expect(successfull).to.be.true;
           done();
@@ -208,7 +209,7 @@ describe('Database Service', () => {
 
   it('should delete account correctly', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginResponse>) => {
         if (process.env.JWT_KEY) {
           const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.deleteAccount(decodedJwt['_id']).then((response: Response<Account>) => {
@@ -237,7 +238,7 @@ describe('Database Service', () => {
 
   it('updateAccount should update account correctly', (done: Mocha.Done) => {
     databaseService.createAccount(accountInfo).then((created) => {
-      databaseService.login(loginInfo).then((tokens: Response<LoginTokens>) => {
+      databaseService.login(loginInfo).then((tokens: Response<LoginResponse>) => {
         if (process.env.JWT_KEY) {
           const decodedJwt: {} = jwt.verify(tokens.documents.accessToken, process.env.JWT_KEY) as object;
           databaseService.updateAccount(decodedJwt['_id'], {
@@ -247,7 +248,7 @@ describe('Database Service', () => {
           } as Account).then((response: Response<Account>) => {
             expect(response.statusCode).to.equal(httpStatus.OK)
             expect(response.documents.username).to.equal('username');
-            databaseService.getAccountById(decodedJwt['_id']).then((account: Response<Account>) => {
+            databaseService.getAccountById(decodedJwt['_id']).then((account: Response<AccountInfo>) => {
               expect(account.statusCode).to.equal(httpStatus.OK);
               expect(account.documents.username).to.equal('newUsername');
               done();

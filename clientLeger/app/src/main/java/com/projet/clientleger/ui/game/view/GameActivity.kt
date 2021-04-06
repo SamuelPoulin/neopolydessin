@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -9,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import androidx.activity.viewModels
@@ -53,6 +55,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -80,13 +83,11 @@ class GameActivity : AppCompatActivity() {
     private fun showQuitGameDialog(message:String, isMessageFromServer:Boolean){
         val dialogView = layoutInflater.inflate(R.layout.dialog_button_quit_game, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
-
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.title.text = message
 
         dialog.quitBtn.setOnClickListener {
-            vm.unsubscribe()
             dialog.dismiss()
             finish()
         }
@@ -94,7 +95,7 @@ class GameActivity : AppCompatActivity() {
         if(isMessageFromServer){
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
-                vm.unsubscribe()
+                dialog.dismiss()
                 finish() }
         }
         else{
@@ -145,23 +146,21 @@ class GameActivity : AppCompatActivity() {
             binding.team1Label.text = "Équipe 1 - ${it[0].score}"
             binding.team2Label.text = "Équipe 1 - ${it[1].score}"
         }
-
-        vm.receiveEndGameNotice().subscribe(){
-            showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+        vm.receiveEndGameNotice().subscribe{
+            lifecycleScope.launch {
+                showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
+            }
+        }
+        vm.reveiceBoardwipeNotice().subscribe{
+            lifecycleScope.launch {
+                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
+            }
         }
     }
 
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
         
     }
-
-    /*private fun boardwipeNeeded(newPlayersInfo: ArrayList<PlayerInfo>): Boolean{
-        val newDrawer = newPlayersInfo.find { it.playerRole == PlayerRole.DRAWER }
-        val oldDrawer = players.find { it.playerRole == PlayerRole.DRAWER }
-        return newDrawer != oldDrawer
-
-    }*/
-
     private fun getFrenchRole(role:String):String{
         return when (role){
             PlayerRole.DRAWER.value -> "Dessinateur"
@@ -191,14 +190,13 @@ class GameActivity : AppCompatActivity() {
                     binding.timer.text = "$minRemaining:$secRemaining"
                 }
             }
-            override fun onFinish(){
-
-            }
+            override fun onFinish(){}
         }
         timer?.start()
     }
 
     override fun onDestroy() {
+        vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
     }

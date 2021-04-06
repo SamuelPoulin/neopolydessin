@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Account } from '@models/account';
@@ -11,13 +11,18 @@ import { LocalSaveService } from './localsave.service';
 })
 export class UserService {
   private jwtService: JwtHelperService;
+  private intervalId: number;
 
-  avatarBlob: Blob;
+  avatarBlob: Blob | undefined;
+  loggedOut: EventEmitter<void>;
+  loggedIn: EventEmitter<void>;
 
   constructor(private localSaveService: LocalSaveService, private apiService: APIService, private router: Router) {
     this.jwtService = new JwtHelperService();
+    this.loggedOut = new EventEmitter<void>();
+    this.loggedIn = new EventEmitter<void>();
 
-    setInterval(() => {
+    this.intervalId = window.setInterval(() => {
       this.validateAuth().catch(() => {
         this.logout();
       });
@@ -55,6 +60,7 @@ export class UserService {
         .then((loginResponse) => {
           this.localSaveService.accessToken = loginResponse.accessToken;
           this.localSaveService.refreshToken = loginResponse.refreshToken;
+          this.loggedIn.emit();
           resolve();
         })
         .catch(() => reject());
@@ -68,6 +74,7 @@ export class UserService {
         .then((loginResponse) => {
           this.localSaveService.accessToken = loginResponse.accessToken;
           this.localSaveService.refreshToken = loginResponse.refreshToken;
+          this.loggedIn.emit();
           resolve();
         })
         .catch(() => reject());
@@ -75,7 +82,10 @@ export class UserService {
   }
 
   logout() {
+    this.avatarBlob = undefined;
+    clearInterval(this.intervalId);
     this.localSaveService.clearData();
+    this.loggedOut.emit();
     this.router.navigate(['login']);
   }
 
@@ -116,6 +126,14 @@ export class UserService {
       return this.localSaveService.account;
     } else {
       return { _id: '', firstName: '', lastName: '', username: '', email: '', createdDate: '', friends: [], avatar: { _id: '' } };
+    }
+  }
+
+  get accessToken(): string {
+    if (this.localSaveService.accessToken) {
+      return this.localSaveService.accessToken;
+    } else {
+      return '';
     }
   }
 }

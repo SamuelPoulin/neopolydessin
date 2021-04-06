@@ -14,5 +14,5 @@ enum class DrawingSocketEndpoints(val endpoint: String) {
     RECEIVE_ERASE("eraseBroadcast"),
 
     SEND_PATH("addPath"),
-    RECEIVE_PATH("addPathBroadcast")
+    RECEIVE_PATH("addPathBroadcast"),
 }

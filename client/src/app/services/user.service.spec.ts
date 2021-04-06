@@ -4,6 +4,7 @@ import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
 import { UserService } from './user.service';
 import { Account } from '@models/account';
+import { EventEmitter } from '@angular/core';
 
 export const MockUserService = jasmine.createSpyObj('UserService', {
   login: null,
@@ -21,6 +22,9 @@ MockUserService.account = {
   username: '',
   avatar: { _id: '' },
 } as Account;
+
+MockUserService.loggedIn = new EventEmitter<void>();
+MockUserService.loggedOut = new EventEmitter<void>();
 
 describe('UserService', () => {
   let service: UserService;

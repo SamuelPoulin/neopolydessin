@@ -46,6 +46,7 @@ class AccountManagementActivity : AppCompatActivity() {
                 }
             }
         }
+        //binding.username.text =
     }
 
     fun changeFragment(fragment: Fragment) {
