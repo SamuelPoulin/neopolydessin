@@ -142,8 +142,10 @@ class GameActivity : AppCompatActivity() {
             setTimer(it)
         }
         vm.teamScores.observe(this){
-            binding.team1Label.text = "Équipe 1 - ${it[0].score}"
-            binding.team2Label.text = "Équipe 1 - ${it[1].score}"
+            if(it.size > 0)
+                binding.team1Label.text = "Équipe 1 - ${it[0].score}"
+            if(it.size > 1)
+                binding.team2Label.text = "Équipe 1 - ${it[1].score}"
         }
         vm.receiveEndGameNotice().subscribe{
             lifecycleScope.launch {

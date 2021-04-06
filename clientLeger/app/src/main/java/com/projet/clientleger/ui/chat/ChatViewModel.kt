@@ -38,6 +38,9 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         receivePlayerConnection()
         receivePlayerDisconnect()
         chatRepository.receiveGuessClassic().subscribe{
+            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
+        }
+        chatRepository.receiveGuessSoloCoop().subscribe{
             println("guess received")
             receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }

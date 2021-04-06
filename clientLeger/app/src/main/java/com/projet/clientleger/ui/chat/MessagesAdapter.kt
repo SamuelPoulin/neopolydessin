@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.enumData.MessageType
-import com.projet.clientleger.data.model.chat.IMessage
-import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.GuessMessageInfo
+import com.projet.clientleger.data.model.chat.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,8 +30,12 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
                     else -> MessageType.OTHER
                 }
             }
-            mMessages[position] is GuessMessageInfo -> {
-                val msg = mMessages[position] as GuessMessageInfo
+            mMessages[position] is GuessMessageInfo || mMessages[position] is GuessMessageSoloCoopInfo -> {
+                val msg: IGuessMessageInfo = if(mMessages[position] is GuessMessageInfo)
+                    mMessages[position] as GuessMessageInfo
+                else
+                    mMessages[position] as GuessMessageSoloCoopInfo
+
                 type = if (msg.senderUsername == username) {
                     when (msg.guessStatus) {
                         GuessStatus.WRONG -> MessageType.USER_GUESS_WRONG

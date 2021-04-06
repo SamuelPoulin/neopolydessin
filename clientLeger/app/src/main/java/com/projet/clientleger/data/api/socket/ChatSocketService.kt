@@ -1,14 +1,12 @@
 package com.projet.clientleger.data.api.socket
 
 import com.projet.clientleger.data.api.model.chat.GuessMessage
+import com.projet.clientleger.data.api.model.chat.GuessMessageSoloCoop
 import com.projet.clientleger.data.api.model.chat.PrivateMessage
 import com.projet.clientleger.data.api.model.chat.ReceivedPrivateMessage
 import com.projet.clientleger.data.endpoint.ChatSocketEndpoints
 import com.projet.clientleger.data.api.model.lobby.Player
-import com.projet.clientleger.data.model.chat.Message
-import com.projet.clientleger.data.model.chat.MessageChat
-import com.projet.clientleger.data.model.chat.GuessMessageInfo
-import com.projet.clientleger.data.model.chat.MessageSystem
+import com.projet.clientleger.data.model.chat.*
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.decodeFromString
@@ -62,6 +60,12 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
     fun receiveGuessClassic(): Observable<GuessMessageInfo>{
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS_CLASSIC.value){(guessMessage) ->
             Json.decodeFromString(GuessMessage.serializer(), guessMessage.toString()).toInfo()
+        }
+    }
+
+    fun receiveGuessSoloCoop(): Observable<GuessMessageSoloCoopInfo>{
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS_SOLO_COOP.value){ (guessMessage) ->
+            Json.decodeFromString(GuessMessageSoloCoop.serializer(), guessMessage.toString()).toInfo()
         }
     }
 
