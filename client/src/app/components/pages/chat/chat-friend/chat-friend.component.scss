@@ -1,0 +1,31 @@
+.chat-friend-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 5px 0px;
+  height: 75px;
+  background-color: #2F2F2F;
+  font-size: 18px;
+  color: white;
+  font-weight: 500;
+}
+
+.chat-friend-avatar {
+  margin: 0px 10px 0px 25px;
+}
+
+.chat-friend-buttons-container {
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.chat-friend-button {
+  background-color: #292929;
+  margin: 0px 5px;
+}
+
+.chat-friend-end-padding {
+  width: 15px;
+}

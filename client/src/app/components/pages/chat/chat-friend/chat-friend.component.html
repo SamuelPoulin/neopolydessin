@@ -1,1 +1,29 @@
-<p>chat-friend works!</p>
+<div class="chat-friend-container">
+  <app-avatar [username]="username" [avatarId]="avatarId" size="35" fontSize="20" class="chat-friend-avatar">
+  </app-avatar>
+  {{username}}
+  <div class="chat-friend-buttons-container">
+    <ng-container [ngSwitch]="friend.status">
+      <ng-container *ngSwitchCase="friendStatus.PENDING">
+        <button mat-icon-button class="chat-friend-button">
+          <mat-icon>done</mat-icon>
+        </button>
+        <button mat-icon-button class="chat-friend-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </ng-container>
+      <ng-container *ngSwitchCase="friendStatus.FRIEND">
+        <button mat-icon-button class="chat-friend-button">
+          <mat-icon>sports_esports</mat-icon>
+        </button>
+        <button mat-icon-button class="chat-friend-button">
+          <mat-icon>send</mat-icon>
+        </button>
+        <button mat-icon-button class="chat-friend-button">
+          <mat-icon>person_remove</mat-icon>
+        </button>
+      </ng-container>
+      <div class="chat-friend-end-padding"></div>
+    </ng-container>
+  </div>
+</div>

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
+import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
 import { Subscription } from 'rxjs';
 import { Message } from '../../../../common/communication/chat-message';
+import { APIService } from './api.service';
 import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
 
@@ -15,18 +17,22 @@ export class ChatService {
   privateMessageSubscription: Subscription;
   playerConnectionSubscription: Subscription;
   playerDisconnectionSubscription: Subscription;
+  friendslistSubscription: Subscription;
 
   rooms: ChatRoom[] = [];
-  friends: any[] = [];
-  friendRequests: any[] = [];
+  friends: FriendWithConnection[] = [];
+  friendRequests: FriendWithConnection[] = [];
   currentRoomIndex: number = 0;
   guessing: boolean = false;
   friendslistOpened: boolean = false;
 
-  constructor(private socketService: SocketService, private gameService: GameService) {
+  constructor(private socketService: SocketService, private gameService: GameService, private apiService: APIService) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, type: ChatRoomType.GAME, messages: [] });
     this.currentRoomIndex = 0;
 
+    this.apiService.getFriendsList().then((friendslist) => {
+      this.updateFriendsList(friendslist);
+    });
     this.initSubscriptions();
   }
 
@@ -56,6 +62,22 @@ export class ChatService {
     this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
       this.handleMessage(message);
     });
+
+    this.friendslistSubscription = this.socketService.receiveFriendslist().subscribe((friendslist) => {
+      this.updateFriendsList(friendslist);
+    });
+  }
+
+  updateFriendsList(friendslist: FriendsList) {
+    this.friends = [];
+    this.friendRequests = [];
+    for (const user of friendslist.friends) {
+      if (user.status === FriendStatus.FRIEND) {
+        this.friends.push(user);
+      } else if (user.status === FriendStatus.PENDING) {
+        this.friendRequests.push(user);
+      }
+    }
   }
 
   handleMessage(message: Message) {

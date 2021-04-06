@@ -8,6 +8,8 @@ import { SocketDrawing } from '@common/socketendpoints/socket-drawing';
 import { BrushInfo } from '@common/communication/brush-info';
 import { ChatMessage, SystemMessage } from '@common/communication/chat-message';
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
+import { FriendsList } from '@common/communication/friends';
+import { SocketFriendListNotifications } from '@common/socketendpoints/socket-friend-actions';
 import {
   CurrentGameState,
   Difficulty,
@@ -67,6 +69,12 @@ export class SocketService {
   receiveGameStart(): Observable<boolean> {
     return new Observable<boolean>((obs) => {
       this.socket.on(SocketLobby.START_GAME_CLIENT, () => obs.next(true));
+    });
+  }
+
+  receiveFriendslist(): Observable<FriendsList> {
+    return new Observable<FriendsList>((obs) => {
+      this.socket.on(SocketFriendListNotifications.UPDATE, (friendslist: FriendsList) => obs.next(friendslist));
     });
   }
 

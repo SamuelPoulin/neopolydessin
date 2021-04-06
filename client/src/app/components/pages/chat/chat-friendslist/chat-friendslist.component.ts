@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { FriendWithConnection } from '@common/communication/friends';
 import { ChatService } from '@services/chat.service';
 
 @Component({
@@ -15,11 +16,11 @@ export class ChatFriendslistComponent {
     this.chatService.friendslistOpened = false;
   }
 
-  get friends() {
+  get friends(): FriendWithConnection[] {
     return this.chatService.friends;
   }
 
-  get friendRequests() {
+  get friendRequests(): FriendWithConnection[] {
     return this.chatService.friendRequests;
   }
 }

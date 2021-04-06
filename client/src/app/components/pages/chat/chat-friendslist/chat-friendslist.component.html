@@ -16,7 +16,7 @@
         </div>
       </ng-container>
       <ng-container *ngFor="let friendRequest of friendRequests">
-        <app-chat-friend friend="friendRequest"></app-chat-friend>
+        <app-chat-friend [friend]="friendRequest"></app-chat-friend>
       </ng-container>
     </div>
     <div id="chat-friendslist-friends-container">
@@ -29,7 +29,7 @@
         </div>
       </ng-container>
       <ng-container *ngFor="let friend of friends">
-        <app-chat-friend friend="friend"></app-chat-friend>
+        <app-chat-friend [friend]="friend"></app-chat-friend>
       </ng-container>
     </div>
   </div>
