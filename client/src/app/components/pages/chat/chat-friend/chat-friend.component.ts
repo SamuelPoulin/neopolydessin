@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FriendStatus, FriendWithConnection } from '@common/communication/friends';
 
 @Component({
@@ -6,12 +6,8 @@ import { FriendStatus, FriendWithConnection } from '@common/communication/friend
   templateUrl: './chat-friend.component.html',
   styleUrls: ['./chat-friend.component.scss'],
 })
-export class ChatFriendComponent implements OnInit {
+export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
-
-  ngOnInit() {
-    console.log(this.friend);
-  }
 
   get username() {
     return this.friend.friendId?.username;
@@ -23,5 +19,25 @@ export class ChatFriendComponent implements OnInit {
 
   get friendStatus() {
     return FriendStatus;
+  }
+
+  confirm() {
+    console.log('Friend confirmed!');
+  }
+
+  reject() {
+    console.log('Friend rejected!');
+  }
+
+  invite() {
+    console.log('Friend invited!');
+  }
+
+  unfriend() {
+    console.log('Friend unfriended!');
+  }
+
+  chat() {
+    console.log('Started chat with friend!');
   }
 }

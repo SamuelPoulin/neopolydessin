@@ -5,21 +5,21 @@
   <div class="chat-friend-buttons-container">
     <ng-container [ngSwitch]="friend.status">
       <ng-container *ngSwitchCase="friendStatus.PENDING">
-        <button mat-icon-button class="chat-friend-button">
+        <button mat-icon-button class="chat-friend-button" (click)="confirm()">
           <mat-icon>done</mat-icon>
         </button>
-        <button mat-icon-button class="chat-friend-button">
+        <button mat-icon-button class="chat-friend-button" (click)="reject()">
           <mat-icon>close</mat-icon>
         </button>
       </ng-container>
       <ng-container *ngSwitchCase="friendStatus.FRIEND">
-        <button mat-icon-button class="chat-friend-button">
+        <button mat-icon-button class="chat-friend-button" (click)="invite()">
           <mat-icon>sports_esports</mat-icon>
         </button>
-        <button mat-icon-button class="chat-friend-button">
+        <button mat-icon-button class="chat-friend-button" (click)="chat()">
           <mat-icon>send</mat-icon>
         </button>
-        <button mat-icon-button class="chat-friend-button">
+        <button mat-icon-button class="chat-friend-button" (click)="unfriend()">
           <mat-icon>person_remove</mat-icon>
         </button>
       </ng-container>
