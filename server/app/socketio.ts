@@ -1,8 +1,9 @@
+/* eslint-disable max-lines */
 import http from 'http';
-import { inject, injectable } from 'inversify';
+import { id, inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { Message } from '../../common/communication/chat-message';
+import { ChatMessage, Message, RoomChatMessage, RoomSystemMessage, SystemMessage } from '../../common/communication/chat-message';
 import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -16,7 +17,7 @@ import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
 import { Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
-import { AccountFriend } from '../../common/communication/account';
+import { AccountFriend, AccountInfo } from '../../common/communication/account';
 import * as jwtUtils from './utils/jwt-util';
 import { DatabaseService, Response } from './services/database.service';
 import { SocketIdService } from './services/socket-id.service';
@@ -25,6 +26,7 @@ import { Observable } from './utils/observable';
 import { PictureWordService } from './services/picture-word.service';
 import { AvatarService } from './services/avatar.service';
 
+const GENERAL_CHAT_ROOM: string = 'general';
 @injectable()
 export class SocketIo {
 
@@ -36,6 +38,9 @@ export class SocketIo {
 
   io: Server;
   lobbyList: Lobby[] = [];
+
+  rooms: string[] = [GENERAL_CHAT_ROOM];
+
   readonly MAX_LENGTH_MSG: number = 200;
   readonly SERVER_OPTS: Partial<ServerOptions> = {
     cors: {
@@ -168,6 +173,9 @@ export class SocketIo {
           }
         });
 
+      // ***************************************
+      // CHAT SYSTEM ENDPOINTS
+      // ***************************************
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessageTo) => {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
@@ -194,6 +202,107 @@ export class SocketIo {
         }
         else {
           console.log(`Message trop long (+${this.MAX_LENGTH_MSG} caractères)`);
+        }
+      });
+
+      socket.on(SocketMessages.GET_CHAT_ROOMS_IM_IN, (callback: (rooms: string[]) => void) => {
+        const roomsImIn: string[] = [];
+        socket.rooms.forEach((room) => {
+          if (this.chatRoomExists(room)) {
+            roomsImIn.push(room);
+          }
+        });
+        callback(roomsImIn);
+      });
+
+      socket.on(SocketMessages.GET_CHAT_ROOMS, (callback: (rooms: string[]) => void) => {
+        callback(this.rooms);
+      });
+
+      socket.on(SocketMessages.CREATE_CHAT_ROOM, (roomName: string, callback: (successfullyCreated: boolean) => void) => {
+        if (!this.chatRoomExists(roomName)) {
+          this.rooms.push(roomName);
+          // create chat history for room
+          callback(true);
+        } else {
+          callback(false);
+        }
+      });
+
+      socket.on(SocketMessages.DELETE_CHAT_ROOM, (roomName: string, callback: (successfullyDeleted: boolean) => void) => {
+        if (this.chatRoomExists(roomName) && roomName !== GENERAL_CHAT_ROOM) {
+          const roomIndex = this.rooms.findIndex((room) => room === roomName);
+          if (roomIndex > -1) {
+            this.io.of('/').in(roomName).sockets.forEach((socketOfClient) => {
+              socketOfClient.leave(roomName);
+            });
+            this.rooms.splice(roomIndex, 1);
+            // delete chat history
+            callback(true);
+          }
+        } else {
+          callback(false);
+        }
+      });
+
+      socket.on(SocketMessages.LEAVE_CHAT_ROOM, (roomName: string, callback: (successfullyLeft: boolean) => void) => {
+        if (this.chatRoomExists(roomName) && socket.rooms.has(roomName)) {
+          socket.leave(roomName);
+          callback(true);
+        } else {
+          callback(false);
+        }
+      });
+
+      socket.on(SocketMessages.JOIN_CHAT_ROOM, async (roomName: string, successfullyJoined: (joined: boolean) => void) => {
+        if (this.chatRoomExists(roomName)) {
+          const accountInfo = await this.getAccountOfUser(socket);
+          if (accountInfo) {
+            socket.join(roomName);
+            const playerJoinedMsg: RoomSystemMessage = {
+              roomName,
+              content: `${accountInfo.username} a rejoint le salon : ${roomName}`,
+              timestamp: Date.now(),
+            };
+            this.io.in(roomName).emit(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, playerJoinedMsg);
+            successfullyJoined(true);
+          } else {
+            successfullyJoined(false);
+          }
+        }
+      });
+
+      socket.on(SocketMessages.LEAVE_CHAT_ROOM, async (roomName, successfullyLeave: (joined: boolean) => void) => {
+        if (socket.rooms.has(roomName)) {
+          const accountInfo = await this.getAccountOfUser(socket);
+          if (accountInfo) {
+            socket.leave(roomName);
+            const playerLeft: RoomSystemMessage = {
+              roomName,
+              content: `${accountInfo.username} a quitté le salon : ${roomName}`,
+              timestamp: Date.now(),
+            };
+            this.io.in(roomName).emit(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, playerLeft);
+            successfullyLeave(true);
+          } else {
+            successfullyLeave(false);
+          }
+        }
+      });
+
+      socket.on(SocketMessages.SEND_MESSAGE_TO_ROOM, async (roomName: string, message: Message) => {
+        if (this.chatRoomExists(roomName)) {
+          const accountInfo = await this.getAccountOfUser(socket);
+          if (accountInfo) {
+            const roomMsg: RoomChatMessage = {
+              content: message.content,
+              timestamp: Date.now(),
+              senderUsername: accountInfo.username,
+              roomName
+            };
+            // add to history
+            this.io.in(roomName).emit(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, roomMsg);
+          }
         }
       });
 
@@ -254,12 +363,26 @@ export class SocketIo {
     }
   }
 
+  private async getAccountOfUser(socket: Socket): Promise<AccountInfo | undefined> {
+    const accountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+    if (accountId) {
+      const account = await this.databaseService.getAccountById(accountId);
+      return account.documents;
+    } else {
+      return undefined;
+    }
+  }
+
   private findLobby(lobbyId: string): Lobby | undefined {
     return this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
   }
 
   private validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
+  }
+
+  private chatRoomExists(roomName: string): boolean {
+    return this.rooms.includes(roomName);
   }
 
 }
