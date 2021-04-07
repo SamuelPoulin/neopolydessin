@@ -6,16 +6,19 @@ import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.account.AccountInfo
+import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
 class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService,
                                           private val sessionManager: SessionManager,
-                                          private val apiAvatarInterface: ApiAvatarInterface,
-                                          private val avatarStorageService: AvatarStorageService) {
+                                          private val avatarStorageService: AvatarStorageService,
+                                          private val chatStorageService: ChatStorageService) {
+    val accountInfo = sessionManager.getAccountInfo()
     fun receivePlayerJoin(): Observable<PlayerInfo> {
         return Observable.create { emitter ->
             lobbySocketService.receivePlayerJoin().subscribe{
@@ -53,7 +56,10 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
             lobbySocketService.receiveJoinedLobbyInfo().subscribe{
                 val list = ArrayList<PlayerInfo>()
                 for(player in it){
-                    avatarStorageService.addPlayer(player)
+                    if(accountInfo.accountId == player.accountId)
+                        avatarStorageService.addPlayer(accountInfo)
+                    else
+                        avatarStorageService.addPlayer(player)
                     list.add(player.toPlayerInfo(avatarStorageService.getAvatar(player.accountId)))
                 }
                 emitter.onNext(list)
@@ -88,11 +94,12 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     }
 
-    fun getAccountInfo(): AccountInfo{
-        return sessionManager.getAccountInfo()
-    }
-
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
     }
+
+    fun addGameTabToStorage(tabInfo: TabInfo){
+        chatStorageService.addEmptyTab(tabInfo, 0, true)
+    }
+
 }

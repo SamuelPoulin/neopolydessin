@@ -12,6 +12,7 @@ import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
@@ -54,6 +55,7 @@ class MainmenuActivity : AppCompatActivity() {
         }
         binding.accountBtn.setOnClickListener {
             val intent = Intent(this, AccountManagementActivity::class.java)
+            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
         }
 
@@ -94,13 +96,13 @@ class MainmenuActivity : AppCompatActivity() {
                 intent = Intent(this, LobbyActivity::class.java)
                 intent.putExtra("gameName", getGameName(dialog))
                 intent.putExtra("isPrivate", false)
-                //vm.createGame(getGameName(dialog), selectedGameType, selectedDifficulty, false)
             }
             else
                 intent = Intent(this, SearchLobbyActivity::class.java)
 
             intent.putExtra("gameType",selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
+            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
             dialog.dismiss()
         }

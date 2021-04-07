@@ -1,5 +1,6 @@
 package com.projet.clientleger.ui.chat
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Html
 import android.util.DisplayMetrics
@@ -12,12 +13,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.FriendSimplified
-import com.projet.clientleger.data.model.chat.IMessage
+import com.projet.clientleger.data.model.chat.TabInfo
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_chat.*
 import java.util.regex.Pattern
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FragmentChatBinding
@@ -40,26 +39,51 @@ class ChatFragment @Inject constructor() : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         screenSize = displayMetrics.widthPixels
         baseWidth = screenSize/2
-        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
-            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
-            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
-        }
-        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
-            resize(bundle["height"] as Int)
-        }
-        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
-            (bundle["friend"] as FriendSimplified).username
-            // TODO chat openned from friendslists
-        }
+
         vm.isGuessing.observe(requireActivity()){
             updateTheme(it)
         }
         vm.isGuesser.observe(requireActivity()){
             updateGuessingBtnVisibility(it)
+        }
+
+        setupFragmentListeners()
+        setupTabsObservers()
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        vm.fetchSavedData()
+    }
+
+    private fun toggleVisibilityChat(){
+        binding?.let { mBinding ->
+            val newVisibility = when(mBinding.chatSendBox.visibility){
+                View.VISIBLE -> View.GONE
+                else -> View.VISIBLE
+            }
+            mBinding.rvTabs.visibility = newVisibility
+            mBinding.messageContainer.visibility = newVisibility
+            mBinding.chatSendBox.visibility = newVisibility
+
+            when(newVisibility) {
+                View.VISIBLE ->{
+                    mBinding.root.setBackgroundResource(R.drawable.chat_background)
+                    mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_hide_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.GONE
+                }
+                else -> {
+                    mBinding.root.setBackgroundColor(Color.TRANSPARENT)
+                    mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.VISIBLE
+                }
+            }
         }
     }
 
@@ -68,23 +92,22 @@ class ChatFragment @Inject constructor() : Fragment() {
             baseHeight = binding!!.root.height
         if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
             val params = binding!!.root.layoutParams
-            params.height = height
-            binding!!.root.requestLayout()
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            params.height = baseHeight - height
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            }
 
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
-            binding!!.root.requestLayout()
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
     }
 
     override fun onCreateView(
@@ -92,25 +115,97 @@ class ChatFragment @Inject constructor() : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChatBinding.inflate(inflater, container, false)
+
         binding!!.sendButton.setOnClickListener { sendMessage() }
         binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
-        vm.messagesLiveData.observe(requireActivity()){
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(it.size - 1)
-        }
+
         binding!!.vm = vm
         return binding!!.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
-        val adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.username)
+        setupRvMessages()
+
+        setupMessagesObserver()
+
+        binding?.let {
+            it.iconsHeader.setOnClickListener {
+                toggleVisibilityChat()
+            }
+
+            val manager = LinearLayoutManager(activity)
+            manager.orientation = LinearLayoutManager.HORIZONTAL
+            it.rvTabs.layoutManager = manager
+            it.rvTabs.adapter = TabAdapter(vm.tabs.value!!, vm::changeSelectedTab)
+        }
+    }
+
+    private fun setupFragmentListeners(){
+        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
+            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
+            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
+        }
+        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
+            resize(bundle["height"] as Int)
+        }
+        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
+            val friend = (bundle["friend"] as FriendSimplified)
+            vm.addNewTab(TabInfo(friend.username, friend.friendId, true))
+        }
+
+        setFragmentResultListener("openGameChat"){requestKey, bundle ->
+            val tabName = (bundle["tabName"] as String)
+            vm.addNewTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+        }
+        setFragmentResultListener("closeGameChat"){requestKey, bundle ->
+            val tabName = (bundle["tabName"] as String)
+            vm.removeTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+        }
+        setFragmentResultListener("activityChange"){requestKey, bundle ->
+            vm.saveData()
+            vm.clear()
+        }
+    }
+
+    private fun setupTabsObservers(){
+        vm.tabs.observe(requireActivity()){ newTabs ->
+            binding?.let { mBinding ->
+                mBinding.rvTabs.adapter?.notifyDataSetChanged()
+                mBinding.rvTabs.scrollToPosition(0)
+            }
+        }
+
+        vm.currentTab.observe(requireActivity()){ tab ->
+            binding?.let { mBinding ->
+                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
+            }
+        }
+    }
+
+    private fun setupMessagesObserver(){
+        vm.messagesLiveData.observe(requireActivity()){
+            binding?.let { mBinding ->
+                if(it.isEmpty()) {
+                    mBinding.noMessagesView.visibility = View.VISIBLE
+                    mBinding.rvMessages.visibility = View.GONE
+                } else {
+                    mBinding.noMessagesView.visibility = View.GONE
+                    mBinding.rvMessages.visibility = View.VISIBLE
+                }
+                mBinding.rvMessages.adapter?.notifyDataSetChanged()
+                mBinding.rvMessages.scrollToPosition(it.size - 1)
+            }
+        }
+    }
+
+    private fun setupRvMessages(){
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
-        rvMessages.layoutManager = LinearLayoutManager(activity)
-        rvMessages.adapter = adapter
+        binding!!.rvMessages.layoutManager = mLinearLayoutManager
+        binding!!.rvMessages.adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.accountInfo.username)
     }
 
     private fun sendMessage() {
@@ -118,7 +213,7 @@ class ChatFragment @Inject constructor() : Fragment() {
 
         //TODO show loading message
 
-        chatBox.text?.clear()
+        binding?.chatBox?.text?.clear()
     }
     private fun isMessageValidFormat(message: String): Boolean {
         return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()
@@ -160,5 +255,10 @@ class ChatFragment @Inject constructor() : Fragment() {
         else{
             binding!!.guessingToggleBtn.visibility = View.INVISIBLE
         }
+    }
+
+    override fun onDestroy() {
+        binding = null
+        super.onDestroy()
     }
 }

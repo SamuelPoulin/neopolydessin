@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import randomColor from 'randomcolor';
 import { GameService } from '@services/game.service';
-import { Player } from '../../../../../../../common/communication/lobby';
+import { GameType, Player } from '../../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-lobby',
@@ -41,5 +41,13 @@ export class LobbyComponent {
   startGame(): void {
     this.gameService.startGame();
     this.router.navigate(['edit']);
+  }
+
+  get gamemode(): GameType {
+    return this.gameService.gameType ? this.gameService.gameType : GameType.CLASSIC;
+  }
+
+  get splitTeams(): boolean {
+    return this.gameService.gameType === GameType.CLASSIC;
   }
 }

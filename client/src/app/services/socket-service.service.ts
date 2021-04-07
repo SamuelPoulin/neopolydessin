@@ -13,7 +13,7 @@ import {
   Difficulty,
   GameType,
   GuessMessage,
-  GuessMessageCoop,
+  GuessMessageSoloCoop,
   LobbyInfo,
   Player,
   TeamScore,
@@ -73,7 +73,7 @@ export class SocketService {
   receiveGuess(): Observable<GuessMessage> {
     return new Observable<GuessMessage>((obs) => {
       this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => obs.next(content));
-      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageCoop) => obs.next(content));
+      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageSoloCoop) => obs.next(content));
     });
   }
 
@@ -122,9 +122,9 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
-  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+  getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
     });
   }
@@ -141,9 +141,10 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, GameType.SPRINT_SOLO, Difficulty.EASY, false, (data: string) => resolve(data));
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      resolve();
     });
   }
 
