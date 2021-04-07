@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
 import { Message } from '../../common/communication/chat-message';
-import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { FriendsList } from '../../common/communication/friends';
@@ -113,7 +113,7 @@ export class SocketIo {
   sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
     const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
     if (socketId) {
-      this.io.to(socketId).emit(endpoint, friends);
+      this.io.to(socketId).emit(endpoint, friends.documents);
     }
   }
 
@@ -168,14 +168,14 @@ export class SocketIo {
           }
         });
 
-      socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessage) => {
+      socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessageTo) => {
         if (this.validateMessageLength(sentMsg)) {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
             const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
             if (senderAccountId) {
               const timestamp = Date.now();
-              const msgToSend: ReceivedPrivateMessage = {
+              const msgToSend: PrivateMessage = {
                 content: sentMsg.content,
                 senderAccountId,
                 timestamp,

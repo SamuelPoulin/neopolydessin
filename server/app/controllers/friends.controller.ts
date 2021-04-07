@@ -26,10 +26,9 @@ export class FriendsController {
 
     this.router.get('/history',
       [
-        query('page').isInt(),
+        query('page').isInt({ min: 1 }),
         query('limit').isInt(),
         query('otherId').isLength({ min: 12, max: 24 })
-
       ],
       validationCheck,
       jwtVerify,
