@@ -49,7 +49,7 @@ class AccountManagementActivity : AppCompatActivity() {
         //binding.username.text =
     }
 
-    fun changeFragment(fragment: Fragment) {
+    private fun changeFragment(fragment: Fragment) {
         val fragmentFound = fragmentManager.findFragmentByTag("fragment")
         if(fragmentFound != fragment) {
             fragmentManager.beginTransaction()
