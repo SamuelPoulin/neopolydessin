@@ -3,7 +3,7 @@ export enum SocketMessages {
     RECEIVE_MESSAGE = 'ReceiveMsg',
 
     GET_CHAT_ROOM_HISTORY = 'getChatRoomHistory',   // roomName: string, page: number, limit: number, callback (chatHistory: ChatRoomHistory | null)
-    GET_CHAT_ROOMS = 'getChatRoooms',               // callback (rooms: string[])
+    GET_CHAT_ROOMS = 'getChatRooms',               // callback (rooms: string[])
     GET_CHAT_ROOMS_IM_IN = 'getChatRoomsIn',        // callback (rooms: string[])
     SEND_MESSAGE_TO_ROOM = 'SendMsgToRoom',         // roomName: string, message: Message
     RECEIVE_MESSAGE_OF_ROOM = 'ReceiveMsgFromRoom', // RoomChatMessage | RoomSystemMessage
