@@ -79,4 +79,10 @@
     <string name="nb_hours_connection">Nombre d\'heures de connexion</string>
     <string name="returnbutton">Retour</string>
     <string name="history_label">Historique des parties jouées</string>
+    <string name="first_name_hint">Prénom</string>
+    <string name="last_name_hint">Nom</string>
+    <string name="username_hint">Nom d\'utilisateur</string>
+    <string name="email_hint">Email</string>
+    <string name="profile_label">Profil</string>
+    <string name="confirm_btn">Confirmer</string>
 </resources>

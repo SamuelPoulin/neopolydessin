@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.Account
+import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.databinding.ActivityAccountManagementBinding
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DashboardFragment
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
@@ -61,6 +62,7 @@ class AccountManagementActivity : AppCompatActivity() {
         binding.logoutBtn.setOnClickListener {
             finish()
         }
+
     }
 
     private fun changeFragment(fragment: Fragment) {
@@ -70,6 +72,9 @@ class AccountManagementActivity : AppCompatActivity() {
                 .replace(R.id.fragmentContainer, fragment, "fragment")
                 .commit()
         }
+    }
+    suspend fun changeProfileInfos(account:UpdateAccountModel){
+        vm.updateAccountInfos(account)
     }
 
 }

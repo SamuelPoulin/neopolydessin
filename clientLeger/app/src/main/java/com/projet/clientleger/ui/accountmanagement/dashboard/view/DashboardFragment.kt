@@ -35,7 +35,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DashboardFragmentBinding.inflate(inflater, container, false)
-        return inflater.inflate(R.layout.dashboard_fragment, container, false)
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,7 +53,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         entries.add(BarEntry(3f,floatArrayOf(3f,2f)))
         entries.add(BarEntry(4f,floatArrayOf(4f,1f)))
         entries.add(BarEntry(5f,floatArrayOf(5f,0f)))
-        entries.add(BarEntry(5f,floatArrayOf(5f,0f)))
+        entries.add(BarEntry(6f,floatArrayOf(6f,0f)))
 
         val barDataSet = BarDataSet(entries,"Dates")
         val greenColor = ContextCompat.getColor(requireActivity().applicationContext,R.color.dark_green)

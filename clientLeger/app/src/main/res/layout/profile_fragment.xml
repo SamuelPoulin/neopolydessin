@@ -1,13 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.accountmanagement.profile.ProfileFragment">
-
-    <TextView
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="PROFILE" />
-
-</FrameLayout>
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        tools:context=".ui.accountmanagement.profile.ProfileFragment">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/statsBox"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintHeight_percent="0.6"
+            app:layout_constraintWidth_percent="0.48"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+            <TextView
+                android:id="@+id/profileLabel"
+                android:text="@string/profile_label"
+                android:textSize="40sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+            <EditText
+                android:id="@+id/firstNameBox"
+                android:hint="@string/first_name_hint"
+                android:paddingStart="10dp"
+                android:textSize="30sp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintWidth_percent="0.49"
+                android:gravity="center_vertical"
+                android:background="@drawable/round_button"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/profileLabel"
+                android:autofillHints="@string/first_name_hint"
+                android:inputType="text"
+                tools:ignore="RtlSymmetry" />
+            <EditText
+                android:id="@+id/lastNameBox"
+                android:hint="@string/last_name_hint"
+                android:paddingStart="10dp"
+                android:textSize="30sp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintWidth_percent="0.49"
+                android:gravity="center_vertical"
+                android:background="@drawable/round_button"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/profileLabel"
+                android:autofillHints="@string/last_name_hint"
+                android:inputType="text"
+                tools:ignore="RtlSymmetry" />
+            <EditText
+                android:id="@+id/usernameBox"
+                android:layout_marginTop="20dp"
+                android:hint="@string/username_hint"
+                android:paddingStart="10dp"
+                android:textSize="30sp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.15"
+                android:gravity="center_vertical"
+                android:background="@drawable/round_button"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/firstNameBox"
+                android:autofillHints="@string/username_hint"
+                android:inputType="text"
+                tools:ignore="RtlSymmetry" />
+            <EditText
+                android:id="@+id/emailBox"
+                android:layout_marginTop="20dp"
+                android:hint="@string/email_hint"
+                android:paddingStart="10dp"
+                android:textSize="30sp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.15"
+                android:gravity="center_vertical"
+                android:background="@drawable/round_button"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/usernameBox"
+                android:autofillHints="@string/email_hint"
+                android:inputType="text"
+                tools:ignore="RtlSymmetry,TextFields" />
+            <Button
+                android:id="@+id/confirmBtn"
+                android:text="@string/confirm_btn"
+                android:textSize="30sp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintTop_toBottomOf="@+id/emailBox"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

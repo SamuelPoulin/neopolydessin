@@ -4,6 +4,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiDashboardInterface
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.api.model.account.FriendInfo
+import com.projet.clientleger.data.model.account.UpdateAccountModel
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
@@ -14,5 +15,12 @@ open class AccountManagementRepository @Inject constructor(private val apiDashbo
         if(res.code() == HttpsURLConnection.HTTP_OK)
             account = res.body()
         return account
+    }
+    open suspend fun updateAccountInfos(account:UpdateAccountModel):Account?{
+        var returnAccount:Account? = Account("","","","","",ArrayList<FriendInfo>(), 0,"")
+        val res = apiDashboardInterface.updateAccount(account)
+        if(res.code() == HttpsURLConnection.HTTP_OK)
+            returnAccount = res.body()
+        return returnAccount
     }
 }
