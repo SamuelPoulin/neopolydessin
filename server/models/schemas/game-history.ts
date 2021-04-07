@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model, model, Query, Schema } from 'mongoose';
 import { GameType } from '../../../common/communication/lobby';
+import { UpdateOneQueryResult } from './account';
 
 export enum GameResult {
   WIN = 'Win',
@@ -29,6 +30,7 @@ export interface GameHistory extends Document {
 
 interface GameHistoryModel extends Model<GameHistory> {
   findByAccountId: (id: string) => Query<GameHistory | null, GameHistory>;
+  addGame: (id: string) => Query<UpdateOneQueryResult | null, GameHistory>;
 }
 
 export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
@@ -58,6 +60,20 @@ export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
     }]
   }]
 });
+
+/* gameHistorySchema.statics.addGame = (accountId: string, gameInfo: Game) => {
+  return gameHistoryModel.updateOne(
+    { accountId },
+    {
+      $push: {
+        games: {
+          // $each: [{ start: Date.now() }],
+          // $position: 0
+        }
+      }
+    }
+  );
+};*/
 
 gameHistorySchema.statics.findByAccountId = (accountId: string) => {
   return gameHistoryModel.findOne({ accountId });

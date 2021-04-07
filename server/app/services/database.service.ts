@@ -120,6 +120,11 @@ export class DatabaseService {
     });
   }
 
+  async addGameToGameHistory(id: string, ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return new Promise<void>((resolve, reject) => {});
+  }
+
 
   async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
     return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
