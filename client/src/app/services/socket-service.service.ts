@@ -124,7 +124,7 @@ export class SocketService {
 
   getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
     });
   }
