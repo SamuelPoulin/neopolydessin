@@ -386,7 +386,7 @@ export abstract class Lobby {
   }
 
   protected endGame(reason: ReasonEndGame): void {
-    this.updatePlayersGameHistory().then(() => {
+    this.updatePlayersGameHistory(reason).then(() => {
       this.currentGameState = CurrentGameState.GAME_OVER;
       clearInterval(this.clockTimeout);
       this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
@@ -443,39 +443,45 @@ export abstract class Lobby {
     return this.players.every((player) => (!player.isBot && (player as Player).finishedLoading) || player.isBot);
   }
 
-  private async updatePlayersGameHistory(): Promise<void> {
-    const teams: Team[] = [];
-    const gameEndTime = Date.now();
-    this.teamScores.forEach((teamScore, indexTeam) => {
-      teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
-        .map((playerToModify) => {
-          return playerToModify.username;
+  private async updatePlayersGameHistory(reason: ReasonEndGame): Promise<void> {
+    if (reason === ReasonEndGame.TIME_RUN_OUT || reason === ReasonEndGame.WINNING_SCORE_REACHED) {
+      const teams: Team[] = [];
+      const gameEndTime = Date.now();
+      this.teamScores.forEach((teamScore, indexTeam) => {
+        teams.push({
+          score: 0,
+          playerNames: []
         });
-      teams[indexTeam].score = teamScore;
-    });
-    this.players.forEach((player) => {
-      let result: GameResult;
-      if (!player.isBot) {
-        if (this.gameType === GameType.CLASSIC) {
-          const winningTeam = this.teamScores[0] > this.teamScores[1] ? 0 : 1;
-          result = player.teamNumber === winningTeam ? GameResult.WIN : GameResult.LOSE;
+        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
+          .map((playerToModify) => {
+            return playerToModify.username;
+          });
+        teams[indexTeam].score = teamScore;
+      });
+      this.players.forEach((player) => {
+        let result: GameResult;
+        if (!player.isBot) {
+          if (this.gameType === GameType.CLASSIC) {
+            const winningTeam = this.teamScores[0] > this.teamScores[1] ? 0 : 1;
+            result = player.teamNumber === winningTeam ? GameResult.WIN : GameResult.LOSE;
+          }
+          else {
+            result = GameResult.NEUTRAL;
+          }
+          const gameInfo: Game = {
+            gameResult: result,
+            startDate: this.gameStartTime,
+            endDate: gameEndTime,
+            gameType: this.gameType,
+            team: teams
+          };
+          const playerAccountId = (player as Player).accountId;
+          if (playerAccountId) {
+            this.databaseService.addGameToGameHistory(playerAccountId, gameInfo);
+          }
         }
-        else {
-          result = GameResult.NEUTRAL;
-        }
-        const gameInfo: Game = {
-          gameResult: result,
-          startDate: this.gameStartTime,
-          endDate: gameEndTime,
-          gameType: this.gameType,
-          team: teams
-        };
-        const playerAccountId = (player as Player).accountId;
-        if (playerAccountId) {
-          this.databaseService.addGameToGameHistory(playerAccountId, gameInfo);
-        }
-      }
-    });
+      });
+    }
   }
 
   abstract addPlayer(playerId: string, socket: Socket): void;
