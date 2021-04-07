@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Player, PlayerRole, TeamScore } from '../../../../common/communication/lobby';
+import { Difficulty, GameType, Player, PlayerRole, TeamScore } from '../../../../common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
@@ -13,6 +13,9 @@ export class GameService {
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   isHost: boolean = false;
   wordToDraw: string = '';
+
+  gameType: GameType | undefined;
+  difficulty: Difficulty | undefined;
 
   lobbySubscription: Subscription;
   rolesSubscription: Subscription;
@@ -120,5 +123,15 @@ export class GameService {
     } else {
       return 0;
     }
+  }
+
+  setGameInfo(gameType: GameType, difficulty: Difficulty) {
+    this.gameType = gameType;
+    this.difficulty = difficulty;
+  }
+
+  clearGameInfo() {
+    this.gameType = undefined;
+    this.difficulty = undefined;
   }
 }

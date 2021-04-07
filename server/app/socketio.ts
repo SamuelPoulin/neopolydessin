@@ -122,9 +122,9 @@ export class SocketIo {
 
       this.onConnect(socket, socket.handshake.auth.token);
 
-      socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbies: LobbyInfo[]) => void) => {
+      socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbiesCallback: LobbyInfo[]) => void) => {
         let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby);
-        lobbies = lobbyOpts.gameType ? this.lobbyList.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
+        lobbies = lobbyOpts.gameType ? lobbies.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
         lobbies = lobbyOpts.difficulty ? lobbies.filter((lobby) => lobby.difficulty === lobbyOpts.difficulty) : lobbies;
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));
       });

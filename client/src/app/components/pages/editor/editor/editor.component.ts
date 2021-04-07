@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { GameType } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
@@ -147,5 +148,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   get loading(): boolean {
     return this.editorService.loading;
+  }
+
+  get splitTeams(): boolean {
+    return this.gameService.gameType === GameType.CLASSIC;
   }
 }
