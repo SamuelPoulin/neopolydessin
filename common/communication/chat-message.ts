@@ -9,11 +9,3 @@ export interface SystemMessage extends Message {
 export interface ChatMessage extends SystemMessage {
   senderUsername: string;
 }
-
-export interface RoomChatMessage extends ChatMessage {
-  roomName: string;
-}
-
-export interface RoomSystemMessage extends SystemMessage {
-  roomName: string;
-}
