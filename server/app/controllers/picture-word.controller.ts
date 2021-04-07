@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { body, header, param } from 'express-validator';
+import { body, header, param, query } from 'express-validator';
 import { inject, injectable } from 'inversify';
 import { PictureWordService } from '../services/picture-word.service';
 import { jwtVerify } from '../middlewares/jwt-verify';
@@ -98,6 +98,58 @@ export class PictureWordController {
       validationCheck,
       async (req: Request, res: Response, next: NextFunction) => {
         this.pictureWordService.getSequenceToDraw(req.params.id)
+          .then((response) => {
+            res.status(response.statusCode).json(response.documents);
+          })
+          .catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.get('/',
+      [
+        query('page').isInt({ min: 1 }),
+        query('limit').isInt(),
+      ],
+      validationCheck,
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: Request, res: Response, next: NextFunction) => {
+        this.pictureWordService.getPictureWords(Number(req.query.page), Number(req.query.limit))
+          .then((result) => {
+            res.status(result.statusCode).json(result.documents);
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
+      });
+
+
+    this.router.post('/:id',
+      [
+        param('id').isString().isLength({ min: 24 }),
+        body('word').isString().optional(),
+        body('color').isString().optional(),
+        body('hints').isArray().optional(),
+        body('difficulty').isIn([
+          Difficulty.EASY,
+          Difficulty.INTERMEDIATE,
+          Difficulty.HARD
+        ]).optional(),
+        body('drawMode').isIn([
+          DrawMode.CONVENTIONAL,
+          DrawMode.RANDOM,
+          DrawMode.PAN_L_TO_R,
+          DrawMode.PAN_R_TO_L,
+          DrawMode.PAN_T_TO_B,
+          DrawMode.PAN_B_TO_T,
+          DrawMode.CENTER_FIRST,
+        ]).optional(),
+        body('drawnPaths').isEmpty(),
+        body('picture').isEmpty()
+      ],
+      validationCheck,
+      async (req: Request, res: Response, next: NextFunction) => {
+        this.pictureWordService.updatePictureWord(req.params.id, req.body)
           .then((response) => {
             res.status(response.statusCode).json(response.documents);
           })
