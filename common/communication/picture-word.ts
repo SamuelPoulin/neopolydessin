@@ -19,13 +19,14 @@ export interface PictureWordInfo {
 export interface UpdatePictureWord extends PictureWord {
     color: string;
 }
+export interface PictureWordPath {
+    brushInfo: BrushInfo
+    path: { x: number, y: number }[]
+    id: string
+}
 
 export interface PictureWordDrawing extends PictureWord {
-    drawnPaths: {
-        brushInfo: BrushInfo
-        path: { x: number, y: number }[]
-        id: string
-    }[],
+    drawnPaths: PictureWordPath[],
 }
 
 export interface PictureWordPicture extends PictureWord {

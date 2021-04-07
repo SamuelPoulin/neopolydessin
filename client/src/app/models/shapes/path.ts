@@ -4,7 +4,7 @@ import { Coordinate } from 'src/app/utils/math/coordinate';
 export class Path extends BaseShape {
   static readonly PATH_STYLE: string = 'round';
   private _trace: string;
-  protected points: Coordinate[];
+  points: Coordinate[];
 
   get trace(): string {
     return this._trace;

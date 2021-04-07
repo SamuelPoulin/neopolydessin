@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
-import { PictureWordPicture } from '@common/communication/picture-word';
+import { PictureWordDrawing, PictureWordPicture } from '@common/communication/picture-word';
 import { DrawingSequence } from '@common/communication/drawing-sequence';
 import { AccountInfo } from '@common/communication/account';
 import { LoginResponse } from '../../../../common/communication/login';
@@ -88,8 +88,26 @@ export class APIService {
     });
   }
 
-  async uploadDrawing() {
-    // todo - redo
+  async uploadDrawing(data: PictureWordDrawing): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/upload/drawing';
+        this.http
+          .post<{ id: string }>(url, data, { headers })
+          .subscribe(
+            (response: { id: string }) => {
+              resolve(response.id);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      } else {
+        reject();
+      }
+    });
   }
 
   async uploadPicture(data: PictureWordPicture): Promise<string> {

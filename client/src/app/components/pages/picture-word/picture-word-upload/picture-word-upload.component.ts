@@ -2,13 +2,17 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { APIService } from '@services/api.service';
-import { PictureWordPicture } from '@common/communication/picture-word';
+import { PictureWordDrawing, PictureWordPath, PictureWordPicture } from '@common/communication/picture-word';
 import { Difficulty } from '@common/communication/lobby';
 import { DrawMode } from '@common/communication/draw-mode';
 import { Color } from '@utils/color/color';
 import { DrawingSequence } from '@common/communication/drawing-sequence';
 import { Coordinate } from '@utils/math/coordinate';
 import { VIEWPORT_DIMENSION } from '@common/communication/viewport';
+import { EditorService } from '@services/editor.service';
+import { BaseShape } from '@models/shapes/base-shape';
+import { Path } from '@models/shapes/path';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-picture-word-upload',
@@ -21,14 +25,25 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   difficulty: Difficulty;
   drawMode: DrawMode;
   color: Color;
-  imageString: string = '';
+  imageString: SafeResourceUrl = '';
   imageData: string = '';
   readonly size: number = 600;
 
   @ViewChild('preview') preview: ElementRef;
 
-  constructor(dialogRef: MatDialogRef<AbstractModalComponent>, private api: APIService) {
+  constructor(
+    dialogRef: MatDialogRef<AbstractModalComponent>,
+    private api: APIService,
+    private editorService: EditorService,
+    private sanitizer: DomSanitizer,
+  ) {
     super(dialogRef);
+
+    if (this.dialogRef.id === 'drawing') {
+      const blob = new Blob([this.editorService.view.svg.outerHTML], { type: 'image/svg+xml' });
+      this.imageString = sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
+      console.log(this.imageString);
+    }
   }
 
   upload(): void {
@@ -37,6 +52,38 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     this.difficulty = Difficulty.EASY;
     this.drawMode = DrawMode.CONVENTIONAL;
 
+    if (this.dialogRef.id === 'drawing') {
+      this.uploadDrawing().then((id) => this.showPreview(id));
+    } else {
+      this.uploadPicture().then((id) => this.showPreview(id));
+    }
+  }
+
+  private async uploadDrawing(): Promise<string> {
+    const paths: PictureWordPath[] = [];
+
+    this.editorService.shapes.forEach((shape: BaseShape) => {
+      if (shape instanceof Path) {
+        paths.push({
+          brushInfo: { color: shape.primaryColor.ahexString, strokeWidth: shape.strokeWidth },
+          id: shape.id.toString(),
+          path: shape.points,
+        });
+      }
+    });
+
+    const data: PictureWordDrawing = {
+      word: this.word,
+      hints: this.hints,
+      difficulty: this.difficulty,
+      drawMode: this.drawMode,
+      drawnPaths: paths,
+    };
+
+    return this.api.uploadDrawing(data);
+  }
+
+  private async uploadPicture(): Promise<string> {
     const data: PictureWordPicture = {
       word: this.word,
       hints: this.hints,
@@ -46,9 +93,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       picture: this.imageData,
     };
 
-    this.api.uploadPicture(data).then((id: string) => {
-      this.showPreview(id);
-    });
+    return this.api.uploadPicture(data);
   }
 
   acceptFile(fileList: FileList): void {
@@ -56,8 +101,9 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
     stringReader.onload = (e: ProgressEvent) => {
       if (stringReader.result) {
-        this.imageString = stringReader.result.toString();
-        this.imageData = this.imageString.split(',')[1];
+        const image = stringReader.result.toString();
+        this.imageString = image;
+        this.imageData = image.split(',')[1];
       }
     };
 
@@ -81,12 +127,15 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       const timePerSegment = totalTime / sequence.stack.length;
 
       ctx.clearRect(0, 0, this.size, this.size);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       for (const segment of sequence.stack) {
         const segmentStart = Date.now();
         const timePerPoint = timePerSegment / segment.path.length;
 
         ctx.beginPath();
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = Color.ahex(segment.brushInfo.color).rgbString;
+        ctx.lineWidth = segment.brushInfo.strokeWidth;
 
         for (const [index, coord] of segment.path.entries()) {
           const c = Coordinate.copy(coord).scale(ratio);
@@ -102,6 +151,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
             await new Promise((resolve) => {
               setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
             });
+            ctx.stroke();
           }
         }
         ctx.stroke();

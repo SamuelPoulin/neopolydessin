@@ -5,7 +5,6 @@
  * Values will be made to fit the bounds
  *
  * Hue value will be made to keep the same angle if the value is out of bounds (ie: 400 will give a hue of 40)
- *
  */
 import { MathUtils } from '@utils/math/math-utils';
 import { ColorComponents } from 'src/app/utils/color/color-components';
@@ -17,7 +16,6 @@ export class Color implements ColorComponents {
   static WHITE: Color = Color.rgb(1, 1, 1);
   static BLACK: Color = Color.rgb();
   static TRANSPARENT: Color = Color.rgb(0, 0, 0, 0);
-
   static readonly MAX_255: number = 255;
 
   /**
@@ -161,6 +159,9 @@ export class Color implements ColorComponents {
    * Creates a color from a + hex string
    */
   static ahex(hexString: string): Color {
+    if (hexString.startsWith('#')) {
+      hexString = hexString.slice(1);
+    }
     const a = parseInt(hexString.substr(0, 2), 16);
     const r = parseInt(hexString.substr(2, 2), 16);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers

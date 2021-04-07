@@ -36,6 +36,8 @@ export class EditorService {
   view: DrawingSurfaceComponent;
   loading: boolean;
 
+  isFreeEdit: boolean = true; // /////////////////// temp
+
   get commandReceiver(): CommandReceiver {
     return this._commandReceiver;
   }
@@ -110,7 +112,7 @@ export class EditorService {
       this.addPathSubscription.unsubscribe();
     }
 
-    if (!this.gameService.canDraw) {
+    if (!this.gameService.canDraw && !this.isFreeEdit) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
         const shape = this.findShapeById(id, true);
         if (shape) {
@@ -119,7 +121,7 @@ export class EditorService {
       });
       this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
         const shape = new Path();
-        shape.primaryColor = Color.ahex(data.brush.color.slice(1));
+        shape.primaryColor = Color.ahex(data.brush.color);
         shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
         data.path.forEach((coord: Coordinate) => {
           shape.addPoint(Coordinate.copy(coord).scale(this.scalingToClient));
