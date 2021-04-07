@@ -14,6 +14,8 @@ const PERCENT_50: number = 0.5;
 
 export class BotService {
 
+  currentBot: number;
+
   private readonly SPEED_DRAW_DELAY: number = 5;
   private readonly DEFAULT_DRAW_DELAY: number = 15;
   // private readonly SLOW_DRAW_DELAY: number = 30;
@@ -70,10 +72,10 @@ export class BotService {
   private lobbyId: string;
   private pathTimer: NodeJS.Timeout;
 
-  private botName: string;
-  private personnality: BotPersonnality;
+  private bots: { botName: string; personnality: BotPersonnality }[] = [];
 
   constructor(io: Server, lobbyId: string) {
+    this.currentBot = 0;
     this.io = io;
     this.lobbyId = lobbyId;
     this.drawDelay = this.DEFAULT_DRAW_DELAY;
@@ -83,7 +85,7 @@ export class BotService {
     this.drawing = drawing;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.personnality.onStartDraw();
+    this.bots[this.currentBot].personnality.onStartDraw();
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
   }
 
@@ -91,7 +93,7 @@ export class BotService {
     clearInterval(this.pathTimer);
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.personnality.onResetDrawing();
+    this.bots[this.currentBot].personnality.onResetDrawing();
   }
 
   pause(): void {
@@ -117,10 +119,11 @@ export class BotService {
   }
 
   getBot(teamNumber: number): Entity {
-    this.personnality = this.AGGRESSIVE;
-    this.botName = this.getBotUsername();
+    const personnality = this.AGGRESSIVE;
+    const botName = this.getBotUsername();
+    this.bots.push({ personnality, botName });
     return {
-      username: this.botName,
+      username: botName,
       playerRole: PlayerRole.PASSIVE,
       teamNumber,
       isBot: true,
@@ -129,15 +132,15 @@ export class BotService {
   }
 
   private playerCorrectGuess(): void {
-    this.personnality.onPlayerCorrectGuess();
+    this.bots[this.currentBot].personnality.onPlayerCorrectGuess();
   }
 
   private playerCloseGuess(): void {
-    this.personnality.onPlayerCloseGuess();
+    this.bots[this.currentBot].personnality.onPlayerCloseGuess();
   }
 
   private playerIncorrectGuess(): void {
-    this.personnality.onPlayerIncorrectGuess();
+    this.bots[this.currentBot].personnality.onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {
@@ -148,7 +151,7 @@ export class BotService {
       if (this.currentCoordIndex >= startAt) {
         const coord = this.drawing.stack[this.currentSegmentIndex].path[this.currentCoordIndex];
         if (this.currentCoordIndex === 0) {
-          this.personnality.onStartSegment();
+          this.bots[this.currentBot].personnality.onStartSegment();
           this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, this.currentCoordIndex, segment.zIndex, coord, segment.brushInfo);
         } else if (this.currentCoordIndex < segment.path.length - 1) {
           this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, coord);
@@ -175,7 +178,7 @@ export class BotService {
     const messageWithUsername: ChatMessage = {
       content,
       timestamp: Date.now(),
-      senderUsername: this.botName
+      senderUsername: this.bots[this.currentBot].botName
     };
     this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
 
