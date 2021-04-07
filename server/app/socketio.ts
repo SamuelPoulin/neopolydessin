@@ -113,7 +113,7 @@ export class SocketIo {
   sendFriendListTo(endpoint: SocketFriendActions, accountId: string, friends: Response<FriendsList>): void {
     const socketId = this.socketIdService.GetSocketIdOfAccountId(accountId);
     if (socketId) {
-      this.io.to(socketId).emit(endpoint, friends);
+      this.io.to(socketId).emit(endpoint, friends.documents);
     }
   }
 
