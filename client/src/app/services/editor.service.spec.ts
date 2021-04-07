@@ -24,7 +24,7 @@ export class MockEditorService extends EditorService {
   }
 }
 
-fdescribe('EditorService', () => {
+describe('EditorService', () => {
   let service: EditorService;
   let rectangle: Rectangle;
   let path: Path;

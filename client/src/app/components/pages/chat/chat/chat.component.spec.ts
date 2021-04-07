@@ -9,7 +9,7 @@ import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { ChatComponent } from './chat.component';
 
-fdescribe('ChatComponent', () => {
+describe('ChatComponent', () => {
   let component: ChatComponent;
   let fixture: ComponentFixture<ChatComponent>;
 

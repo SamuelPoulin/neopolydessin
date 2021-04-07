@@ -6,7 +6,7 @@ import { ModalDialogService } from '@services/modal/modal-dialog.service';
 
 import { ChatFriendslistComponent } from './chat-friendslist.component';
 
-fdescribe('ChatFriendslistComponent', () => {
+describe('ChatFriendslistComponent', () => {
   let component: ChatFriendslistComponent;
   let fixture: ComponentFixture<ChatFriendslistComponent>;
   const modalDialogServiceSpy = jasmine.createSpyObj('ModalDialogService', ['openByName']);

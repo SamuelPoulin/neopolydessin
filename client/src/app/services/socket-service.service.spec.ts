@@ -40,7 +40,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   sendRemovePath: null,
 });
 
-fdescribe('SocketService', () => {
+describe('SocketService', () => {
   let service: SocketService;
 
   beforeEach(async(() => {

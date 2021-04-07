@@ -20,7 +20,7 @@ MockChatService.messages = [];
 MockChatService.friends = [];
 MockChatService.friendRequests = [];
 
-fdescribe('ChatService', () => {
+describe('ChatService', () => {
   let service: ChatService;
 
   beforeEach(async(() => {

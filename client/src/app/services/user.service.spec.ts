@@ -26,7 +26,7 @@ MockUserService.account = {
 MockUserService.loggedIn = new EventEmitter<void>();
 MockUserService.loggedOut = new EventEmitter<void>();
 
-fdescribe('UserService', () => {
+describe('UserService', () => {
   let service: UserService;
 
   beforeEach(async(() => {

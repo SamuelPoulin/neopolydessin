@@ -6,7 +6,7 @@ import { MockAPIService } from '@services/api.service.spec';
 
 import { ChatAddFriendComponent } from './chat-add-friend.component';
 
-fdescribe('ChatAddFriendComponent', () => {
+describe('ChatAddFriendComponent', () => {
   let component: ChatAddFriendComponent;
   let fixture: ComponentFixture<ChatAddFriendComponent>;
 

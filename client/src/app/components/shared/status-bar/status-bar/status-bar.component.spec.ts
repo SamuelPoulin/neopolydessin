@@ -8,7 +8,7 @@ import { SharedModule } from '../../shared.module';
 
 import { StatusBarComponent } from './status-bar.component';
 
-fdescribe('StatusBarComponent', () => {
+describe('StatusBarComponent', () => {
   let component: StatusBarComponent;
   let fixture: ComponentFixture<StatusBarComponent>;
 

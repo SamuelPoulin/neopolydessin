@@ -3,7 +3,7 @@ import { SharedModule } from '../shared.module';
 
 import { GamemodeTitleComponent } from './gamemode-title.component';
 
-fdescribe('GamemodeTitleComponent', () => {
+describe('GamemodeTitleComponent', () => {
   let component: GamemodeTitleComponent;
   let fixture: ComponentFixture<GamemodeTitleComponent>;
 
