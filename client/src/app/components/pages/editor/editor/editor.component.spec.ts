@@ -55,7 +55,7 @@ export const keyUp = (key: string, shiftKey: boolean = false, ctrlKey: boolean =
   } as KeyboardEvent;
 };
 
-describe('EditorComponent', () => {
+fdescribe('EditorComponent', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   const modalDialogServiceSpy = createSpyObj('ModalDialogService', {

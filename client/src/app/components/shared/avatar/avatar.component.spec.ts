@@ -6,7 +6,7 @@ import { MockUserService } from '@services/user.service.spec';
 
 import { AvatarComponent } from './avatar.component';
 
-describe('AvatarComponent', () => {
+fdescribe('AvatarComponent', () => {
   let component: AvatarComponent;
   let fixture: ComponentFixture<AvatarComponent>;
 

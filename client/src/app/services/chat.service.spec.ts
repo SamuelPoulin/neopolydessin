@@ -1,4 +1,6 @@
 import { async, TestBed } from '@angular/core/testing';
+import { APIService } from './api.service';
+import { MockAPIService } from './api.service.spec';
 import { ChatService } from './chat.service';
 import { GameService } from './game.service';
 import { MockGameService } from './game.service.spec';
@@ -15,8 +17,10 @@ export const MockChatService = jasmine.createSpyObj('ChatService', {
 });
 
 MockChatService.messages = [];
+MockChatService.friends = [];
+MockChatService.friendRequests = [];
 
-describe('ChatService', () => {
+fdescribe('ChatService', () => {
   let service: ChatService;
 
   beforeEach(async(() => {
@@ -24,6 +28,7 @@ describe('ChatService', () => {
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: GameService, useValue: MockGameService },
+        { provide: APIService, useValue: MockAPIService },
       ],
     }).compileComponents();
   }));

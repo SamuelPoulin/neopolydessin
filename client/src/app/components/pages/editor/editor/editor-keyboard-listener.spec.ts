@@ -19,7 +19,7 @@ import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
 import { EditorModule } from '../editor.module';
 
-describe('EditorKeyboardListener', () => {
+fdescribe('EditorKeyboardListener', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   let keyboardListener: KeyboardListenerService;

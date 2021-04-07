@@ -16,9 +16,12 @@ export const MockAPIService = jasmine.createSpyObj('APIService', {
   handleResponse: null,
   handleError: null,
   getAccount: Promise.resolve(),
+  getFriendsList: Promise.resolve({ friends: [] }),
 });
 
-describe('APIService', () => {
+MockAPIService.friendslistUpdated = of();
+
+fdescribe('APIService', () => {
   let apiService: APIService;
   let httpTestingController: HttpTestingController;
   let notification: MatSnackBar;

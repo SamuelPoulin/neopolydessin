@@ -19,7 +19,7 @@ MockGameService.scores = [
   { teamNumber: 1, score: 0 },
 ];
 
-describe('GameService', () => {
+fdescribe('GameService', () => {
   let service: GameService;
 
   beforeEach(async(() => {

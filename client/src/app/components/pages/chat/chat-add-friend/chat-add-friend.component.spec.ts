@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef } from '@angular/material/dialog';
+import { APIService } from '@services/api.service';
+import { MockAPIService } from '@services/api.service.spec';
 
 import { ChatAddFriendComponent } from './chat-add-friend.component';
 
@@ -9,6 +12,10 @@ describe('ChatAddFriendComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ChatAddFriendComponent],
+      providers: [
+        { provide: APIService, useValue: MockAPIService },
+        { provide: MatDialogRef, useValue: {} },
+      ],
     }).compileComponents();
   });
 
