@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model, model, Query, Schema } from 'mongoose';
 import { GameType } from '../../../common/communication/lobby';
-import { UpdateOneQueryResult } from './account';
 
 export enum GameResult {
   WIN = 'Win',
@@ -14,7 +13,7 @@ export interface Game {
   startDate: number;
   endDate: number;
   gameType: GameType;
-  team: [Team];
+  team: Team[];
 }
 
 export interface Team {
@@ -30,7 +29,7 @@ export interface GameHistory extends Document {
 
 interface GameHistoryModel extends Model<GameHistory> {
   findByAccountId: (id: string) => Query<GameHistory | null, GameHistory>;
-  addGame: (id: string) => Query<UpdateOneQueryResult | null, GameHistory>;
+  addGame: (id: string, gameInfo: Game) => Query<GameHistory | null, GameHistory>;
 }
 
 export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
@@ -41,6 +40,10 @@ export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
   },
   games: [{
     _id: false,
+    gameResult: {
+      type: GameResult,
+      required: true,
+    },
     startDate: {
       type: Number,
       required: true,
@@ -61,19 +64,22 @@ export const gameHistorySchema = new Schema<GameHistory, GameHistoryModel>({
   }]
 });
 
-/* gameHistorySchema.statics.addGame = (accountId: string, gameInfo: Game) => {
+gameHistorySchema.statics.addGame = (accountId: string, gameInfo: Game) => {
   return gameHistoryModel.updateOne(
     { accountId },
     {
       $push: {
         games: {
-          // $each: [{ start: Date.now() }],
-          // $position: 0
+          gameResult: gameInfo.gameResult,
+          startDate: gameInfo.startDate,
+          endDate: gameInfo.endDate,
+          gameType: gameInfo.gameType,
+          team: gameInfo.team,
         }
       }
     }
   );
-};*/
+};
 
 gameHistorySchema.statics.findByAccountId = (accountId: string) => {
   return gameHistoryModel.findOne({ accountId });

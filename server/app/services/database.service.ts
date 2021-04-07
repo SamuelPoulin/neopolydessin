@@ -4,7 +4,7 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
-import gameHistoryModel, { GameHistory, GameResult } from '../../models/schemas/game-history';
+import gameHistoryModel, { Game, GameHistory, GameResult } from '../../models/schemas/game-history';
 import { Observable } from '../utils/observable';
 import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
@@ -120,9 +120,21 @@ export class DatabaseService {
     });
   }
 
-  async addGameToGameHistory(id: string, ): Promise<void> {
+  async addGameToGameHistory(id: string, gameInfo: Game): Promise<Response<GameHistory>> {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    return new Promise<void>((resolve, reject) => {});
+    return new Promise<Response<GameHistory>>((resolve, reject) => {
+      try {
+        gameHistoryModel.addGame(id, gameInfo)
+          .then((gameAdded: GameHistory) => {
+            resolve({ statusCode: OK, documents: gameAdded});
+          })
+          .catch((err: Error) => {
+            reject(DatabaseService.rejectErrorMessage(err));
+          });
+      } catch {
+        reject(DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString())));
+      }
+    });
   }
 
 
