@@ -379,8 +379,8 @@ describe('Socketio', () => {
 
                 let friendList1: FriendsList;
 
-                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: Response<FriendsList>) => {
-                    friendList1 = friendList.documents;
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
+                    friendList1 = friendList;
                 });
 
                 testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
@@ -407,8 +407,8 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 })
 
-                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: Response<FriendsList>) => {
-                    friendList2 = friendList.documents;
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
+                    friendList2 = friendList;
                 });
 
                 testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
@@ -510,7 +510,7 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 });
 
-                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: Response<FriendsList>) => {
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
                     friendService.getMessageHistory(accountId, accountId2, 1, 5)
                         .catch((err) => {
                             expect(err.statusCode).to.equal(NOT_FOUND);

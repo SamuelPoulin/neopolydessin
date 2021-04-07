@@ -3,8 +3,8 @@ import { Document, Schema, Model, model, Query } from 'mongoose';
 import { UpdateOneQueryResult } from './account';
 
 export interface Login {
-  start: Date;
-  end?: Date;
+  start: number;
+  end?: number;
 }
 
 export interface Logins extends Document {
@@ -50,7 +50,7 @@ loginSchema.statics.addLogin = (accountId: string) => {
     {
       $push: {
         logins: {
-          $each: [{ start: new Date() }],
+          $each: [{ start: Date.now() }],
           $position: 0
         }
       }
