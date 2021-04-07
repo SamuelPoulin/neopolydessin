@@ -215,7 +215,7 @@ export class DatabaseService {
           loginsModelId = logins._id.toHexString();
           return avatarModel.addAvatarDocument(model._id.toHexString());
         })
-        .then( async (result: Avatar) => {
+        .then(async (result: Avatar) => {
           model.avatar = result._id.toHexString();
           const gameHistory = new gameHistoryModel({
             accountId: model._id, games: []
@@ -349,7 +349,7 @@ export class DatabaseService {
           return avatarModel.removeAvatar(id);
         })
         .then((result) => {
-          return gameHistoryModel.findOneAndDelete( { accountId: id});
+          return gameHistoryModel.findOneAndDelete({ accountId: id });
         })
         .then((result) => {
           return accountModel.findByIdAndDelete(id);
@@ -383,7 +383,7 @@ export class DatabaseService {
         })
         .catch((err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
-          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false });
+          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false, new: true });
         })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());

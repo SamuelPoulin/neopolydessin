@@ -1,0 +1,29 @@
+<app-abstract-modal>
+  <div header id="home-gamemode-header">
+    Choisir le mode de jeu
+  </div>
+  <div content id="home-gamemode-content">
+    <app-username-input [(value)]="lobbyName">Nom de la partie</app-username-input>
+    <mat-form-field appearance="fill">
+      <mat-label>Mode de jeu</mat-label>
+      <mat-select [(value)]="selectedGamemode">
+        <mat-option *ngFor="let gamemode of gamemodes" [value]="gamemode">
+          {{gamemode}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Difficulté</mat-label>
+      <mat-select [(value)]="selectedDifficulty">
+        <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty">
+          {{difficulty}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div actions>
+    <button mat-stroked-button (click)="startGame()">
+      Commencer
+    </button>
+  </div>
+</app-abstract-modal>

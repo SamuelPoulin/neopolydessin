@@ -2,6 +2,7 @@ import { Message } from '../../../../../common/communication/chat-message';
 
 export interface ChatRoom {
   name: string;
+  id: string;
   type: ChatRoomType;
   messages: Message[];
 }

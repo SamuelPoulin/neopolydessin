@@ -29,6 +29,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   receiveGameStart: of(),
   receiveRoles: of(),
   receiveWord: of(),
+  receiveFriendslist: of(),
   receiveScores: of(),
   receiveNextTimestamp: of(),
   receivePrivateMessage: of(),

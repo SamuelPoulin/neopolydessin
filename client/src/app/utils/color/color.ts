@@ -5,7 +5,6 @@
  * Values will be made to fit the bounds
  *
  * Hue value will be made to keep the same angle if the value is out of bounds (ie: 400 will give a hue of 40)
- *
  */
 import { MathUtils } from '@utils/math/math-utils';
 import { ColorComponents } from 'src/app/utils/color/color-components';
@@ -17,7 +16,6 @@ export class Color implements ColorComponents {
   static WHITE: Color = Color.rgb(1, 1, 1);
   static BLACK: Color = Color.rgb();
   static TRANSPARENT: Color = Color.rgb(0, 0, 0, 0);
-
   static readonly MAX_255: number = 255;
 
   /**
@@ -59,10 +57,6 @@ export class Color implements ColorComponents {
    * Constructor for a color from hsl or rgb values.
    * If HSL values are given, they will be prioritized over RGB values
    * If both HSL values and RGB values are given, RGB will be recalculated.
-   *
-   * Method for calculating rgb components from HSL is an implementation of:
-   * https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
-   *
    */
   private constructor(components: ColorComponents, doNotCompute: boolean = false) {
     // eslint-disable-next-line @typescript-eslint/typedef
@@ -150,6 +144,9 @@ export class Color implements ColorComponents {
    * Creates a color from hex string
    */
   static hex(hexString: string, a: number = 1): Color {
+    if (hexString.startsWith('#')) {
+      hexString = hexString.slice(1);
+    }
     const r = parseInt(hexString.substr(0, 2), 16);
     const g = parseInt(hexString.substr(2, 2), 16);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -161,6 +158,9 @@ export class Color implements ColorComponents {
    * Creates a color from a + hex string
    */
   static ahex(hexString: string): Color {
+    if (hexString.startsWith('#')) {
+      hexString = hexString.slice(1);
+    }
     const a = parseInt(hexString.substr(0, 2), 16);
     const r = parseInt(hexString.substr(2, 2), 16);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers

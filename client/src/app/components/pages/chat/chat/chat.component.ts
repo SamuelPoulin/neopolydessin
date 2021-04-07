@@ -20,6 +20,8 @@ export class ChatComponent {
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
+  friendslistOpened: boolean = false;
+
   constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
   }
@@ -70,6 +72,10 @@ export class ChatComponent {
 
   toggleGuessMode(): void {
     this.chatService.guessing = !this.chatService.guessing;
+  }
+
+  toggleFriendslist() {
+    this.chatService.friendslistOpened = !this.chatService.friendslistOpened;
   }
 
   addEmoji(e: EmojiEvent) {

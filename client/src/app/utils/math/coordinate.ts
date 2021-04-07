@@ -1,3 +1,4 @@
+import { Coord } from '@common/communication/drawing-sequence';
 import { Direction } from '@utils/math/direction.enum';
 import { MathUtils } from './math-utils';
 
@@ -25,7 +26,7 @@ export class Coordinate {
     return this.apply(c, Math.abs);
   }
 
-  static copy(c: Coordinate): Coordinate {
+  static copy(c: Coordinate | Coord): Coordinate {
     return new Coordinate(c.x, c.y);
   }
 

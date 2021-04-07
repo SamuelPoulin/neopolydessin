@@ -6,8 +6,11 @@ import { Coordinate } from '@utils/math/coordinate';
 import { SocketMessages } from '@common/socketendpoints/socket-messages';
 import { SocketDrawing } from '@common/socketendpoints/socket-drawing';
 import { BrushInfo } from '@common/communication/brush-info';
-import { ChatMessage, SystemMessage } from '@common/communication/chat-message';
+import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-message';
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
+import { FriendsList } from '@common/communication/friends';
+import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
+import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import {
   CurrentGameState,
   Difficulty,
@@ -70,6 +73,15 @@ export class SocketService {
     });
   }
 
+  receiveFriendslist(): Observable<FriendsList> {
+    return new Observable<FriendsList>((obs) => {
+      this.socket.on(SocketFriendActions.UPDATE, (friendslist: FriendsList) => {
+        console.log(friendslist);
+        obs.next(friendslist);
+      });
+    });
+  }
+
   receiveGuess(): Observable<GuessMessage> {
     return new Observable<GuessMessage>((obs) => {
       this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => obs.next(content));
@@ -83,9 +95,9 @@ export class SocketService {
     });
   }
 
-  receivePrivateMessage(): Observable<ChatMessage> {
-    return new Observable<ChatMessage>((obs) => {
-      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => obs.next(content));
+  receivePrivateMessage(): Observable<PrivateMessage> {
+    return new Observable<PrivateMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (privateMessage: PrivateMessage) => obs.next(privateMessage));
     });
   }
 
@@ -122,15 +134,19 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
-  getLobbyList(gameType: GameType, difficulty: Difficulty): Observable<LobbyInfo[]> {
+  getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, gameType, difficulty, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
     });
   }
 
   sendMessage(message: string): void {
-    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message });
+    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message } as Message);
+  }
+
+  sendPrivateMessage(message: string, friendId: string) {
+    this.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, { receiverAccountId: friendId, content: message } as PrivateMessageTo);
   }
 
   sendGuess(guess: string) {
@@ -141,9 +157,10 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, GameType.SPRINT_SOLO, Difficulty.EASY, false, (data: string) => resolve(data));
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      resolve();
     });
   }
 

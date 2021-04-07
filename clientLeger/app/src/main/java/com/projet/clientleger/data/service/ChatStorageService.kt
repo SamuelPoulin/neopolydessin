@@ -24,8 +24,10 @@ class ChatStorageService @Inject constructor() {
         convos.clear()
         convos.putAll(convosToSave)
 
+        val bufferTabs =  ArrayList<TabInfo>()
+        bufferTabs.addAll(tabs)
         tabs.clear()
-        tabs.addAll(tabs.distinctBy { it.convoId })
+        tabs.addAll(bufferTabs.distinctBy { it.convoId })
 
         this.selectedTab = selectedTab
     }
