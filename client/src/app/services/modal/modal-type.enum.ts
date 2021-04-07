@@ -9,4 +9,5 @@ export enum ModalType {
   CHAT = 'chat',
   UPLOAD = 'upload',
   ADD_FRIEND = 'add_friend',
+  CHOOSE_GAMEMODE = 'choose-gamemode',
 }
