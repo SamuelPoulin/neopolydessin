@@ -1,9 +1,9 @@
 /* eslint-disable max-lines */
 import http from 'http';
-import { id, inject, injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { Server, Socket, ServerOptions } from 'socket.io';
-import { ChatMessage, Message, RoomChatMessage, RoomSystemMessage, SystemMessage } from '../../common/communication/chat-message';
+import { Message, RoomChatMessage, RoomSystemMessage } from '../../common/communication/chat-message';
 import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
@@ -332,6 +332,7 @@ export class SocketIo {
     try {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
+      socket.join(GENERAL_CHAT_ROOM);
       loginsModel.addLogin(accountId)
         .then(() => { SocketIo.CLIENT_CONNECTED.notify(socket); })
         .catch((err) => { throw Error(err); });
