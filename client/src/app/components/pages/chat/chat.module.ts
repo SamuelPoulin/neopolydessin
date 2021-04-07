@@ -6,10 +6,22 @@ import { ChatComponent } from './chat/chat.component';
 import { SystemMessageComponent } from './system-message/system-message.component';
 import { ChatTabsComponent } from './chat-tabs/chat-tabs.component';
 import { ChatTabComponent } from './chat-tab/chat-tab.component';
+import { ChatFriendslistComponent } from './chat-friendslist/chat-friendslist.component';
+import { ChatFriendComponent } from './chat-friend/chat-friend.component';
+import { ChatAddFriendComponent } from './chat-add-friend/chat-add-friend.component';
 
 @NgModule({
   imports: [SharedModule, PickerModule],
-  declarations: [ChatComponent, ChatMessageComponent, SystemMessageComponent, ChatTabsComponent, ChatTabComponent],
+  declarations: [
+    ChatComponent,
+    ChatMessageComponent,
+    SystemMessageComponent,
+    ChatTabsComponent,
+    ChatTabComponent,
+    ChatFriendslistComponent,
+    ChatFriendComponent,
+    ChatAddFriendComponent,
+  ],
   exports: [ChatComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

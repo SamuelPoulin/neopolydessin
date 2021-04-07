@@ -109,7 +109,6 @@ export class DatabaseService {
     return new Promise<Response<DashBoardInfo>>((resolve, reject) => {
       accountModel.findById(new ObjectId(id))
         .populate('logins', 'logins')
-        .populate('avatar', 'avatar')
         .populate('gameHistory', 'games')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
@@ -406,8 +405,6 @@ export class DatabaseService {
   }
 
   private accountToDashBoardInfo(account: Account): DashBoardInfo {
-    console.log(account.logins);
-    console.log(account.gameHistory);
     return {
       _id: account.id,
       firstName: account.firstName,

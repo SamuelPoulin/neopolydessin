@@ -173,17 +173,19 @@ export class SocketIo {
           const socketOfFriend = this.socketIdService.GetSocketIdOfAccountId(sentMsg.receiverAccountId);
           if (socketOfFriend) {
             const senderAccountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-            if (senderAccountId) {
+            const receiverAccountId = this.socketIdService.GetAccountIdOfSocketId(socketOfFriend);
+            if (senderAccountId && receiverAccountId) {
               const timestamp = Date.now();
-              const msgToSend: PrivateMessage = {
+              const privateMsg: PrivateMessage = {
                 content: sentMsg.content,
                 senderAccountId,
+                receiverAccountId,
                 timestamp,
               };
-              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, timestamp).then((result) => {
+              messagesHistoryModel.addMessageToHistory(sentMsg, senderAccountId, receiverAccountId, timestamp).then((result) => {
                 if (result.nModified === 0) throw new Error('couldn\'t update history');
-                socket.to(socketOfFriend).emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
-                socket.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, msgToSend);
+                socket.to(socketOfFriend).emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, privateMsg);
+                socket.emit(SocketMessages.RECEIVE_PRIVATE_MESSAGE, privateMsg);
               }).catch((err) => {
                 console.log(err);
               });
@@ -197,6 +199,18 @@ export class SocketIo {
 
       socket.on(SocketConnection.DISCONNECTING, () => {
         this.onDisconnecting(socket);
+      });
+
+      socket.on(SocketLobby.ACCEPT_INVITE, (lobbyIdToJoin: string, callback: (lobbyJoined: boolean) => void) => {
+        const lobbyToJoin = this.findLobby(lobbyIdToJoin);
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
+          lobbyToJoin.addPlayer(playerId, socket);
+          callback(true);
+        }
+        else {
+          callback(false);
+        }
       });
 
       socket.on(SocketConnection.DISCONNECTION, () => {

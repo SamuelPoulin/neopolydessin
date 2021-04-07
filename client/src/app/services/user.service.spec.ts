@@ -3,8 +3,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
 import { UserService } from './user.service';
-import { Account } from '@models/account';
 import { EventEmitter } from '@angular/core';
+import { AccountInfo } from '@common/communication/account';
 
 export const MockUserService = jasmine.createSpyObj('UserService', {
   login: null,
@@ -17,11 +17,11 @@ MockUserService.account = {
   firstName: '',
   lastName: '',
   email: '',
-  createdDate: '',
+  createdDate: Date.now(),
   friends: [],
   username: '',
-  avatar: { _id: '' },
-} as Account;
+  avatar: '',
+} as AccountInfo;
 
 MockUserService.loggedIn = new EventEmitter<void>();
 MockUserService.loggedOut = new EventEmitter<void>();

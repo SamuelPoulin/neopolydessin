@@ -1,0 +1,36 @@
+<div id="chat-friendslist-container" [style.left]="opened ? '0px' : '400px'">
+  <div id="chat-friendslist-header">
+    <button mat-icon-button id="chat-friendslist-closer" (click)="closeFriendslist()">
+      <mat-icon [inline]="true" id="chat-friendslist-closer-icon">close</mat-icon>
+    </button>
+    <button mat-flat-button class="chat-friendslist-button" (click)="openAddFriend()">Add friend</button>
+  </div>
+  <div id="chat-friendslist-content-container">
+    <div id="chat-friendslist-pending-container">
+      <div class="chat-friendslist-section-title">
+        Requêtes
+      </div>
+      <ng-container *ngIf="friendRequests.length === 0">
+        <div class="chat-friendslist-empty-message">
+          Vous n'avez pas de requête d'amitié.
+        </div>
+      </ng-container>
+      <ng-container *ngFor="let friendRequest of friendRequests">
+        <app-chat-friend [friend]="friendRequest"></app-chat-friend>
+      </ng-container>
+    </div>
+    <div id="chat-friendslist-friends-container">
+      <div class="chat-friendslist-section-title">
+        Amis
+      </div>
+      <ng-container *ngIf="friends.length === 0">
+        <div class="chat-friendslist-empty-message">
+          Vous n'avez pas encore ajouté d'amis.
+        </div>
+      </ng-container>
+      <ng-container *ngFor="let friend of friends">
+        <app-chat-friend [friend]="friend"></app-chat-friend>
+      </ng-container>
+    </div>
+  </div>
+</div>

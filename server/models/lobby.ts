@@ -332,6 +332,17 @@ export abstract class Lobby {
       }
     });
 
+    socket.on(SocketLobby.SEND_INVITE, async (friendId: string) => {
+      const friendSocket = this.socketIdService.GetSocketIdOfAccountId(friendId);
+      const playerId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+      if (friendSocket && playerId) {
+        const playerInviting = this.findPlayerById(playerId);
+        if (playerInviting) {
+          socket.to(friendSocket).emit(SocketLobby.RECEIVE_INVITE, playerInviting.username, this.lobbyId);
+        }
+      }
+    });
+
     socket.on(SocketLobby.LOADING_OVER, () => {
       const playerDoneLoading = this.findPlayerBySocket(socket);
       if (playerDoneLoading) {
@@ -363,6 +374,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
     socket.removeAllListeners(SocketLobby.LOADING_OVER);
+    socket.removeAllListeners(SocketLobby.SEND_INVITE);
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {

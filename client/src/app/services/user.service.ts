@@ -98,7 +98,7 @@ export class UserService {
           .getAccount()
           .then((account) => {
             this.localSaveService.account = account;
-            resolve(this.localSaveService.account);
+            resolve(account);
           })
           .catch(() => reject());
       }
