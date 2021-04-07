@@ -10,7 +10,7 @@ import { ModalType } from 'src/app/services/modal/modal-type.enum';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import Spy = jasmine.Spy;
 
-describe('ModalDialogService', () => {
+fdescribe('ModalDialogService', () => {
   let service: ModalDialogService;
   let openSpy: Spy;
 

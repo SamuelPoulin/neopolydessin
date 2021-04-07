@@ -9,7 +9,7 @@ import { MockUserService } from '@services/user.service.spec';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
 
-describe('LobbyComponent', () => {
+fdescribe('LobbyComponent', () => {
   let component: LobbyComponent;
   let fixture: ComponentFixture<LobbyComponent>;
 

@@ -4,7 +4,7 @@ import { MockChatService } from '@services/chat.service.spec';
 
 import { ChatTabComponent } from './chat-tab.component';
 
-describe('ChatTabComponent', () => {
+fdescribe('ChatTabComponent', () => {
   let component: ChatTabComponent;
   let fixture: ComponentFixture<ChatTabComponent>;
 
