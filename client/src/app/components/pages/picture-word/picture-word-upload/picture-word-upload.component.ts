@@ -23,7 +23,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   color: Color;
   imageString: string = '';
   imageData: string = '';
-  size: number = 450;
+  readonly size: number = 600;
 
   @ViewChild('preview') preview: ElementRef;
 
@@ -45,8 +45,9 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       color: this.color.hexString,
       picture: this.imageData,
     };
-    this.api.uploadPicture(data).then((id: number) => {
-      console.log(id);
+
+    this.api.uploadPicture(data).then((id: string) => {
+      this.showPreview(id);
     });
   }
 
@@ -65,18 +66,18 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     }
   }
 
-  showPreview() {
-    this.api.getDrawingPreview('606ce445ca767702e011a9b9').then((sequence: DrawingSequence) => {
+  showPreview(id: string) {
+    this.api.getDrawingPreview(id).then((sequence: DrawingSequence) => {
       this.drawPreview(sequence);
     });
   }
 
   async drawPreview(sequence: DrawingSequence) {
-    console.log(this.preview);
     const ratio = this.size / VIEWPORT_DIMENSION;
     const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
     if (ctx) {
       const totalTime = 5000;
+      const timeoutOffset = 0.1;
       const timePerSegment = totalTime / sequence.stack.length;
 
       ctx.clearRect(0, 0, this.size, this.size);
@@ -97,7 +98,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
           }
 
           const now = Date.now();
-          if (now < segmentStart + (timePerPoint - 0.1) * index) {
+          if (now < segmentStart + (timePerPoint - timeoutOffset) * index) {
             await new Promise((resolve) => {
               setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
             });

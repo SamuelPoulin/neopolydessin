@@ -92,20 +92,22 @@ export class APIService {
     // todo - redo
   }
 
-  async uploadPicture(data: PictureWordPicture): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
+  async uploadPicture(data: PictureWordPicture): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
         headers = headers.set('authorization', this.localSaveService.accessToken);
         const url = APIService.API_PICTUREWORD_ROUTE + '/upload/picture';
-        this.http.post(url, data, { headers }).subscribe(
-          (response: number) => {
-            resolve(response);
-          },
-          (e) => {
-            reject(e);
-          },
-        );
+        this.http
+          .post<{ id: string }>(url, data, { headers })
+          .subscribe(
+            (response: { id: string }) => {
+              resolve(response.id);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
       } else {
         reject();
       }

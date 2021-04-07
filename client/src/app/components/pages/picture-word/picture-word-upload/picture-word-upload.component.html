@@ -5,13 +5,13 @@
   <div content id="content">
     <app-custom-input class="input" [(value)]="word">Mot à deviner</app-custom-input>
 
-    <img [src]="imageString" width="450" id="uploaded-image">
+    <img [src]="imageString" [width]="size" id="uploaded-image">
 
-    <canvas #preview width="450" height="450"></canvas>
+    <canvas #preview [width]="size" [height]="size"></canvas>
 
   </div>
   <div actions>
-      <button id="btn-preview" mat-stroked-button (click)="showPreview()">
+      <button id="btn-preview" mat-stroked-button (click)="showPreview('606ce445ca767702e011a9b9')">
         <mat-icon id="btn-image-icon">edit</mat-icon>
       </button>
       <button id="btn-image" mat-stroked-button>
