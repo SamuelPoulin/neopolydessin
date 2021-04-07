@@ -7,7 +7,7 @@ import { Entity, GuessResponse, PlayerRole } from '../../../common/communication
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
-const PERCENT_5: number = 0.05;
+const PERCENT_1: number = 0.01;
 const PERCENT_20: number = 0.2;
 const PERCENT_30: number = 0.3;
 const PERCENT_50: number = 0.5;
@@ -29,10 +29,10 @@ export class BotService {
     },
 
     onStartSegment: () => {
-      if (Math.random() < PERCENT_5 && this.drawDelay === this.SPEED_DRAW_DELAY) {
+      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
         this.sendBotMessage('Bon, je vais me calmer');
         this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_5 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
+      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
         this.sendBotMessage('On va plus vite!!');
         this.drawDelay = this.SPEED_DRAW_DELAY;
       }
@@ -64,6 +64,53 @@ export class BotService {
 
     onPlayerRequestsHint: () => {
       this.sendBotMessage(`Un indice... pour vrai? ${this.hints[this.hintIndex]}`);
+    }
+  };
+
+  private readonly GENTLEMEN: BotPersonnality = {
+    onStartDraw: () => {
+      if (Math.random() < PERCENT_20) {
+        this.sendBotMessage('Attention mesdames et messieurs, la partie va commencer!');
+        this.drawDelay = this.SPEED_DRAW_DELAY;
+      }
+    },
+
+    onStartSegment: () => {
+      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
+        this.sendBotMessage('Je vais ralentir un peu, je suis à bout de souffle.');
+        this.drawDelay = this.DEFAULT_DRAW_DELAY;
+      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
+        this.sendBotMessage('Augmentons la vitesse du jeu!');
+        this.drawDelay = this.SPEED_DRAW_DELAY;
+      }
+    },
+
+    onResetDrawing: () => {
+      if (Math.random() < PERCENT_20) {
+        this.sendBotMessage('Allons-y pour un autre si cela ne vous derange pas?');
+      }
+    },
+
+    onPlayerCorrectGuess: () => {
+      if (Math.random() < PERCENT_30) {
+        this.sendBotMessage('Fabuleux! Il s\'agit d\'une observation astucieuse!');
+      }
+    },
+
+    onPlayerCloseGuess: () => {
+      if (Math.random() < PERCENT_50) {
+        this.sendBotMessage('Dommage, vous étiez si proche de la bonne réponse...');
+      }
+    },
+
+    onPlayerIncorrectGuess: () => {
+      if (Math.random() < PERCENT_50) {
+        this.sendBotMessage('Ce n\'est pas exactement ce qu\'on recherche, malheureusement.');
+      }
+    },
+
+    onPlayerRequestsHint: () => {
+      this.sendBotMessage(`Il me fait plaisir de vous donner un indice, nous sommes dans la même équipe! ${this.hints[this.hintIndex]}`);
     }
   };
 
@@ -137,8 +184,24 @@ export class BotService {
     }
   }
 
+  getBotPersonnality(): BotPersonnality {
+    const nbBot = 2;
+    const index = Math.floor(Math.random() * nbBot);
+    switch (index) {
+      case 1: {
+        return this.AGGRESSIVE;
+      }
+      case 2: {
+        return this.GENTLEMEN;
+      }
+      default: {
+        return this.AGGRESSIVE;
+      }
+    }
+  }
+
   getBot(teamNumber: number): Entity {
-    const personnality = this.AGGRESSIVE;
+    const personnality = this.getBotPersonnality();
     const botName = this.getBotUsername();
     this.bots.push({ personnality, botName });
     return {
