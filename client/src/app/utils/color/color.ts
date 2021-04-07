@@ -57,10 +57,6 @@ export class Color implements ColorComponents {
    * Constructor for a color from hsl or rgb values.
    * If HSL values are given, they will be prioritized over RGB values
    * If both HSL values and RGB values are given, RGB will be recalculated.
-   *
-   * Method for calculating rgb components from HSL is an implementation of:
-   * https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
-   *
    */
   private constructor(components: ColorComponents, doNotCompute: boolean = false) {
     // eslint-disable-next-line @typescript-eslint/typedef
@@ -148,6 +144,9 @@ export class Color implements ColorComponents {
    * Creates a color from hex string
    */
   static hex(hexString: string, a: number = 1): Color {
+    if (hexString.startsWith('#')) {
+      hexString = hexString.slice(1);
+    }
     const r = parseInt(hexString.substr(0, 2), 16);
     const g = parseInt(hexString.substr(2, 2), 16);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers

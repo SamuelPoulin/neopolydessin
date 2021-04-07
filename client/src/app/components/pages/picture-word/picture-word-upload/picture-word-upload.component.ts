@@ -35,14 +35,13 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     dialogRef: MatDialogRef<AbstractModalComponent>,
     private api: APIService,
     private editorService: EditorService,
-    private sanitizer: DomSanitizer,
+    protected sanitizer: DomSanitizer,
   ) {
     super(dialogRef);
 
     if (this.dialogRef.id === 'drawing') {
       const blob = new Blob([this.editorService.view.svg.outerHTML], { type: 'image/svg+xml' });
       this.imageString = sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
-      console.log(this.imageString);
     }
   }
 

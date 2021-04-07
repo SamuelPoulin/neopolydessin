@@ -31,12 +31,13 @@ export class EditorService {
 
   private removePathSubscription: Subscription;
   private addPathSubscription: Subscription;
+  private clearSubscription: Subscription;
 
   readonly gridProperties: GridProperties;
   view: DrawingSurfaceComponent;
   loading: boolean;
 
-  isFreeEdit: boolean = true; // /////////////////// temp
+  isFreeEdit: boolean = false;
 
   get commandReceiver(): CommandReceiver {
     return this._commandReceiver;
@@ -70,6 +71,7 @@ export class EditorService {
   }
 
   resetDrawing(): void {
+    this.applyShapesBuffer();
     if (this.view) {
       this.shapes.forEach(this.view.removeShape, this.view);
     }
@@ -110,7 +112,10 @@ export class EditorService {
     if (this.removePathSubscription) {
       this.removePathSubscription.unsubscribe();
       this.addPathSubscription.unsubscribe();
+      this.clearSubscription.unsubscribe();
     }
+
+    this.clearSubscription = this.socketService.receiveScores().subscribe(() => this.resetDrawing());
 
     if (!this.gameService.canDraw && !this.isFreeEdit) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {

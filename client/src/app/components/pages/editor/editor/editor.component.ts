@@ -2,7 +2,6 @@ import { AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild } 
 import { ActivatedRoute } from '@angular/router';
 import { GameType } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
-import { PictureWordUploadComponent } from '@components/pages/picture-word/picture-word-upload/picture-word-upload.component';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
 import { ChatService } from '@services/chat.service';
@@ -117,8 +116,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveDrawing(): void {
-    console.log('save');
-    this.dialog.open(PictureWordUploadComponent, { id: 'drawing' }); // //////////////////////// change to open by name
+    this.dialog.openByName(ModalType.UPLOAD, { id: 'drawing' });
   }
 
   setToolbarState(opened: boolean): void {
