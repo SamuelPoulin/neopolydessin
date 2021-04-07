@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { SocketService } from '@services/socket-service.service';
-import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
+import { GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-server-browser',
@@ -19,7 +19,7 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.socketService.getLobbyList(GameType.CLASSIC, Difficulty.EASY).subscribe((lobbies) => {
+    this.socketService.getLobbyList().subscribe((lobbies) => {
       this.dataSource.data = lobbies;
       this.lobbyCount = lobbies.length;
     });

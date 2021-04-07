@@ -14,7 +14,9 @@ import { UserService } from '@services/user.service';
 })
 export class HomeGamemodeComponent extends AbstractModalComponent {
   gamemodes: string[];
+  difficulties: string[];
   selectedGamemode: string;
+  selectedDifficulty: string;
 
   lobbyName: string;
 
@@ -28,7 +30,10 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     super(dialogRef);
 
     this.gamemodes = ['Classique', 'Co-op', 'Solo'];
+    this.difficulties = ['Facile', 'Intermédiaire', 'Difficile'];
+
     this.selectedGamemode = 'Classique';
+    this.selectedDifficulty = 'Facile';
 
     this.lobbyName = 'Partie de ' + this.userService.account.username;
   }
@@ -50,10 +55,28 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
   }
 
   get gamemode() {
-    return GameType.CLASSIC;
+    switch (this.selectedGamemode) {
+      case 'Classique':
+        return GameType.CLASSIC;
+      case 'Co-op':
+        return GameType.SPRINT_COOP;
+      case 'Solo':
+        return GameType.SPRINT_SOLO;
+      default:
+        return GameType.CLASSIC;
+    }
   }
 
   get difficulty() {
-    return Difficulty.EASY;
+    switch (this.selectedDifficulty) {
+      case 'Facile':
+        return Difficulty.EASY;
+      case 'Intermédiaire':
+        return Difficulty.INTERMEDIATE;
+      case 'Difficile':
+        return Difficulty.HARD;
+      default:
+        return Difficulty.EASY;
+    }
   }
 }

@@ -108,7 +108,6 @@ export class UserService {
   async fetchAvatar(): Promise<Blob> {
     return new Promise<Blob>((resolve, reject) => {
       if (this.localSaveService.account && this.localSaveService.account.avatar) {
-        console.log('nice');
         this.apiService
           .getAvatarById(this.localSaveService.account.avatar)
           .then((blob: Blob) => {
