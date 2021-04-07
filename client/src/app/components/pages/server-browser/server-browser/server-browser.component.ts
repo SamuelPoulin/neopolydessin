@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { GameService } from '@services/game.service';
 import { SocketService } from '@services/socket-service.service';
-import { GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo } from '../../../../../../../common/communication/lobby';
 
 @Component({
   selector: 'app-server-browser',
@@ -14,7 +15,7 @@ export class ServerBrowserComponent implements OnInit {
   dataSource: MatTableDataSource<LobbyInfo>;
   lobbyCount: number;
 
-  constructor(private socketService: SocketService, private router: Router) {
+  constructor(private socketService: SocketService, private gameService: GameService, private router: Router) {
     this.dataSource = new MatTableDataSource<LobbyInfo>();
   }
 
@@ -25,8 +26,9 @@ export class ServerBrowserComponent implements OnInit {
     });
   }
 
-  joinLobby(lobbyId: string): void {
+  joinLobby(lobbyId: string, gameType: GameType, difficulty: Difficulty): void {
     this.socketService.joinLobby(lobbyId);
+    this.gameService.setGameInfo(gameType, difficulty);
     this.router.navigate([`/lobby/${lobbyId}`]);
   }
 

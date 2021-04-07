@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { GameType } from '@common/communication/lobby';
 
 @Component({
   selector: 'app-gamemode-title',
@@ -6,22 +7,26 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./gamemode-title.component.scss'],
 })
 export class GamemodeTitleComponent {
-  @Input() gamemode: string;
+  @Input() gamemode: GameType;
 
   constructor() {
-    this.gamemode = 'classique';
+    this.gamemode = GameType.CLASSIC;
   }
 
   get gamemodeName(): string {
     switch (this.gamemode) {
-      case 'classique':
+      case GameType.CLASSIC:
         return 'Classique';
-      case 'coop':
+      case GameType.SPRINT_COOP:
         return 'Co-op';
-      case 'solo':
+      case GameType.SPRINT_SOLO:
         return 'Solo';
       default:
         return '';
     }
+  }
+
+  get gameType() {
+    return GameType;
   }
 }

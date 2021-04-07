@@ -1,11 +1,12 @@
 <div class="team-container">
-  <div class="players-title">{{name}}<ng-container *ngIf="scoreIndex !== undefined">&nbsp;-&nbsp;{{score}}</ng-container></div>
+  <div class="players-title">{{name}}<ng-container *ngIf="showScore && scoreIndex !== undefined">&nbsp;-&nbsp;{{score}}</ng-container></div>
   <div *ngFor="let player of team" class="player-container ennemy-container"
     [style.border-left]="ennemy !== undefined && '2px solid red'">
     <app-avatar class="player-avatar" [username]="player.username" [avatarId]="player.avatarId" size="35" fontSize="20"></app-avatar>
     <div class="player-username">{{player.username}}</div>
     <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.DRAWER">brush</mat-icon>
     <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.GUESSER">help</mat-icon>
+    <mat-icon class="player-role-icon" *ngIf="player.isBot">smart_toy</mat-icon>
     <mat-icon class="player-role-icon player-owner-role" *ngIf="player.isOwner">gamepad</mat-icon>
   </div>
 </div>

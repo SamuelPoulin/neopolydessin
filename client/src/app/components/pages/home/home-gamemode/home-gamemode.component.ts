@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Difficulty, GameType } from '@common/communication/lobby';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
+import { GameService } from '@services/game.service';
 import { SocketService } from '@services/socket-service.service';
 import { UserService } from '@services/user.service';
 
@@ -24,6 +25,7 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     dialogRef: MatDialogRef<AbstractModalComponent>,
     private socketService: SocketService,
     private userService: UserService,
+    private gameService: GameService,
     private router: Router,
     private snackBar: MatSnackBar,
   ) {
@@ -42,6 +44,7 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     this.socketService
       .createLobby(this.lobbyName, this.gamemode, this.difficulty)
       .then(() => {
+        this.gameService.setGameInfo(this.gamemode, this.difficulty);
         this.dialogRef.close();
         this.router.navigate(['lobby']);
       })

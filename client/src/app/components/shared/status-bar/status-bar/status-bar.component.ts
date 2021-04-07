@@ -22,6 +22,7 @@ export class StatusBarComponent {
   navigateBack() {
     if (this.quit !== undefined) {
       this.gameService.leaveGame();
+      this.gameService.clearGameInfo();
     }
     this.router.navigate([this.previousPage]);
   }
