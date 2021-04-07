@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FriendWithConnection } from '@common/communication/friends';
 import { ChatService } from '@services/chat.service';
+import { ModalDialogService } from '@services/modal/modal-dialog.service';
+import { ModalType } from '@services/modal/modal-type.enum';
 
 @Component({
   selector: 'app-chat-friendslist',
@@ -10,10 +12,14 @@ import { ChatService } from '@services/chat.service';
 export class ChatFriendslistComponent {
   @Input() opened: boolean;
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService, private modalService: ModalDialogService) {}
 
   closeFriendslist() {
     this.chatService.friendslistOpened = false;
+  }
+
+  openAddFriend() {
+    this.modalService.openByName(ModalType.ADD_FRIEND);
   }
 
   get friends(): FriendWithConnection[] {

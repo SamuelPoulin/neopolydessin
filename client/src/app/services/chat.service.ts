@@ -17,7 +17,8 @@ export class ChatService {
   privateMessageSubscription: Subscription;
   playerConnectionSubscription: Subscription;
   playerDisconnectionSubscription: Subscription;
-  friendslistSubscription: Subscription;
+  friendslistSocketSubscription: Subscription;
+  friendslistAPISubscription: Subscription;
 
   rooms: ChatRoom[] = [];
   friends: FriendWithConnection[] = [];
@@ -27,7 +28,7 @@ export class ChatService {
   friendslistOpened: boolean = false;
 
   constructor(private socketService: SocketService, private gameService: GameService, private apiService: APIService) {
-    this.rooms.push({ name: ChatService.GAME_ROOM_NAME, type: ChatRoomType.GAME, messages: [] });
+    this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
@@ -63,7 +64,11 @@ export class ChatService {
       this.handleMessage(message);
     });
 
-    this.friendslistSubscription = this.socketService.receiveFriendslist().subscribe((friendslist) => {
+    this.friendslistSocketSubscription = this.socketService.receiveFriendslist().subscribe((friendslist) => {
+      this.updateFriendsList(friendslist);
+    });
+
+    this.friendslistAPISubscription = this.apiService.friendslistUpdated.subscribe((friendslist: FriendsList) => {
       this.updateFriendsList(friendslist);
     });
   }
@@ -85,7 +90,11 @@ export class ChatService {
   }
 
   sendMessage(text: string) {
-    this.socketService.sendMessage(text);
+    if (this.rooms[this.currentRoomIndex].type === ChatRoomType.GAME) {
+      this.socketService.sendMessage(text);
+    } else if (this.rooms[this.currentRoomIndex].type === ChatRoomType.PRIVATE) {
+      this.socketService.sendPrivateMessage(text, this.rooms[this.currentRoomIndex].id);
+    }
   }
 
   sendGuess(text: string) {
@@ -113,6 +122,19 @@ export class ChatService {
     if (roomIndex > -1) {
       this.rooms[roomIndex].messages = [];
     }
+  }
+
+  createDM(friendUsername: string, friendId: string) {
+    this.apiService
+      .getMessageHistory(friendId)
+      .then((privateMessages) => {
+        this.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: privateMessages });
+        this.currentRoomIndex = this.rooms.findIndex((room) => room.name === friendUsername);
+        this.friendslistOpened = false;
+      })
+      .catch(() => {
+        console.log('DM Error');
+      });
   }
 
   get messages() {

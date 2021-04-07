@@ -6,10 +6,11 @@ import { Coordinate } from '@utils/math/coordinate';
 import { SocketMessages } from '@common/socketendpoints/socket-messages';
 import { SocketDrawing } from '@common/socketendpoints/socket-drawing';
 import { BrushInfo } from '@common/communication/brush-info';
-import { ChatMessage, SystemMessage } from '@common/communication/chat-message';
+import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-message';
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
-import { SocketFriendListNotifications } from '@common/socketendpoints/socket-friend-actions';
+import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
+import { PrivateMessageTo } from '@common/communication/private-message';
 import {
   CurrentGameState,
   Difficulty,
@@ -74,7 +75,10 @@ export class SocketService {
 
   receiveFriendslist(): Observable<FriendsList> {
     return new Observable<FriendsList>((obs) => {
-      this.socket.on(SocketFriendListNotifications.UPDATE, (friendslist: FriendsList) => obs.next(friendslist));
+      this.socket.on(SocketFriendActions.UPDATE, (friendslist: FriendsList) => {
+        console.log(friendslist);
+        obs.next(friendslist);
+      });
     });
   }
 
@@ -140,7 +144,11 @@ export class SocketService {
   }
 
   sendMessage(message: string): void {
-    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message });
+    this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message } as Message);
+  }
+
+  sendPrivateMessage(message: string, friendId: string) {
+    this.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, { receiverAccountId: friendId, content: message } as PrivateMessageTo);
   }
 
   sendGuess(guess: string) {

@@ -8,4 +8,5 @@ export enum ModalType {
   GALLERY = 'gallery',
   CHAT = 'chat',
   UPLOAD = 'upload',
+  ADD_FRIEND = 'add_friend',
 }

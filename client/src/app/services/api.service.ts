@@ -1,11 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
 import { PictureWordPicture } from '@common/communication/picture-word';
 import { AccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
+import { Decision } from '@common/communication/friend-request';
+import { PrivateMessage } from '@common/communication/private-message';
 import { LoginResponse } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
@@ -32,6 +34,10 @@ export class APIService {
   private static API_AVATAR_ROUTE: string;
   private static API_ACCOUNT_ROUTE: string;
   private static API_FRIENDS_ROUTE: string;
+  private static API_FRIENDS_DECISION_ROUTE: string;
+  private static API_FRIENDS_HISTORY_ROUTE: string;
+
+  friendslistUpdated: EventEmitter<FriendsList>;
 
   constructor(private http: HttpClient, private notification: MatSnackBar, private localSaveService: LocalSaveService) {
     APIService.API_BASE_URL = environment.apiBaseUrl;
@@ -47,6 +53,10 @@ export class APIService {
     APIService.API_AVATAR_ROUTE = APIService.API_BASE_URL + '/avatar';
     APIService.API_ACCOUNT_ROUTE = APIService.API_DATABASE_ROUTE + '/account';
     APIService.API_FRIENDS_ROUTE = APIService.API_DATABASE_ROUTE + '/friends';
+    APIService.API_FRIENDS_DECISION_ROUTE = APIService.API_FRIENDS_ROUTE + '/decision';
+    APIService.API_FRIENDS_HISTORY_ROUTE = APIService.API_FRIENDS_ROUTE + '/history';
+
+    this.friendslistUpdated = new EventEmitter<FriendsList>();
   }
 
   async login(username: string, password: string): Promise<LoginResponse> {
@@ -220,6 +230,92 @@ export class APIService {
     const message = errorMessage.includes('500') ? APIService.SERVER_PROBLEM_MSG : APIService.FILE_TOO_LARGE_MSG;
     this.notification.open(message, 'ok', {
       duration: 10000,
+    });
+  }
+
+  async sendFriendDecision(idOfFriend: string, decision: Decision): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .post(
+            APIService.API_FRIENDS_DECISION_ROUTE,
+            { idOfFriend, decision },
+            { headers: { authorization: this.localSaveService.accessToken } },
+          )
+          .subscribe(
+            (friendslist: FriendsList) => {
+              this.friendslistUpdated.emit(friendslist);
+              resolve();
+            },
+            (e) => reject(e),
+          );
+      }
+    });
+  }
+
+  async removeFriend(idOfFriend: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .delete(APIService.API_FRIENDS_ROUTE + `/${idOfFriend}`, {
+            headers: { authorization: this.localSaveService.accessToken },
+          })
+          .subscribe(
+            (friendslist: FriendsList) => {
+              this.friendslistUpdated.emit(friendslist);
+              resolve();
+            },
+            (e) => reject(e),
+          );
+      }
+    });
+  }
+
+  async addFriend(username: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .post(
+            APIService.API_FRIENDS_ROUTE,
+            { username },
+            {
+              headers: { authorization: this.localSaveService.accessToken },
+            },
+          )
+          .subscribe(
+            (friendslist: FriendsList) => {
+              this.friendslistUpdated.emit(friendslist);
+              resolve();
+            },
+            (e) => reject(e),
+          );
+      }
+    });
+  }
+
+  async getMessageHistory(friendId: string): Promise<PrivateMessage[]> {
+    return new Promise<PrivateMessage[]>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .get(APIService.API_FRIENDS_HISTORY_ROUTE, {
+            params: {
+              page: '1',
+              otherId: friendId,
+              limit: '4',
+            },
+            headers: {
+              authorization: this.localSaveService.accessToken,
+            },
+          })
+          .subscribe(
+            (privateMessages: { messages: PrivateMessage[] }) => {
+              resolve(privateMessages.messages);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      }
     });
   }
 

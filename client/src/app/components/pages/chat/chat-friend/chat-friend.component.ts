@@ -1,5 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { Decision } from '@common/communication/friend-request';
 import { FriendStatus, FriendWithConnection } from '@common/communication/friends';
+import { APIService } from '@services/api.service';
+import { ChatService } from '@services/chat.service';
 
 @Component({
   selector: 'app-chat-friend',
@@ -9,6 +12,8 @@ import { FriendStatus, FriendWithConnection } from '@common/communication/friend
 export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
 
+  constructor(private apiService: APIService, private chatService: ChatService) {}
+
   get username() {
     return this.friend.friendId?.username;
   }
@@ -17,16 +22,24 @@ export class ChatFriendComponent {
     return this.friend.friendId?.avatar;
   }
 
+  get canConfirm(): boolean {
+    return this.friend.received;
+  }
+
   get friendStatus() {
     return FriendStatus;
   }
 
   confirm() {
-    console.log('Friend confirmed!');
+    if (this.friend.friendId?._id) {
+      this.apiService.sendFriendDecision(this.friend.friendId?._id, Decision.ACCEPT);
+    }
   }
 
   reject() {
-    console.log('Friend rejected!');
+    if (this.friend.friendId?._id) {
+      this.apiService.sendFriendDecision(this.friend.friendId?._id, Decision.REFUSE);
+    }
   }
 
   invite() {
@@ -35,9 +48,15 @@ export class ChatFriendComponent {
 
   unfriend() {
     console.log('Friend unfriended!');
+    if (this.friend.friendId?._id) {
+      this.apiService.removeFriend(this.friend.friendId._id);
+    }
   }
 
   chat() {
     console.log('Started chat with friend!');
+    if (this.friend.friendId?._id && this.friend.friendId.username) {
+      this.chatService.createDM(this.friend.friendId.username, this.friend.friendId._id);
+    }
   }
 }
