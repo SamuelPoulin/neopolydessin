@@ -4,7 +4,8 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
-import { PictureWordPicture } from '@common/communication/picture-word';
+import { PictureWordDrawing, PictureWordPicture } from '@common/communication/picture-word';
+import { DrawingSequence } from '@common/communication/drawing-sequence';
 import { AccountInfo, PublicAccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
 import { Decision } from '@common/communication/friend-request';
@@ -101,24 +102,66 @@ export class APIService {
     });
   }
 
-  async uploadDrawing() {
-    // todo - redo
+  async uploadDrawing(data: PictureWordDrawing): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/upload/drawing';
+        this.http
+          .post<{ id: string }>(url, data, { headers })
+          .subscribe(
+            (response: { id: string }) => {
+              resolve(response.id);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      } else {
+        reject();
+      }
+    });
   }
 
-  async uploadPicture(data: PictureWordPicture): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
+  async uploadPicture(data: PictureWordPicture): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
         headers = headers.set('authorization', this.localSaveService.accessToken);
         const url = APIService.API_PICTUREWORD_ROUTE + '/upload/picture';
-        this.http.post(url, data, { headers }).subscribe(
-          (response: number) => {
-            resolve(response);
-          },
-          (e) => {
-            reject(e);
-          },
-        );
+        this.http
+          .post<{ id: string }>(url, data, { headers })
+          .subscribe(
+            (response: { id: string }) => {
+              resolve(response.id);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async getDrawingPreview(id: string) {
+    return new Promise<DrawingSequence>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/sequence/' + id;
+        this.http
+          .get<DrawingSequence>(url, { headers })
+          .subscribe(
+            (response: DrawingSequence) => {
+              resolve(response);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
       } else {
         reject();
       }

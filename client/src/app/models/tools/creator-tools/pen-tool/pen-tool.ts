@@ -34,7 +34,9 @@ export class PenTool extends CreatorTool {
   initListeners(): void {
     // todo - move to editor?
     this.editorService.socketService.receiveStartPath().subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
-      this.editorService.colorsService.primaryColor = Color.ahex(pathData.brush.color.slice(1));
+      this.editorService.colorsService.primaryColor =
+        // eslint-disable-next-line
+        pathData.brush.color.length > 7 ? Color.ahex(pathData.brush.color) : Color.hex(pathData.brush.color);
       this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
       this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
       this.shape.updateProperties();

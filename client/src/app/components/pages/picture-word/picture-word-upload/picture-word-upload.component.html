@@ -5,16 +5,21 @@
   <div content id="content">
     <app-custom-input class="input" [(value)]="word">Mot à deviner</app-custom-input>
 
-    <img [src]="imageString" width="450" id="uploaded-image">
+    <img [src]="imageString" [width]="size" id="uploaded-image">
+
+    <canvas #preview [width]="size" [height]="size"></canvas>
 
   </div>
   <div actions>
-      <button id="btn-image" mat-stroked-button>
-    <label for="upload-input" id="btn-image-label">
-        <mat-icon id="btn-image-icon">image</mat-icon>
-    </label>
+      <button id="btn-preview" mat-stroked-button (click)="showPreview('606d671280dc2514aa33770e')">
+        <mat-icon id="btn-image-icon">edit</mat-icon>
       </button>
-    <input (change)="acceptFile($event.target.files)" type="file" id="upload-input"/>
+      <button id="btn-image" mat-stroked-button>
+        <label for="upload-input" id="btn-image-label">
+          <mat-icon id="btn-image-icon">image</mat-icon>
+        </label>
+      </button>
+    <input (change)="acceptFile($event.target.files)" type="file" id="upload-input" accept="image/png, image/jpeg"/>
     <button id="btn-confirm" mat-stroked-button (click)="upload()">
       Enregistrer
     </button>
