@@ -64,7 +64,6 @@ export class BotService {
 
     onPlayerRequestsHint: () => {
       this.sendBotMessage(`Un indice... pour vrai? ${this.hints[this.hintIndex]}`);
-      this.hintIndex++;
     }
   };
 
@@ -133,6 +132,9 @@ export class BotService {
   requestHint(): void {
     // ajouter un timer pour genre 20sec?
     this.bots[this.currentBot].personnality.onPlayerRequestsHint();
+    if (this.hintIndex < this.hints.length) {
+      this.hintIndex++;
+    }
   }
 
   getBot(teamNumber: number): Entity {
