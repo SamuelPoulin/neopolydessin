@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
 import { Subscription } from 'rxjs';
-import { Message } from '../../../../common/communication/chat-message';
+import { ChatMessage, Message } from '../../../../common/communication/chat-message';
 import { APIService } from './api.service';
 import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
+import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -27,7 +28,12 @@ export class ChatService {
   guessing: boolean = false;
   friendslistOpened: boolean = false;
 
-  constructor(private socketService: SocketService, private gameService: GameService, private apiService: APIService) {
+  constructor(
+    private socketService: SocketService,
+    private gameService: GameService,
+    private apiService: APIService,
+    private userService: UserService,
+  ) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.currentRoomIndex = 0;
 
@@ -52,8 +58,31 @@ export class ChatService {
       }
     });
 
-    this.privateMessageSubscription = this.socketService.receivePrivateMessage().subscribe((message) => {
-      this.handleMessage(message);
+    this.privateMessageSubscription = this.socketService.receivePrivateMessage().subscribe((privateMessage) => {
+      console.log(privateMessage);
+      let roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.senderAccountId);
+
+      if (roomIndex === -1) {
+        this.apiService
+          .getPublicAccount(privateMessage.senderAccountId)
+          .then((accountInfo) => {
+            this.rooms.push({ name: accountInfo.username, id: privateMessage.senderAccountId, type: ChatRoomType.PRIVATE, messages: [] });
+            roomIndex = this.rooms.length - 1;
+
+            this.rooms[roomIndex].messages.push({
+              senderUsername: accountInfo.username,
+              content: privateMessage.content,
+              timestamp: privateMessage.timestamp,
+            } as ChatMessage);
+          })
+          .catch();
+      } else {
+        this.rooms[roomIndex].messages.push({
+          senderUsername: this.rooms[roomIndex].name,
+          content: privateMessage.content,
+          timestamp: privateMessage.timestamp,
+        } as ChatMessage);
+      }
     });
 
     this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
@@ -128,7 +157,16 @@ export class ChatService {
     this.apiService
       .getMessageHistory(friendId)
       .then((privateMessages) => {
-        this.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: privateMessages });
+        const chatMessages: ChatMessage[] = [];
+        for (const privateMessage of privateMessages) {
+          chatMessages.push({
+            senderUsername:
+              privateMessage.senderAccountId === this.userService.account._id ? this.userService.account.username : friendUsername,
+            content: privateMessage.content,
+            timestamp: privateMessage.timestamp,
+          });
+        }
+        this.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
         this.currentRoomIndex = this.rooms.findIndex((room) => room.name === friendUsername);
         this.friendslistOpened = false;
       })

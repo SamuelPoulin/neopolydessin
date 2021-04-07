@@ -6,6 +6,8 @@ import { GameService } from './game.service';
 import { MockGameService } from './game.service.spec';
 import { SocketService } from './socket-service.service';
 import { MockSocketService } from './socket-service.service.spec';
+import { UserService } from './user.service';
+import { MockUserService } from './user.service.spec';
 
 export const MockChatService = jasmine.createSpyObj('ChatService', {
   sendMessage: null,
@@ -29,6 +31,7 @@ describe('ChatService', () => {
         { provide: SocketService, useValue: MockSocketService },
         { provide: GameService, useValue: MockGameService },
         { provide: APIService, useValue: MockAPIService },
+        { provide: UserService, useValue: MockUserService },
       ],
     }).compileComponents();
   }));

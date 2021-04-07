@@ -49,14 +49,12 @@ export class ChatFriendComponent {
   }
 
   unfriend() {
-    console.log('Friend unfriended!');
     if (this.friend.friendId?._id) {
       this.apiService.removeFriend(this.friend.friendId._id);
     }
   }
 
   chat() {
-    console.log('Started chat with friend!');
     if (this.friend.friendId?._id && this.friend.friendId.username) {
       this.chatService.createDM(this.friend.friendId.username, this.friend.friendId._id);
     }

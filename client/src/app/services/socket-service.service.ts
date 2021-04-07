@@ -10,7 +10,7 @@ import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
-import { PrivateMessageTo } from '@common/communication/private-message';
+import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import {
   CurrentGameState,
   Difficulty,
@@ -95,9 +95,9 @@ export class SocketService {
     });
   }
 
-  receivePrivateMessage(): Observable<ChatMessage> {
-    return new Observable<ChatMessage>((obs) => {
-      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (content: ChatMessage) => obs.next(content));
+  receivePrivateMessage(): Observable<PrivateMessage> {
+    return new Observable<PrivateMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (privateMessage: PrivateMessage) => obs.next(privateMessage));
     });
   }
 

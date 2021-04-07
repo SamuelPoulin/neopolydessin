@@ -1,10 +1,11 @@
+/* eslint-disable max-lines */
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
 import { PictureWordPicture } from '@common/communication/picture-word';
-import { AccountInfo } from '@common/communication/account';
+import { AccountInfo, PublicAccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
 import { Decision } from '@common/communication/friend-request';
 import { PrivateMessage } from '@common/communication/private-message';
@@ -172,6 +173,23 @@ export class APIService {
             reject(e);
           },
         );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async getPublicAccount(accountId: string): Promise<PublicAccountInfo> {
+    return new Promise<PublicAccountInfo>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .get(APIService.API_ACCOUNT_ROUTE + `/${accountId}`, { headers: { authorization: this.localSaveService.accessToken } })
+          .subscribe(
+            (accountInfo: PublicAccountInfo) => {
+              resolve(accountInfo);
+            },
+            (e) => reject(e),
+          );
       } else {
         reject();
       }
