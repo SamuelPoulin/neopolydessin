@@ -75,7 +75,7 @@ describe('AvatarController', () => {
             });
     });
 
-    it.only('get with id should return picture correctly', (done: Mocha.Done) => {
+    it('get with id should return picture correctly', (done: Mocha.Done) => {
         // simulate account creation
         avatarModel.addAvatarDocument('1');
         if (fs.existsSync(avatarPath)) {
