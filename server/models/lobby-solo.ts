@@ -147,9 +147,8 @@ export class LobbySolo extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    const timeCorrectGuess = 30000;
     this.timeLeftSeconds += TIME_ADD_CORRECT_GUESS;
-    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
+    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }
 
