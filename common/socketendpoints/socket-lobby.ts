@@ -28,6 +28,9 @@ export enum SocketLobby {
     UPDATE_WORD_TO_DRAW = 'updateWordToDraw',
     UPDATE_TEAMS_SCORE = 'updateTeamsScore',
     UPDATE_GAME_STATE = 'updateGameState',
+    SEND_INVITE = 'sendInviteToFriend',
+    RECEIVE_INVITE = 'receiveInviteFromFriend',
+    ACCEPT_INVITE = 'acceptInviteFromFriend',
 
     SOLO_COOP_GUESS_BROADCAST = 'soloCoopGuessBroadcast',
     CLASSIQUE_GUESS_BROADCAST = 'classiqueGuessBroadcast'

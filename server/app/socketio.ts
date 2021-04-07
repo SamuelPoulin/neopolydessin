@@ -199,6 +199,18 @@ export class SocketIo {
         this.onDisconnecting(socket);
       });
 
+      socket.on(SocketLobby.ACCEPT_INVITE, (lobbyIdToJoin: string, callback: (lobbyJoined: boolean) => void) => {
+        const lobbyToJoin = this.findLobby(lobbyIdToJoin);
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
+          lobbyToJoin.addPlayer(playerId, socket);
+          callback(true);
+        }
+        else {
+          callback(false);
+        }
+      });
+
       socket.on(SocketConnection.DISCONNECTION, () => {
         this.onDisconnect(socket);
       });
