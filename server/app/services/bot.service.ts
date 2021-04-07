@@ -60,11 +60,19 @@ export class BotService {
       if (Math.random() < PERCENT_50) {
         this.sendBotMessage('Vous êtes pas très bon... Pourtant mon dessin est clair.');
       }
+    },
+
+    onPlayerRequestsHint: () => {
+      this.sendBotMessage(`Un indice... pour vrai? ${this.hints[this.hintIndex]}`);
+      this.hintIndex++;
     }
   };
 
   private io: Server;
   private drawing: DrawingSequence;
+
+  private hintIndex: number;
+  private hints: string[];
   private currentSegmentIndex: number;
   private currentCoordIndex: number;
 
@@ -81,8 +89,10 @@ export class BotService {
     this.drawDelay = this.DEFAULT_DRAW_DELAY;
   }
 
-  draw(drawing: DrawingSequence): void {
+  draw(drawing: DrawingSequence, hints: string[]): void {
     this.drawing = drawing;
+    this.hints = hints;
+    this.hintIndex = 0;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
     this.bots[this.currentBot].personnality.onStartDraw();
@@ -93,6 +103,8 @@ export class BotService {
     clearInterval(this.pathTimer);
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
+    this.hints = [];
+    this.hintIndex = 0;
     this.bots[this.currentBot].personnality.onResetDrawing();
   }
 
@@ -116,6 +128,11 @@ export class BotService {
         this.playerIncorrectGuess();
         break;
     }
+  }
+
+  requestHint(): void {
+    // ajouter un timer pour genre 20sec?
+    this.bots[this.currentBot].personnality.onPlayerRequestsHint();
   }
 
   getBot(teamNumber: number): Entity {

@@ -136,7 +136,7 @@ export class LobbyClassique extends Lobby {
       if (instanceOfPlayer(drawer)) {
         this.io.to((drawer as ServerPlayer).socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, pictureWord.word);
       } else {
-        this.botService.draw(pictureWord.sequence);
+        this.botService.draw(pictureWord.sequence, pictureWord.hints);
       }
     });
 
