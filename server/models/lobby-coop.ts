@@ -150,9 +150,8 @@ export class LobbyCoop extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    const timeCorrectGuess = this.TIME_ADD_CORRECT_GUESS * this.MS_PER_SEC;
     this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
-    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
+    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }
 
