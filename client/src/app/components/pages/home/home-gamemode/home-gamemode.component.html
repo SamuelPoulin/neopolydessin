@@ -1,0 +1,20 @@
+<app-abstract-modal>
+  <div header id="home-gamemode-header">
+    Choisir le mode de jeu
+  </div>
+  <div content>
+    <mat-form-field appearance="fill">
+      <mat-label>Mode de jeu</mat-label>
+      <mat-select [(value)]="selectedGamemode">
+        <mat-option *ngFor="let gamemode of gamemodes" [value]="gamemode">
+          {{gamemode}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div actions>
+    <button mat-stroked-button (click)="startGame()">
+      Commencer
+    </button>
+  </div>
+</app-abstract-modal>

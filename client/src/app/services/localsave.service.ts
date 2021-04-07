@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Account } from '@models/account';
+import { AccountInfo } from '@common/communication/account';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class LocalSaveService {
     localStorage.clear();
   }
 
-  set account(account: Account | undefined) {
+  set account(account: AccountInfo | undefined) {
     if (account) {
       localStorage.setItem(LocalSaveService.STORAGE_ACCOUNT_KEY, JSON.stringify(account));
     } else {
@@ -21,10 +21,10 @@ export class LocalSaveService {
     }
   }
 
-  get account(): Account | undefined {
+  get account(): AccountInfo | undefined {
     const value = localStorage.getItem(LocalSaveService.STORAGE_ACCOUNT_KEY);
     if (value) {
-      return JSON.parse(value) as Account;
+      return JSON.parse(value) as AccountInfo;
     } else {
       return undefined;
     }

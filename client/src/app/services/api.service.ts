@@ -1,10 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Account } from '@models/account';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
 import { PictureWordPicture } from '@common/communication/picture-word';
+import { AccountInfo } from '@common/communication/account';
 import { LoginResponse } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
@@ -148,11 +148,11 @@ export class APIService {
     });
   }
 
-  async getAccount(): Promise<Account> {
-    return new Promise<Account>((resolve, reject) => {
+  async getAccount(): Promise<AccountInfo> {
+    return new Promise<AccountInfo>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         this.http.get(APIService.API_ACCOUNT_ROUTE, { headers: { authorization: this.localSaveService.accessToken } }).subscribe(
-          (account: Account) => {
+          (account: AccountInfo) => {
             resolve(account);
           },
           (e) => {

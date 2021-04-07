@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Account } from '@models/account';
+import { AccountInfo } from '@common/communication/account';
 import { ACCESS_TOKEN_REFRESH_INTERVAL } from '../../../../common/communication/login';
 import { APIService } from './api.service';
 import { LocalSaveService } from './localsave.service';
@@ -89,8 +89,8 @@ export class UserService {
     this.router.navigate(['login']);
   }
 
-  async fetchAccount(): Promise<Account> {
-    return new Promise<Account>((resolve, reject) => {
+  async fetchAccount(): Promise<AccountInfo> {
+    return new Promise<AccountInfo>((resolve, reject) => {
       if (this.localSaveService.account) {
         resolve(this.localSaveService.account);
       } else {
@@ -108,8 +108,9 @@ export class UserService {
   async fetchAvatar(): Promise<Blob> {
     return new Promise<Blob>((resolve, reject) => {
       if (this.localSaveService.account && this.localSaveService.account.avatar) {
+        console.log('nice');
         this.apiService
-          .getAvatarById(this.localSaveService.account.avatar._id)
+          .getAvatarById(this.localSaveService.account.avatar)
           .then((blob: Blob) => {
             this.avatarBlob = blob;
             resolve(this.avatarBlob);
@@ -121,11 +122,11 @@ export class UserService {
     });
   }
 
-  get account(): Account {
+  get account(): AccountInfo {
     if (this.localSaveService.account) {
       return this.localSaveService.account;
     } else {
-      return { _id: '', firstName: '', lastName: '', username: '', email: '', createdDate: '', friends: [], avatar: { _id: '' } };
+      return { _id: '', firstName: '', lastName: '', username: '', email: '', createdDate: Date.now(), friends: [], avatar: '' };
     }
   }
 

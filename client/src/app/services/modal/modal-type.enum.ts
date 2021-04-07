@@ -8,4 +8,5 @@ export enum ModalType {
   GALLERY = 'gallery',
   CHAT = 'chat',
   UPLOAD = 'upload',
+  CHOOSE_GAMEMODE = 'choose-gamemode',
 }
