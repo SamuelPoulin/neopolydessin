@@ -194,7 +194,9 @@ class LobbyActivity : AppCompatActivity() {
     private fun goToGame(){
         vm.unsubscribe()
         supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
-        val intent = Intent(this, GameActivity::class.java)
+        val intent = Intent(this, GameActivity::class.java).apply {
+            putExtra("gameType", vm.gameType)
+        }
         nextActivityIntent = intent
         startActivity(intent)
         finish()

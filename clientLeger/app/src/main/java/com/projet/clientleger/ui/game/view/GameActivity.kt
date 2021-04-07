@@ -16,11 +16,13 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.model.game.PlayerAvatar
@@ -67,9 +69,10 @@ class GameActivity : AppCompatActivity() {
             supportFragmentManager.setFragmentResult("keyboardEvent", bundleOf("height" to heightDiff))
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
+
         //clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
-
+        setupTeamsUi()
         binding.team1Rv.layoutManager = LinearLayoutManager(this)
         binding.team1Rv.adapter = PlayersAdapter(team1)
         binding.team2Rv.layoutManager = LinearLayoutManager(this)
@@ -80,6 +83,18 @@ class GameActivity : AppCompatActivity() {
         }
         vm.onPlayerReady()
     }
+
+    private fun setupTeamsUi(){
+        val gameType = intent.getSerializableExtra("gameType") as GameType
+        binding.team1Score.text = "0"
+        binding.team2Score.text = "0"
+        if(gameType != GameType.CLASSIC){
+            binding.team1Label.text = "Joueurs - "
+            binding.team2Label.visibility = View.GONE
+            binding.team2Score.visibility = View.GONE
+        }
+    }
+
     private fun showQuitGameDialog(message:String, isMessageFromServer:Boolean){
         val dialogView = layoutInflater.inflate(R.layout.dialog_button_quit_game, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
@@ -113,7 +128,16 @@ class GameActivity : AppCompatActivity() {
         vm.currentRoleLiveData.observe(this){
             supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to (it == PlayerRole.GUESSER)))
             supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to (it == PlayerRole.DRAWER)))
-            binding.role.text = getFrenchRole(it.value)
+            val icon = when(it){
+                PlayerRole.DRAWER -> R.drawable.ic_drawer
+                PlayerRole.GUESSER -> R.drawable.ic_guessing
+                else -> 0
+            }
+            if(icon != 0){
+                binding.currentRole.setImageResource(icon)
+                binding.currentRole.visibility = View.VISIBLE
+            } else
+                binding.currentRole.visibility = View.INVISIBLE
         }
 
         vm.playersLiveData.observe(this){
@@ -148,9 +172,9 @@ class GameActivity : AppCompatActivity() {
         }
         vm.teamScores.observe(this){
             if(it.size > 0)
-                binding.team1Label.text = "Équipe 1 - ${it[0].score}"
+                binding.team1Score.text = it[0].score.toString()
             if(it.size > 1)
-                binding.team2Label.text = "Équipe 1 - ${it[1].score}"
+                binding.team2Label.text = it[1].score.toString()
         }
         vm.receiveEndGameNotice().subscribe{
             lifecycleScope.launch {

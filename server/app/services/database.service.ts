@@ -4,6 +4,7 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
+import gameHistoryModel, { GameHistory, GameResult } from '../../models/schemas/game-history';
 import { Observable } from '../utils/observable';
 import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
@@ -14,6 +15,8 @@ import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
+import { DashBoardInfo, GameHistoryDashBoard } from '../../../common/communication/dashboard';
+import { GameType } from '../../../common/communication/lobby';
 import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
 
 export interface Response<T> {
@@ -102,6 +105,23 @@ export class DatabaseService {
     });
   }
 
+  async getDashboardById(id: string): Promise<Response<DashBoardInfo>> {
+    return new Promise<Response<DashBoardInfo>>((resolve, reject) => {
+      accountModel.findById(new ObjectId(id))
+        .populate('logins', 'logins')
+        .populate('avatar', 'avatar')
+        .populate('gameHistory', 'games')
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: this.accountToDashBoardInfo(doc) });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+
   async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
     return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
       try {
@@ -179,8 +199,15 @@ export class DatabaseService {
           loginsModelId = logins._id.toHexString();
           return avatarModel.addAvatarDocument(model._id.toHexString());
         })
-        .then(async (result: Avatar) => {
+        .then( async (result: Avatar) => {
           model.avatar = result._id.toHexString();
+          const gameHistory = new gameHistoryModel({
+            accountId: model._id, games: []
+          });
+          return gameHistory.save();
+        })
+        .then(async (gameHistory: GameHistory) => {
+          model.gameHistory = gameHistory._id.toHexString();
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
@@ -306,6 +333,9 @@ export class DatabaseService {
           return avatarModel.removeAvatar(id);
         })
         .then((result) => {
+          return gameHistoryModel.findOneAndDelete( { accountId: id});
+        })
+        .then((result) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
@@ -373,5 +403,79 @@ export class DatabaseService {
       username: account.username,
       avatar: account.avatar
     };
+  }
+
+  private accountToDashBoardInfo(account: Account): DashBoardInfo {
+    console.log(account.logins);
+    console.log(account.gameHistory);
+    return {
+      _id: account.id,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      username: account.username,
+      email: account.email,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      logins: account.logins as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      gameHistory: this.gameHistoryToGameHistoryDashBoard(account.gameHistory as any),
+      createdDate: account.createdDate,
+      avatar: account.avatar,
+    };
+  }
+
+  private gameHistoryToGameHistoryDashBoard(gameHistory: GameHistory): GameHistoryDashBoard {
+    let timePlayed: number = 0;
+    let nbWin: number = 0;
+    let classiqueGamePlayed: number = 0;
+    let bestCoopScore: number = 0;
+    let bestSoloScore: number = 0;
+    let averageTimePerGame: number = 0;
+    let winRate: number = 0;
+    gameHistory.games.forEach((game) => {
+      switch (game.gameType) {
+        case GameType.CLASSIC: {
+          if (game.gameResult === GameResult.WIN) {
+            nbWin++;
+          }
+          classiqueGamePlayed++;
+          break;
+        }
+        case GameType.SPRINT_SOLO: {
+          if (game.team[0].score > bestSoloScore) {
+            bestSoloScore = game.team[0].score;
+          }
+          break;
+        }
+        case GameType.SPRINT_COOP: {
+          if (game.team[0].score > bestCoopScore) {
+            bestCoopScore = game.team[0].score;
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+      timePlayed += this.calculateGameTime(game.startDate, game.endDate);
+    });
+    if (gameHistory.games.length > 0) {
+      averageTimePerGame = timePlayed / gameHistory.games.length;
+    }
+    if (classiqueGamePlayed > 0) {
+      winRate = nbWin / classiqueGamePlayed;
+    }
+    return {
+      games: gameHistory.games,
+      nbGamePlayed: gameHistory.games.length,
+      winPercentage: winRate,
+      averageGameTime: averageTimePerGame,
+      totalTimePlayed: timePlayed,
+      bestScoreSolo: bestSoloScore,
+      bestScoreCoop: bestCoopScore,
+    };
+  }
+
+  private calculateGameTime(startTime: number, endTime: number): number {
+    return endTime - startTime;
   }
 }

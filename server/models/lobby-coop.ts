@@ -9,7 +9,7 @@ import {
   GameType,
   PlayerRole,
   GuessResponse,
-  GuessMessageCoop,
+  GuessMessageSoloCoop,
   ReasonEndGame,
   CurrentGameState
 } from '../../common/communication/lobby';
@@ -37,6 +37,7 @@ export class LobbyCoop extends Lobby {
     this.gameType = GameType.SPRINT_COOP;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = NB_GUESSES;
+    this.teamScores = [0];
     this.timeLeftSeconds = COOP_START_TIME;
     this.players.push(this.botService.getBot(0));
   }
@@ -86,7 +87,7 @@ export class LobbyCoop extends Lobby {
             this.guessLeft--;
             break;
         }
-        const guessMessage: GuessMessageCoop = {
+        const guessMessage: GuessMessageSoloCoop = {
           content: word,
           timestamp: Date.now(),
           guessStatus,
@@ -149,8 +150,8 @@ export class LobbyCoop extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    const timeCorrectGuess = this.TIME_ADD_CORRECT_GUESS * this.MS_PER_SEC;
-    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
+    this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
+    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }
 

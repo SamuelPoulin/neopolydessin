@@ -92,7 +92,7 @@ class ChatFragment @Inject constructor() : Fragment() {
             baseHeight = binding!!.root.height
         if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
             val params = binding!!.root.layoutParams
-            params.height = height
+            params.height = baseHeight - height
             binding?.let {
                 it.root.requestLayout()
                 it.rvMessages.adapter?.notifyDataSetChanged()
