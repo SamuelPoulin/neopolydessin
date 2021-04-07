@@ -6,4 +6,5 @@ export interface PrivateMessageTo extends Message {
 
 export interface PrivateMessage extends SystemMessage {
     senderAccountId: string;
+    receiverAccountId: string;
 }
