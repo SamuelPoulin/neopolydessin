@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { APIService } from '@services/api.service';
@@ -6,6 +6,9 @@ import { PictureWordPicture } from '@common/communication/picture-word';
 import { Difficulty } from '@common/communication/lobby';
 import { DrawMode } from '@common/communication/draw-mode';
 import { Color } from '@utils/color/color';
+import { DrawingSequence } from '@common/communication/drawing-sequence';
+import { Coordinate } from '@utils/math/coordinate';
+import { VIEWPORT_DIMENSION } from '@common/communication/viewport';
 
 @Component({
   selector: 'app-picture-word-upload',
@@ -19,7 +22,10 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   drawMode: DrawMode;
   color: Color;
   imageString: string = '';
-  imageData: ArrayBuffer = new ArrayBuffer(0);
+  imageData: string = '';
+  size: number = 450;
+
+  @ViewChild('preview') preview: ElementRef;
 
   constructor(dialogRef: MatDialogRef<AbstractModalComponent>, private api: APIService) {
     super(dialogRef);
@@ -37,7 +43,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       difficulty: this.difficulty,
       drawMode: this.drawMode,
       color: this.color.hexString,
-      picture: this.imageString,
+      picture: this.imageData,
     };
     this.api.uploadPicture(data).then((id: number) => {
       console.log(id);
@@ -45,24 +51,60 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   }
 
   acceptFile(fileList: FileList): void {
-    const dataReader = new FileReader();
     const stringReader = new FileReader();
-
-    dataReader.onload = (e: ProgressEvent) => {
-      if (dataReader.result) {
-        this.imageData = dataReader.result as ArrayBuffer;
-      }
-    };
 
     stringReader.onload = (e: ProgressEvent) => {
       if (stringReader.result) {
         this.imageString = stringReader.result.toString();
+        this.imageData = this.imageString.split(',')[1];
       }
     };
 
     if (fileList[0]) {
-      dataReader.readAsArrayBuffer(fileList[0]);
       stringReader.readAsDataURL(fileList[0]);
+    }
+  }
+
+  showPreview() {
+    this.api.getDrawingPreview('606ce445ca767702e011a9b9').then((sequence: DrawingSequence) => {
+      this.drawPreview(sequence);
+    });
+  }
+
+  async drawPreview(sequence: DrawingSequence) {
+    console.log(this.preview);
+    const ratio = this.size / VIEWPORT_DIMENSION;
+    const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
+    if (ctx) {
+      const totalTime = 5000;
+      const timePerSegment = totalTime / sequence.stack.length;
+
+      ctx.clearRect(0, 0, this.size, this.size);
+      for (const segment of sequence.stack) {
+        const segmentStart = Date.now();
+        const timePerPoint = timePerSegment / segment.path.length;
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'black';
+
+        for (const [index, coord] of segment.path.entries()) {
+          const c = Coordinate.copy(coord).scale(ratio);
+
+          if (index === 0) {
+            ctx.moveTo(c.x, c.y);
+          } else {
+            ctx.lineTo(c.x, c.y);
+          }
+
+          const now = Date.now();
+          if (now < segmentStart + (timePerPoint - 0.1) * index) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
+            });
+          }
+        }
+        ctx.stroke();
+      }
     }
   }
 }

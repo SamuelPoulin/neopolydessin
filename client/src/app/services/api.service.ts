@@ -5,6 +5,7 @@ import { Account } from '@models/account';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
 import { PictureWordPicture } from '@common/communication/picture-word';
+import { DrawingSequence } from '@common/communication/drawing-sequence';
 import { LoginResponse } from '../../../../common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
@@ -105,6 +106,28 @@ export class APIService {
             reject(e);
           },
         );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async getDrawingPreview(id: string) {
+    return new Promise<DrawingSequence>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/sequence/' + id;
+        this.http
+          .get<DrawingSequence>(url, { headers })
+          .subscribe(
+            (response: DrawingSequence) => {
+              resolve(response);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
       } else {
         reject();
       }
