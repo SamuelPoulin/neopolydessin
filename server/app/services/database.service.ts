@@ -121,7 +121,6 @@ export class DatabaseService {
   }
 
   async addGameToGameHistory(id: string, gameInfo: Game): Promise<Response<GameHistory>> {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     return new Promise<Response<GameHistory>>((resolve, reject) => {
       try {
         gameHistoryModel.addGame(id, gameInfo)
