@@ -1,0 +1,54 @@
+#chat-friendslist-container {
+  position: absolute;
+  overflow: hidden;
+  top: 75px;
+  max-height: calc(100vh - 135px);
+  width: 400px;
+  background-color: #292929;
+  transition: left 0.25s;
+  z-index: 1;
+}
+
+#chat-friendslist-closer {
+  color: white;
+  margin: 0px 15px;
+}
+
+#chat-friendslist-closer-icon {
+  font-size: 28px;
+}
+
+#chat-friendslist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+#chat-friendslist-content-container {
+  overflow-y: auto;
+  max-height: calc(100vh - 195px);
+  min-height: calc(100vh - 195px);
+}
+
+.chat-friendslist-button {
+  color:white;
+  background-color: #464646;
+  height: 35px;
+  font-weight: 500;
+  padding: 0px 5px;
+  margin: 0px 15px;
+  font-size: 18px;
+}
+
+.chat-friendslist-section-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: white;
+  padding: 10px 25px;
+}
+
+.chat-friendslist-empty-message {
+  color: #464646;
+  padding: 0px 25px;
+}

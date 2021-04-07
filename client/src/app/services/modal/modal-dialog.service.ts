@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ChatAddFriendComponent } from '@components/pages/chat/chat-add-friend/chat-add-friend.component';
 import { HomeGamemodeComponent } from '@components/pages/home/home-gamemode/home-gamemode.component';
 import { PictureWordUploadComponent } from '@components/pages/picture-word/picture-word-upload/picture-word-upload.component';
 import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
@@ -17,6 +18,8 @@ export class ModalDialogService extends MatDialog {
           return this.open(ConfirmModalComponent, {});
         case ModalType.UPLOAD:
           return this.open(PictureWordUploadComponent, {});
+        case ModalType.ADD_FRIEND:
+          return this.open(ChatAddFriendComponent, {});
         case ModalType.CHOOSE_GAMEMODE:
           return this.open(HomeGamemodeComponent, {});
       }
