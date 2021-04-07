@@ -1,3 +1,3 @@
 package com.projet.clientleger.data.model.account
 
-data class UpdateAccountModel(val firstName:String, val lastName:String, val username:String, val email:String)
+data class UpdateAccountModel(val firstName:String? = null, val lastName:String? = null, val username:String? = null, val email:String? = null)

@@ -27,14 +27,28 @@ class ProfileFragment @Inject constructor(): Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = ProfileFragmentBinding.inflate(inflater, container, false)
         binding!!.confirmBtn.setOnClickListener {
+            var firstName: String? = binding!!.firstNameBox.text.toString()
+            var lastName: String? = binding!!.lastNameBox.text.toString()
+            var username: String? = binding!!.usernameBox.text.toString()
+            var email: String? = binding!!.emailBox.text.toString()
+            if(firstName!!.isEmpty())
+                firstName = null
+            if(lastName!!.isEmpty())
+                lastName = null
+            if(username!!.isEmpty())
+                username = null
+            if(email!!.isEmpty())
+                email = null
+
+
             val updateAccountModel = UpdateAccountModel(
-                binding!!.firstNameBox.text.toString(),
-                binding!!.lastNameBox.text.toString(),
-                binding!!.usernameBox.text.toString(),
-                binding!!.emailBox.text.toString())
+                    firstName,
+                    lastName,
+                    username,
+                    email)
 
             lifecycleScope.launch {
                 binding!!.confirmBtn.isEnabled = false
