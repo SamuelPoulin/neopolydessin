@@ -15,10 +15,9 @@ const PERCENT_50: number = 0.5;
 export class BotService {
 
   currentBot: number;
-
+  private readonly HINT_COOLDOWN: number = 30;
   private readonly SPEED_DRAW_DELAY: number = 5;
   private readonly DEFAULT_DRAW_DELAY: number = 15;
-  // private readonly SLOW_DRAW_DELAY: number = 30;
 
   private readonly AGGRESSIVE: BotPersonnality = {
     onStartDraw: () => {
@@ -114,9 +113,12 @@ export class BotService {
     }
   };
 
+  private botPersonnalities: BotPersonnality[] = [this.AGGRESSIVE, this.GENTLEMEN];
+
   private io: Server;
   private drawing: DrawingSequence;
 
+  private hintAvailable: boolean;
   private hintIndex: number;
   private hints: string[];
   private currentSegmentIndex: number;
@@ -129,6 +131,7 @@ export class BotService {
   private bots: { botName: string; personnality: BotPersonnality }[] = [];
 
   constructor(io: Server, lobbyId: string) {
+    this.hintAvailable = true;
     this.currentBot = 0;
     this.io = io;
     this.lobbyId = lobbyId;
@@ -177,27 +180,19 @@ export class BotService {
   }
 
   requestHint(): void {
-    // ajouter un timer pour genre 20sec?
-    this.bots[this.currentBot].personnality.onPlayerRequestsHint();
-    if (this.hintIndex < this.hints.length) {
-      this.hintIndex++;
+    if (this.hintAvailable) {
+      this.hintAvailable = false;
+      this.bots[this.currentBot].personnality.onPlayerRequestsHint();
+      setTimeout(() => this.hintAvailable = true, this.HINT_COOLDOWN);
+      if (this.hintIndex < this.hints.length) {
+        this.hintIndex++;
+      }
     }
   }
 
   getBotPersonnality(): BotPersonnality {
-    const nbBot = 2;
-    const index = Math.floor(Math.random() * nbBot);
-    switch (index) {
-      case 1: {
-        return this.AGGRESSIVE;
-      }
-      case 2: {
-        return this.GENTLEMEN;
-      }
-      default: {
-        return this.AGGRESSIVE;
-      }
-    }
+    const index = Math.floor(Math.random() * this.botPersonnalities.length);
+    return this.botPersonnalities[index];
   }
 
   getBot(teamNumber: number): Entity {
