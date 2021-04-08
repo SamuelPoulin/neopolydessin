@@ -94,7 +94,6 @@ export class BotPersonnality {
   ) {
     this.name = this.getBotUsername();
     this.sentences = this.getBotPersonnality();
-    console.log(this.sentences);
     this.drawDelay = DEFAULT_DRAW_DELAY;
   }
 
