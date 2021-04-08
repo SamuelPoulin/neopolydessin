@@ -328,7 +328,7 @@ export abstract class Lobby {
             timestamp: Date.now(),
             senderUsername: player.username
           };
-          if (sentMsg.content.includes('indice') && sentMsg.content.includes('besoin')) {
+          if (sentMsg.content.includes('indice')) {
             this.botService.requestHint();
           }
           this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
