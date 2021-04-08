@@ -46,13 +46,6 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
-                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
-            }
-            true
-        }
         binding.accountBtn.setOnClickListener {
             val intent = Intent(this, AccountManagementActivity::class.java)
             supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))

@@ -10,6 +10,7 @@ import com.projet.clientleger.data.model.chat.*
 import io.reactivex.rxjava3.core.Observable
 import retrofit2.Response
 import javax.inject.Inject
+import javax.net.ssl.HttpsURLConnection
 
 class ChatRepository @Inject constructor(private val sessionManager: SessionManager,
                                          private val chatSocketService: ChatSocketService,
@@ -54,8 +55,14 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         return chatSocketService.receiveGuessSoloCoop()
     }
 
-    suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): Response<ArrayList<MessageChat>> {
-        return sessionManager.request(pageNumberWanted, friendId, messagePerPage,apiFriendslistInterface::getFriendChatHistory)
+    suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): ArrayList<MessageChat> {
+        val messages = ArrayList<MessageChat>()
+        try{
+            val res = sessionManager.request(pageNumberWanted, friendId, messagePerPage,apiFriendslistInterface::getFriendChatHistory)
+            if(res.code() == HttpsURLConnection.HTTP_OK)
+                messages.addAll(res.body()!!)
+        } catch (e: Exception) {println(e.message)}
+        return messages
     }
 
     fun clearSocketSubscriptions(){

@@ -32,7 +32,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp"
             android:clickable="true">
             <ImageView
                 android:id="@+id/chatIcon"
@@ -54,6 +53,20 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toRightOf="@+id/chatIcon"/>
+            <Button
+                android:id="@+id/toggleFriendslistBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_friendslist_btn"
+                android:textColor="@color/white"
+                android:text="@string/friends"
+                android:textAllCaps="false"
+                android:minWidth="1dp"
+                android:minHeight="1dp"
+                android:backgroundTint="@color/hover_btn"
+                app:layout_constraintRight_toLeftOf="@id/hideIcon"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
             <ImageView
                 android:id="@+id/hideIcon"
                 android:layout_width="wrap_content"

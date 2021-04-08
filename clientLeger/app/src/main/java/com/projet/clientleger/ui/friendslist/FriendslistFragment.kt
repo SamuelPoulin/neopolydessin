@@ -10,6 +10,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +37,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
             friends.addAll(list)
             binding?.rvFriends?.adapter?.notifyDataSetChanged()
         }
+        setFragmentListeners()
     }
 
     override fun onCreateView(
@@ -52,11 +54,31 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         binding?.rvFriends?.adapter =
             FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest)
         view.visibility = View.GONE
+        setupClickListeners()
+    }
+
+    private fun setupClickListeners(){
+        binding?.let { mBinding ->
+            mBinding.closeBtn.setOnClickListener {
+                toggleVisibility()
+            }
+            mBinding.addFriendBtn.setOnClickListener {
+                showAddFriendDialog()
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+    }
+
+    private fun setFragmentListeners(){
+        setFragmentResultListener("toggleVisibility"){ requestKey, bundle ->
+            println("friendslistFrag receive result")
+            toggleVisibility()
+        }
+
     }
 
     private fun openFriendChat(friendSimplified: FriendSimplified) {

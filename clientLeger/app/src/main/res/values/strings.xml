@@ -75,4 +75,5 @@
     <string name="team2_label">Équipe 2 -</string>
     <string name="coopTeamLabel">Joueurs</string>
     <string name="tableau_de_bord">Tableau de Bord</string>
+    <string name="friends">Amis</string>
 </resources>

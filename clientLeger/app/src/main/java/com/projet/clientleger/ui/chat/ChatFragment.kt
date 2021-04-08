@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,7 +53,6 @@ class ChatFragment @Inject constructor() : Fragment() {
         vm.isGuesser.observe(requireActivity()){
             updateGuessingBtnVisibility(it)
         }
-
         setupFragmentListeners()
         setupTabsObservers()
     }
@@ -131,15 +132,25 @@ class ChatFragment @Inject constructor() : Fragment() {
 
         setupMessagesObserver()
 
+        setupClickListeners()
+
         binding?.let {
-            it.iconsHeader.setOnClickListener {
-                toggleVisibilityChat()
-            }
 
             val manager = LinearLayoutManager(activity)
             manager.orientation = LinearLayoutManager.HORIZONTAL
             it.rvTabs.layoutManager = manager
             it.rvTabs.adapter = TabAdapter(vm.tabs.value!!, vm::changeSelectedTab)
+        }
+    }
+
+    private fun setupClickListeners(){
+        binding?.let { mBinding ->
+            mBinding.toggleFriendslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibility", Bundle())
+            }
+            mBinding.iconsHeader.setOnClickListener {
+                toggleVisibilityChat()
+            }
         }
     }
 

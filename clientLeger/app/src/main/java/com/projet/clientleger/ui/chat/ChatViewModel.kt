@@ -73,10 +73,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             val newMessages: ArrayList<IMessage> = ArrayList()
             if(tabInfo.isDM){
                 CoroutineScope(Job() + Dispatchers.Main).launch {
-                    val res = chatRepository.getChatFriendHistory(1, tabInfo.convoId, NB_MESSAGES_PER_PAGE)
-                    if(res.code() == HttpsURLConnection.HTTP_OK){
-                        newMessages.addAll(res.body()!!)
-                    }
+                    newMessages.addAll(chatRepository.getChatFriendHistory(1, tabInfo.convoId, NB_MESSAGES_PER_PAGE))
                 }
             }
             messagesLiveData.value!!.clear()
