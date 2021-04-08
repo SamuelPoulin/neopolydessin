@@ -14,13 +14,13 @@ import {
   CurrentGameState
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
-import { Lobby } from './lobby';
-
-const NB_GUESSES: number = 5;
-const COOP_START_TIME: number = 60;
+import { DifficultyModifiers, Lobby } from './lobby';
 
 @injectable()
 export class LobbyCoop extends Lobby {
+
+  private guessTries: number;
+  private addOnCorrectGuess: number;
 
   private guessLeft: number;
 
@@ -36,9 +36,12 @@ export class LobbyCoop extends Lobby {
     super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_COOP;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
-    this.guessLeft = NB_GUESSES;
+    const diffMods = this.DIFFICULTY_MODIFIERS.get(difficulty) as DifficultyModifiers;
+    this.guessTries = diffMods.guessTries;
+    this.guessLeft = this.guessTries;
+    this.addOnCorrectGuess = diffMods.timeAddedOnCorrectGuess;
+    this.timeLeftSeconds = diffMods.soloCoopTime;
     this.teamScores = [0];
-    this.timeLeftSeconds = COOP_START_TIME;
     this.players.push(this.botService.getBot(0));
   }
 
@@ -102,7 +105,7 @@ export class LobbyCoop extends Lobby {
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
           this.botService.resetDrawing();
           this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
-          this.pictureWordService.getRandomWord()
+          this.pictureWordService.getRandomWord(this.difficulty)
             .then((pictureWord) => {
               this.wordToGuess = pictureWord.word;
               this.botService.draw(pictureWord.sequence, pictureWord.hints);
@@ -110,7 +113,7 @@ export class LobbyCoop extends Lobby {
             .catch((err) => {
               this.endGame(ReasonEndGame.NO_WORDS_FOUND);
             });
-          this.guessLeft = NB_GUESSES;
+          this.guessLeft = this.guessTries;
         }
 
       }
@@ -123,7 +126,7 @@ export class LobbyCoop extends Lobby {
   }
 
   protected startRoundTimer() {
-    this.pictureWordService.getRandomWord()
+    this.pictureWordService.getRandomWord(this.difficulty)
       .then((pictureWord) => {
         this.wordToGuess = pictureWord.word;
         this.sendStartTimeToClient();
@@ -150,7 +153,7 @@ export class LobbyCoop extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    this.timeLeftSeconds += this.TIME_ADD_CORRECT_GUESS;
+    this.timeLeftSeconds += this.addOnCorrectGuess;
     const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }

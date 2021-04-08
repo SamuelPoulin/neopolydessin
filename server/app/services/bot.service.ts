@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { BotPersonnality, BOT_NAMES } from '../utils/botinfo';
 import { ChatMessage } from '../../../common/communication/chat-message';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
-import { Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
+import { Difficulty, Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
@@ -11,29 +11,37 @@ const PERCENT_1: number = 0.01;
 const PERCENT_20: number = 0.2;
 const PERCENT_30: number = 0.3;
 const PERCENT_50: number = 0.5;
+const EASY_DELAY: number = 50;
+const INTERMEDIATE_DELAY: number = 25;
+const HARD_DELAY: number = 15;
 
 export class BotService {
 
   currentBot: number;
   private readonly HINT_COOLDOWN: number = 30;
-  private readonly SPEED_DRAW_DELAY: number = 5;
-  private readonly DEFAULT_DRAW_DELAY: number = 15;
+  private readonly SPEED_MODIFIER: number = -10;
+
+  private readonly DIFFICULTY_MODIFIER: Map<Difficulty, number> = new Map([
+    [Difficulty.EASY, EASY_DELAY],
+    [Difficulty.INTERMEDIATE, INTERMEDIATE_DELAY],
+    [Difficulty.HARD, HARD_DELAY]
+  ]);
 
   private readonly AGGRESSIVE: BotPersonnality = {
     onStartDraw: () => {
       if (Math.random() < PERCENT_20) {
         this.sendBotMessage('Êtes-vous prêts?');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
+        this.currentDrawDelay = this.baseDrawDelay + this.SPEED_MODIFIER;
       }
     },
 
     onStartSegment: () => {
-      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
+      if (Math.random() < PERCENT_1 && this.currentDrawDelay !== this.baseDrawDelay) {
         this.sendBotMessage('Bon, je vais me calmer');
-        this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
+        this.currentDrawDelay = this.baseDrawDelay;
+      } else if (Math.random() < PERCENT_1 && this.currentDrawDelay === this.baseDrawDelay) {
         this.sendBotMessage('On va plus vite!!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
+        this.currentDrawDelay = this.baseDrawDelay + this.SPEED_MODIFIER;
       }
     },
 
@@ -70,17 +78,17 @@ export class BotService {
     onStartDraw: () => {
       if (Math.random() < PERCENT_20) {
         this.sendBotMessage('Attention mesdames et messieurs, la partie va commencer!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
+        this.currentDrawDelay = this.baseDrawDelay + this.SPEED_MODIFIER;
       }
     },
 
     onStartSegment: () => {
-      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
+      if (Math.random() < PERCENT_1 && this.currentDrawDelay !== this.baseDrawDelay) {
         this.sendBotMessage('Je vais ralentir un peu, je suis à bout de souffle.');
-        this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
+        this.currentDrawDelay = this.baseDrawDelay;
+      } else if (Math.random() < PERCENT_1 && this.currentDrawDelay === this.baseDrawDelay) {
         this.sendBotMessage('Augmentons la vitesse du jeu!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
+        this.currentDrawDelay = this.baseDrawDelay + this.SPEED_MODIFIER;
       }
     },
 
@@ -124,18 +132,20 @@ export class BotService {
   private currentSegmentIndex: number;
   private currentCoordIndex: number;
 
-  private drawDelay: number;
+  private baseDrawDelay: number;
+  private currentDrawDelay: number;
   private lobbyId: string;
   private pathTimer: NodeJS.Timeout;
 
   private bots: { botName: string; personnality: BotPersonnality }[] = [];
 
-  constructor(io: Server, lobbyId: string) {
+  constructor(io: Server, lobbyId: string, difficulty: Difficulty) {
     this.hintAvailable = true;
     this.currentBot = 0;
     this.io = io;
     this.lobbyId = lobbyId;
-    this.drawDelay = this.DEFAULT_DRAW_DELAY;
+    this.baseDrawDelay = this.DIFFICULTY_MODIFIER.get(difficulty) as number;
+    this.currentDrawDelay = this.baseDrawDelay;
   }
 
   draw(drawing: DrawingSequence, hints: string[]): void {
@@ -243,7 +253,7 @@ export class BotService {
           }
         }
       };
-    }, this.drawDelay);
+    }, this.currentDrawDelay);
   }
 
   private getBotUsername(): string {
