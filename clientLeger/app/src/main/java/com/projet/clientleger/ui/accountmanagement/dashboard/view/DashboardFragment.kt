@@ -18,10 +18,12 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
 import com.projet.clientleger.databinding.FragmentChatBinding
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -29,6 +31,7 @@ import javax.inject.Inject
 class DashboardFragment @Inject constructor(): Fragment() {
     val vm: DashboardViewModel by viewModels()
     private var binding: DashboardFragmentBinding? = null
+    lateinit var accountDashboard:AccountDashboard
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,5 +86,15 @@ class DashboardFragment @Inject constructor(): Fragment() {
         barChart.animateY(5000)
         barChart.invalidate()
     }
-
+    fun applyAccountValues(account: AccountDashboard) {
+        println(account.gameHistory)
+        accountDashboard = account
+        binding!!.nbGamesPlayed.text = accountDashboard.gameHistory.nbGamesPlayed.toString()
+        binding!!.nbHoursPlayed.text = formatTimeToHours(account.gameHistory.totalTimePlayed).toString()
+        binding!!.winPercentage.text = account.gameHistory.winPercentage.toString()
+        //binding!!.nbHoursConnected.text = formatTimeToHours(account.)
+    }
+    private fun formatTimeToHours(time:Long):Long{
+        return TimeUnit.MILLISECONDS.toHours(time)
+    }
 }

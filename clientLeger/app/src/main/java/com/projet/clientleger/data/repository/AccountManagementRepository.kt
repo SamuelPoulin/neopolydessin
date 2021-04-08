@@ -10,10 +10,7 @@ import javax.net.ssl.HttpsURLConnection
 open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager){
     open suspend fun getAccountInfos():AccountDashboard? {
         val res = apiDashboardInterface.getAccount()
-        val accountDashboard:AccountDashboard? = res.body()
-        println(res.body())
-        println(accountDashboard)
-        return accountDashboard
+        return res.body()
     }
     open suspend fun updateAccountInfos(account:UpdateAccountModel):Account?{
         var returnAccount:Account? = Account("","","","","",ArrayList<FriendInfo>(), 0,"")

@@ -58,6 +58,7 @@ class AccountManagementActivity : AppCompatActivity() {
             vm.getAccountInfos()
             binding.username.text = vm.accountInfos.username
             binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
+            dashboardFragment.applyAccountValues(vm.accountInfos)
         }
         binding.logoutBtn.setOnClickListener {
             finish()

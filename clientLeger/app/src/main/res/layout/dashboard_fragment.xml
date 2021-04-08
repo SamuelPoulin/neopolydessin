@@ -72,7 +72,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="0.5"
                     android:layout_height="wrap_content"
-                    android:text="@string/nb_games"
+                    android:text="@string/nb_hours_in_game"
                     android:textSize="25sp"
                     android:layout_marginStart="10dp"
                     />
