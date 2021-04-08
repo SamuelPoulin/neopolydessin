@@ -66,7 +66,7 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCorrectGuess: 'Bravo!  (=^-ω-^=)',
       onPlayerCloseGuess: 'C\'était proche! (> _ <) ',
       onPlayerIncorrectGuess: '(╯°□°）╯︵ ┻━┻',
-      onPlayerRequestsHint: ''
+      onPlayerRequestsHint: '*Donne un indice*'
     }
   ]
 ]);
