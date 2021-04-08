@@ -1,4 +1,4 @@
-import chai, { expect } from 'chai';
+import chai from 'chai';
 import { describe, beforeEach } from 'mocha';
 import 'chai-http';
 chai.use(require('chai-http'));
