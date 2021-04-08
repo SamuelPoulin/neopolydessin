@@ -24,7 +24,7 @@ import Types from './types';
 import { Observable } from './utils/observable';
 import { PictureWordService } from './services/picture-word.service';
 import { AvatarService } from './services/avatar.service';
-
+import { ChatRoomService, GENERAL_CHAT_ROOM } from './services/chat-room.service';
 @injectable()
 export class SocketIo {
 
@@ -48,11 +48,13 @@ export class SocketIo {
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
     @inject(Types.DatabaseService) private databaseService: DatabaseService,
     @inject(Types.PictureWordService) private pictureWordService: PictureWordService,
+    @inject(Types.ChatRoomService) private chatRoomService: ChatRoomService,
   ) { }
 
   init(server: http.Server): void {
     this.io = new Server(server, this.SERVER_OPTS);
     this.bindIoEvents();
+    this.chatRoomService.initIo(this.io);
 
     SocketIo.CLIENT_CONNECTED.subscribe((socket: Socket) => {
       console.log(`Connected with ${socket.id} \n`);
@@ -121,6 +123,7 @@ export class SocketIo {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
 
       this.onConnect(socket, socket.handshake.auth.token);
+      this.chatRoomService.bindIoEvents(socket);
 
       socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbiesCallback: LobbyInfo[]) => void) => {
         let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby);
@@ -223,6 +226,7 @@ export class SocketIo {
     try {
       const accountId = jwtUtils.decodeAccessToken(accessToken);
       this.socketIdService.AssociateAccountIdToSocketId(accountId, socket.id);
+      socket.join(GENERAL_CHAT_ROOM);
       loginsModel.addLogin(accountId)
         .then(() => { SocketIo.CLIENT_CONNECTED.notify(socket); })
         .catch((err) => { throw Error(err); });
@@ -261,5 +265,4 @@ export class SocketIo {
   private validateMessageLength(msg: Message): boolean {
     return msg.content.length <= this.MAX_LENGTH_MSG;
   }
-
 }

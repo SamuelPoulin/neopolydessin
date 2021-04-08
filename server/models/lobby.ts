@@ -27,6 +27,7 @@ import {
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from '../../common/communication/drawing-sequence';
 import { BotService } from '../app/services/bot.service';
+import { Game, GameResult, Team } from './schemas/game-history';
 
 
 export interface ServerPlayer extends Player {
@@ -62,6 +63,7 @@ export abstract class Lobby {
   protected currentGameState: CurrentGameState;
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
+  protected gameStartTime: number;
 
   protected players: Entity[];
   protected teamScores: number[];
@@ -86,6 +88,7 @@ export abstract class Lobby {
     this.currentGameState = CurrentGameState.LOBBY;
     this.drawingCommands = new DrawingService();
     this.timeLeftSeconds = 0;
+    this.gameStartTime = 0;
     this.players = [];
     this.teamScores = [];
     this.botService = new BotService(this.io, this.lobbyId);
@@ -246,6 +249,7 @@ export abstract class Lobby {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id) {
         this.currentGameState = CurrentGameState.IN_GAME;
+        this.gameStartTime = Date.now();
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
       }
     });
@@ -385,10 +389,12 @@ export abstract class Lobby {
   }
 
   protected endGame(reason: ReasonEndGame): void {
-    this.currentGameState = CurrentGameState.GAME_OVER;
-    clearInterval(this.clockTimeout);
-    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
-    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+    this.updatePlayersGameHistory(reason).then(() => {
+      this.currentGameState = CurrentGameState.GAME_OVER;
+      clearInterval(this.clockTimeout);
+      this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
+      SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+    });
   }
 
   protected getTeamLength(teamNumber: number): number {
@@ -438,6 +444,47 @@ export abstract class Lobby {
 
   private everyPlayerIsLoaded(): boolean {
     return this.players.every((player) => (!player.isBot && (player as Player).finishedLoading) || player.isBot);
+  }
+
+  private async updatePlayersGameHistory(reason: ReasonEndGame): Promise<void> {
+    if (reason === ReasonEndGame.TIME_RUN_OUT || reason === ReasonEndGame.WINNING_SCORE_REACHED) {
+      const teams: Team[] = [];
+      const gameEndTime = Date.now();
+      this.teamScores.forEach((teamScore, indexTeam) => {
+        teams.push({
+          score: 0,
+          playerNames: []
+        });
+        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
+          .map((playerToModify) => {
+            return playerToModify.username;
+          });
+        teams[indexTeam].score = teamScore;
+      });
+      this.players.forEach((player) => {
+        let result: GameResult;
+        if (!player.isBot) {
+          if (this.gameType === GameType.CLASSIC) {
+            const winningTeam = this.teamScores[0] > this.teamScores[1] ? 0 : 1;
+            result = player.teamNumber === winningTeam ? GameResult.WIN : GameResult.LOSE;
+          }
+          else {
+            result = GameResult.NEUTRAL;
+          }
+          const gameInfo: Game = {
+            gameResult: result,
+            startDate: this.gameStartTime,
+            endDate: gameEndTime,
+            gameType: this.gameType,
+            team: teams
+          };
+          const playerAccountId = (player as Player).accountId;
+          if (playerAccountId) {
+            this.databaseService.addGameToGameHistory(playerAccountId, gameInfo);
+          }
+        }
+      });
+    }
   }
 
   abstract addPlayer(playerId: string, socket: Socket): void;
