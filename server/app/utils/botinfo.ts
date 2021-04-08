@@ -18,4 +18,5 @@ export interface BotPersonnality {
   onPlayerCorrectGuess: () => void;
   onPlayerCloseGuess: () => void;
   onPlayerIncorrectGuess: () => void;
+  onPlayerRequestsHint: () => void;
 };

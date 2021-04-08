@@ -136,7 +136,7 @@ export class LobbyClassique extends Lobby {
       if (instanceOfPlayer(drawer)) {
         this.io.to((drawer as ServerPlayer).socket.id).emit(SocketLobby.UPDATE_WORD_TO_DRAW, pictureWord.word);
       } else {
-        this.botService.draw(pictureWord.sequence);
+        this.botService.draw(pictureWord.sequence, pictureWord.hints);
       }
     });
 
@@ -209,6 +209,7 @@ export class LobbyClassique extends Lobby {
 
     const botInDrawingTeam = teams[this.drawingTeamNumber].findIndex((player) => player.isBot);
     if (botInDrawingTeam > -1) {
+      this.botService.currentBot = this.drawingTeamNumber;
       teams[this.drawingTeamNumber][botInDrawingTeam].playerRole = PlayerRole.DRAWER;
       this.drawers[this.drawingTeamNumber] = teams[this.drawingTeamNumber][botInDrawingTeam];
       teams[this.drawingTeamNumber][(botInDrawingTeam + 1) % 2].playerRole = PlayerRole.GUESSER;

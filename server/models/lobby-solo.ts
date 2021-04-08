@@ -105,7 +105,7 @@ export class LobbySolo extends Lobby {
           this.pictureWordService.getRandomWord()
             .then((pictureWord) => {
               this.wordToGuess = pictureWord.word;
-              this.botService.draw(pictureWord.sequence);
+              this.botService.draw(pictureWord.sequence, pictureWord.hints);
             })
             .catch((err) => {
               this.endGame(ReasonEndGame.NO_WORDS_FOUND);
@@ -127,7 +127,7 @@ export class LobbySolo extends Lobby {
         this.wordToGuess = pictureWord.word;
         this.sendStartTimeToClient();
 
-        this.botService.draw(pictureWord.sequence);
+        this.botService.draw(pictureWord.sequence, pictureWord.hints);
 
         this.clockTimeout = setInterval(() => {
           --this.timeLeftSeconds;
