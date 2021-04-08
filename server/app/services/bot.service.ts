@@ -1,150 +1,40 @@
-/* eslint-disable no-invalid-this */
 import { Server } from 'socket.io';
-import { BotPersonnality, BOT_NAMES } from '../utils/botinfo';
-import { ChatMessage } from '../../../common/communication/chat-message';
+import { BotPersonnality } from '../utils/botinfo';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
 import { Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
-import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
-const PERCENT_1: number = 0.01;
-const PERCENT_20: number = 0.2;
-const PERCENT_30: number = 0.3;
-const PERCENT_50: number = 0.5;
-
+const HINT_COOLDOWN: number = 30000;
 export class BotService {
 
   currentBot: number;
-  private readonly HINT_COOLDOWN: number = 30;
-  private readonly SPEED_DRAW_DELAY: number = 5;
-  private readonly DEFAULT_DRAW_DELAY: number = 15;
-
-  private readonly AGGRESSIVE: BotPersonnality = {
-    onStartDraw: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Êtes-vous prêts?');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onStartSegment: () => {
-      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
-        this.sendBotMessage('Bon, je vais me calmer');
-        this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
-        this.sendBotMessage('On va plus vite!!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onResetDrawing: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Un autre');
-      }
-    },
-
-    onPlayerCorrectGuess: () => {
-      if (Math.random() < PERCENT_30) {
-        this.sendBotMessage('Finalement! C\'était pas si difficile?');
-      }
-    },
-
-    onPlayerCloseGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Wow! Comment vous faites pour être aussi médiocre?');
-      }
-    },
-
-    onPlayerIncorrectGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Vous êtes pas très bon... Pourtant mon dessin est clair.');
-      }
-    },
-
-    onPlayerRequestsHint: () => {
-      this.sendBotMessage(`Un indice... pour vrai? ${this.hints[this.hintIndex]}`);
-    }
-  };
-
-  private readonly GENTLEMEN: BotPersonnality = {
-    onStartDraw: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Attention mesdames et messieurs, la partie va commencer!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onStartSegment: () => {
-      if (Math.random() < PERCENT_1 && this.drawDelay === this.SPEED_DRAW_DELAY) {
-        this.sendBotMessage('Je vais ralentir un peu, je suis à bout de souffle.');
-        this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_1 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
-        this.sendBotMessage('Augmentons la vitesse du jeu!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onResetDrawing: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Allons-y pour un autre si cela ne vous derange pas?');
-      }
-    },
-
-    onPlayerCorrectGuess: () => {
-      if (Math.random() < PERCENT_30) {
-        this.sendBotMessage('Fabuleux! Il s\'agit d\'une observation astucieuse!');
-      }
-    },
-
-    onPlayerCloseGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Dommage, vous étiez si proche de la bonne réponse...');
-      }
-    },
-
-    onPlayerIncorrectGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Ce n\'est pas exactement ce qu\'on recherche, malheureusement.');
-      }
-    },
-
-    onPlayerRequestsHint: () => {
-      this.sendBotMessage(`Il me fait plaisir de vous donner un indice, nous sommes dans la même équipe! ${this.hints[this.hintIndex]}`);
-    }
-  };
-
-  private botPersonnalities: BotPersonnality[] = [this.AGGRESSIVE, this.GENTLEMEN];
 
   private io: Server;
   private drawing: DrawingSequence;
 
   private hintAvailable: boolean;
-  private hintIndex: number;
-  private hints: string[];
   private currentSegmentIndex: number;
   private currentCoordIndex: number;
 
-  private drawDelay: number;
   private lobbyId: string;
   private pathTimer: NodeJS.Timeout;
 
-  private bots: { botName: string; personnality: BotPersonnality }[] = [];
+  private bots: BotPersonnality[] = [];
 
   constructor(io: Server, lobbyId: string) {
     this.hintAvailable = true;
     this.currentBot = 0;
     this.io = io;
     this.lobbyId = lobbyId;
-    this.drawDelay = this.DEFAULT_DRAW_DELAY;
   }
 
   draw(drawing: DrawingSequence, hints: string[]): void {
     this.drawing = drawing;
-    this.hints = hints;
-    this.hintIndex = 0;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].personnality.onStartDraw();
+    this.bots[this.currentBot].hintIndex = 0;
+    this.bots[this.currentBot].hints = hints;
+    this.bots[this.currentBot].onStartDraw();
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
   }
 
@@ -152,9 +42,9 @@ export class BotService {
     clearInterval(this.pathTimer);
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.hints = [];
-    this.hintIndex = 0;
-    this.bots[this.currentBot].personnality.onResetDrawing();
+    this.bots[this.currentBot].hints = [];
+    this.bots[this.currentBot].hintIndex = 0;
+    this.bots[this.currentBot].onResetDrawing();
   }
 
   pause(): void {
@@ -182,25 +72,16 @@ export class BotService {
   requestHint(): void {
     if (this.hintAvailable) {
       this.hintAvailable = false;
-      this.bots[this.currentBot].personnality.onPlayerRequestsHint();
-      setTimeout(() => this.hintAvailable = true, this.HINT_COOLDOWN);
-      if (this.hintIndex < this.hints.length) {
-        this.hintIndex++;
-      }
+      this.bots[this.currentBot].onPlayerRequestsHint();
+      setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);
     }
   }
 
-  getBotPersonnality(): BotPersonnality {
-    const index = Math.floor(Math.random() * this.botPersonnalities.length);
-    return this.botPersonnalities[index];
-  }
-
   getBot(teamNumber: number): Entity {
-    const personnality = this.getBotPersonnality();
-    const botName = this.getBotUsername();
-    this.bots.push({ personnality, botName });
+    const bot = new BotPersonnality(this.io, this.lobbyId);
+    this.bots.push(bot);
     return {
-      username: botName,
+      username: bot.name,
       playerRole: PlayerRole.PASSIVE,
       teamNumber,
       isBot: true,
@@ -209,15 +90,15 @@ export class BotService {
   }
 
   private playerCorrectGuess(): void {
-    this.bots[this.currentBot].personnality.onPlayerCorrectGuess();
+    this.bots[this.currentBot].onPlayerCorrectGuess();
   }
 
   private playerCloseGuess(): void {
-    this.bots[this.currentBot].personnality.onPlayerCloseGuess();
+    this.bots[this.currentBot].onPlayerCloseGuess();
   }
 
   private playerIncorrectGuess(): void {
-    this.bots[this.currentBot].personnality.onPlayerIncorrectGuess();
+    this.bots[this.currentBot].onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {
@@ -228,7 +109,7 @@ export class BotService {
       if (this.currentCoordIndex >= startAt) {
         const coord = this.drawing.stack[this.currentSegmentIndex].path[this.currentCoordIndex];
         if (this.currentCoordIndex === 0) {
-          this.bots[this.currentBot].personnality.onStartSegment();
+          this.bots[this.currentBot].onStartSegment();
           this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, this.currentCoordIndex, segment.zIndex, coord, segment.brushInfo);
         } else if (this.currentCoordIndex < segment.path.length - 1) {
           this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, coord);
@@ -243,21 +124,7 @@ export class BotService {
           }
         }
       };
-    }, this.drawDelay);
+    }, this.bots[this.currentBot].drawDelay);
   }
 
-  private getBotUsername(): string {
-    const random = Math.floor(Math.random() * BOT_NAMES.length);
-    return BOT_NAMES[random];
-  }
-
-  private sendBotMessage(content: string): void {
-    const messageWithUsername: ChatMessage = {
-      content,
-      timestamp: Date.now(),
-      senderUsername: this.bots[this.currentBot].botName
-    };
-    this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
-
-  }
 }
