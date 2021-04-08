@@ -12,7 +12,7 @@ import retrofit2.http.POST
 
 const val databasePath: String = "api/database/"
 interface ApiDashboardInterface {
-    @GET(databasePath +"account")
+    @GET(databasePath +"dashboard")
     suspend fun getAccount(): Response<AccountDashboard>
     @POST(databasePath + "account")
     suspend fun updateAccount(@Body updateAccountModel: UpdateAccountModel):Response<Account>

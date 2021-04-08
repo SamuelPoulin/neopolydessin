@@ -68,7 +68,6 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
             for(i in 0 until jsonList.length()) {
                 list.add(Json.decodeFromString(Player.serializer(), jsonList.get(i).toString()))
             }
-            println(list)
             list
         }
     }

@@ -4,18 +4,20 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
+import gameHistoryModel, { Game, GameHistory, GameResult } from '../../models/schemas/game-history';
 import { Observable } from '../utils/observable';
-import { FriendsListEvent } from '../socketio';
 import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
-import { AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
+import { AccountFriend, AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
 import accountModel, { Account } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
 import loginsModel, { Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
-import { Friend } from '../../../common/communication/friends';
+import { DashBoardInfo, GameHistoryDashBoard } from '../../../common/communication/dashboard';
+import { GameType } from '../../../common/communication/lobby';
+import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
 
 export interface Response<T> {
   statusCode: number;
@@ -30,7 +32,7 @@ export interface ErrorMsg {
 @injectable()
 export class DatabaseService {
 
-  static UPDATE_FRIEND_LIST: Observable<{ accountId?: string; friends: Friend[]; event: FriendsListEvent }> = new Observable();
+  static FRIEND_LIST_NOTIFICATION: Observable<{ accountId: string; friends: AccountFriend[]; type: NotificationType }> = new Observable();
 
   static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
@@ -102,6 +104,38 @@ export class DatabaseService {
         });
     });
   }
+
+  async getDashboardById(id: string): Promise<Response<DashBoardInfo>> {
+    return new Promise<Response<DashBoardInfo>>((resolve, reject) => {
+      accountModel.findById(new ObjectId(id))
+        .populate('logins', 'logins')
+        .populate('gameHistory', 'games')
+        .then((doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
+          resolve({ statusCode: OK, documents: this.accountToDashBoardInfo(doc) });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+  async addGameToGameHistory(id: string, gameInfo: Game): Promise<Response<GameHistory>> {
+    return new Promise<Response<GameHistory>>((resolve, reject) => {
+      try {
+        gameHistoryModel.addGame(id, gameInfo)
+          .then((gameAdded: GameHistory) => {
+            resolve({ statusCode: OK, documents: gameAdded});
+          })
+          .catch((err: Error) => {
+            reject(DatabaseService.rejectErrorMessage(err));
+          });
+      } catch {
+        reject(DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString())));
+      }
+    });
+  }
+
 
   async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
     return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
@@ -182,6 +216,13 @@ export class DatabaseService {
         })
         .then(async (result: Avatar) => {
           model.avatar = result._id.toHexString();
+          const gameHistory = new gameHistoryModel({
+            accountId: model._id, games: []
+          });
+          return gameHistory.save();
+        })
+        .then(async (gameHistory: GameHistory) => {
+          model.gameHistory = gameHistory._id.toHexString();
           return bcrypt.hash(model.password, this.SALT_ROUNDS);
         })
         .then(async (hash) => {
@@ -206,7 +247,7 @@ export class DatabaseService {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
-      let friends: Friend[];
+      let friends: AccountFriend[];
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
@@ -228,10 +269,7 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
-            friends,
-            event: FriendsListEvent.userConnected
-          });
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({ accountId: account.id, friends, type: NotificationType.userConnected });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -279,9 +317,10 @@ export class DatabaseService {
           return this.getAccountById(doc.accountId);
         })
         .then((account) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: account.documents._id,
             friends: account.documents.friends,
-            event: FriendsListEvent.userDisconnected,
+            type: NotificationType.userDisconnected,
           });
           resolve(true);
         })
@@ -309,12 +348,16 @@ export class DatabaseService {
           return avatarModel.removeAvatar(id);
         })
         .then((result) => {
+          return gameHistoryModel.findOneAndDelete({ accountId: id });
+        })
+        .then((result) => {
           return accountModel.findByIdAndDelete(id);
         })
         .then((account: Account) => {
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: account.id,
             friends: account.friends,
-            event: FriendsListEvent.userUpdatedAccount
+            type: NotificationType.userUpdatedAccount
           });
           resolve({ statusCode: OK, documents: account });
         })
@@ -339,13 +382,14 @@ export class DatabaseService {
         })
         .catch((err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
-          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false });
+          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false, new: true });
         })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
-          DatabaseService.UPDATE_FRIEND_LIST.notify({
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: doc.id,
             friends: doc.friends,
-            event: FriendsListEvent.userUpdatedAccount
+            type: NotificationType.userUpdatedAccount
           });
           resolve({ statusCode: OK, documents: doc });
         })
@@ -374,5 +418,77 @@ export class DatabaseService {
       username: account.username,
       avatar: account.avatar
     };
+  }
+
+  private accountToDashBoardInfo(account: Account): DashBoardInfo {
+    return {
+      _id: account.id,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      username: account.username,
+      email: account.email,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      logins: account.logins as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      gameHistory: this.gameHistoryToGameHistoryDashBoard(account.gameHistory as any),
+      createdDate: account.createdDate,
+      avatar: account.avatar,
+    };
+  }
+
+  private gameHistoryToGameHistoryDashBoard(gameHistory: GameHistory): GameHistoryDashBoard {
+    let timePlayed: number = 0;
+    let nbWin: number = 0;
+    let classiqueGamePlayed: number = 0;
+    let bestCoopScore: number = 0;
+    let bestSoloScore: number = 0;
+    let averageTimePerGame: number = 0;
+    let winRate: number = 0;
+    gameHistory.games.forEach((game) => {
+      switch (game.gameType) {
+        case GameType.CLASSIC: {
+          if (game.gameResult === GameResult.WIN) {
+            nbWin++;
+          }
+          classiqueGamePlayed++;
+          break;
+        }
+        case GameType.SPRINT_SOLO: {
+          if (game.team[0].score > bestSoloScore) {
+            bestSoloScore = game.team[0].score;
+          }
+          break;
+        }
+        case GameType.SPRINT_COOP: {
+          if (game.team[0].score > bestCoopScore) {
+            bestCoopScore = game.team[0].score;
+          }
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+      timePlayed += this.calculateGameTime(game.startDate, game.endDate);
+    });
+    if (gameHistory.games.length > 0) {
+      averageTimePerGame = timePlayed / gameHistory.games.length;
+    }
+    if (classiqueGamePlayed > 0) {
+      winRate = nbWin / classiqueGamePlayed;
+    }
+    return {
+      games: gameHistory.games,
+      nbGamePlayed: gameHistory.games.length,
+      winPercentage: winRate,
+      averageGameTime: averageTimePerGame,
+      totalTimePlayed: timePlayed,
+      bestScoreSolo: bestSoloScore,
+      bestScoreCoop: bestCoopScore,
+    };
+  }
+
+  private calculateGameTime(startTime: number, endTime: number): number {
+    return endTime - startTime;
   }
 }

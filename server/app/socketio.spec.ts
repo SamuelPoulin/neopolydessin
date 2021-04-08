@@ -16,10 +16,10 @@ import { SocketDrawing } from '../../common/socketendpoints/socket-drawing';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
 import { Register } from '../../common/communication/register';
 import MongoMemoryServer from 'mongodb-memory-server-core';
-import { PrivateMessage, ReceivedPrivateMessage } from '../../common/communication/private-message';
+import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { FriendsService } from './services/friends.service';
 import { NOT_FOUND, OK } from 'http-status-codes';
-import { SocketFriendActions } from '../../common/socketendpoints/socket-friend-actions';
+import { NotificationType, SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import { BrushInfo } from '../../common/communication/brush-info';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { PictureWordService } from './services/picture-word.service';
@@ -146,172 +146,229 @@ describe('Socketio', () => {
     it('clients should be able to receive path information', (done: Mocha.Done) => {
         pictureWordService.uploadDrawing({
             word: 'TestWord1',
-            drawnPaths: [],
+            drawnPaths: [{
+                id: '0',
+                brushInfo: {
+                    color: "#000000",
+                    strokeWidth: 1
+                },
+                path: [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 2 },
+                    { x: 3, y: 3 }
+                ]
+            }],
             hints: ['Clue1', 'Clue2', 'Clue3'],
             difficulty: Difficulty.EASY,
             drawMode: DrawMode.CONVENTIONAL
-        });
-        testDoneWhenAllClientsAreDisconnected(done);
-        createClient(accountInfo)
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
-                })
+        }).then(() => {
+            testDoneWhenAllClientsAreDisconnected(done);
+            createClient(accountInfo)
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
+                    })
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        console.log('started');
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
+                    });
 
-                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
-                    expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                });
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
 
-                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                    expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    testClient.socket.close();
-                });
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.close();
+                    });
 
-                let nbConnections = 0;
-                testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
-                    nbConnections++;
-                    if (nbConnections === 3) {
-                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                    }
-                });
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
-                    players.forEach((player) => {
-                        if (player.teamNumber === 0) {
-                            expect(player.playerRole).to.equal(PlayerRole.DRAWER);
-
-                        } else {
-                            expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
+                    let nbConnections = 0;
+                    testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
+                        nbConnections++;
+                        if (nbConnections === 3) {
+                            testClient.socket.emit(SocketLobby.START_GAME_SERVER);
                         }
                     });
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                    testClient.socket.emit(SocketDrawing.UPDATE_PATH, [{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                    testClient.socket.emit(SocketDrawing.END_PATH, { x: 3, y: 3 });
-                })
 
-                return createClient(otherAccountInfo);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                        clients[0].emit(SocketLobby.ADD_BOT, 1);
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
                     });
-                });
 
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
+                    testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                        console.log(players);
+                        players.forEach((player) => {
+                            if (player.teamNumber === 0) {
+                                if (player.isBot) {
+                                    expect(player.playerRole).to.equal(PlayerRole.DRAWER);
+                                } else {
+                                    expect(player.playerRole).to.equal(PlayerRole.GUESSER);
+                                }
+                            } else {
+                                expect(player.playerRole).to.equal(PlayerRole.PASSIVE);
+                            }
+                        });
+                    });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
+                    return createClient(otherAccountInfo);
+                })
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                            clients[0].emit(SocketLobby.ADD_BOT, 1);
+                            clients[0].emit(SocketLobby.ADD_BOT, 0);
+                        });
+                    });
 
-                });
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
 
-                testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord[]) => {
-                    expect(coords).to.deep.equal([{ x: 1, y: 1 }, { x: 2, y: 2 }]);
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
 
-                testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                    expect(coord).to.deep.equal({ x: 3, y: 3 });
-                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
-                    testClient.socket.close();
-                });
-            })
+                    });
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
+                        testClient.socket.close();
+                    });
+                })
+        });
     })
 
     it('multiple lobbies should work correctly', (done: Mocha.Done) => {
         pictureWordService.uploadDrawing({
             word: 'TestWord2',
-            drawnPaths: [],
+            drawnPaths: [{
+                id: '0',
+                brushInfo: {
+                    color: "#000000",
+                    strokeWidth: 1
+                },
+                path: [
+                    { x: 1, y: 1 },
+                    { x: 2, y: 2 },
+                    { x: 3, y: 3 }
+                ]
+            }],
             hints: ['Clue1', 'Clue2', 'Clue3'],
             difficulty: Difficulty.EASY,
             drawMode: DrawMode.CONVENTIONAL
-        });
-        testDoneWhenAllClientsAreDisconnected(done);
-        createClient(accountInfo)
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
-                })
-
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.close();
-                })
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                })
-
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
-                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                })
-                return createClient(otherAccountInfo);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.CLASSIC, Difficulty.EASY, false);
-                    testClient.socket.emit(SocketDrawing.START_PATH, { x: 0, y: 0 });
-                    testClient.socket.close();
-                })
-
-                testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
-                    testClient.socket.emit(SocketLobby.START_GAME_SERVER);
-                })
-
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
-
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                })
-
-                return createClient(accountInfo3);
-            })
-            .then((testClient) => {
-                testClient.socket.on('connect', () => {
-                    testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.CLASSIC, difficulty: Difficulty.EASY }, (lobbies: LobbyInfo[]) => {
-                        testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+        }).then(() => {
+            testDoneWhenAllClientsAreDisconnected(done);
+            createClient(accountInfo)
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
                     });
 
-                });
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    });
 
-                testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
-                    testClient.socket.emit(SocketLobby.LOADING_OVER);
-                });
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
 
-                testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                    expect(id).to.be.equal(0);
-                    expect(zIndex).to.be.equal(0);
-                    expect(coord).to.deep.equal({ x: 0, y: 0 });
-                    testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
-                    testClient.socket.close();
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        console.log('end path received')
+                        testClient.socket.close();
+                    });
+
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
+                        players.forEach((player) => {
+                            if (player.isBot) {
+                                expect(player.playerRole).to.equal(PlayerRole.DRAWER);
+                            } else {
+                                expect(player.playerRole).to.equal(PlayerRole.GUESSER);
+                            }
+                        })
+                    });
+
+                    testClient.socket.on(SocketMessages.PLAYER_CONNECTION, (lobbyId: string) => {
+                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                    });
+                    return createClient(otherAccountInfo);
                 })
-            });
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.SPRINT_SOLO, Difficulty.EASY, false);
+                    })
+
+                    testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (lobbyInfo: LobbyInfo) => {
+                        testClient.socket.emit(SocketLobby.START_GAME_SERVER);
+                    });
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    })
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        testClient.socket.close();
+                    });
+
+                    return createClient(accountInfo3);
+                })
+                .then((testClient) => {
+                    testClient.socket.on('connect', () => {
+                        testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.SPRINT_COOP }, (lobbies: LobbyInfo[]) => {
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                        });
+                    });
+
+                    testClient.socket.on(SocketLobby.START_GAME_CLIENT, () => {
+                        testClient.socket.emit(SocketLobby.LOADING_OVER);
+                    });
+
+                    testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
+                        expect(id).to.be.equal(0);
+                        expect(zIndex).to.be.equal(0);
+                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                    })
+
+                    testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
+                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                    });
+
+                    testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
+                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        console.log('end path received')
+                        testClient.socket.close();
+                    });
+                });
+        })
     });
 
     it('friendship notifications should work correctly', (done: Mocha.Done) => {
@@ -319,29 +376,47 @@ describe('Socketio', () => {
         let accountId2: string;
         createClient(accountInfo)
             .then((testClient) => {
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
-                    expect(friendList.documents.friends[0].status).to.equal(FriendStatus.PENDING);
-                    expect(friendList.documents.friends[0].received).to.be.true;
-                    friendService.acceptFriendship(testClient.accountId, accountId2)
-                        .then((friendList) => {
-                            expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
-                            expect(friendList.documents.friends[0].received).to.be.true;
-                            testClient.socket.close();
-                        });
-                })
+
+                let friendList1: FriendsList;
+
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
+                    friendList1 = friendList;
+                });
+
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestReceived) {
+                        expect(friendList1.friends[0].status).to.equal(FriendStatus.PENDING);
+                        expect(friendList1.friends[0].received).to.be.true;
+                        friendService.acceptFriendship(testClient.accountId, accountId2)
+                            .then((friendList) => {
+                                expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
+                                expect(friendList.documents.friends[0].received).to.be.true;
+                                testClient.socket.close();
+                            });
+                    }
+                });
                 return createClient(otherAccountInfo);
             })
             .then((testClient) => {
                 accountId2 = testClient.accountId;
 
+                let friendList2: FriendsList;
+
+
                 testClient.socket.on('connect', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 })
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
-                    expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
-                    expect(friendList.documents.friends[0].received).to.be.false;
-                    testClient.socket.close();
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
+                    friendList2 = friendList;
+                });
+
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestAccepted) {
+                        expect(friendList2.friends[0].status).to.equal(FriendStatus.FRIEND);
+                        expect(friendList2.friends[0].received).to.be.false;
+                        testClient.socket.close();
+                    }
                 })
             });
     });
@@ -354,18 +429,22 @@ describe('Socketio', () => {
             .then((testClient) => {
                 accountId = testClient.accountId;
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
-                    friendService.acceptFriendship(testClient.accountId, accountId2);
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestReceived) {
+                        friendService.acceptFriendship(testClient.accountId, accountId2);
+                    }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    expect(msg.content).to.equal('bonjourhi');
-                    expect(msg.senderAccountId).to.equal(accountId2);
-                    const otherMsg: PrivateMessage = {
-                        receiverAccountId: accountId2,
-                        content: 'eyo what up',
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    if (msg.senderAccountId != accountId) {
+                        expect(msg.content).to.equal('bonjourhi');
+                        expect(msg.senderAccountId).to.equal(accountId2);
+                        const otherMsg: PrivateMessageTo = {
+                            receiverAccountId: accountId2,
+                            content: 'eyo what up',
+                        }
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                     }
-                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, otherMsg);
                 })
                 return createClient(otherAccountInfo);
             })
@@ -376,24 +455,28 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    expect(msg.content).to.equal('eyo what up');
-                    expect(msg.senderAccountId).to.equal(accountId);
-                    friendService.getMessageHistory(accountId, accountId2, 1, 5)
-                        .then((history) => {
-                            expect(history.statusCode).to.equal(OK);
-                            expect(history.documents.messages).to.be.lengthOf(2);
-                            clients[0].close();
-                            clients[1].close();
-                        })
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    if (msg.senderAccountId != accountId2) {
+                        expect(msg.content).to.equal('eyo what up');
+                        expect(msg.senderAccountId).to.equal(accountId);
+                        friendService.getMessageHistory(accountId, accountId2, 1, 5)
+                            .then((history) => {
+                                expect(history.statusCode).to.equal(OK);
+                                expect(history.documents.messages).to.be.lengthOf(2);
+                                clients[0].close();
+                                clients[1].close();
+                            })
+                    }
                 });
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
-                    const msg: PrivateMessage = {
-                        receiverAccountId: accountId,
-                        content: 'bonjourhi',
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestAccepted) {
+                        const msg: PrivateMessageTo = {
+                            receiverAccountId: accountId,
+                            content: 'bonjourhi',
+                        }
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                     }
-                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                 });
             });
     });
@@ -406,11 +489,13 @@ describe('Socketio', () => {
             .then((testClient) => {
                 accountId = testClient.accountId;
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
-                    friendService.acceptFriendship(testClient.accountId, accountId2);
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestReceived) {
+                        friendService.acceptFriendship(testClient.accountId, accountId2);
+                    }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
                     expect(msg.content).to.equal('bonjourhi');
                     expect(msg.senderAccountId).to.equal(accountId2);
                     friendService.unfriend(accountId, accountId2);
@@ -425,7 +510,7 @@ describe('Socketio', () => {
                     friendService.requestFriendship(accountId2, 'username');
                 });
 
-                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: Response<FriendsList>) => {
+                testClient.socket.on(SocketFriendActions.UPDATE, (friendList: FriendsList) => {
                     friendService.getMessageHistory(accountId, accountId2, 1, 5)
                         .catch((err) => {
                             expect(err.statusCode).to.equal(NOT_FOUND);
@@ -433,30 +518,34 @@ describe('Socketio', () => {
                         })
                 });
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
-                    const msg: PrivateMessage = {
-                        receiverAccountId: accountId,
-                        content: 'bonjourhi',
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestAccepted) {
+                        const msg: PrivateMessageTo = {
+                            receiverAccountId: accountId,
+                            content: 'bonjourhi',
+                        }
+                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                     }
-                    testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg);
                 });
             });
     });
 
     it('private message history should be deleted when deleting account', (done: Mocha.Done) => {
-        let accountId: string;
+        let accountId1: string;
         let accountId2: string;
         let accountId3: string;
         testDoneWhenAllClientsAreDisconnected(done);
         createClient(accountInfo)
             .then((testClient) => {
-                accountId = testClient.accountId;
+                accountId1 = testClient.accountId;
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
-                    friendService.acceptFriendship(testClient.accountId, accountId3);
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestReceived) {
+                        friendService.acceptFriendship(testClient.accountId, accountId3);
+                    }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
                     testClient.socket.close();
                 })
                 return createClient(otherAccountInfo);
@@ -464,12 +553,14 @@ describe('Socketio', () => {
             .then((testClient) => {
                 accountId2 = testClient.accountId;
 
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_RECEIVED, (friendList: Response<FriendsList>) => {
-                    friendService.acceptFriendship(testClient.accountId, accountId3);
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestReceived) {
+                        friendService.acceptFriendship(testClient.accountId, accountId3);
+                    }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    const otherMsg: PrivateMessage = {
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    const otherMsg: PrivateMessageTo = {
                         receiverAccountId: accountId3,
                         content: 'eyo what up',
                     }
@@ -487,45 +578,50 @@ describe('Socketio', () => {
                 });
 
                 let nbCall = 0;
-                testClient.socket.on(SocketFriendActions.FRIEND_REQUEST_ACCEPTED, (friendList: Response<FriendsList>) => {
-                    nbCall++;
-                    if (nbCall === 2) {
-                        const msg = (receiverAccountId: string) => {
-                            return {
-                                receiverAccountId: receiverAccountId,
-                                senderAccountId: testClient.accountId,
-                                content: 'bonjourhi',
-                                timestamp: Date.now(),
-                            }
-                        };
-                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId))
-                        testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId2));
+                testClient.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (notif: NotificationType, accountId: string) => {
+                    if (notif === NotificationType.requestAccepted) {
+                        nbCall++;
+                        if (nbCall === 2) {
+                            const msg = (receiverAccountId: string) => {
+                                return {
+                                    receiverAccountId: receiverAccountId,
+                                    senderAccountId: testClient.accountId,
+                                    content: 'bonjourhi',
+                                    timestamp: Date.now(),
+                                }
+                            };
+                            testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId1))
+                            testClient.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, msg(accountId2));
+                        }
                     }
                 });
 
-                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: ReceivedPrivateMessage) => {
-                    clients[1].close();
-                    expect(msg.senderAccountId).to.be.equal(accountId2);
-                    friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
-                        .then((history) => {
-                            expect(history.documents.messages).to.be.lengthOf(2);
-                            return friendService.getMessageHistory(accountId, testClient.accountId, 1, 5);
-                        })
-                        .then((history) => {
-                            expect(history.documents.messages).to.be.lengthOf(1);
-                            return databaseService.deleteAccount(accountId3);
-                        })
-                        .then((result) => {
-                            return friendService.getMessageHistory(testClient.accountId, accountId2, 1, 5)
-                        })
-                        .catch((err: ErrorMsg) => {
-                            expect(err.statusCode).to.be.equal(NOT_FOUND);
-                            return friendService.getMessageHistory(testClient.accountId, accountId, 1, 5)
-                        })
-                        .catch((err: ErrorMsg) => {
-                            expect(err.statusCode).to.be.equal(NOT_FOUND);
-                            testClient.socket.close();
-                        });
+                testClient.socket.on(SocketMessages.RECEIVE_PRIVATE_MESSAGE, (msg: PrivateMessage) => {
+                    if (msg.senderAccountId != accountId3) {
+                        clients[1].close();
+                        expect(msg.senderAccountId).to.be.equal(accountId2);
+
+                        friendService.getMessageHistory(accountId3, accountId2, 1, 5)
+                            .then((history) => {
+                                expect(history.documents.messages).to.be.lengthOf(2);
+                                return friendService.getMessageHistory(accountId1, accountId3, 1, 5);
+                            })
+                            .then((history) => {
+                                expect(history.documents.messages).to.be.lengthOf(1);
+                                return databaseService.deleteAccount(accountId3);
+                            })
+                            .then((result) => {
+                                return friendService.getMessageHistory(accountId3, accountId2, 1, 5)
+                            })
+                            .catch((err: ErrorMsg) => {
+                                expect(err.statusCode).to.be.equal(NOT_FOUND);
+                                return friendService.getMessageHistory(accountId3, accountId1, 1, 5)
+                            })
+                            .catch((err: ErrorMsg) => {
+                                expect(err.statusCode).to.be.equal(NOT_FOUND);
+                                testClient.socket.close();
+                            });
+                    }
                 });
             });
     });

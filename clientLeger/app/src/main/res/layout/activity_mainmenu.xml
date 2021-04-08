@@ -10,10 +10,12 @@
             type="com.projet.clientleger.ui.mainmenu.view.MainmenuActivity" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.mainmenu.view.MainmenuActivity"
-        android:animateLayoutChanges="false">
+        android:animateLayoutChanges="false"
+        >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -27,6 +29,7 @@
         </androidx.appcompat.widget.Toolbar>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuContentContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/round_corner_outlined"

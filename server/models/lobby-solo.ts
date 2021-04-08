@@ -7,7 +7,7 @@ import {
   CurrentGameState,
   Difficulty,
   GameType,
-  GuessMessageCoop,
+  GuessMessageSoloCoop,
   GuessResponse,
   PlayerRole,
   ReasonEndGame
@@ -18,6 +18,7 @@ import { Lobby } from './lobby';
 
 const NB_GUESSES: number = 3;
 const SOLO_START_TIME: number = 120;
+const TIME_ADD_CORRECT_GUESS: number = 30;
 @injectable()
 export class LobbySolo extends Lobby {
 
@@ -37,8 +38,9 @@ export class LobbySolo extends Lobby {
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     this.guessLeft = NB_GUESSES;
     this.timeLeftSeconds = SOLO_START_TIME;
+    this.teamScores = [0];
     this.privateLobby = true;
-    this.players.push(this.getBotInfo(0));
+    this.players.push(this.botService.getBot(0));
   }
 
   addPlayer(playerId: string, socket: Socket) {
@@ -86,7 +88,7 @@ export class LobbySolo extends Lobby {
             this.guessLeft--;
             break;
         }
-        const guessMessage: GuessMessageCoop = {
+        const guessMessage: GuessMessageSoloCoop = {
           content: word,
           timestamp: Date.now(),
           guessStatus,
@@ -95,6 +97,7 @@ export class LobbySolo extends Lobby {
         };
         this.io.in(this.lobbyId)
           .emit(SocketLobby.SOLO_COOP_GUESS_BROADCAST, guessMessage);
+        this.botService.playerGuess(guessStatus);
 
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
           this.botService.resetDrawing();
@@ -145,8 +148,8 @@ export class LobbySolo extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    const timeCorrectGuess = 30000;
-    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC + timeCorrectGuess;
+    this.timeLeftSeconds += TIME_ADD_CORRECT_GUESS;
+    const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }
 

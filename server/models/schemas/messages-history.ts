@@ -1,23 +1,23 @@
 import { ObjectId } from 'mongodb';
 import { Document, Schema, Model, model, Query } from 'mongoose';
-import { Message } from '../../../common/communication/chat-message';
-import { PrivateMessage } from '../../../common/communication/private-message';
+import { PrivateMessage, PrivateMessageTo } from '../../../common/communication/private-message';
 import { UpdateOneQueryResult } from './account';
 
 export interface MessageHistory {
-  messages: Message[];
+  messages: PrivateMessage[];
 }
 
 export interface Messages extends Document {
   _id: ObjectId;
   accountId: ObjectId;
   otherAccountId: ObjectId;
-  messages: [Message];
+  messages: [PrivateMessage];
 }
 
 interface MessagesModel extends Model<Messages> {
-  findHistory: (id: string, otherId: string, page: number, limit: number) => Query<MessageHistory | null, Messages>;
-  addMessageToHistory: (msg: PrivateMessage, senderId: string, timestamp: number) => Query<UpdateOneQueryResult, Messages>;
+  findHistory: (id: string, otherId: string, page: number, limit: number) => Query<Messages | null, Messages>;
+  addMessageToHistory: (msg: PrivateMessageTo, senderId: string,
+    receiverId: string, timestamp: number) => Query<UpdateOneQueryResult, Messages>;
   removeHistory: (id: string, otherId: string) => Query<Messages | null, Messages>;
   removeHistoryOfAccount: (id: string) => Query<Messages | null, Messages>;
 }
@@ -46,7 +46,12 @@ export const messagesSchema = new Schema<Messages, MessagesModel>({
   },
   messages: [
     {
+      _id: false,
       senderAccountId: {
+        type: String,
+        required: true,
+      },
+      receiverAccountId: {
         type: String,
         required: true,
       },
@@ -63,12 +68,13 @@ messagesSchema.statics.findHistory = (id: string, otherId: string, page: number,
     .skip(skips).limit(limit);
 };
 
-messagesSchema.statics.addMessageToHistory = (msg: PrivateMessage, senderId: string, timestamp: number) => {
+messagesSchema.statics.addMessageToHistory = (msg: PrivateMessageTo, senderId: string, receiverId: string, timestamp: number) => {
   return messagesHistoryModel.updateOne(findMessagesQuery(senderId, msg.receiverAccountId),
     {
       $push: {
         messages: {
           senderAccountId: senderId,
+          receiverAccountId: receiverId,
           content: msg.content,
           timestamp,
         }

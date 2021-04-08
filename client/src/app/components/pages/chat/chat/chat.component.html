@@ -1,7 +1,16 @@
 <div id="chat-container">
+  <div id="chat-friendslist-anchor">
+    <app-chat-friendslist [opened]="chatService.friendslistOpened"></app-chat-friendslist>
+  </div>
   <div id="chat-header">
     <img id="chat-logo" src="assets/chat.png" />
     <h1 id="chat-text">Chat</h1>
+    <div id="chat-friendslist-toggler-container">
+      <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="chatService.friendslistOpened ? '#464646' : '#2F2F2F'">
+        <mat-icon>group</mat-icon>
+        Amis
+      </button>
+    </div>
   </div>
   <app-chat-tabs></app-chat-tabs>
   <div id="chat-messages">

@@ -2,8 +2,9 @@ import fs from 'fs';
 import { INTERNAL_SERVER_ERROR, NOT_FOUND, OK } from 'http-status-codes';
 import { inject, injectable } from 'inversify';
 import potrace from 'potrace';
+import { ObjectId } from 'mongodb';
 import Types from '../types';
-import { PictureWordDrawing, PictureWordPicture } from '../../../common/communication/picture-word';
+import { PictureWordDrawing, PictureWordInfo, PictureWordPicture, UpdatePictureWord } from '../../../common/communication/picture-word';
 import pictureWordModel, { PictureWord } from '../../models/schemas/picture-word-pair';
 import { DrawingSequence } from '../../../common/communication/drawing-sequence';
 import { Difficulty } from '../../../common/communication/lobby';
@@ -37,8 +38,6 @@ export class PictureWordService {
   async uploadPicture(body: PictureWordPicture): Promise<Response<string>> {
     return new Promise<Response<string>>((resolve, reject) => {
       const toSave = new pictureWordModel(body);
-      // const file = fs.readFileSync(path.resolve('C:/Users/mort_/Pictures/stealin.png'));
-      // const uploadedPicture: Buffer = Buffer.from(file);
       const uploadedPicture: Buffer = Buffer.from(body.picture, 'base64');
       this.posterizePromise(uploadedPicture, body.color)
         .then(async (svg) => {
@@ -63,6 +62,35 @@ export class PictureWordService {
       pictureWordModel.uploadDrawing(body)
         .then((drawing) => {
           resolve({ statusCode: OK, documents: drawing.id });
+        })
+        .catch((err: Error) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+  async updatePictureWord(id: string, body: UpdatePictureWord): Promise<Response<DrawingSequence>> {
+    return new Promise<Response<DrawingSequence>>((resolve, reject) => {
+      pictureWordModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false })
+        .then(async (pictureWord: PictureWord) => {
+          return this.getSequenceToDraw(pictureWord.id);
+        })
+        .then((sequence) => {
+          resolve(sequence);
+        })
+        .catch((err) => {
+          reject(DatabaseService.rejectErrorMessage(err));
+        });
+    });
+  }
+
+  async getPictureWords(page: number, limit: number): Promise<Response<PictureWordInfo[]>> {
+    return new Promise<Response<PictureWordInfo[]>>((resolve, reject) => {
+      const skips = limit * (page - 1);
+      pictureWordModel.find().skip(skips).limit(limit)
+        .then((pictureWords: PictureWord[]) => {
+          const infos = pictureWords.map((pictureWord) => this.pictureWordToPictureWordInfo(pictureWord));
+          resolve({ statusCode: OK, documents: infos });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -149,6 +177,15 @@ export class PictureWordService {
         console.error(e);
       }
     }
+  }
+
+  private pictureWordToPictureWordInfo(pictureWord: PictureWord): PictureWordInfo {
+    return {
+      _id: pictureWord.id,
+      word: pictureWord.word,
+      drawMode: pictureWord.drawMode,
+      difficulty: pictureWord.difficulty
+    };
   }
 
 }

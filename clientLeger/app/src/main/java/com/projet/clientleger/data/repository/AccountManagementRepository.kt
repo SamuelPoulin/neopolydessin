@@ -9,12 +9,11 @@ import javax.net.ssl.HttpsURLConnection
 
 open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager){
     open suspend fun getAccountInfos():AccountDashboard? {
-        var account:AccountDashboard? = AccountDashboard("","","","","", Logins("",ArrayList<Login>()),ArrayList<FriendInfo>(), 0,"")
         val res = apiDashboardInterface.getAccount()
-        if(res.code() == HttpsURLConnection.HTTP_OK)
-            account = res.body()
-        println(account)
-        return account
+        val accountDashboard:AccountDashboard? = res.body()
+        println(res.body())
+        println(accountDashboard)
+        return accountDashboard
     }
     open suspend fun updateAccountInfos(account:UpdateAccountModel):Account?{
         var returnAccount:Account? = Account("","","","","",ArrayList<FriendInfo>(), 0,"")

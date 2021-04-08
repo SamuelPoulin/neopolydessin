@@ -5,14 +5,16 @@ import android.graphics.BitmapFactory
 import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.utils.BitmapConversion
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.HttpsURLConnection
 
 @Singleton
-class AvatarStorageService @Inject constructor(val sessionManager: SessionManager, val apiAvatarInterface: ApiAvatarInterface) {
+class AvatarStorageService @Inject constructor(val sessionManager: SessionManager, private val apiAvatarInterface: ApiAvatarInterface) {
     private val gameAvatars: HashMap<String, Bitmap> = HashMap()
+
 
     fun addPlayer(player: Player) {
         if (gameAvatars.containsKey(player.accountId))
@@ -27,11 +29,18 @@ class AvatarStorageService @Inject constructor(val sessionManager: SessionManage
         }
     }
 
+    fun addPlayer(accountInfo: AccountInfo){
+        if (gameAvatars.containsKey(accountInfo.accountId))
+            return
+        gameAvatars[accountInfo.accountId] = accountInfo.avatar
+    }
+
     fun getAvatar(accountId: String?): Bitmap?{
         return gameAvatars[accountId]
     }
 
     fun clear(){
+
         gameAvatars.clear()
     }
 }

@@ -1,5 +1,6 @@
-import { AfterViewInit, Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { GameType } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { APIService } from '@services/api.service';
@@ -20,7 +21,7 @@ import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.comp
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
@@ -77,6 +78,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.editorService.isFreeEdit = false;
+  }
+
   handleMouseEvent(e: MouseEvent): void {
     if (this.currentTool) {
       this.currentTool.handleMouseEvent(e);
@@ -108,6 +113,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
         }
       });
     }
+  }
+
+  saveDrawing(): void {
+    this.dialog.openByName(ModalType.UPLOAD, { id: 'drawing' });
   }
 
   setToolbarState(opened: boolean): void {
@@ -147,5 +156,9 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   get loading(): boolean {
     return this.editorService.loading;
+  }
+
+  get splitTeams(): boolean {
+    return this.gameService.gameType === GameType.CLASSIC;
   }
 }

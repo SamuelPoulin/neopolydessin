@@ -93,6 +93,18 @@ export class DatabaseController {
           });
       });
 
+    this.router.get('/dashboard',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.getDashboardById(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
     this.router.get('/account/:id',
       jwtVerify,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),
@@ -120,10 +132,10 @@ export class DatabaseController {
 
     this.router.post('/account', jwtVerify, [
       body('_id').isEmpty(),
-      body('firstName').optional(),
-      body('lastName').optional(),
-      body('username').optional(),
-      body('email').optional(),
+      body('firstName').isString().optional(),
+      body('lastName').isString().optional(),
+      body('username').isString().optional(),
+      body('email').isEmail().optional(),
       body('password').isEmpty(),
       validationCheck,
       this.loggedIn.checkLoggedIn.bind(this.loggedIn),

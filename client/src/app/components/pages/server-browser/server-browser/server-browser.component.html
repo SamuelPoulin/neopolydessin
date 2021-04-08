@@ -20,7 +20,7 @@
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell class="join-button-cell" *matCellDef="let lobby">
               <button mat-flat-button color="warn" class="menu-button join-button"
-                (click)="joinLobby(lobby.lobbyId)">
+                (click)="joinLobby(lobby.lobbyId, lobby.gameType, lobby.difficulty)">
                 Rejoindre
                 <mat-icon class="menu-button-icon join-button-icon">arrow_forward</mat-icon>
               </button>

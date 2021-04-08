@@ -6,6 +6,8 @@ import com.projet.clientleger.data.api.TokenInterceptor
 import com.projet.clientleger.data.api.http.ApiAvatarInterface
 import com.projet.clientleger.data.api.http.ApiSessionManagerInterface
 import com.projet.clientleger.data.api.socket.SocketService
+import com.projet.clientleger.data.service.AvatarStorageService
+import com.projet.clientleger.data.service.ChatStorageService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,5 +24,7 @@ object SessionManagerModule {
                               tokenInterceptor: TokenInterceptor,
                               apiSessionManagerInterface: ApiSessionManagerInterface,
                               apiAvatarInterface: ApiAvatarInterface,
-                              socketService: SocketService): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface, apiAvatarInterface, socketService)
+                              socketService: SocketService,
+                              chatStorageService: ChatStorageService): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface,
+            apiAvatarInterface, socketService, chatStorageService)
 }
