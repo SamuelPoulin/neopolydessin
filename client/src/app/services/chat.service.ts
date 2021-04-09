@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
 import { Subscription } from 'rxjs';
@@ -31,12 +31,15 @@ export class ChatService {
   friendslistOpened: boolean = false;
   chatRoomsOpened: boolean = false;
 
+  chatRoomChanged: EventEmitter<void>;
+
   constructor(
     private socketService: SocketService,
     private gameService: GameService,
     private apiService: APIService,
     private userService: UserService,
   ) {
+    this.chatRoomChanged = new EventEmitter<void>();
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
     this.currentRoomIndex = 0;
@@ -53,6 +56,8 @@ export class ChatService {
       if (roomIndex > -1) {
         this.rooms[roomIndex].messages.push(message);
       }
+
+      this.chatRoomChanged.emit();
     });
 
     this.guessSubscription = this.socketService.receiveGuess().subscribe((message) => {
@@ -93,6 +98,8 @@ export class ChatService {
           timestamp: privateMessage.timestamp,
         } as ChatMessage);
       }
+
+      this.chatRoomChanged.emit();
     });
 
     this.chatRoomMessageSubscription = this.socketService.receiveChatRoomMessage().subscribe((chatRoomMessage) => {
@@ -105,6 +112,8 @@ export class ChatService {
           content: chatRoomMessage.content,
         } as ChatMessage);
       }
+
+      this.chatRoomChanged.emit();
     });
 
     this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
@@ -163,6 +172,7 @@ export class ChatService {
     if (roomIndex > -1) {
       this.rooms.splice(roomIndex, 1);
       this.currentRoomIndex = 0;
+      this.chatRoomChanged.emit();
     }
   }
 
@@ -170,6 +180,7 @@ export class ChatService {
     const roomIndex = this.rooms.findIndex((room) => room.name === roomName);
     if (roomIndex > -1) {
       this.currentRoomIndex = roomIndex;
+      this.chatRoomChanged.emit();
     }
   }
 
@@ -196,6 +207,7 @@ export class ChatService {
         this.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
         this.currentRoomIndex = this.rooms.findIndex((room) => room.name === friendUsername);
         this.friendslistOpened = false;
+        this.chatRoomChanged.emit();
       })
       .catch(() => {
         console.log('DM Error');
@@ -219,6 +231,6 @@ export class ChatService {
   }
 
   get canGuess(): boolean {
-    return this.gameService.canGuess;
+    return this.gameService.canGuess && this.rooms[this.currentRoomIndex].type === ChatRoomType.GAME;
   }
 }

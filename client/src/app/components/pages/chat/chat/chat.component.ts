@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
+import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
@@ -22,8 +23,14 @@ export class ChatComponent {
 
   friendslistOpened: boolean = false;
 
+  chatRoomChangedSubscription: Subscription;
+
   constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
+
+    this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
+      this.scrollToBottom();
+    });
   }
 
   sendMessage(): void {
