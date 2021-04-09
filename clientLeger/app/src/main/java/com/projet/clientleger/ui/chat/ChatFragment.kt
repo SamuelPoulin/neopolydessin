@@ -21,6 +21,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.service.ChatStorageService
@@ -93,7 +94,7 @@ class ChatFragment @Inject constructor() : Fragment() {
     override fun onResume() {
         super.onResume()
         chatService?.let {
-            vm.fetchSavedData(it.getConvos(), it.currentConvo)
+            vm.fetchSavedData(it.convos, it.currentConvo)
         }
     }
 
@@ -196,7 +197,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             val friend = (bundle["friend"] as FriendSimplified)
-            chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, true), true)
+            chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, TabType.FRIEND), true)
         }
 
         setFragmentResultListener("openGameChat"){requestKey, bundle ->
@@ -216,6 +217,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         chatService?.let { service ->
             service.subscribeConvosChange(vm::updateConvos)
             service.subscribeCurrentConvoChange(vm::updateCurrentConvo)
+            service.subscribeCurrentTabChange(vm::changeCurrentTab)
         }
     }
 

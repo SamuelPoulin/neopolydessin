@@ -6,6 +6,7 @@ import android.os.IBinder
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
@@ -85,15 +86,19 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     fun sendMessage(){
         messageContentLiveData.value?.let{
-            if(currentConvo.value!!.tabInfo.isDM)
-                chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
-            else{
-                if(isGuessing.value!!) {
-                    chatRepository.sendGuess(it)
-                } else {
-                    chatRepository.sendMessage(Message(formatMessageContent(it)))
-                }
+            when(currentConvo.value!!.tabInfo.tabType){
+                TabType.GAME -> sendGameMessage(it)
+                TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
+                TabType.ROOM -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoName, it)
             }
+        }
+    }
+
+    private fun sendGameMessage(content: String){
+        if(isGuessing.value!!) {
+            chatRepository.sendGuess(content)
+        } else {
+            chatRepository.sendMessage(Message(formatMessageContent(content)))
         }
     }
 
