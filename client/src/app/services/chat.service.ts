@@ -63,8 +63,14 @@ export class ChatService {
     });
 
     this.privateMessageSubscription = this.socketService.receivePrivateMessage().subscribe((privateMessage) => {
-      console.log(privateMessage);
-      let roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.senderAccountId);
+      let roomIndex = -1;
+      const isSender: boolean = privateMessage.senderAccountId === this.userService.account._id;
+
+      if (isSender) {
+        roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.receiverAccountId);
+      } else {
+        roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.senderAccountId);
+      }
 
       if (roomIndex === -1) {
         this.apiService
@@ -82,7 +88,7 @@ export class ChatService {
           .catch();
       } else {
         this.rooms[roomIndex].messages.push({
-          senderUsername: this.rooms[roomIndex].name,
+          senderUsername: isSender ? this.userService.account.username : this.rooms[roomIndex].name,
           content: privateMessage.content,
           timestamp: privateMessage.timestamp,
         } as ChatMessage);
