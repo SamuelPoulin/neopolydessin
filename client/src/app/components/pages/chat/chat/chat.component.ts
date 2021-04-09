@@ -76,6 +76,12 @@ export class ChatComponent {
 
   toggleFriendslist() {
     this.chatService.friendslistOpened = !this.chatService.friendslistOpened;
+    this.chatService.chatRoomsOpened = false;
+  }
+
+  toggleChatRooms() {
+    this.chatService.chatRoomsOpened = !this.chatService.chatRoomsOpened;
+    this.chatService.friendslistOpened = false;
   }
 
   addEmoji(e: EmojiEvent) {

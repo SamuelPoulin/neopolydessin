@@ -11,6 +11,8 @@ import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
+import { ChatRoomMessage } from '@common/communication/chat-room-history';
+import { ChatRoom } from '@models/chat/chat-room';
 import {
   CurrentGameState,
   Difficulty,
@@ -101,6 +103,18 @@ export class SocketService {
     });
   }
 
+  receiveChatRoomMessage(): Observable<ChatRoomMessage> {
+    return new Observable<ChatRoomMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, (chatRoomMessage: ChatRoomMessage) => obs.next(chatRoomMessage));
+    });
+  }
+
+  receiveChatRooms(): Observable<ChatRoom[]> {
+    return new Observable<ChatRoom[]>((obs) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: ChatRoom[]) => obs.next(chatRooms));
+    });
+  }
+
   receiveNextTimestamp(): Observable<TimeInfo> {
     return new Observable<TimeInfo>((obs) => {
       this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));
@@ -147,6 +161,10 @@ export class SocketService {
 
   sendPrivateMessage(message: string, friendId: string) {
     this.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, { receiverAccountId: friendId, content: message } as PrivateMessageTo);
+  }
+
+  sendRoomMessage(message: string, roomName: string) {
+    this.socket.emit(SocketMessages.SEND_MESSAGE_TO_ROOM, roomName, { content: message } as Message);
   }
 
   sendGuess(guess: string) {

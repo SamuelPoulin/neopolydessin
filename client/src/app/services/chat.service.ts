@@ -12,10 +12,12 @@ import { UserService } from './user.service';
 export class ChatService {
   // private static GENERAL_ROOM_NAME: string = 'Général';
   private static GAME_ROOM_NAME: string = 'Partie';
+  private static GENERAL_ROOM_NAME: string = 'Général';
 
   messageSubscription: Subscription;
-  guessSubscription: Subscription;
   privateMessageSubscription: Subscription;
+  chatRoomMessageSubscription: Subscription;
+  guessSubscription: Subscription;
   playerConnectionSubscription: Subscription;
   playerDisconnectionSubscription: Subscription;
   friendslistSocketSubscription: Subscription;
@@ -27,6 +29,7 @@ export class ChatService {
   currentRoomIndex: number = 0;
   guessing: boolean = false;
   friendslistOpened: boolean = false;
+  chatRoomsOpened: boolean = false;
 
   constructor(
     private socketService: SocketService,
@@ -35,6 +38,7 @@ export class ChatService {
     private userService: UserService,
   ) {
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
+    this.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
     this.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
@@ -85,6 +89,18 @@ export class ChatService {
       }
     });
 
+    this.chatRoomMessageSubscription = this.socketService.receiveChatRoomMessage().subscribe((chatRoomMessage) => {
+      console.log(chatRoomMessage);
+      if (chatRoomMessage.roomName === 'general') {
+        const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GENERAL);
+        this.rooms[roomIndex].messages.push({
+          senderUsername: chatRoomMessage.senderUsername,
+          timestamp: chatRoomMessage.timestamp,
+          content: chatRoomMessage.content,
+        } as ChatMessage);
+      }
+    });
+
     this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
       this.handleMessage(message);
     });
@@ -119,10 +135,15 @@ export class ChatService {
   }
 
   sendMessage(text: string) {
-    if (this.rooms[this.currentRoomIndex].type === ChatRoomType.GAME) {
+    const room = this.rooms[this.currentRoomIndex];
+    if (room.type === ChatRoomType.GAME) {
       this.socketService.sendMessage(text);
-    } else if (this.rooms[this.currentRoomIndex].type === ChatRoomType.PRIVATE) {
-      this.socketService.sendPrivateMessage(text, this.rooms[this.currentRoomIndex].id);
+    } else if (room.type === ChatRoomType.GENERAL) {
+      this.socketService.sendRoomMessage(text, 'general');
+    } else if (room.type === ChatRoomType.GROUP) {
+      console.log('Group');
+    } else if (room.type === ChatRoomType.PRIVATE) {
+      this.socketService.sendPrivateMessage(text, room.id);
     }
   }
 

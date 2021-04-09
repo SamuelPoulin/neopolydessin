@@ -1,11 +1,16 @@
 <div id="chat-container">
   <div id="chat-friendslist-anchor">
     <app-chat-friendslist [opened]="chatService.friendslistOpened"></app-chat-friendslist>
+    <app-chat-rooms [opened]="chatService.chatRoomsOpened"></app-chat-rooms>
   </div>
   <div id="chat-header">
     <img id="chat-logo" src="assets/chat.png" />
     <h1 id="chat-text">Chat</h1>
     <div id="chat-friendslist-toggler-container">
+      <button color="warn" mat-flat-button id="chat-rooms-toggler" (click)="toggleChatRooms()" [style.background-color]="chatService.chatRoomsOpened ? '#464646' : '#2F2F2F'">
+        <mat-icon>weekend</mat-icon>
+        Salons
+      </button>
       <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="chatService.friendslistOpened ? '#464646' : '#2F2F2F'">
         <mat-icon>group</mat-icon>
         Amis

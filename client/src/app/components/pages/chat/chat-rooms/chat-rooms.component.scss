@@ -1,0 +1,39 @@
+#chat-rooms-container {
+  position: absolute;
+  overflow: hidden;
+  top: 75px;
+  max-height: calc(100vh - 135px);
+  width: 400px;
+  background-color: #292929;
+  transition: left 0.25s;
+  z-index: 1;
+}
+
+#chat-rooms-closer {
+  color: white;
+  margin: 0px 15px;
+}
+
+#chat-rooms-closer-icon {
+  font-size: 28px;
+}
+
+#chat-rooms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+#chat-rooms-content-container {
+  overflow-y: auto;
+  max-height: calc(100vh - 195px);
+  min-height: calc(100vh - 195px);
+}
+
+.chat-rooms-section-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: white;
+  padding: 10px 25px;
+}
