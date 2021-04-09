@@ -19,6 +19,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
 import com.projet.clientleger.ui.accountmanagement.dashboard.ConnectionAdapter
+import com.projet.clientleger.ui.accountmanagement.dashboard.GameHistoryAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dashboard_fragment.*
 import kotlinx.android.synthetic.main.dialog_account_history.*
@@ -131,6 +132,8 @@ class DashboardFragment @Inject constructor(): Fragment() {
         dialog.show()
         dialog.connectionHistory.layoutManager = LinearLayoutManager(requireActivity())
         dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins.logins)
+        dialog.gameHistory.layoutManager = LinearLayoutManager(requireActivity())
+        dialog.gameHistory.adapter = GameHistoryAdapter(accountDashboard.gameHistory.games)
     }
     private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)
