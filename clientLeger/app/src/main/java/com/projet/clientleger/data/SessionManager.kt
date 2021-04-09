@@ -15,7 +15,6 @@ import com.projet.clientleger.data.api.model.RefreshTokenModel
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.model.account.AccountInfo
-import com.projet.clientleger.data.service.AvatarStorageService
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.utils.BitmapConversion
@@ -75,8 +74,8 @@ open class SessionManager @Inject constructor(
         socketService.connect(accessToken)
         when (res.code()) {
             HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body())
-            HttpsURLConnection.HTTP_UNAUTHORIZED -> logout(SESSION_EXPIRED)
-            else -> logout(ApiErrorMessages.UNKNOWN_ERROR)
+            HttpsURLConnection.HTTP_UNAUTHORIZED -> logoutAndRestart(SESSION_EXPIRED)
+            else -> logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
         }
     }
 
@@ -142,10 +141,10 @@ open class SessionManager @Inject constructor(
             HttpsURLConnection.HTTP_OK -> {
                 updateAccessToken(res.body()!!.accessToken)
             }
-            HttpsURLConnection.HTTP_BAD_REQUEST -> logout(ApiErrorMessages.BAD_REQUEST)
-            HttpsURLConnection.HTTP_UNAUTHORIZED -> logout(SESSION_EXPIRED)
-            HttpsURLConnection.HTTP_INTERNAL_ERROR -> logout(ApiErrorMessages.SERVER_ERROR)
-            else -> logout(ApiErrorMessages.UNKNOWN_ERROR)
+            HttpsURLConnection.HTTP_BAD_REQUEST -> logoutAndRestart(ApiErrorMessages.BAD_REQUEST)
+            HttpsURLConnection.HTTP_UNAUTHORIZED -> logoutAndRestart(SESSION_EXPIRED)
+            HttpsURLConnection.HTTP_INTERNAL_ERROR -> logoutAndRestart(ApiErrorMessages.SERVER_ERROR)
+            else -> logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
         }
     }
 
@@ -188,7 +187,7 @@ open class SessionManager @Inject constructor(
         return res
     }
 
-    fun logout(errorMessage: String?) {
+    fun logoutAndRestart(errorMessage: String?) {
         tokenInterceptor.clearToken()
         chatStorageService.clear()
         clearCred()
@@ -198,8 +197,14 @@ open class SessionManager @Inject constructor(
         errorMessage.let {
             bundle.putString(ERROR_MESSAGE, errorMessage)
         }
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context?.startActivity(intent, bundle)
+    }
+    fun logout(){
+        tokenInterceptor.clearToken()
+        chatStorageService.clear()
+        clearCred()
+        socketService.disconnect()
     }
 }

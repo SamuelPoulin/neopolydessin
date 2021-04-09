@@ -29,16 +29,16 @@ class GameHistoryAdapter(private val games: ArrayList<Game>) : RecyclerView.Adap
 
     override fun onBindViewHolder(holder: ViewHolderGame, position: Int) {
         holder.gameResult.text = games[position].gameResult
-        holder.date.text = "4 avril"
-        holder.gameDuration.text = "2:02"
+        holder.date.text = formatDate(games[position].startDate)
+        holder.gameDuration.text = formatTimestamp(games[position].endDate - games[position].startDate)
         holder.gameType.text = games[position].gameType
         holder.players.text = addAllPlayers(games[position])
     }
     private fun addAllPlayers(game:Game):String{
         var players = ""
         for(j in 0 until game.team.size){
-            for(i in 0 until game.team[0].playerNames.size){
-                players += game.team[0].playerNames[i]
+            for(i in 0 until game.team[j].playerNames.size){
+                players += game.team[j].playerNames[i]
                 if(i != 0 || j != 0){
                     players += "\n"
                 }
@@ -53,7 +53,13 @@ class GameHistoryAdapter(private val games: ArrayList<Game>) : RecyclerView.Adap
     private fun formatDate(time: Long):String{
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = time
-        val formatter = SimpleDateFormat("dd/MM hh:mm:ss")
+        val formatter = SimpleDateFormat("MM/dd")
+        return formatter.format(calendar.time)
+    }
+    private fun formatTimestamp(time:Long):String{
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = time
+        val formatter = SimpleDateFormat("mm:ss")
         return formatter.format(calendar.time)
     }
 }

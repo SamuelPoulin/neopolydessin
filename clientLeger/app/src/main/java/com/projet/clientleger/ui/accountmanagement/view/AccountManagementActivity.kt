@@ -13,12 +13,16 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.databinding.ActivityAccountManagementBinding
+import com.projet.clientleger.ui.accountmanagement.dashboard.view.DOUBLE_DIGIT
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DashboardFragment
+import com.projet.clientleger.ui.accountmanagement.dashboard.view.SECONDS_IN_MIN
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
 import com.projet.clientleger.ui.accountmanagement.settings.SettingsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.math.floor
 
 @AndroidEntryPoint
 class AccountManagementActivity : AppCompatActivity() {
@@ -84,6 +88,15 @@ class AccountManagementActivity : AppCompatActivity() {
     }
     suspend fun changeProfileInfos(account:UpdateAccountModel){
         vm.updateAccountInfos(account)
+    }
+    fun formatTimeMinSecFormat(time: Long):String{
+        val min = floor((TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN).toDouble()).toInt()
+        val sec = TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN
+        var result = "$min:$sec"
+        if(sec < DOUBLE_DIGIT){
+            result = "$min:0$sec"
+        }
+        return result
     }
 
 }
