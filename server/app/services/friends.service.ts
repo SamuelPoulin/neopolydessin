@@ -42,7 +42,7 @@ export class FriendsService {
           if (this.emptyFriendList(result[0])) {
             friendList = { friends: [] };
           }
-          resolve({ statusCode: OK, documents: friendList });
+          resolve({ statusCode: OK, documents: { friends: friendList.friends } });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));

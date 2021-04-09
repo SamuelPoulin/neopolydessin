@@ -32,4 +32,5 @@ export interface PictureWordDrawing extends PictureWord {
 export interface PictureWordPicture extends PictureWord {
     picture: string,
     color: string,
+    threshold?: number
 }

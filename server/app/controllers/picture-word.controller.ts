@@ -28,7 +28,8 @@ export class PictureWordController {
         header('Content-Type').contains('application/json'),
         body('word').exists(),
         body('picture').exists(),
-        body('hints').isArray({ min: 3, max: 3 }),
+        body('hints').isArray({ min: 3 }),
+        body('threshold').optional(),
         body('difficulty').isIn([
           Difficulty.EASY,
           Difficulty.INTERMEDIATE,
