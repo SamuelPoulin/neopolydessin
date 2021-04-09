@@ -37,16 +37,29 @@ export interface ServerPlayer extends Player {
 const DEFAULT_TEAM_SIZE: number = 4;
 const SOLO_TEAM_SIZE: number = 2;
 
+export interface DifficultyModifiers {
+  timeAddedOnCorrectGuess: number;
+  soloCoopTime: number;
+  guessTries: number;
+  classicTime: number;
+  replyTime: number;
+}
+
 @injectable()
 export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
   readonly MS_PER_SEC: number = 1000;
-  readonly TIME_ADD_CORRECT_GUESS: number = 30;
   readonly GAME_SIZE_MAP: Map<GameType, number> = new Map<GameType, number>([
     [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
     [GameType.SPRINT_SOLO, SOLO_TEAM_SIZE],
     [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
+  ]);
+
+  readonly DIFFICULTY_MODIFIERS: Map<Difficulty, DifficultyModifiers> = new Map<Difficulty, DifficultyModifiers>([
+    [Difficulty.EASY, { timeAddedOnCorrectGuess: 30, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
+    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 20, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
+    [Difficulty.HARD, { timeAddedOnCorrectGuess: 10, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
   ]);
 
   lobbyId: string;
@@ -91,7 +104,7 @@ export abstract class Lobby {
     this.gameStartTime = 0;
     this.players = [];
     this.teamScores = [];
-    this.botService = new BotService(this.io, this.lobbyId);
+    this.botService = new BotService(this.io, this.lobbyId, this.difficulty);
   }
 
   toLobbyInfo(): Player[] {

@@ -17,18 +17,20 @@ import {
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
-import { Lobby, ServerPlayer } from './lobby';
+import { DifficultyModifiers, Lobby, ServerPlayer } from './lobby';
 
 
 @injectable()
 export class LobbyClassique extends Lobby {
 
   protected clockTimeout: NodeJS.Timeout;
-  private readonly START_GAME_TIME_LEFT: number = 30;
-  private readonly REPLY_TIME: number = 15;
+
   private readonly END_SCORE: number = 5;
   private drawingTeamNumber: number;
   private drawers: Entity[];
+
+  private drawPhaseTime: number;
+  private replyPhaseTime: number;
 
   constructor(
     socketIdService: SocketIdService,
@@ -42,7 +44,10 @@ export class LobbyClassique extends Lobby {
     super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.CLASSIC;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
-    this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
+    const diffMods = this.DIFFICULTY_MODIFIERS.get(difficulty) as DifficultyModifiers;
+    this.drawPhaseTime = diffMods.classicTime;
+    this.replyPhaseTime = diffMods.replyTime;
+    this.timeLeftSeconds = this.drawPhaseTime;
     this.teamScores = [0, 0];
     this.drawingTeamNumber = 0;
     this.drawers = [];
@@ -130,7 +135,7 @@ export class LobbyClassique extends Lobby {
   protected startRoundTimer() {
     this.setRoles();
     this.drawingCommands.resetDrawing();
-    this.pictureWordService.getRandomWord().then((pictureWord) => {
+    this.pictureWordService.getRandomWord(this.difficulty).then((pictureWord) => {
       this.wordToGuess = pictureWord.word;
       const drawer = this.drawers[this.drawingTeamNumber];
       if (instanceOfPlayer(drawer)) {
@@ -144,7 +149,7 @@ export class LobbyClassique extends Lobby {
 
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
     this.currentGameState = CurrentGameState.DRAWING;
-    this.timeLeftSeconds = this.START_GAME_TIME_LEFT;
+    this.timeLeftSeconds = this.drawPhaseTime;
     this.startTimerGuessToClient();
 
     this.clockTimeout = setInterval(() => {
@@ -172,7 +177,7 @@ export class LobbyClassique extends Lobby {
 
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.REPLY);
     this.currentGameState = CurrentGameState.REPLY;
-    this.timeLeftSeconds = this.REPLY_TIME;
+    this.timeLeftSeconds = this.replyPhaseTime;
     this.startTimerReplyToClient();
 
     this.clockTimeout = setInterval(() => {
@@ -195,7 +200,7 @@ export class LobbyClassique extends Lobby {
   }
 
   private startTimerReplyToClient() {
-    const replyTimeSeconds = this.REPLY_TIME;
+    const replyTimeSeconds = this.replyPhaseTime;
     const timerValue = Date.now() + replyTimeSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: timerValue });
   }

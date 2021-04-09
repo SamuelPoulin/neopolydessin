@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { BotPersonnality } from '../utils/botinfo';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
-import { Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
+import { Difficulty, Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 
 const HINT_COOLDOWN: number = 30000;
@@ -9,22 +9,23 @@ export class BotService {
 
   currentBot: number;
 
-  private io: Server;
   private drawing: DrawingSequence;
 
   private hintAvailable: boolean;
   private currentSegmentIndex: number;
   private currentCoordIndex: number;
 
-  private lobbyId: string;
   private pathTimer: NodeJS.Timeout;
 
   private bots: BotPersonnality[] = [];
 
-  constructor(io: Server, lobbyId: string) {
+  constructor(
+    private io: Server,
+    private lobbyId: string,
+    private difficulty: Difficulty
+  ) {
     this.hintAvailable = true;
     this.currentBot = 0;
-    this.io = io;
     this.lobbyId = lobbyId;
   }
 
@@ -78,7 +79,7 @@ export class BotService {
   }
 
   getBot(teamNumber: number): Entity {
-    const bot = new BotPersonnality(this.io, this.lobbyId);
+    const bot = new BotPersonnality(this.io, this.lobbyId, this.difficulty);
     this.bots.push(bot);
     return {
       username: bot.name,

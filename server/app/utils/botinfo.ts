@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { ChatMessage } from '../../../common/communication/chat-message';
+import { Difficulty } from '../../../common/communication/lobby';
 import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
 const BOT_NAMES: string[] = [
@@ -71,13 +72,21 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
   ]
 ]);
 
+const HARD_DELAY: number = 15;
+const INTERMEDIATE_DELAY: number = 25;
+const EASY_DELAY: number = 50;
+const SPEED_MOD: number = -10;
+
+const DIFFICULTY_SPEEDS: Map<Difficulty, number> = new Map([
+  [Difficulty.EASY, EASY_DELAY],
+  [Difficulty.INTERMEDIATE, INTERMEDIATE_DELAY],
+  [Difficulty.HARD, HARD_DELAY]
+]);
+
 const PERCENT_1: number = 0.01;
 const PERCENT_20: number = 0.2;
 const PERCENT_30: number = 0.3;
 const PERCENT_50: number = 0.5;
-const SPEED_DRAW_DELAY: number = 5;
-const DEFAULT_DRAW_DELAY: number = 15;
-
 export class BotPersonnality {
 
 
@@ -86,31 +95,35 @@ export class BotPersonnality {
 
   hints: string[];
   hintIndex: number;
+
+  private baseDrawDelay: number;
   private sentences: BotSentences;
 
   constructor(
     private io: Server,
-    private lobbyId: string
+    private lobbyId: string,
+    difficulty: Difficulty,
   ) {
+    this.baseDrawDelay = DIFFICULTY_SPEEDS.get(difficulty) as number;
+    this.drawDelay = this.baseDrawDelay;
     this.name = this.getBotUsername();
     this.sentences = this.getBotPersonnality();
-    this.drawDelay = DEFAULT_DRAW_DELAY;
   }
 
   onStartDraw() {
     if (Math.random() < PERCENT_20) {
       this.sendBotMessage(this.sentences.onStartDraw);
-      this.drawDelay = SPEED_DRAW_DELAY;
+      this.drawDelay = this.baseDrawDelay + SPEED_MOD;
     }
   }
 
   onStartSegment() {
-    if (Math.random() < PERCENT_1 && this.drawDelay === SPEED_DRAW_DELAY) {
+    if (Math.random() < PERCENT_1 && this.drawDelay !== this.baseDrawDelay) {
       this.sendBotMessage(this.sentences.onSlowDown);
-      this.drawDelay = DEFAULT_DRAW_DELAY;
-    } else if (Math.random() < PERCENT_1 && this.drawDelay === DEFAULT_DRAW_DELAY) {
+      this.drawDelay = this.baseDrawDelay;
+    } else if (Math.random() < PERCENT_1 && this.drawDelay === this.baseDrawDelay) {
       this.sendBotMessage(this.sentences.onSpeedUp);
-      this.drawDelay = SPEED_DRAW_DELAY;
+      this.drawDelay = this.baseDrawDelay + SPEED_MOD;
     }
   }
 
