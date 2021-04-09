@@ -42,6 +42,13 @@
                     android:text="bob"
                     android:textAlignment="center"
                     android:textSize="20sp" />
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="bob@bob.com"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButtonToggleGroup

@@ -58,12 +58,20 @@ class AccountManagementActivity : AppCompatActivity() {
             vm.getAccountInfos()
             binding.username.text = vm.accountInfos.username
             binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
+            binding.email.text = vm.accountInfos.email
             dashboardFragment.applyAccountValues(vm.accountInfos)
         }
         binding.logoutBtn.setOnClickListener {
             finish()
         }
-
+    }
+    fun fetchAccountInfos(){
+        lifecycleScope.launch{
+            vm.getAccountInfos()
+            binding.username.text = vm.accountInfos.username
+            binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
+            binding.email.text = vm.accountInfos.email
+        }
     }
 
     private fun changeFragment(fragment: Fragment) {

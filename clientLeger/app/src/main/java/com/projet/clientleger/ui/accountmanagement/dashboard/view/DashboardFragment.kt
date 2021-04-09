@@ -134,6 +134,9 @@ class DashboardFragment @Inject constructor(): Fragment() {
         dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins.logins)
         dialog.gameHistory.layoutManager = LinearLayoutManager(requireActivity())
         dialog.gameHistory.adapter = GameHistoryAdapter(accountDashboard.gameHistory.games)
+        dialog.dismissBtn.setOnClickListener {
+            dialog.dismiss()
+        }
     }
     private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)

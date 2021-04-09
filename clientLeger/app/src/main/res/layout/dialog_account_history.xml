@@ -7,6 +7,14 @@
     android:minHeight="200dp"
     android:minWidth="1200dp">
 
+    <ImageButton
+        android:id="@+id/dismissBtn"
+        android:background="@drawable/ic_logout_black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <TextView
         android:id="@+id/gameLabel"
         android:layout_width="0dp"

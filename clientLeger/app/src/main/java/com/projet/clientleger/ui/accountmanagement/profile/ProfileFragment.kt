@@ -30,31 +30,7 @@ class ProfileFragment @Inject constructor(): Fragment() {
     ): View {
         binding = ProfileFragmentBinding.inflate(inflater, container, false)
         binding!!.confirmBtn.setOnClickListener {
-            var firstName: String? = binding!!.firstNameBox.text.toString()
-            var lastName: String? = binding!!.lastNameBox.text.toString()
-            var username: String? = binding!!.usernameBox.text.toString()
-            var email: String? = binding!!.emailBox.text.toString()
-            if(firstName!!.isEmpty())
-                firstName = null
-            if(lastName!!.isEmpty())
-                lastName = null
-            if(username!!.isEmpty())
-                username = null
-            if(email!!.isEmpty())
-                email = null
-
-
-            val updateAccountModel = UpdateAccountModel(
-                    firstName,
-                    lastName,
-                    username,
-                    email)
-
-            lifecycleScope.launch {
-                binding!!.confirmBtn.isEnabled = false
-                activity.changeProfileInfos(updateAccountModel)
-                binding!!.confirmBtn.isEnabled = true
-            }
+            sendNewInfos()
         }
         return binding!!.root
     }
@@ -62,6 +38,39 @@ class ProfileFragment @Inject constructor(): Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity = context as AccountManagementActivity
+    }
+    private fun sendNewInfos(){
+        var firstName: String? = binding!!.firstNameBox.text.toString()
+        var lastName: String? = binding!!.lastNameBox.text.toString()
+        var username: String? = binding!!.usernameBox.text.toString()
+        var email: String? = binding!!.emailBox.text.toString()
+        if(firstName!!.isEmpty())
+            firstName = null
+        if(lastName!!.isEmpty())
+            lastName = null
+        if(username!!.isEmpty())
+            username = null
+        if(email!!.isEmpty())
+            email = null
+        val updateAccountModel = UpdateAccountModel(
+                firstName,
+                lastName,
+                username,
+                email)
+
+        lifecycleScope.launch {
+            binding!!.confirmBtn.isEnabled = false
+            activity.changeProfileInfos(updateAccountModel)
+            activity.fetchAccountInfos()
+            clearBoxes()
+            binding!!.confirmBtn.isEnabled = true
+        }
+    }
+    private fun clearBoxes(){
+        binding!!.firstNameBox.text.clear()
+        binding!!.lastNameBox.text.clear()
+        binding!!.usernameBox.text.clear()
+        binding!!.emailBox.text.clear()
     }
 
 }
