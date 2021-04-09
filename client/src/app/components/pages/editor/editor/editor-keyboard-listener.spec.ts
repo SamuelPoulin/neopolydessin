@@ -1,4 +1,3 @@
-/* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
@@ -23,6 +22,7 @@ describe('EditorKeyboardListener', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   let keyboardListener: KeyboardListenerService;
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
