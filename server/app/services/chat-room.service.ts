@@ -22,7 +22,10 @@ export class ChatRoomService {
   constructor(
     @inject(Types.SocketIdService) private socketIdService: SocketIdService,
     @inject(Types.DatabaseService) private databaseService: DatabaseService,
-  ) {
+  ) { }
+
+  initIo(io: Server) {
+    this.io = io;
     chatRoomHistoryModel.findOne({ roomName: GENERAL_CHAT_ROOM })
       .then((chatRoom) => {
         if (!chatRoom) {
@@ -35,10 +38,7 @@ export class ChatRoomService {
           this.rooms.push(room.roomName);
         });
       });
-  }
 
-  initIo(io: Server) {
-    this.io = io;
   }
 
   bindIoEvents(socket: Socket): void {

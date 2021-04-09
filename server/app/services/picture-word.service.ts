@@ -126,12 +126,12 @@ export class PictureWordService {
     });
   }
 
-  async getRandomWord(): Promise<RandomWord> {
+  async getRandomWord(difficulty: Difficulty): Promise<RandomWord> {
     return new Promise<RandomWord>((resolve, reject) => {
-      pictureWordModel.countDocuments()
+      pictureWordModel.countDocuments({ difficulty })
         .then((count) => {
           const random = Math.floor(Math.random() * count);
-          return pictureWordModel.findOne().skip(random);
+          return pictureWordModel.findOne({ difficulty }).skip(random);
         })
         .then((pictureWord) => {
           if (!pictureWord) throw new Error(NOT_FOUND.toString());
