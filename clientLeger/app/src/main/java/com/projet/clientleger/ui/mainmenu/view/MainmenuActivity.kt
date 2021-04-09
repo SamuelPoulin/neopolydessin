@@ -17,6 +17,7 @@ import androidx.fragment.app.commit
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
@@ -55,6 +56,8 @@ class MainmenuActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
+
+        startService(Intent(this, ChatStorageService::class.java))
     }
 
     fun showGameDialog(isCreating: Boolean) {
@@ -146,5 +149,10 @@ class MainmenuActivity : AppCompatActivity() {
                 // write code to perform some action
             }
         }
+    }
+
+    override fun onDestroy() {
+        stopService(Intent(this, ChatStorageService::class.java))
+        super.onDestroy()
     }
 }

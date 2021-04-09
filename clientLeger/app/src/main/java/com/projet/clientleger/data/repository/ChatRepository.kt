@@ -55,12 +55,12 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         return chatSocketService.receiveGuessSoloCoop()
     }
 
-    suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): ArrayList<MessageChat> {
-        val messages = ArrayList<MessageChat>()
+    suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): ArrayList<MessageId> {
+        val messages = ArrayList<MessageId>()
         try{
             val res = sessionManager.request(pageNumberWanted, friendId, messagePerPage,apiFriendslistInterface::getFriendChatHistory)
             if(res.code() == HttpsURLConnection.HTTP_OK)
-                messages.addAll(res.body()!!)
+                messages.addAll(res.body()!!.messages)
         } catch (e: Exception) {println(e.message)}
         return messages
     }

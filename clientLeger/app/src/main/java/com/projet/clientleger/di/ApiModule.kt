@@ -85,8 +85,4 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
-
-    @Provides
-    @Singleton
-    fun provideChatStorageService(): ChatStorageService = ChatStorageService()
 }

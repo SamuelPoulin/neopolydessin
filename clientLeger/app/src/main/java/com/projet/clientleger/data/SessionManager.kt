@@ -43,8 +43,7 @@ open class SessionManager @Inject constructor(
         private val tokenInterceptor: TokenInterceptor,
         private val apiSessionManagerInterface: ApiSessionManagerInterface,
         private val apiAvatarInterface: ApiAvatarInterface,
-        private val socketService: SocketService,
-        private val chatStorageService: ChatStorageService
+        private val socketService: SocketService
 ) {
     companion object {
         const val ERROR_MESSAGE = "errorMessage"
@@ -190,7 +189,6 @@ open class SessionManager @Inject constructor(
 
     fun logout(errorMessage: String?) {
         tokenInterceptor.clearToken()
-        chatStorageService.clear()
         clearCred()
         socketService.disconnect()
         val intent = Intent(context, ConnexionActivity::class.java)

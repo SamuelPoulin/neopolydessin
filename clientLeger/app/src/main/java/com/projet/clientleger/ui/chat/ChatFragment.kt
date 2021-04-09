@@ -1,7 +1,12 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import android.os.Bundle
+import android.os.IBinder
 import android.text.Html
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -18,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -34,6 +40,20 @@ class ChatFragment @Inject constructor() : Fragment() {
     var baseHeight: Int = -1
     var screenSize: Int = -1
     var baseWidth: Int = -1
+    private var chatService: ChatStorageService? = null
+
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            println("service received")
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            (binding?.rvTabs?.adapter as TabAdapter).clickCallback = chatService!!::removeConvo
+            setupChatServiceSubscriptions()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            chatService = null
+        }
+    }
 
     companion object {
         fun newInstance() = ChatFragment()
@@ -57,10 +77,25 @@ class ChatFragment @Inject constructor() : Fragment() {
         setupTabsObservers()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        Intent(requireContext(), ChatStorageService::class.java).also { intent ->
+            activity?.bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(chatConnection)
+        chatService = null
+    }
 
     override fun onResume() {
         super.onResume()
-        vm.fetchSavedData()
+        chatService?.let {
+            vm.fetchSavedData(it.getConvos(), it.currentConvo)
+        }
     }
 
     private fun toggleVisibilityChat(){
@@ -133,13 +168,11 @@ class ChatFragment @Inject constructor() : Fragment() {
         setupMessagesObserver()
 
         setupClickListeners()
-
         binding?.let {
-
             val manager = LinearLayoutManager(activity)
             manager.orientation = LinearLayoutManager.HORIZONTAL
             it.rvTabs.layoutManager = manager
-            it.rvTabs.adapter = TabAdapter(vm.tabs.value!!, vm::changeSelectedTab)
+            it.rvTabs.adapter = TabAdapter(vm.convos.value!!)
         }
     }
 
@@ -164,34 +197,42 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             val friend = (bundle["friend"] as FriendSimplified)
-            vm.addNewTab(TabInfo(friend.username, friend.friendId, true))
+            chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, true), true)
         }
 
         setFragmentResultListener("openGameChat"){requestKey, bundle ->
             val tabName = (bundle["tabName"] as String)
-            vm.addNewTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+            chatService?.addNewConvo(TabInfo(tabName, ChatViewModel.GAME_TAB_ID), true)
         }
         setFragmentResultListener("closeGameChat"){requestKey, bundle ->
             val tabName = (bundle["tabName"] as String)
-            vm.removeTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
+            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         }
         setFragmentResultListener("activityChange"){requestKey, bundle ->
-            vm.saveData()
             vm.clear()
         }
     }
 
+    private fun setupChatServiceSubscriptions(){
+        chatService?.let { service ->
+            service.subscribeConvosChange(vm::updateConvos)
+            service.subscribeCurrentConvoChange(vm::updateCurrentConvo)
+        }
+    }
+
     private fun setupTabsObservers(){
-        vm.tabs.observe(requireActivity()){ newTabs ->
+        vm.convos.observe(requireActivity()){ convos ->
             binding?.let { mBinding ->
                 mBinding.rvTabs.adapter?.notifyDataSetChanged()
-                mBinding.rvTabs.scrollToPosition(0)
+                var scrollIndex = convos.indexOfFirst { it.tabInfo.convoId == vm.currentConvo.value!!.tabInfo.convoId }
+                if(scrollIndex < 0)
+                    scrollIndex = 0
+                mBinding.rvTabs.scrollToPosition(scrollIndex)
             }
         }
-
-        vm.currentTab.observe(requireActivity()){ tab ->
+        vm.currentConvo.observe(requireActivity()){
             binding?.let { mBinding ->
-                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
+                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
             }
         }
     }

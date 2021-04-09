@@ -7,13 +7,14 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
+import com.projet.clientleger.data.model.chat.Convo
 import com.projet.clientleger.data.model.chat.TabInfo
 import kotlinx.android.synthetic.main.activity_mainmenu.view.*
 
-class TabAdapter(private val tabs: ArrayList<TabInfo>,
-                 private val clickCallback: (TabInfo) -> Unit): RecyclerView.Adapter<TabAdapter.ViewHolderTab>() {
+class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<TabAdapter.ViewHolderTab>() {
     private var selectedTab: TabInfo? = null
     private val items: ArrayList<Pair<String, FrameLayout>> = ArrayList()
+    var clickCallback: ((String) -> Unit)? = null
     class ViewHolderTab(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val rootView: View = itemView
         val tabTextView: TextView = itemView.findViewById(R.id.tabName)
@@ -26,21 +27,21 @@ class TabAdapter(private val tabs: ArrayList<TabInfo>,
     }
 
     override fun onBindViewHolder(holder: ViewHolderTab, position: Int) {
-        holder.tabTextView.text = tabs[position].convoName
+        holder.tabTextView.text = convos[position].tabInfo.convoName
         val tabId = selectedTab?.convoId ?: ""
-        if(tabs[position].convoId != tabId)
+        if(convos[position].tabInfo.convoId != tabId)
             holder.selectedUnderline.visibility = View.INVISIBLE
         else
             holder. selectedUnderline.visibility = View.VISIBLE
 
         holder.rootView.setOnClickListener {
-            clickCallback.invoke(tabs[position])
+            clickCallback?.invoke(convos[position].tabInfo.convoId)
         }
-        items.add(Pair(tabs[position].convoId, holder.selectedUnderline))
+        items.add(Pair(convos[position].tabInfo.convoId, holder.selectedUnderline))
     }
 
     override fun getItemCount(): Int {
-       return tabs.size
+       return convos.size
     }
 
     fun setSelectedTabIndex(tabInfo: TabInfo){
