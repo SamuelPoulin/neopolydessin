@@ -39,7 +39,7 @@ export class PictureWordService {
     return new Promise<Response<string>>((resolve, reject) => {
       const toSave = new pictureWordModel(body);
       const uploadedPicture: Buffer = Buffer.from(body.picture, 'base64');
-      this.posterizePromise(uploadedPicture, body.color)
+      this.posterizePromise(uploadedPicture, body.color, body.threshold)
         .then(async (svg) => {
           return this.writeSVG(toSave.id, svg);
         })
@@ -159,9 +159,9 @@ export class PictureWordService {
     });
   }
 
-  async posterizePromise(picture: Buffer, color: string): Promise<string> {
+  async posterizePromise(picture: Buffer, color: string, threshold?: number): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      potrace.posterize(picture, { color }, (err, result) => {
+      potrace.posterize(picture, { color, threshold }, (err, result) => {
         if (err) throw new Error(INTERNAL_SERVER_ERROR.toString());
         resolve(result);
       });
