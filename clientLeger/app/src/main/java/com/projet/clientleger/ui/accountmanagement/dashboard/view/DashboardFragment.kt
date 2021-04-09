@@ -2,12 +2,13 @@ package com.projet.clientleger.ui.accountmanagement.dashboard.view
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.Point
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -17,7 +18,10 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
+import com.projet.clientleger.ui.accountmanagement.dashboard.ConnectionAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.dashboard_fragment.*
+import kotlinx.android.synthetic.main.dialog_account_history.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -116,6 +120,17 @@ class DashboardFragment @Inject constructor(): Fragment() {
         binding!!.averageGameTime.text = formatTimeMinSecFormat(account.gameHistory.averageGameTime)
         setBarChart()
         isAccountDefined = true
+        //setupConnectionAdapter()
+        showHistoryDialog.setOnClickListener {
+            showHistoryDialog()
+        }
+    }
+    private fun showHistoryDialog(){
+        val dialogView = layoutInflater.inflate(R.layout.dialog_account_history, null)
+        val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
+        dialog.show()
+        dialog.connectionHistory.layoutManager = LinearLayoutManager(requireActivity())
+        dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins.logins)
     }
     private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)
