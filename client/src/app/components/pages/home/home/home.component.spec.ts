@@ -55,20 +55,4 @@ describe('HomeComponent', () => {
 
     expect(navigateSpy).toHaveBeenCalledWith(['test']);
   });
-
-  /* keyboard shortcuts */
-
-  it('should handle keyboard event', () => {
-    const keyDownSpy = spyOn(component['keyboardListener'], 'handle');
-
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
-
-    expect(keyDownSpy).toHaveBeenCalled();
-  });
-
-  it('can open modal with keyboard shortcut', () => {
-    const openModalSpy = spyOn(component, 'openModal');
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'o', ctrlKey: true }));
-    expect(openModalSpy).toHaveBeenCalled();
-  });
 });

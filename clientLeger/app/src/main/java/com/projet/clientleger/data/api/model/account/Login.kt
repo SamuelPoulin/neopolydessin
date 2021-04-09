@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import java.util.*
 
 @Serializable
-data class Login(val _id: String, val start: String, val end: String?){
+data class Login(val start: String, val end: String?){
     fun toLoginInfo(): LoginInfo{
         var endDate: Date? = null
         if(end != null)

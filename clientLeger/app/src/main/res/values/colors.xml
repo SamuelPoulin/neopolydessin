@@ -24,6 +24,8 @@
     <color name="milk_white">#FBFBFB</color>
     <color name="shadow_grey">#EEEEEE</color>
     <color name="team_blue">#0000FF</color>
+    <color name="dark_green">#25be4f</color>
+    <color name="light_red">#C04C45</color>
     <color name="chat_header_black">#2F2F2F</color>
     <color name="tab_grey">#414141</color>
     <color name="tabs_black">#292929</color>

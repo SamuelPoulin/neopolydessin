@@ -21,7 +21,7 @@
     <string name="title_activity_account_management">AccountManagementActivity</string>
     <string name="dashboard">Tableau de bord</string>
     <string name="userProfile">Profil utilisateur</string>
-    <string name="accountSettings">Paramèters de compte</string>
+    <string name="accountSettings">Paramètres</string>
     <string name="disconnect">Deconnexion</string>
     <string name="profile">Profil</string>
     <string name="userGuide">Guide utilisateur</string>
@@ -76,4 +76,18 @@
     <string name="coopTeamLabel">Joueurs</string>
     <string name="tableau_de_bord">Tableau de Bord</string>
     <string name="friends">Amis</string>
+    <string name="statistiques_label">Statistiques</string>
+    <string name="nb_games">Nombre de parties jouées</string>
+    <string name="win_percentage">Poucentage de victoires</string>
+    <string name="nb_hours_connection">Nombre d\'heures de connexion</string>
+    <string name="returnbutton">Retour</string>
+    <string name="history_label">Historique des parties jouées</string>
+    <string name="first_name_hint">Prénom</string>
+    <string name="last_name_hint">Nom</string>
+    <string name="username_hint">Nom d\'utilisateur</string>
+    <string name="email_hint">Email</string>
+    <string name="profile_label">Profil</string>
+    <string name="confirm_btn">Confirmer</string>
+    <string name="nb_hours_in_game">Nombre d\'heures en jeu</string>
+    <string name="average_time_game">Temps moyen d\'une partie</string>
 </resources>

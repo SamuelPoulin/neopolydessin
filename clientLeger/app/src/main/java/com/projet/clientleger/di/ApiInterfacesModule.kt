@@ -40,4 +40,8 @@ object ApiInterfacesModule {
     @Provides
     @Singleton
     fun provideApiAvatarInterface(apiInterfaceBuilder: ApiInterfaceBuilder): ApiAvatarInterface = apiInterfaceBuilder.buildInterface(ApiAvatarInterface::class.java)
+
+    @Provides
+    @Singleton
+    fun provideApiDashboardInterface(apiInterfaceBuilder: ApiInterfaceBuilder):ApiDashboardInterface = apiInterfaceBuilder.buildInterface(ApiDashboardInterface::class.java)
 }

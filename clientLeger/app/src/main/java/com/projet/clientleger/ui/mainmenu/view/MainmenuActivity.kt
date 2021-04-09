@@ -58,6 +58,11 @@ class MainmenuActivity : AppCompatActivity() {
         }
 
         startService(Intent(this, ChatStorageService::class.java))
+
+        binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
+        }
     }
 
     fun showGameDialog(isCreating: Boolean) {
@@ -153,6 +158,7 @@ class MainmenuActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         stopService(Intent(this, ChatStorageService::class.java))
+        vm.disconnect()
         super.onDestroy()
     }
 }
