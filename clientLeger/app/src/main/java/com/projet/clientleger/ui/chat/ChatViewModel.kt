@@ -66,26 +66,20 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     }
 
-    fun updateConvos(newConvos: ArrayList<Convo>){
+    fun updateConvos(){
         convos.value?.let { convosList ->
-            println("update convos: ${newConvos}")
-            convosList.clear()
-            convosList.addAll(newConvos)
             convos.postValue(convosList)
-
-            val newMessages = (newConvos.find { it.tabInfo.convoId == currentConvo.value!!.tabInfo.convoId})?.messages
-            println("dsadasda: ${newMessages} --- ${currentConvo.value}")
-            if(newMessages != null){
-                if(newMessages.size != currentConvo.value!!.messages.size){
-                    messagesLiveData.value!!.clear()
-                    messagesLiveData.value!!.addAll(newMessages)
-                    messagesLiveData.postValue(messagesLiveData.value!!)
-                }
-            }
         }
     }
 
-    fun updateCurrentConvo(newCurrentConvo: Convo?){
+    fun updateCurrentConvo(){
+        for(i in messagesLiveData.value!!.size - 1 until currentConvo.value!!.messages.size)
+            messagesLiveData.value!!.add(currentConvo.value!!.messages[i])
+        messagesLiveData.postValue(messagesLiveData.value!!)
+    }
+
+    fun changeCurrentTab(newTabId: TabInfo?){
+        val newCurrentConvo = convos.value!!.find { it.tabInfo.convoId== newTabId?.convoId }
         currentConvo.postValue(newCurrentConvo)
     }
 

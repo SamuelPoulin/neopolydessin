@@ -30,8 +30,9 @@ class ChatStorageService @Inject constructor(): Service() {
     private val convos: ArrayList<Convo> = ArrayList()
     lateinit var accountInfo: AccountInfo
     var currentConvo: Convo? = null
-    lateinit var convosListeners: ArrayList<(ArrayList<Convo>) -> Unit>
-    private lateinit var currentConvoListeners: ArrayList<(Convo?) -> Unit>
+    lateinit var convosListeners: ArrayList<() -> Unit>
+    private lateinit var currentConvoListeners: ArrayList<() -> Unit>
+    private lateinit var currentTabListeners: ArrayList<(TabInfo?) -> Unit>
     private val binder = LocalBinder()
 
     inner class LocalBinder : Binder(){
@@ -41,6 +42,7 @@ class ChatStorageService @Inject constructor(): Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         currentConvoListeners = ArrayList()
         convosListeners = ArrayList()
+        currentTabListeners = ArrayList()
 
         accountInfo = sessionManager.getAccountInfo()
         chatRepository.receiveMessage().subscribe{
@@ -66,15 +68,15 @@ class ChatStorageService @Inject constructor(): Service() {
             } else{
                 addNewConvo(tabInfo, false)
             }
+            emitConvosChange()
         } else {
             val newMessageConvo = convos.find { it.tabInfo.convoId == currentConvo?.tabInfo?.convoId }
             if(newMessageConvo != null) {
                 val messageId = newMessage as ReceivedPrivateMessage
                 newMessageConvo.messages.add(MessageChat(messageId.content, messageId.timestamp, messageId.senderAccountId))
+                emitCurrentConvoChange()
             }
         }
-        println("receiveMessage : ${convos[0].messages}")
-        emitConvosChange()
     }
 
     fun addNewConvo(tabInfo: TabInfo, isSelected: Boolean){
@@ -90,45 +92,52 @@ class ChatStorageService @Inject constructor(): Service() {
             emitConvosChange()
         }
         if (isSelected)
-            changeSelectedConvo(tabInfo.convoId)
+            changeSelectedConvo(tabInfo)
     }
 
     fun removeConvo(convoId: String){
-        convos.removeIf { it.tabInfo.convoId == convoId }
-        currentConvo = convos.find { it.tabInfo.convoId != convoId }
-        emitConvosChange()
-        emitCurrentConvoChange()
+        val convoToRemove = convos.find { it.tabInfo.convoId == convoId }
+        if(convoToRemove != null){
+            if(convoToRemove.tabInfo.convoId == currentConvo?.tabInfo?.convoId)
+                changeSelectedConvo(convos.find { it.tabInfo.convoId != convoId }?.tabInfo)
+            convos.removeIf { it.tabInfo.convoId == convoId }
+            emitConvosChange()
+        }
     }
 
     private fun messageIdListToMessageChatList(listMessageId: ArrayList<MessageId>):ArrayList<IMessage>{
         return ArrayList()
     }
 
-    fun subscribeCurrentConvoChange(listener : (Convo?) -> Unit){
+    fun subscribeCurrentConvoChange(listener : () -> Unit){
         currentConvoListeners.add(listener)
     }
 
-    fun subscribeConvosChange(listener : (ArrayList<Convo>) -> Unit){
+    fun subscribeConvosChange(listener : () -> Unit){
         convosListeners.add(listener)
     }
 
+    private fun emitCurrentTabChange(){
+        for (listener in currentTabListeners)
+            listener.invoke(currentConvo?.tabInfo)
+    }
 
-    fun changeSelectedConvo(convoId: String){
-        val convo = convos.find { it.tabInfo.convoId == convoId }
+    private fun changeSelectedConvo(tabInfo: TabInfo?){
+        val convo = convos.find { it.tabInfo.convoId == tabInfo?.convoId }
         if(convo != null){
             currentConvo = convo
-            emitCurrentConvoChange()
+            emitCurrentTabChange()
         }
     }
 
     private fun emitConvosChange(){
         for (listener in convosListeners)
-            listener.invoke(getConvos())
+            listener.invoke()
     }
 
     private fun emitCurrentConvoChange(){
         for(listener in currentConvoListeners)
-            listener.invoke(currentConvo)
+            listener.invoke()
     }
 
     private fun notifyUpdateTab(convoId: String){
@@ -144,9 +153,7 @@ class ChatStorageService @Inject constructor(): Service() {
 //    }
 
     fun getConvos(): ArrayList<Convo> {
-        val buffer: ArrayList<Convo> = ArrayList()
-        buffer.addAll(convos)
-        return buffer
+        return convos
     }
 
     fun saveData(convosToSave: ArrayList<Convo> , selectedConvoId: String) {

@@ -44,7 +44,6 @@ class ChatFragment @Inject constructor() : Fragment() {
 
     private val chatConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            println("service received")
             chatService = (service as ChatStorageService.LocalBinder).getService()
             (binding?.rvTabs?.adapter as TabAdapter).clickCallback = chatService!!::removeConvo
             setupChatServiceSubscriptions()
