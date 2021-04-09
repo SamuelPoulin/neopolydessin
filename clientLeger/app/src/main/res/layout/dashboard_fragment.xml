@@ -1,200 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        tools:context=".ui.accountmanagement.dashboard.view.DashboardFragment">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/statsBox"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.4"
-            app:layout_constraintWidth_percent="0.48"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
-            <TextView
-                android:id="@+id/statisticLabel"
-                android:text="@string/statistiques_label"
-                android:textSize="40sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:gravity="center_vertical"
-                app:layout_constraintHeight_percent="0.3"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.3"
-                android:gravity="center"
-                android:background="@drawable/round_button"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/statisticLabel"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:text="@string/nb_games"
-                    android:textSize="25sp"
-                    android:layout_marginStart="10dp"
-                    />
-                <TextView
-                    android:id="@+id/nbGamesPlayed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="51"
-                    android:textSize="50sp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="10dp"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.3"
-                android:gravity="center"
-                android:background="@drawable/round_button"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:text="@string/nb_hours_in_game"
-                    android:textSize="25sp"
-                    android:layout_marginStart="10dp"
-                    />
-                <TextView
-                    android:id="@+id/nbHoursPlayed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="25h"
-                    android:textSize="50sp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="10dp"
-                    />
-            </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.4"
-            app:layout_constraintWidth_percent="0.48"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
-            <TextView
-                android:id="@+id/emptyLabel"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:gravity="center_vertical"
-                app:layout_constraintHeight_percent="0.3"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.3"
-                android:gravity="center"
-                android:background="@drawable/round_button"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/emptyLabel"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:text="@string/win_percentage"
-                    android:textSize="25sp"
-                    android:layout_marginStart="10dp"
-                    />
-                <TextView
-                    android:id="@+id/winPercentage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="21%"
-                    android:textSize="50sp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="10dp"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.3"
-                android:gravity="center"
-                android:background="@drawable/round_button"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                >
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="0.5"
-                    android:layout_height="wrap_content"
-                    android:text="@string/average_time_game"
-                    android:textSize="25sp"
-                    android:layout_marginStart="10dp"
-                    />
-                <TextView
-                    android:id="@+id/averageGameTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="38h"
-                    android:textSize="50sp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    android:layout_marginEnd="10dp"
-                    />
-            </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.55"
-            app:layout_constraintTop_toBottomOf="@id/statsBox">
-            <TextView
-                android:id="@+id/historyTitle"
-                android:text="@string/history_label"
-                android:textSize="40sp"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHeight_percent="1"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            tools:context=".ui.accountmanagement.dashboard.view.DashboardFragment">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/statsBox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.4"
                 app:layout_constraintLeft_toLeftOf="parent"
-                />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48">
+
+                <TextView
+                    android:id="@+id/statisticLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/statistiques_label"
+                    android:textColor="@color/black"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/statisticLabel">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/nb_games"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/nbGamesPlayed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:text="51"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/nb_hours_in_game"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/nbHoursPlayed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:text="25h"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.4"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48">
+
+                <TextView
+                    android:id="@+id/emptyLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center_vertical"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/emptyLabel">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/win_percentage"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/winPercentage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:text="21%"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintLeft_toLeftOf="parent">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/average_time_game"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/averageGameTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:text="38h"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.85"
-                app:layout_constraintTop_toBottomOf="@id/historyTitle">
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/historyBarChart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_marginTop="20dp"
+                app:layout_constraintHeight_percent="0.55"
+                app:layout_constraintTop_toBottomOf="@id/statsBox">
 
+                <TextView
+                    android:id="@+id/historyTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/history_label"
+                    android:textColor="@color/black"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintHeight_percent="0.85"
+                    app:layout_constraintTop_toBottomOf="@id/historyTitle">
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/historyBarChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:layout_editor_absoluteX="16dp"
+                        tools:layout_editor_absoluteY="0dp" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </layout>

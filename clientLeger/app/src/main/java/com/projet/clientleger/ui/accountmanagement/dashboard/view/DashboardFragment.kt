@@ -2,10 +2,9 @@ package com.projet.clientleger.ui.accountmanagement.dashboard.view
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.Point
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,6 +23,8 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.math.floor
+
+
 const val DOUBLE_DIGIT = 10
 const val FORMATTED_DATE_START = 4
 const val FORMATTED_DATE_END = 10
@@ -66,9 +67,9 @@ class DashboardFragment @Inject constructor(): Fragment() {
             labels.add(formatDate(getDaysAgo(i).toString()))
         }
         val data = BarData(barDataSet)
-        customizeChart(data,barChart,labels)
+        customizeChart(data, barChart, labels)
     }
-    private fun customizeChart(data:BarData, barChart: BarChart,labels:ArrayList<String>){
+    private fun customizeChart(data: BarData, barChart: BarChart, labels: ArrayList<String>){
         barChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         barChart.description.isEnabled = false
@@ -99,7 +100,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
                     }
                 }
             }
-            entries.add(BarEntry((FIRST_DAY_IN_WEEK-j).toFloat(), floatArrayOf(winCpt.toFloat(),neutralCpt.toFloat(),loseCpt.toFloat())))
+            entries.add(BarEntry((FIRST_DAY_IN_WEEK - j).toFloat(), floatArrayOf(winCpt.toFloat(), neutralCpt.toFloat(), loseCpt.toFloat())))
             winCpt = 0
             neutralCpt = 0
             loseCpt = 0
@@ -133,7 +134,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
         return calendar.time
     }
-    private fun formatDate(date:String):String{
+    private fun formatDate(date: String):String{
         var result = ""
         for(i in FORMATTED_DATE_START until FORMATTED_DATE_END){
             result += date[i]
