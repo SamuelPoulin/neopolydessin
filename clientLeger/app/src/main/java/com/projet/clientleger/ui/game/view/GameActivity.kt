@@ -51,7 +51,6 @@ class GameActivity : AppCompatActivity() {
 
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
-    //private var currentKeyWord : String = ""
     private val team1: ArrayList<PlayerInfo> = ArrayList()
     private val team2:ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
@@ -70,7 +69,6 @@ class GameActivity : AppCompatActivity() {
         }
         supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
 
-        //clientRole.playerName = vm.accountInfo.username
         setSubscriptions()
         setupTeamsUi()
         binding.team1Rv.layoutManager = LinearLayoutManager(this)

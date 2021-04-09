@@ -19,4 +19,7 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun getUsername():String{
         return mainmenuRepository.getUsername()
     }
+    fun disconnect(){
+        mainmenuRepository.disconnect()
+    }
 }
