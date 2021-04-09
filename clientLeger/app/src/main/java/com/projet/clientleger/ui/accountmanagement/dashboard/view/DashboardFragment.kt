@@ -1,7 +1,7 @@
 package com.projet.clientleger.ui.accountmanagement.dashboard.view
 
+import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.ColorSpace
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,62 +15,60 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
-import com.projet.clientleger.databinding.FragmentChatBinding
-import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
+import kotlin.collections.ArrayList
+import kotlin.math.floor
+const val DOUBLE_DIGIT = 10
+const val FORMATTED_DATE_START = 4
+const val FORMATTED_DATE_END = 10
+const val SECONDS_IN_MIN = 60
+const val DAYS_IN_WEEK = 7
+const val LAST_DAY_IN_WEEK = -1
+const val FIRST_DAY_IN_WEEK = 6
 
 @AndroidEntryPoint
 class DashboardFragment @Inject constructor(): Fragment() {
     val vm: DashboardViewModel by viewModels()
     private var binding: DashboardFragmentBinding? = null
     lateinit var accountDashboard:AccountDashboard
+    private var isAccountDefined:Boolean = false
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         binding = DashboardFragmentBinding.inflate(inflater, container, false)
         return binding!!.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setBarChart()
-        super.onViewCreated(view, savedInstanceState)
+    override fun onStart() {
+        if(isAccountDefined){
+            setBarChart()
+        }
+        super.onStart()
     }
     private fun setBarChart(){
         val barChart:BarChart = requireView().findViewById(R.id.historyBarChart)
-
-        val entries = ArrayList<BarEntry>()
-
-        entries.add(BarEntry(0f, floatArrayOf(0f,5f)))
-        entries.add(BarEntry(1f,floatArrayOf(1f,4f)))
-        entries.add(BarEntry(2f,floatArrayOf(2f,3f)))
-        entries.add(BarEntry(3f,floatArrayOf(3f,2f)))
-        entries.add(BarEntry(4f,floatArrayOf(4f,1f)))
-        entries.add(BarEntry(5f,floatArrayOf(5f,0f)))
-        entries.add(BarEntry(6f,floatArrayOf(6f,0f)))
-
-        val barDataSet = BarDataSet(entries,"Dates")
-        val greenColor = ContextCompat.getColor(requireActivity().applicationContext,R.color.dark_green)
-        val redColor = ContextCompat.getColor(requireActivity().applicationContext,R.color.light_red )
-        barDataSet.setColors(greenColor,redColor)
+        val entries = setupEntries()
+        val barDataSet = BarDataSet(entries, "Dates")
+        val greenColor = ContextCompat.getColor(requireActivity().applicationContext, R.color.dark_green)
+        val redColor = ContextCompat.getColor(requireActivity().applicationContext, R.color.light_red)
+        val yellowColor = ContextCompat.getColor(requireActivity().applicationContext, R.color.mustard_yellow)
+        barDataSet.setColors(greenColor, yellowColor, redColor)
         val labels = ArrayList<String>()
-        labels.add("1 mars")
-        labels.add("2 mars")
-        labels.add("3 mars")
-        labels.add("4 mars")
-        labels.add("5 mars")
-        labels.add("6 mars")
-        labels.add("7 mars")
-
+        for(i in FIRST_DAY_IN_WEEK downTo LAST_DAY_IN_WEEK){
+            labels.add(formatDate(getDaysAgo(i).toString()))
+        }
+        val data = BarData(barDataSet)
+        customizeChart(data,barChart,labels)
+    }
+    private fun customizeChart(data:BarData, barChart: BarChart,labels:ArrayList<String>){
         barChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         barChart.description.isEnabled = false
@@ -78,23 +76,76 @@ class DashboardFragment @Inject constructor(): Fragment() {
         barChart.axisRight.setDrawLabels(false)
         barChart.axisRight.setDrawGridLines(false)
         barChart.axisLeft.setStartAtZero(true)
-
-        val data = BarData(barDataSet)
         barChart.data = data // set the data and list of lables into chart
         barChart.data.setValueTextColor(Color.WHITE)
         barChart.setDrawValueAboveBar(false)
-        barChart.animateY(5000)
+        barChart.animateY(3000)
         barChart.invalidate()
     }
-    fun applyAccountValues(account: AccountDashboard) {
-        println(account.gameHistory)
-        accountDashboard = account
-        binding!!.nbGamesPlayed.text = accountDashboard.gameHistory.nbGamesPlayed.toString()
-        binding!!.nbHoursPlayed.text = formatTimeToHours(account.gameHistory.totalTimePlayed).toString()
-        binding!!.winPercentage.text = account.gameHistory.winPercentage.toString()
-        //binding!!.nbHoursConnected.text = formatTimeToHours(account.)
+    private fun setupEntries():ArrayList<BarEntry>{
+        val entries = ArrayList<BarEntry>()
+        val games = accountDashboard.gameHistory.games
+        var winCpt = 0
+        var neutralCpt = 0
+        var loseCpt = 0
+        var buffer = 0
+        for(j in 0 until DAYS_IN_WEEK){
+            for(i in 0 until games.size){
+                if(areDatesOnSameDay(Date(games[i].startDate), getDaysAgo(j))){
+                    when(games[i].gameResult){
+                        "Win" -> winCpt++
+                        "Neutral" -> neutralCpt++
+                        "Lose" -> loseCpt++
+                    }
+                }
+            }
+            entries.add(BarEntry((FIRST_DAY_IN_WEEK-j).toFloat(), floatArrayOf(winCpt.toFloat(),neutralCpt.toFloat(),loseCpt.toFloat())))
+            winCpt = 0
+            neutralCpt = 0
+            loseCpt = 0
+        }
+        return entries
     }
-    private fun formatTimeToHours(time:Long):Long{
+    @SuppressLint("SetTextI18n")
+    fun applyAccountValues(account: AccountDashboard) {
+        accountDashboard = account
+        binding!!.nbGamesPlayed.text = accountDashboard.gameHistory.nbGamePlayed
+        binding!!.nbHoursPlayed.text = "${formatTimeToHours(account.gameHistory.totalTimePlayed).toString()}h"
+        binding!!.winPercentage.text = "${account.gameHistory.winPercentage.toInt().toString()}%"
+        binding!!.averageGameTime.text = formatTimeMinSecFormat(account.gameHistory.averageGameTime)
+        setBarChart()
+        isAccountDefined = true
+    }
+    private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)
     }
+    private fun formatTimeMinSecFormat(time: Long):String{
+        val min = floor((TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN).toDouble()).toInt()
+        val sec = TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN
+        var result = "$min:$sec"
+        if(sec < DOUBLE_DIGIT){
+            result = "$min:0$sec"
+        }
+        return result
+    }
+    private fun getDaysAgo(daysAgo: Int): Date {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
+        return calendar.time
+    }
+    private fun formatDate(date:String):String{
+        var result = ""
+        for(i in FORMATTED_DATE_START until FORMATTED_DATE_END){
+            result += date[i]
+        }
+        return result
+    }
+    private fun areDatesOnSameDay(date1: Date, date2: Date):Boolean{
+        val calendar1 = Calendar.getInstance()
+        calendar1.time = date1
+        val calendar2 = Calendar.getInstance()
+        calendar2.time = date2
+        return calendar1[Calendar.YEAR] === calendar2[Calendar.YEAR] && calendar1[Calendar.MONTH] === calendar2[Calendar.MONTH] && calendar1[Calendar.DAY_OF_MONTH] === calendar2[Calendar.DAY_OF_MONTH]
+    }
+
 }

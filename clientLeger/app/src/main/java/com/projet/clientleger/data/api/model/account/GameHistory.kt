@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GameHistory(val games:ArrayList<Game>,
-                       val nbGamesPlayed:Int,
+                       val nbGamePlayed:String,
                        val winPercentage:Float,
                        val averageGameTime:Long,
                        val totalTimePlayed:Long,

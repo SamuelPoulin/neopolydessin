@@ -88,4 +88,5 @@
     <string name="profile_label">Profil</string>
     <string name="confirm_btn">Confirmer</string>
     <string name="nb_hours_in_game">Nombre d\'heures en jeu</string>
+    <string name="average_time_game">Temps moyen d\'une partie</string>
 </resources>

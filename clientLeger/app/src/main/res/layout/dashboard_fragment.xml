@@ -147,12 +147,12 @@
                     android:layout_width="0dp"
                     android:layout_weight="0.5"
                     android:layout_height="wrap_content"
-                    android:text="@string/nb_hours_connection"
+                    android:text="@string/average_time_game"
                     android:textSize="25sp"
                     android:layout_marginStart="10dp"
                     />
                 <TextView
-                    android:id="@+id/nbHoursConnected"
+                    android:id="@+id/averageGameTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="38h"
