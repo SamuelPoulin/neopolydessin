@@ -16,7 +16,6 @@ import {
   Difficulty,
   GameType,
   GuessMessage,
-  GuessMessageSoloCoop,
   LobbyInfo,
   Player,
   TeamScore,
@@ -84,8 +83,7 @@ export class SocketService {
 
   receiveGuess(): Observable<GuessMessage> {
     return new Observable<GuessMessage>((obs) => {
-      this.socket.on(SocketLobby.CLASSIQUE_GUESS_BROADCAST, (content: GuessMessage) => obs.next(content));
-      this.socket.on(SocketLobby.SOLO_COOP_GUESS_BROADCAST, (content: GuessMessageSoloCoop) => obs.next(content));
+      this.socket.on(SocketLobby.GUESS_BROADCAST, (content: GuessMessage) => obs.next(content));
     });
   }
 

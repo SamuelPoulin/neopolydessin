@@ -46,10 +46,6 @@ export interface GuessMessage extends ChatMessage {
   guessStatus: GuessResponse
 }
 
-export interface GuessMessageSoloCoop extends GuessMessage {
-  nbGuessLeft: number,
-}
-
 export interface LobbyOpts {
   difficulty?: Difficulty;
   gameType?: GameType;
