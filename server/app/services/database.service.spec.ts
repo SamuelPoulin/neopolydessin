@@ -11,6 +11,7 @@ import { login, LoginResponse } from '../../../common/communication/login';
 import jwt from 'jsonwebtoken';
 import { Account } from '../../models/schemas/account';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { AccountInfo } from '../../../common/communication/account';
 
 export const accountInfo: Register = {
   firstName: 'name',
@@ -244,7 +245,7 @@ describe('Database Service', () => {
             firstName: 'newName',
             username: 'newUsername',
             email: 'newEmail@email.email'
-          } as Account).then((response: Response<Account>) => {
+          } as Account).then((response: Response<AccountInfo>) => {
             expect(response.statusCode).to.equal(httpStatus.OK)
             expect(response.documents.username).to.equal('newUsername');
             done();

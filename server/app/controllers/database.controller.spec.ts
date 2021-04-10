@@ -222,12 +222,11 @@ describe('Database Controller', () => {
 
   it('should call update when sending a post request to api/database/account', (done: Mocha.Done) => {
     const account = {
-      _id: new ObjectId(),
+      _id: '123456789012345678901234',
       firstName: 'user',
       username: 'username',
       email: 'email@email.email',
-      password: 'admin123'
-    } as Account
+    } as AccountInfo
 
     const stub = sinon.stub(DatabaseService.prototype, 'updateAccount').resolves({ statusCode: 200, documents: account });
     chai

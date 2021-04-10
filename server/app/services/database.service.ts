@@ -367,8 +367,8 @@ export class DatabaseService {
     });
   }
 
-  async updateAccount(id: string, body: Account): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve, reject) => {
+  async updateAccount(id: string, body: Account): Promise<Response<AccountInfo>> {
+    return new Promise<Response<AccountInfo>>((resolve, reject) => {
       this.getAccountByUsername(body.username)
         .then((account: Response<Account>) => {
           throw new Error(BAD_REQUEST.toString());
@@ -391,7 +391,7 @@ export class DatabaseService {
             friends: doc.friends,
             type: NotificationType.userUpdatedAccount
           });
-          resolve({ statusCode: OK, documents: doc });
+          resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });
         })
         .catch((err: Error | ErrorMsg) => {
           reject(DatabaseService.rejectErrorMessage(err));

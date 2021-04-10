@@ -280,6 +280,26 @@ export class APIService {
     });
   }
 
+  async updateAccount(firstName?: string, lastName?: string, username?: string, email?: string): Promise<AccountInfo> {
+    return new Promise<AccountInfo>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http.post(APIService.API_ACCOUNT_ROUTE,
+          { firstName, lastName, email, username },
+          { headers: { authorization: this.localSaveService.accessToken } }
+        ).subscribe(
+          (accountInfo: AccountInfo) => {
+            resolve(accountInfo);
+          },
+          (err) => {
+            reject(err);
+          }
+        );
+      } else {
+        reject();
+      }
+    });
+  }
+
   async getFriendsList(): Promise<FriendsList> {
     return new Promise<FriendsList>((resolve, reject) => {
       if (this.localSaveService.accessToken) {

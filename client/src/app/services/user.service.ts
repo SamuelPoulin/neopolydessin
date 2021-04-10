@@ -17,12 +17,14 @@ export class UserService {
   avatarBlob: Blob | undefined;
   loggedOut: EventEmitter<void>;
   loggedIn: EventEmitter<void>;
+  accountUpdated: EventEmitter<void>;
 
   constructor(private localSaveService: LocalSaveService, private apiService: APIService, private router: Router) {
     this.updateAvatar = false;
     this.jwtService = new JwtHelperService();
     this.loggedOut = new EventEmitter<void>();
     this.loggedIn = new EventEmitter<void>();
+    this.accountUpdated = new EventEmitter<void>();
 
     this.intervalId = window.setInterval(() => {
       this.validateAuth().catch(() => {
@@ -100,6 +102,7 @@ export class UserService {
           .getAccount()
           .then((account) => {
             this.localSaveService.account = account;
+            this.accountUpdated.emit();
             resolve(account);
           })
           .catch(() => reject());
@@ -128,6 +131,19 @@ export class UserService {
       this.apiService.uploadAvatar(file)
         .then((returnedId) => {
           this.notifyAvatarChanged();
+          resolve(true);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+  async updateAccount(firstName?: string, lastName?: string, username?: string, email?: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.apiService.updateAccount(firstName, lastName, username, email)
+        .then((accountInfo) => {
+          this.localSaveService.account = accountInfo;
+          this.accountUpdated.emit();
           resolve(true);
         })
         .catch((err) => {
