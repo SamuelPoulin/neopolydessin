@@ -1,4 +1,6 @@
+import { EventEmitter } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
 import { ChatService } from './chat.service';
@@ -21,12 +23,14 @@ export const MockChatService = jasmine.createSpyObj('ChatService', {
 MockChatService.messages = [];
 MockChatService.friends = [];
 MockChatService.friendRequests = [];
+MockChatService.chatRoomChanged = new EventEmitter<void>();
 
 describe('ChatService', () => {
   let service: ChatService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: GameService, useValue: MockGameService },

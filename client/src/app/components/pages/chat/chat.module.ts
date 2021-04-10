@@ -9,6 +9,9 @@ import { ChatTabComponent } from './chat-tab/chat-tab.component';
 import { ChatFriendslistComponent } from './chat-friendslist/chat-friendslist.component';
 import { ChatFriendComponent } from './chat-friend/chat-friend.component';
 import { ChatAddFriendComponent } from './chat-add-friend/chat-add-friend.component';
+import { ChatRoomsComponent } from './chat-rooms/chat-rooms.component';
+import { ChatCreateChatRoomComponent } from './chat-create-chat-room/chat-create-chat-room.component';
+import { ChatRoomComponent } from './chat-room/chat-room.component';
 
 @NgModule({
   imports: [SharedModule, PickerModule],
@@ -21,6 +24,9 @@ import { ChatAddFriendComponent } from './chat-add-friend/chat-add-friend.compon
     ChatFriendslistComponent,
     ChatFriendComponent,
     ChatAddFriendComponent,
+    ChatRoomsComponent,
+    ChatCreateChatRoomComponent,
+    ChatRoomComponent,
   ],
   exports: [ChatComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

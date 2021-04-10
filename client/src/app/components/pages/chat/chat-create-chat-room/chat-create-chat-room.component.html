@@ -1,0 +1,13 @@
+<app-abstract-modal>
+  <div header id="chat-create-chat-room-header">
+    Créer un salon
+  </div>
+  <div content>
+    <app-username-input [(value)]="roomName">Nom du salon</app-username-input>
+  </div>
+  <div actions>
+    <button mat-stroked-button (click)="createChatRoom()">
+      Créer
+    </button>
+  </div>
+</app-abstract-modal>
