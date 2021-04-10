@@ -28,6 +28,8 @@ import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
 import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 
 export const keyDown = (key: string, shiftKey: boolean = false, ctrlKey: boolean = false, altKey: boolean = false): KeyboardEvent => {
   return {
@@ -77,6 +79,7 @@ describe('EditorComponent', () => {
         { provide: UserService, useValue: MockUserService },
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
+        { provide: SocketService, useValue: MockSocketService },
         {
           provide: ModalDialogService,
           useValue: modalDialogServiceSpy,
