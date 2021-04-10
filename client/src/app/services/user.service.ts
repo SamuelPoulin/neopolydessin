@@ -121,6 +121,12 @@ export class UserService {
     });
   }
 
+  uploadAvatar(file: File) {
+    this.apiService.uploadAvatar(file).then((returnedId) => {
+      // add avatar refresh logic
+    });
+  }
+
   get account(): AccountInfo {
     if (this.localSaveService.account) {
       return this.localSaveService.account;

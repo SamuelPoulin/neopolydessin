@@ -36,6 +36,7 @@ export class APIService {
   private static API_REFRESH_ROUTE: string;
   private static API_REGISTER_ROUTE: string;
   private static API_AVATAR_ROUTE: string;
+  private static API_UPLOAD_AVATAR_ROUTE: string;
   private static API_ACCOUNT_ROUTE: string;
   private static API_FRIENDS_ROUTE: string;
   private static API_FRIENDS_DECISION_ROUTE: string;
@@ -56,6 +57,7 @@ export class APIService {
     APIService.API_REFRESH_ROUTE = APIService.API_AUTH_ROUTE + '/refresh';
     APIService.API_REGISTER_ROUTE = APIService.API_AUTH_ROUTE + '/register';
     APIService.API_AVATAR_ROUTE = APIService.API_BASE_URL + '/avatar';
+    APIService.API_UPLOAD_AVATAR_ROUTE = APIService.API_AVATAR_ROUTE + '/upload';
     APIService.API_ACCOUNT_ROUTE = APIService.API_DATABASE_ROUTE + '/account';
     APIService.API_FRIENDS_ROUTE = APIService.API_DATABASE_ROUTE + '/friends';
     APIService.API_FRIENDS_DECISION_ROUTE = APIService.API_FRIENDS_ROUTE + '/decision';
@@ -204,6 +206,25 @@ export class APIService {
         );
       } else {
         reject();
+      }
+    });
+  }
+
+  async uploadAvatar(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return new Promise<string>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .post(
+            APIService.API_UPLOAD_AVATAR_ROUTE,
+            formData,
+            { headers: { authorization: this.localSaveService.accessToken } })
+          .subscribe((avatarId: { id: string }) => {
+            resolve(avatarId.id);
+          }, (e) => {
+            reject(e);
+          });
       }
     });
   }

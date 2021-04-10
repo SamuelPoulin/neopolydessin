@@ -48,4 +48,9 @@ export class AccountNavbarComponent {
   logout(): void {
     this.userService.logout();
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  uploadAvatar(event: any): void {
+    this.userService.uploadAvatar(event.target.files[0]);
+  }
 }

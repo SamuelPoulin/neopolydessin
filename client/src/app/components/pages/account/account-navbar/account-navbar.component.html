@@ -6,11 +6,12 @@
         Retour
       </button>
     </div>
-    <app-avatar [username]="username" 
-    mainUser
-    [size]="100" 
-    [fontSize]="48" 
-    ></app-avatar>
+    <div>
+      <label for="avatarInput">
+        <app-avatar [username]="username" mainUser [size]="100" [fontSize]="48" ></app-avatar>
+      </label>
+      <input id="avatarInput" type="file" (change)="uploadAvatar($event)"/> 
+    </div>
     <div id="navbar-user">
       <div id="navbar-user-name">{{firstName + ' ' + lastName}}</div>
       <div id="navbar-user-username">@{{username}}</div>
