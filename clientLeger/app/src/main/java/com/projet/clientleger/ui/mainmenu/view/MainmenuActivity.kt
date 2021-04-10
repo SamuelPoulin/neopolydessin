@@ -1,8 +1,8 @@
 package com.projet.clientleger.ui.mainmenu.view
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
@@ -12,16 +12,25 @@ import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
+import com.codertainment.materialintro.sequence.SkipLocation
+import com.codertainment.materialintro.shape.Focus
+import com.codertainment.materialintro.shape.FocusGravity
+import com.codertainment.materialintro.shape.ShapeType
+import com.codertainment.materialintro.utils.materialIntro
+import com.codertainment.materialintro.utils.materialIntroSequence
+import com.codertainment.materialintro.view.MaterialIntroView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
-import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
+import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
@@ -33,7 +42,7 @@ class MainmenuActivity : AppCompatActivity() {
 
     var selectedGameType: GameType = GameType.CLASSIC
     var selectedDifficulty: Difficulty = Difficulty.EASY
-    //val fragmentManager: FragmentManager = supportFragmentManager
+    var isTutorialStarted:Boolean = false
     lateinit var binding: ActivityMainmenuBinding
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
@@ -66,7 +75,70 @@ class MainmenuActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
+        binding.userGuideBtn.setOnClickListener {
+            //userGuide("Haha tu sais meme pas comment utiliser l'application", binding.createGameBtn)
+            tutorialSequence()
+        }
     }
+    private fun tutorialSequence(){
+        materialIntroSequence(showSkip = true, persistSkip = true) {
+            addConfig {
+                viewId = "createGameBtn"
+                targetView = binding.createGameBtn
+                skipLocation = SkipLocation.BOTTOM_LEFT
+                skipText = "Skip"
+                isFadeInAnimationEnabled = true
+                isFadeOutAnimationEnabled = true
+                fadeAnimationDurationMillis = 300
+                infoText=  "Haha tu sais meme pas comment utiliser l'application"
+                focusType = Focus.ALL
+                focusGravity = FocusGravity.CENTER
+                dismissOnTouch = false
+                isInfoEnabled = true
+                infoTextColor = Color.BLACK
+                infoTextSize = 18f
+                infoTextAlignment = View.TEXT_ALIGNMENT_CENTER
+                infoTextTypeface = Typeface.DEFAULT_BOLD
+                infoCardBackgroundColor = Color.WHITE
+                isHelpIconEnabled = true
+                helpIconResource = R.drawable.ic_pencil
+                helpIconColor = Color.BLUE
+                isDotViewEnabled = false
+                //viewId = "unique_id" // or automatically picked from view's tag
+                isPerformClick = true
+                showOnlyOnce = false
+                shapeType = ShapeType.RECTANGLE
+                dismissOnTouch = true
+            }
+
+        }
+    }
+    /*fun userGuide(message:String, target: View){
+        materialIntro(show = true) {
+            isFadeInAnimationEnabled = true
+            isFadeOutAnimationEnabled = true
+            fadeAnimationDurationMillis = 300
+            focusType = Focus.ALL
+            focusGravity = FocusGravity.CENTER
+            dismissOnTouch = false
+            isInfoEnabled = true
+            infoText = message
+            infoTextColor = Color.BLACK
+            infoTextSize = 18f
+            infoTextAlignment = View.TEXT_ALIGNMENT_CENTER
+            infoTextTypeface = Typeface.DEFAULT_BOLD
+            infoCardBackgroundColor = Color.WHITE
+            isHelpIconEnabled = true
+            helpIconResource = R.drawable.ic_pencil
+            helpIconColor = Color.BLUE
+            isDotViewEnabled = false
+            //viewId = "unique_id" // or automatically picked from view's tag
+            targetView = target
+            isPerformClick = true
+            showOnlyOnce = false
+            shapeType = ShapeType.RECTANGLE
+            dismissOnTouch = true
+        }*/
 
     fun showGameDialog(isCreating: Boolean) {
         val visibility: Int
@@ -104,7 +176,7 @@ class MainmenuActivity : AppCompatActivity() {
             else
                 intent = Intent(this, SearchLobbyActivity::class.java)
 
-            intent.putExtra("gameType",selectedGameType)
+            intent.putExtra("gameType", selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
             supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
@@ -115,14 +187,14 @@ class MainmenuActivity : AppCompatActivity() {
             dialog.dismiss()
         }
     }
-    private fun getGameName(dialog:AlertDialog):String{
+    private fun getGameName(dialog: AlertDialog):String{
         var gameName = "Partie de ${vm.getUsername()}"
         if(dialog.gameName.text.toString() != ""){
             gameName = dialog.gameName.text.toString()
         }
         return gameName
     }
-    private fun setupGamemodeSpinner(dialogView:View){
+    private fun setupGamemodeSpinner(dialogView: View){
         val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
         adapterGamemode.setDropDownViewResource(R.layout.spinner_dropdown_item)
         val spinnerGamemode = dialogView.findViewById<Spinner>(R.id.gamemodeSpinner)
