@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.accountmanagement.dashboard.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
@@ -20,6 +21,7 @@ import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
 import com.projet.clientleger.ui.accountmanagement.dashboard.ConnectionAdapter
 import com.projet.clientleger.ui.accountmanagement.dashboard.GameHistoryAdapter
+import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dashboard_fragment.*
 import kotlinx.android.synthetic.main.dialog_account_history.*
@@ -44,6 +46,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
     private var binding: DashboardFragmentBinding? = null
     lateinit var accountDashboard:AccountDashboard
     private var isAccountDefined:Boolean = false
+    lateinit var activity: AccountManagementActivity
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -51,6 +54,11 @@ class DashboardFragment @Inject constructor(): Fragment() {
     ): View? {
         binding = DashboardFragmentBinding.inflate(inflater, container, false)
         return binding!!.root
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as AccountManagementActivity
     }
 
     override fun onStart() {
@@ -118,7 +126,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         binding!!.nbGamesPlayed.text = accountDashboard.gameHistory.nbGamePlayed
         binding!!.nbHoursPlayed.text = "${formatTimeToHours(account.gameHistory.totalTimePlayed).toString()}h"
         binding!!.winPercentage.text = "${account.gameHistory.winPercentage.toInt().toString()}%"
-        binding!!.averageGameTime.text = formatTimeMinSecFormat(account.gameHistory.averageGameTime)
+        binding!!.averageGameTime.text = activity.formatTimeMinSecFormat(account.gameHistory.averageGameTime)
         setBarChart()
         isAccountDefined = true
         //setupConnectionAdapter()
@@ -140,15 +148,6 @@ class DashboardFragment @Inject constructor(): Fragment() {
     }
     private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)
-    }
-    private fun formatTimeMinSecFormat(time: Long):String{
-        val min = floor((TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN).toDouble()).toInt()
-        val sec = TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN
-        var result = "$min:$sec"
-        if(sec < DOUBLE_DIGIT){
-            result = "$min:0$sec"
-        }
-        return result
     }
     private fun getDaysAgo(daysAgo: Int): Date {
         val calendar = Calendar.getInstance()

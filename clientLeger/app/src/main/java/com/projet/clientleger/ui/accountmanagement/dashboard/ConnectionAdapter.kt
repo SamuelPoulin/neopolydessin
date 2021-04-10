@@ -35,7 +35,7 @@ class ConnectionAdapter(private val connections: ArrayList<Login>) : RecyclerVie
     private fun formatDate(time: Long):String{
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = time
-        val formatter = SimpleDateFormat("dd/MM hh:mm:ss")
+        val formatter = SimpleDateFormat("MM/dd hh:mm:ss")
         return formatter.format(calendar.time)
     }
 }

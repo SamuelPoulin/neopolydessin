@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
   background-color: #f8f8f8;
   overflow: hidden;
 }
@@ -126,17 +125,25 @@ system-message {
   justify-content: flex-end;
 }
 
-#chat-friendslist-toggler {
+#chat-friendslist-toggler, #chat-rooms-toggler {
   height: 50%;
-  margin-right: 15px;
   padding: 0px 5px;
   color: white;
-
+  
   transition: background-color 0.25s;
 
   &:hover {
     background-color: #464646 !important;
   }
+}
+
+#chat-friendslist-toggler {
+  margin-right: 15px;
+  border-radius: 0px 5px 5px 0px;
+}
+
+#chat-rooms-toggler {
+  border-radius: 5px 0px 0px 5px;
 }
 
 #chat-friendslist-anchor {

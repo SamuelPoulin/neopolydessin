@@ -120,7 +120,7 @@ export class LobbyClassique extends Lobby {
             guessStatus,
             senderUsername: guesser.username
           };
-          this.io.in(this.lobbyId).emit(SocketLobby.CLASSIQUE_GUESS_BROADCAST, guessReturn);
+          this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
           this.botService.playerGuess(guessStatus);
         }
       }

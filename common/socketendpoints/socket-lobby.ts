@@ -32,6 +32,5 @@ export enum SocketLobby {
     RECEIVE_INVITE = 'receiveInviteFromFriend',
     ACCEPT_INVITE = 'acceptInviteFromFriend',
 
-    SOLO_COOP_GUESS_BROADCAST = 'soloCoopGuessBroadcast',
-    CLASSIQUE_GUESS_BROADCAST = 'classiqueGuessBroadcast'
+    GUESS_BROADCAST = 'GuessBroadcast'
 }

@@ -12,11 +12,7 @@ open class AccountManagementRepository @Inject constructor(private val apiDashbo
         val res = apiDashboardInterface.getAccount()
         return res.body()
     }
-    open suspend fun updateAccountInfos(account:UpdateAccountModel):Account?{
-        var returnAccount:Account? = Account("","","","","",ArrayList<FriendInfo>(), 0,"")
-        val res = apiDashboardInterface.updateAccount(account)
-        if(res.code() == HttpsURLConnection.HTTP_OK)
-            returnAccount = res.body()
-        return returnAccount
+    open suspend fun updateAccountInfos(account:UpdateAccountModel){
+        apiDashboardInterface.updateAccount(account)
     }
 }

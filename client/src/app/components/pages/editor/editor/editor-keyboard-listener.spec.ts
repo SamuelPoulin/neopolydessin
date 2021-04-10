@@ -1,4 +1,3 @@
-/* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
@@ -13,6 +12,8 @@ import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { Tool } from '@tools/tool';
@@ -23,6 +24,7 @@ describe('EditorKeyboardListener', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   let keyboardListener: KeyboardListenerService;
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
@@ -32,6 +34,7 @@ describe('EditorKeyboardListener', () => {
         { provide: UserService, useValue: MockUserService },
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
+        { provide: SocketService, useValue: MockSocketService },
       ],
     }).compileComponents();
   }));

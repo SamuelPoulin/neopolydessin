@@ -1,18 +1,18 @@
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
   <app-status-bar quit previousPage=""></app-status-bar>
   <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
-    (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)"
-    (guideButtonClicked)="openGuide()" (mouseenter)='setToolbarState(true)'>
+    (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)" 
+    (mouseenter)='setToolbarState(true)'>
   </app-toolbar>
-  
+
   <div *ngIf="editorService.isFreeEdit; then freeEditor else gameEditor"></div>
   <ng-template #gameEditor>
     <div id="editor-game-area">
       <div id="game-area-infos">
         <app-gamemode-title gamemode="classique"></app-gamemode-title>
         <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
-          (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)" (click)="handleMouseEvent($event)"
-          (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
+          (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)"
+          (click)="handleMouseEvent($event)" (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
           (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">
           <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
         </app-drawing-surface>
@@ -27,19 +27,15 @@
       </div>
       <div id="game-area-teams-container">
         <div id="game-area-teams">
-          <app-team [team]="gameService.teams[0]" [scoreIndex]="0" name="Équipe 1"></app-team>
-          <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy></app-team>
+          <app-team [team]="gameService.teams[0]" [scoreIndex]="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"
+            [hideScore]="!splitTeams"></app-team>
+          <ng-container *ngIf="splitTeams">
+            <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy [hideScore]="false">
+            </app-team>
+          </ng-container>
         </div>
       </div>
       <app-chat></app-chat>
-    </div>
-    <div id="game-area-teams-container">
-      <div id="game-area-teams">
-        <app-team [team]="gameService.teams[0]" [scoreIndex]="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'" [hideScore]="!splitTeams"></app-team>
-        <ng-container *ngIf="splitTeams">
-          <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy [hideScore]="false"></app-team>
-        </ng-container>
-      </div>
     </div>
   </ng-template>
 
@@ -48,8 +44,8 @@
       <div id="game-area-infos">
         <app-gamemode-title gamemode="classique"></app-gamemode-title>
         <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
-          (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)" (click)="handleMouseEvent($event)"
-          (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
+          (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)"
+          (click)="handleMouseEvent($event)" (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
           (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">
           <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
         </app-drawing-surface>

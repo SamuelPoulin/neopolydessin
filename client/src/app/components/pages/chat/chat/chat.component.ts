@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
+import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
@@ -21,9 +23,20 @@ export class ChatComponent {
   emojiMartOpen: boolean = false;
 
   friendslistOpened: boolean = false;
+  chatRoomChangedSubscription: Subscription;
 
-  constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
+  constructor(
+    private snackBar: MatSnackBar,
+    public chatService: ChatService,
+    public userService: UserService,
+    public dialog: MatDialog,
+    public router: Router,
+  ) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
+
+    this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
+      this.scrollToBottom();
+    });
   }
 
   sendMessage(): void {
@@ -76,6 +89,12 @@ export class ChatComponent {
 
   toggleFriendslist() {
     this.chatService.friendslistOpened = !this.chatService.friendslistOpened;
+    this.chatService.chatRoomsOpened = false;
+  }
+
+  toggleChatRooms() {
+    this.chatService.chatRoomsOpened = !this.chatService.chatRoomsOpened;
+    this.chatService.friendslistOpened = false;
   }
 
   addEmoji(e: EmojiEvent) {

@@ -15,6 +15,6 @@ class AccountManagementViewModel @Inject constructor(private val accountManageme
         accountInfos = accountManagementRepository.getAccountInfos()!!
     }
     suspend fun updateAccountInfos(account:UpdateAccountModel){
-        val updatedAccount:Account? = accountManagementRepository.updateAccountInfos(account)
+        accountManagementRepository.updateAccountInfos(account)
     }
 }

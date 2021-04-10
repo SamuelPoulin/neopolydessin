@@ -1,7 +1,6 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.http.ApiMainmenuInterface
 import com.projet.clientleger.data.api.socket.LobbySocketService
 import com.projet.clientleger.data.api.socket.SocketService
 import com.projet.clientleger.data.enumData.Difficulty
@@ -19,6 +18,6 @@ class MainmenuRepository @Inject constructor(private val socketService: SocketSe
         return sessionManager.getUsername()
     }
     fun disconnect(){
-        socketService.disconnect()
+        sessionManager.logout()
     }
 }
