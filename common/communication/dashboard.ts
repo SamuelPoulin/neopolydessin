@@ -1,5 +1,24 @@
 import { Logins } from '../../server/models/schemas/logins';
-import { Game } from '../../server/models/schemas/game-history';
+import { GameType } from './lobby';
+
+export enum GameResult {
+    WIN = 'Win',
+    LOSE = 'Lose',
+    NEUTRAL = 'Neutral'
+}
+
+export interface Game {
+    gameResult: GameResult;
+    startDate: number;
+    endDate: number;
+    gameType: GameType;
+    team: Team[];
+}
+
+export interface Team {
+    score: number;
+    playerNames: string[];
+}
 
 export interface DashBoardInfo {
     _id: string;

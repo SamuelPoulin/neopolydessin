@@ -1,25 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model, model, Query, Schema } from 'mongoose';
+import { Game, GameResult } from '../../../common/communication/dashboard';
 import { GameType } from '../../../common/communication/lobby';
-
-export enum GameResult {
-  WIN = 'Win',
-  LOSE = 'Lose',
-  NEUTRAL = 'Neutral'
-}
-
-export interface Game {
-  gameResult: GameResult;
-  startDate: number;
-  endDate: number;
-  gameType: GameType;
-  team: Team[];
-}
-
-export interface Team {
-  score: number;
-  playerNames: string[];
-}
 
 export interface GameHistory extends Document {
   _id: ObjectId;

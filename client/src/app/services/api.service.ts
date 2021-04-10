@@ -10,7 +10,8 @@ import { AccountInfo, PublicAccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
 import { Decision } from '@common/communication/friend-request';
 import { PrivateMessage } from '@common/communication/private-message';
-import { LoginResponse } from '../../../../common/communication/login';
+import { DashBoardInfo } from '@common/communication/dashboard';
+import { LoginResponse } from '@common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
 @Injectable({
@@ -25,6 +26,7 @@ export class APIService {
 
   private static API_BASE_URL: string;
   private static API_DATABASE_ROUTE: string;
+  private static API_DASHBOARD_ROUTE: string;
   private static API_PICTUREWORD_ROUTE: string;
   private static API_DRAWINGS_ROUTE: string;
   private static API_DRAWING_ROUTE: string;
@@ -47,6 +49,7 @@ export class APIService {
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
     APIService.API_DATABASE_ROUTE = APIService.API_BASE_URL + '/database';
+    APIService.API_DASHBOARD_ROUTE = APIService.API_DATABASE_ROUTE + '/dashboard';
     APIService.API_PICTUREWORD_ROUTE = APIService.API_BASE_URL + '/pictureword';
     APIService.API_AUTH_ROUTE = APIService.API_DATABASE_ROUTE + '/auth';
     APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
@@ -233,6 +236,23 @@ export class APIService {
             },
             (e) => reject(e),
           );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async getDashBoardInfo(): Promise<DashBoardInfo> {
+    return new Promise<DashBoardInfo>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http.get(APIService.API_DASHBOARD_ROUTE, {
+          headers: { authorization: this.localSaveService.accessToken }
+        }).subscribe(
+          (dashboard: DashBoardInfo) => {
+            resolve(dashboard);
+          }, (e) => {
+            reject(e);
+          });
       } else {
         reject();
       }
