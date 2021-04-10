@@ -1,19 +1,16 @@
 /*tslint:disable:no-string-literal no-magic-numbers max-file-line-count*/
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
 import { of } from 'rxjs';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
-import { AbstractModalComponent } from 'src/app/components/shared/abstract-modal/abstract-modal.component';
 import { mouseDown } from '@models/tools/creator-tools/pen-tool/pen-tool.spec';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { EditorService } from 'src/app/services/editor.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
-import { ModalType } from 'src/app/services/modal/modal-type.enum';
 import { Color } from 'src/app/utils/color/color';
 import { SharedModule } from '../../../shared/shared.module';
 import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.component';
@@ -154,35 +151,6 @@ describe('EditorComponent', () => {
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it('can call openCreateModal with keyboard shortcut', () => {
-    const openModalSpy = spyOn(component, 'openCreateModal').and.callThrough();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'o', ctrlKey: true }));
-    expect(openModalSpy).toHaveBeenCalled();
-  });
-
-  it('can open create modal if user confirms', () => {
-    modalDialogServiceSpy.openByName.and.returnValue({
-      afterClosed: () => of(true),
-    } as MatDialogRef<AbstractModalComponent>);
-
-    component.openCreateModal();
-    expect(modalDialogServiceSpy.openByName).toHaveBeenCalledWith(ModalType.CONFIRM);
-    expect(modalDialogServiceSpy.openByName).toHaveBeenCalledWith(ModalType.CREATE);
-  });
-
-  it('does not open create modal if user cancels', () => {
-    modalDialogServiceSpy.openByName.and.returnValue({
-      afterClosed: () => of(false),
-    } as MatDialogRef<AbstractModalComponent>);
-    component.openCreateModal();
-    expect(modalDialogServiceSpy.openByName).toHaveBeenCalledWith(ModalType.CONFIRM);
-    expect(modalDialogServiceSpy.openByName).not.toHaveBeenCalledWith(ModalType.CREATE);
-  });
-
-  it('opens dialog on openGuide', () => {
-    component.openGuide();
-    expect(modalDialogServiceSpy.openByName).toHaveBeenCalledWith(ModalType.GUIDE);
-  });
 
   it('should undo on ctrl z', () => {
     const undoSpy = spyOn(component.editorService.commandReceiver, 'undo');

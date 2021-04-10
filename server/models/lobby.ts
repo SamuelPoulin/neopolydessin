@@ -27,6 +27,7 @@ import {
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from '../../common/communication/drawing-sequence';
 import { BotService } from '../app/services/bot.service';
+import { Game, GameResult, Team } from './schemas/game-history';
 
 
 export interface ServerPlayer extends Player {
@@ -36,16 +37,29 @@ export interface ServerPlayer extends Player {
 const DEFAULT_TEAM_SIZE: number = 4;
 const SOLO_TEAM_SIZE: number = 2;
 
+export interface DifficultyModifiers {
+  timeAddedOnCorrectGuess: number;
+  soloCoopTime: number;
+  guessTries: number;
+  classicTime: number;
+  replyTime: number;
+}
+
 @injectable()
 export abstract class Lobby {
 
   readonly MAX_LENGTH_MSG: number = 200;
   readonly MS_PER_SEC: number = 1000;
-  readonly TIME_ADD_CORRECT_GUESS: number = 30;
   readonly GAME_SIZE_MAP: Map<GameType, number> = new Map<GameType, number>([
     [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
     [GameType.SPRINT_SOLO, SOLO_TEAM_SIZE],
     [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
+  ]);
+
+  readonly DIFFICULTY_MODIFIERS: Map<Difficulty, DifficultyModifiers> = new Map<Difficulty, DifficultyModifiers>([
+    [Difficulty.EASY, { timeAddedOnCorrectGuess: 30, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
+    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 20, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
+    [Difficulty.HARD, { timeAddedOnCorrectGuess: 10, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
   ]);
 
   lobbyId: string;
@@ -62,6 +76,7 @@ export abstract class Lobby {
   protected currentGameState: CurrentGameState;
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
+  protected gameStartTime: number;
 
   protected players: Entity[];
   protected teamScores: number[];
@@ -86,9 +101,10 @@ export abstract class Lobby {
     this.currentGameState = CurrentGameState.LOBBY;
     this.drawingCommands = new DrawingService();
     this.timeLeftSeconds = 0;
+    this.gameStartTime = 0;
     this.players = [];
     this.teamScores = [];
-    this.botService = new BotService(this.io, this.lobbyId);
+    this.botService = new BotService(this.io, this.lobbyId, this.difficulty);
   }
 
   toLobbyInfo(): Player[] {
@@ -246,6 +262,7 @@ export abstract class Lobby {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id) {
         this.currentGameState = CurrentGameState.IN_GAME;
+        this.gameStartTime = Date.now();
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
       }
     });
@@ -325,6 +342,9 @@ export abstract class Lobby {
             senderUsername: player.username
           };
           this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
+          if (sentMsg.content.includes('indice')) {
+            this.botService.requestHint();
+          }
         }
       }
       else {
@@ -382,10 +402,12 @@ export abstract class Lobby {
   }
 
   protected endGame(reason: ReasonEndGame): void {
-    this.currentGameState = CurrentGameState.GAME_OVER;
-    clearInterval(this.clockTimeout);
-    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
-    SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+    this.updatePlayersGameHistory(reason).then(() => {
+      this.currentGameState = CurrentGameState.GAME_OVER;
+      clearInterval(this.clockTimeout);
+      this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
+      SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
+    });
   }
 
   protected getTeamLength(teamNumber: number): number {
@@ -435,6 +457,47 @@ export abstract class Lobby {
 
   private everyPlayerIsLoaded(): boolean {
     return this.players.every((player) => (!player.isBot && (player as Player).finishedLoading) || player.isBot);
+  }
+
+  private async updatePlayersGameHistory(reason: ReasonEndGame): Promise<void> {
+    if (reason === ReasonEndGame.TIME_RUN_OUT || reason === ReasonEndGame.WINNING_SCORE_REACHED) {
+      const teams: Team[] = [];
+      const gameEndTime = Date.now();
+      this.teamScores.forEach((teamScore, indexTeam) => {
+        teams.push({
+          score: 0,
+          playerNames: []
+        });
+        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
+          .map((playerToModify) => {
+            return playerToModify.username;
+          });
+        teams[indexTeam].score = teamScore;
+      });
+      this.players.forEach((player) => {
+        let result: GameResult;
+        if (!player.isBot) {
+          if (this.gameType === GameType.CLASSIC) {
+            const winningTeam = this.teamScores[0] > this.teamScores[1] ? 0 : 1;
+            result = player.teamNumber === winningTeam ? GameResult.WIN : GameResult.LOSE;
+          }
+          else {
+            result = GameResult.NEUTRAL;
+          }
+          const gameInfo: Game = {
+            gameResult: result,
+            startDate: this.gameStartTime,
+            endDate: gameEndTime,
+            gameType: this.gameType,
+            team: teams
+          };
+          const playerAccountId = (player as Player).accountId;
+          if (playerAccountId) {
+            this.databaseService.addGameToGameHistory(playerAccountId, gameInfo);
+          }
+        }
+      });
+    }
   }
 
   abstract addPlayer(playerId: string, socket: Socket): void;

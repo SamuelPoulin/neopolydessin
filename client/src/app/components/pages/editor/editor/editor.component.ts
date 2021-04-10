@@ -95,23 +95,8 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent): void {
-    if (!this.dialog.modalIsOpened) {
+    if (this.gameService.canDraw) {
       this.keyboardListener.handle(event);
-    }
-  }
-
-  openGuide(): void {
-    this.dialog.openByName(ModalType.GUIDE);
-  }
-
-  openCreateModal(): void {
-    const confirmDialog = this.dialog.openByName(ModalType.CONFIRM);
-    if (confirmDialog) {
-      confirmDialog.afterClosed().subscribe((result) => {
-        if (result) {
-          this.dialog.openByName(ModalType.CREATE);
-        }
-      });
     }
   }
 
@@ -125,7 +110,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.toolbar.close();
     }
-    this.keyboardListener.listening = !(opened || this.dialog.modalIsOpened);
+    this.keyboardListener.listening = !(opened);
   }
 
   get currentTool(): Tool | undefined {

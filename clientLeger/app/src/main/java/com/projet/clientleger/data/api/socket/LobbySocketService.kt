@@ -9,7 +9,9 @@ import com.projet.clientleger.data.model.lobby.LobbyInfo
 import io.reactivex.rxjava3.core.Observable
 import io.socket.client.Ack
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,9 +49,13 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.LEAVE_LOBBY.value)
     }
 
-    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
+    fun receiveAllLobbies(gameType: GameType?, difficulty: Difficulty?) : Observable<ArrayList<LobbyInfo>>{
         return Observable.create{
-            emitter -> socketService.socket.emit(LobbySocketEndpoints.RECEIVE_ALL_LOBBIES.value,gameType.value, difficulty.value, Ack{ res ->
+            emitter ->
+            val obj = JSONObject()
+            obj.put("difficulty", difficulty?.value)
+            obj.put("gameType", gameType?.value)
+            socketService.socket.emit(LobbySocketEndpoints.RECEIVE_ALL_LOBBIES.value,obj, Ack{ res ->
             val jsonList = res[0] as JSONArray
             val list = ArrayList<LobbyInfo>()
             for(i in 0 until jsonList.length()){

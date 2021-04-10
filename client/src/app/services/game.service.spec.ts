@@ -10,6 +10,7 @@ import { MockUserService } from './user.service.spec';
 
 export const MockGameService = jasmine.createSpyObj('GameService', {
   resetTeams: null,
+  canDraw: true,
 });
 
 MockGameService.roleChanged = new EventEmitter<PlayerRole>();

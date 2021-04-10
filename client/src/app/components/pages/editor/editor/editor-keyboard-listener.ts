@@ -39,13 +39,6 @@ export class EditorKeyboardListener extends KeyboardListenerService {
         },
       ],
       [
-        KeyboardListenerService.getIdentifier('o', true),
-        () => {
-          editorComponent.openCreateModal();
-          return true;
-        },
-      ],
-      [
         KeyboardListenerService.getIdentifier('z', true),
         () => {
           editorComponent.editorService.commandReceiver.undo();

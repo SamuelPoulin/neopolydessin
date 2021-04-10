@@ -59,7 +59,7 @@ describe('Picture word service', () => {
             .then((result) => {
                 producedSVGPath = `${testOutputPath}/${result.documents}.svg`;
                 expect(fs.existsSync(producedSVGPath)).to.be.true;
-                return service.getRandomWord();
+                return service.getRandomWord(Difficulty.EASY);
             })
             .then((pw) => {
                 expect(pw.word).to.equal('word');
@@ -91,7 +91,7 @@ describe('Picture word service', () => {
         service.uploadDrawing(pwd)
             .then((result) => {
                 expect(result.statusCode).to.be.equal(OK);
-                return service.getRandomWord();
+                return service.getRandomWord(Difficulty.EASY);
             })
             .then((pw) => {
                 expect(pw.word).to.equal('word');
@@ -100,7 +100,7 @@ describe('Picture word service', () => {
     });
 
     it('get random word should return NOT_FOUND if no word is in database', (done: Mocha.Done) => {
-        service.getRandomWord()
+        service.getRandomWord(Difficulty.EASY)
             .catch((err) => {
                 expect((err.message as string).includes('404')).to.be.true;
                 done();

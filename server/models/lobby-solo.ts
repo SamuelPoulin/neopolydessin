@@ -14,13 +14,13 @@ import {
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { levenshtein } from '../app/utils/levenshtein-distance';
-import { Lobby } from './lobby';
+import { DifficultyModifiers, Lobby } from './lobby';
 
-const NB_GUESSES: number = 3;
-const SOLO_START_TIME: number = 120;
-const TIME_ADD_CORRECT_GUESS: number = 30;
 @injectable()
 export class LobbySolo extends Lobby {
+
+  private guessTries: number;
+  private addOnCorrectGuess: number;
 
   private guessLeft: number;
 
@@ -36,8 +36,11 @@ export class LobbySolo extends Lobby {
     super(socketIdService, databaseService, pictureWordService, io, difficulty, privateGame, lobbyName);
     this.gameType = GameType.SPRINT_SOLO;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
-    this.guessLeft = NB_GUESSES;
-    this.timeLeftSeconds = SOLO_START_TIME;
+    const diffMods = this.DIFFICULTY_MODIFIERS.get(difficulty) as DifficultyModifiers;
+    this.guessTries = diffMods.guessTries;
+    this.guessLeft = this.guessTries;
+    this.addOnCorrectGuess = diffMods.timeAddedOnCorrectGuess;
+    this.timeLeftSeconds = diffMods.soloCoopTime;
     this.teamScores = [0];
     this.privateLobby = true;
     this.players.push(this.botService.getBot(0));
@@ -102,15 +105,15 @@ export class LobbySolo extends Lobby {
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {
           this.botService.resetDrawing();
           this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
-          this.pictureWordService.getRandomWord()
+          this.pictureWordService.getRandomWord(this.difficulty)
             .then((pictureWord) => {
               this.wordToGuess = pictureWord.word;
-              this.botService.draw(pictureWord.sequence);
+              this.botService.draw(pictureWord.sequence, pictureWord.hints);
             })
             .catch((err) => {
               this.endGame(ReasonEndGame.NO_WORDS_FOUND);
             });
-          this.guessLeft = NB_GUESSES;
+          this.guessLeft = this.guessTries;
         }
       }
     });
@@ -122,12 +125,12 @@ export class LobbySolo extends Lobby {
   }
 
   protected startRoundTimer() {
-    this.pictureWordService.getRandomWord()
+    this.pictureWordService.getRandomWord(this.difficulty)
       .then((pictureWord) => {
         this.wordToGuess = pictureWord.word;
         this.sendStartTimeToClient();
 
-        this.botService.draw(pictureWord.sequence);
+        this.botService.draw(pictureWord.sequence, pictureWord.hints);
 
         this.clockTimeout = setInterval(() => {
           --this.timeLeftSeconds;
@@ -148,7 +151,7 @@ export class LobbySolo extends Lobby {
   }
 
   private addTimeOnCorrectGuess() {
-    this.timeLeftSeconds += TIME_ADD_CORRECT_GUESS;
+    this.timeLeftSeconds += this.addOnCorrectGuess;
     const endTime = Date.now() + this.timeLeftSeconds * this.MS_PER_SEC;
     this.io.in(this.lobbyId).emit(SocketLobby.SET_TIME, { serverTime: Date.now(), timestamp: endTime });
   }

@@ -1,89 +1,41 @@
-/* eslint-disable no-invalid-this */
 import { Server } from 'socket.io';
-import { BotPersonnality, BOT_NAMES } from '../utils/botinfo';
-import { ChatMessage } from '../../../common/communication/chat-message';
+import { BotPersonnality } from '../utils/botinfo';
 import { DrawingSequence, Segment } from '../../../common/communication/drawing-sequence';
-import { Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
+import { Difficulty, Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
-import { SocketMessages } from '../../../common/socketendpoints/socket-messages';
 
-const PERCENT_5: number = 0.05;
-const PERCENT_20: number = 0.2;
-const PERCENT_30: number = 0.3;
-const PERCENT_50: number = 0.5;
-
+const HINT_COOLDOWN: number = 30000;
 export class BotService {
 
-  private readonly SPEED_DRAW_DELAY: number = 5;
-  private readonly DEFAULT_DRAW_DELAY: number = 15;
-  // private readonly SLOW_DRAW_DELAY: number = 30;
+  currentBot: number;
 
-  private readonly AGGRESSIVE: BotPersonnality = {
-    onStartDraw: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Êtes-vous prêts?');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onStartSegment: () => {
-      if (Math.random() < PERCENT_5 && this.drawDelay === this.SPEED_DRAW_DELAY) {
-        this.sendBotMessage('Bon, je vais me calmer');
-        this.drawDelay = this.DEFAULT_DRAW_DELAY;
-      } else if (Math.random() < PERCENT_5 && this.drawDelay === this.DEFAULT_DRAW_DELAY) {
-        this.sendBotMessage('On va plus vite!!');
-        this.drawDelay = this.SPEED_DRAW_DELAY;
-      }
-    },
-
-    onResetDrawing: () => {
-      if (Math.random() < PERCENT_20) {
-        this.sendBotMessage('Un autre');
-      }
-    },
-
-    onPlayerCorrectGuess: () => {
-      if (Math.random() < PERCENT_30) {
-        this.sendBotMessage('Finalement! C\'était pas si difficile?');
-      }
-    },
-
-    onPlayerCloseGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Wow! Comment vous faites pour être aussi médiocre?');
-      }
-    },
-
-    onPlayerIncorrectGuess: () => {
-      if (Math.random() < PERCENT_50) {
-        this.sendBotMessage('Vous êtes pas très bon... Pourtant mon dessin est clair.');
-      }
-    }
-  };
-
-  private io: Server;
   private drawing: DrawingSequence;
+
+  private hintAvailable: boolean;
   private currentSegmentIndex: number;
   private currentCoordIndex: number;
 
-  private drawDelay: number;
-  private lobbyId: string;
   private pathTimer: NodeJS.Timeout;
 
-  private botName: string;
-  private personnality: BotPersonnality;
+  private bots: BotPersonnality[] = [];
 
-  constructor(io: Server, lobbyId: string) {
-    this.io = io;
+  constructor(
+    private io: Server,
+    private lobbyId: string,
+    private difficulty: Difficulty
+  ) {
+    this.hintAvailable = true;
+    this.currentBot = 0;
     this.lobbyId = lobbyId;
-    this.drawDelay = this.DEFAULT_DRAW_DELAY;
   }
 
-  draw(drawing: DrawingSequence): void {
+  draw(drawing: DrawingSequence, hints: string[]): void {
     this.drawing = drawing;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.personnality.onStartDraw();
+    this.bots[this.currentBot].hintIndex = 0;
+    this.bots[this.currentBot].hints = hints;
+    this.bots[this.currentBot].onStartDraw();
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
   }
 
@@ -91,7 +43,9 @@ export class BotService {
     clearInterval(this.pathTimer);
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.personnality.onResetDrawing();
+    this.bots[this.currentBot].hints = [];
+    this.bots[this.currentBot].hintIndex = 0;
+    this.bots[this.currentBot].onResetDrawing();
   }
 
   pause(): void {
@@ -116,11 +70,19 @@ export class BotService {
     }
   }
 
+  requestHint(): void {
+    if (this.hintAvailable) {
+      this.hintAvailable = false;
+      this.bots[this.currentBot].onPlayerRequestsHint();
+      setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);
+    }
+  }
+
   getBot(teamNumber: number): Entity {
-    this.personnality = this.AGGRESSIVE;
-    this.botName = this.getBotUsername();
+    const bot = new BotPersonnality(this.io, this.lobbyId, this.difficulty);
+    this.bots.push(bot);
     return {
-      username: this.botName,
+      username: bot.name,
       playerRole: PlayerRole.PASSIVE,
       teamNumber,
       isBot: true,
@@ -129,15 +91,15 @@ export class BotService {
   }
 
   private playerCorrectGuess(): void {
-    this.personnality.onPlayerCorrectGuess();
+    this.bots[this.currentBot].onPlayerCorrectGuess();
   }
 
   private playerCloseGuess(): void {
-    this.personnality.onPlayerCloseGuess();
+    this.bots[this.currentBot].onPlayerCloseGuess();
   }
 
   private playerIncorrectGuess(): void {
-    this.personnality.onPlayerIncorrectGuess();
+    this.bots[this.currentBot].onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {
@@ -148,7 +110,7 @@ export class BotService {
       if (this.currentCoordIndex >= startAt) {
         const coord = this.drawing.stack[this.currentSegmentIndex].path[this.currentCoordIndex];
         if (this.currentCoordIndex === 0) {
-          this.personnality.onStartSegment();
+          this.bots[this.currentBot].onStartSegment();
           this.io.in(this.lobbyId).emit(SocketDrawing.START_PATH_BC, this.currentCoordIndex, segment.zIndex, coord, segment.brushInfo);
         } else if (this.currentCoordIndex < segment.path.length - 1) {
           this.io.in(this.lobbyId).emit(SocketDrawing.UPDATE_PATH_BC, coord);
@@ -163,21 +125,7 @@ export class BotService {
           }
         }
       };
-    }, this.drawDelay);
+    }, this.bots[this.currentBot].drawDelay);
   }
 
-  private getBotUsername(): string {
-    const random = Math.floor(Math.random() * BOT_NAMES.length);
-    return BOT_NAMES[random];
-  }
-
-  private sendBotMessage(content: string): void {
-    const messageWithUsername: ChatMessage = {
-      content,
-      timestamp: Date.now(),
-      senderUsername: this.botName
-    };
-    this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
-
-  }
 }

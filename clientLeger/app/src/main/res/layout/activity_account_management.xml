@@ -12,7 +12,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.25"
+            android:layout_weight="0.15"
             android:orientation="vertical">
 
             <LinearLayout
@@ -40,6 +40,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="bob"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="bob@bob.com"
                     android:textAlignment="center"
                     android:textSize="20sp" />
             </LinearLayout>
@@ -87,9 +94,10 @@
                     app:iconPadding="10dp" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
             <Button
+                android:id="@+id/logoutBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/disconnect"
+                android:text="@string/returnbutton"
                 app:icon="@drawable/ic_round_logout_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
