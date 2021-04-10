@@ -1,5 +1,6 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '@services/user.service';
 
 @Component({
@@ -17,7 +18,11 @@ export class AccountNavbarComponent {
   lastName: string;
   username: string;
 
-  constructor(private mediaMatcher: MediaMatcher, public userService: UserService) {
+  constructor(
+    private mediaMatcher: MediaMatcher,
+    public userService: UserService,
+    private snackBar: MatSnackBar
+  ) {
     this.firstName = this.userService.account.firstName;
     this.lastName = this.userService.account.lastName;
     this.username = this.userService.account.username;
@@ -25,7 +30,6 @@ export class AccountNavbarComponent {
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
     AccountNavbarComponent.IS_SCREEN_BIG = this.matcher.matches;
-
     this.closed = true;
   }
 
@@ -47,5 +51,22 @@ export class AccountNavbarComponent {
 
   logout(): void {
     this.userService.logout();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  uploadAvatar(event: any): void {
+    this.userService.uploadAvatar(event.target.files[0])
+      .catch((err) => {
+        this.sendNotification('Il y a eu une erreur, essayez une autre image.');
+      });
+  }
+
+  sendNotification(message: string) {
+
+    this.snackBar.open(message, 'Ok', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
   }
 }
