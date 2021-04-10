@@ -1,4 +1,3 @@
-import { Logins } from '../../server/models/schemas/logins';
 import { GameType } from './lobby';
 
 export enum GameResult {
@@ -20,13 +19,19 @@ export interface Team {
     playerNames: string[];
 }
 
+
+export interface Logins {
+    start: number;
+    end?: number;
+}
+
 export interface DashBoardInfo {
     _id: string;
     firstName: string;
     lastName: string;
     username: string;
     email: string;
-    logins: Logins;
+    logins: Logins[];
     gameHistory: GameHistoryDashBoard;
     createdDate: number;
     avatar: string;

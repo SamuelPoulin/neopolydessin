@@ -11,7 +11,7 @@ import { Register } from '../../../common/communication/register';
 import { AccountFriend, AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
 import accountModel, { Account } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
-import loginsModel, { Logins } from '../../models/schemas/logins';
+import loginsModel, { Login, Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
@@ -427,8 +427,7 @@ export class DatabaseService {
       lastName: account.lastName,
       username: account.username,
       email: account.email,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logins: account.logins as any,
+      logins: (account.logins as unknown as { _id: string; logins: [Login] }).logins,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       gameHistory: this.gameHistoryToGameHistoryDashBoard(account.gameHistory as any),
       createdDate: account.createdDate,

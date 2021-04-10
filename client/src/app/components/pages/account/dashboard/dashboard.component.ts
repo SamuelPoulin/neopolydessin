@@ -60,7 +60,7 @@ export class DashboardComponent {
       this.soloHighScore = info.gameHistory.bestScoreSolo;
       this.coopHighScore = info.gameHistory.bestScoreCoop;
       this.games = info.gameHistory.games;
-      this.logins = info.logins.logins;
+      this.logins = info.logins;
       this.connectionTime = this.toHours(this.getTimeConnected());
 
       const victories: number[] = [];
