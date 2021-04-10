@@ -56,16 +56,16 @@ export class BotService {
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], this.currentCoordIndex + 1);
   }
 
-  playerGuess(guessStatus: GuessResponse): void {
+  playerGuess(guessStatus: GuessResponse, guessTries?: number, guessLeft?: number): void {
     switch (guessStatus) {
       case GuessResponse.CORRECT:
-        this.playerCorrectGuess();
+        this.bots[this.currentBot].onPlayerCorrectGuess(guessTries, guessLeft);
         break;
       case GuessResponse.CLOSE:
-        this.playerCloseGuess();
+        this.bots[this.currentBot].onPlayerCloseGuess(guessTries, guessLeft);
         break;
       case GuessResponse.WRONG:
-        this.playerIncorrectGuess();
+        this.bots[this.currentBot].onPlayerIncorrectGuess(guessTries, guessLeft);
         break;
     }
   }
@@ -88,18 +88,6 @@ export class BotService {
       isBot: true,
       isOwner: false
     };
-  }
-
-  private playerCorrectGuess(): void {
-    this.bots[this.currentBot].onPlayerCorrectGuess();
-  }
-
-  private playerCloseGuess(): void {
-    this.bots[this.currentBot].onPlayerCloseGuess();
-  }
-
-  private playerIncorrectGuess(): void {
-    this.bots[this.currentBot].onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {

@@ -70,9 +70,6 @@ object ApiModule {
     @Singleton
     fun provideDrawingSocketService(socketService: SocketService): DrawingSocketService = DrawingSocketService(socketService)
 
-    @Provides
-    @Singleton
-    fun provideAccountManagementSocketService(socketService: SocketService): AccountManagementSocketService = AccountManagementSocketService(socketService)
 
     @Provides
     @Singleton

@@ -1,9 +1,18 @@
 package com.projet.clientleger.data.repository
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.socket.AccountManagementSocketService
+import com.projet.clientleger.data.api.http.ApiDashboardInterface
+import com.projet.clientleger.data.api.model.account.*
+import com.projet.clientleger.data.model.account.UpdateAccountModel
 import javax.inject.Inject
+import javax.net.ssl.HttpsURLConnection
 
-public class AccountManagementRepository @Inject constructor(private val accountManagementSocketService: AccountManagementSocketService, private val sessionManager: SessionManager){
-
+open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager){
+    open suspend fun getAccountInfos():AccountDashboard? {
+        val res = apiDashboardInterface.getAccount()
+        return res.body()
+    }
+    open suspend fun updateAccountInfos(account:UpdateAccountModel){
+        apiDashboardInterface.updateAccount(account)
+    }
 }

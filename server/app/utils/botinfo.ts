@@ -30,6 +30,7 @@ export interface BotSentences {
   onPlayerCorrectGuess: string;
   onPlayerCloseGuess: string;
   onPlayerIncorrectGuess: string;
+  guessLeftMessage: (guessTries: number, guessLeft: number) => string;
   onPlayerRequestsHint: string;
 }
 
@@ -44,6 +45,9 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCloseGuess: 'Wow! Comment vous faites pour être aussi médiocre?',
       onPlayerIncorrectGuess: 'Vous êtes pas très bon... Pourtant mon dessin est clair.',
       onPlayerRequestsHint: 'Un indice... pour vrai?',
+      guessLeftMessage: (guessTries: number, guessLeft: number) => {
+        return `Il reste ${guessLeft} essai sur ${guessTries}`;
+      }
     }
   ],
   [
@@ -56,6 +60,10 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCloseGuess: 'Dommage, vous étiez si proche de la bonne réponse...',
       onPlayerIncorrectGuess: 'Ce n\'est pas exactement ce qu\'on recherche, malheureusement.',
       onPlayerRequestsHint: 'Il me fait plaisir de vous donner un indice, nous sommes dans la même équipe!',
+      guessLeftMessage: (guessTries: number, guessLeft: number) => {
+        return `Faites attention, il vous reste ${guessLeft} essai sur ${guessTries}`;
+      }
+
     }
   ],
   [
@@ -67,14 +75,17 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCorrectGuess: 'Bravo!  (=^-ω-^=)',
       onPlayerCloseGuess: 'C\'était proche! (> _ <) ',
       onPlayerIncorrectGuess: '(╯°□°）╯︵ ┻━┻',
-      onPlayerRequestsHint: '*Donne un indice*'
+      onPlayerRequestsHint: '*Donne un indice*',
+      guessLeftMessage: (guessTries: number, guessLeft: number) => {
+        return `Haaaaaaaaaaaa il reste ${guessLeft} essai sur ${guessTries}!!!`;
+      }
     }
   ]
 ]);
 
-const HARD_DELAY: number = 15;
-const INTERMEDIATE_DELAY: number = 25;
-const EASY_DELAY: number = 50;
+const HARD_DELAY: number = 5;
+const INTERMEDIATE_DELAY: number = 15;
+const EASY_DELAY: number = 25;
 const SPEED_MOD: number = -10;
 
 const DIFFICULTY_SPEEDS: Map<Difficulty, number> = new Map([
@@ -113,7 +124,8 @@ export class BotPersonnality {
   onStartDraw() {
     if (Math.random() < PERCENT_20) {
       this.sendBotMessage(this.sentences.onStartDraw);
-      this.drawDelay = this.baseDrawDelay + SPEED_MOD;
+      const newSpeed = (this.baseDrawDelay + SPEED_MOD);
+      this.drawDelay = newSpeed < 0 ? 1 : newSpeed;
     }
   }
 
@@ -123,7 +135,8 @@ export class BotPersonnality {
       this.drawDelay = this.baseDrawDelay;
     } else if (Math.random() < PERCENT_1 && this.drawDelay === this.baseDrawDelay) {
       this.sendBotMessage(this.sentences.onSpeedUp);
-      this.drawDelay = this.baseDrawDelay + SPEED_MOD;
+      const newSpeed = (this.baseDrawDelay + SPEED_MOD);
+      this.drawDelay = newSpeed < 0 ? 1 : newSpeed;
     }
   }
 
@@ -133,28 +146,34 @@ export class BotPersonnality {
     }
   }
 
-  onPlayerCorrectGuess() {
+  onPlayerCorrectGuess(guessTries?: number, guessLeft?: number) {
     if (Math.random() < PERCENT_30) {
       this.sendBotMessage(this.sentences.onPlayerCorrectGuess);
     }
   }
 
-  onPlayerCloseGuess() {
+  onPlayerCloseGuess(guessTries?: number, guessLeft?: number) {
     if (Math.random() < PERCENT_50) {
       this.sendBotMessage(this.sentences.onPlayerCloseGuess);
     }
+    if (guessTries && guessLeft) {
+      this.sendBotMessage(this.sentences.guessLeftMessage(guessTries, guessLeft));
+    }
   }
 
-  onPlayerIncorrectGuess() {
+  onPlayerIncorrectGuess(guessTries?: number, guessLeft?: number) {
     if (Math.random() < PERCENT_50) {
       this.sendBotMessage(this.sentences.onPlayerIncorrectGuess);
+    }
+    if (guessTries && guessLeft) {
+      this.sendBotMessage(this.sentences.guessLeftMessage(guessTries, guessLeft));
     }
   }
 
   onPlayerRequestsHint() {
     if (this.hintIndex < this.hints.length) {
-      this.hintIndex++;
       this.sendBotMessage(this.sentences.onPlayerRequestsHint + ` ${this.hints[this.hintIndex]}`);
+      this.hintIndex++;
     }
   }
 

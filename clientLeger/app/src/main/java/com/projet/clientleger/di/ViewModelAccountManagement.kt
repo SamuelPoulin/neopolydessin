@@ -1,7 +1,7 @@
 package com.projet.clientleger.di
 
 import com.projet.clientleger.data.SessionManager
-import com.projet.clientleger.data.api.socket.AccountManagementSocketService
+import com.projet.clientleger.data.api.http.ApiDashboardInterface
 import com.projet.clientleger.data.repository.AccountManagementRepository
 import dagger.Module
 import dagger.Provides
@@ -14,5 +14,5 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object ViewModelAccountManagement {
     @Provides
     @ViewModelScoped
-    fun provideRepo(accountManagementSocketService: AccountManagementSocketService, sessionManager: SessionManager) = AccountManagementRepository(accountManagementSocketService, sessionManager)
+    fun provideRepo(apiDashboardInterface: ApiDashboardInterface, sessionManager: SessionManager) = AccountManagementRepository(apiDashboardInterface, sessionManager)
 }
