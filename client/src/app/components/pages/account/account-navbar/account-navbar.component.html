@@ -8,7 +8,7 @@
     </div>
     <div>
       <label for="avatarInput">
-        <app-avatar [username]="username" mainUser [size]="100" [fontSize]="48" ></app-avatar>
+        <app-avatar [username]="username" [updateFlag]="this.userService.updateAvatar" mainUser [size]="100" [fontSize]="48" ></app-avatar>
       </label>
       <input id="avatarInput" type="file" (change)="uploadAvatar($event)"/> 
     </div>

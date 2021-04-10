@@ -13,11 +13,13 @@ export class UserService {
   private jwtService: JwtHelperService;
   private intervalId: number;
 
+  updateAvatar: boolean;
   avatarBlob: Blob | undefined;
   loggedOut: EventEmitter<void>;
   loggedIn: EventEmitter<void>;
 
   constructor(private localSaveService: LocalSaveService, private apiService: APIService, private router: Router) {
+    this.updateAvatar = false;
     this.jwtService = new JwtHelperService();
     this.loggedOut = new EventEmitter<void>();
     this.loggedIn = new EventEmitter<void>();
@@ -121,11 +123,23 @@ export class UserService {
     });
   }
 
-  uploadAvatar(file: File) {
-    this.apiService.uploadAvatar(file).then((returnedId) => {
-      // add avatar refresh logic
+  async uploadAvatar(file: File): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.apiService.uploadAvatar(file)
+        .then((returnedId) => {
+          this.notifyAvatarChanged();
+          resolve(true);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
+
+  private notifyAvatarChanged() {
+    this.updateAvatar = this.updateAvatar ? false : true;
+  }
+
 
   get account(): AccountInfo {
     if (this.localSaveService.account) {
