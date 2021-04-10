@@ -1,31 +1,35 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 import { SharedModule } from '@components/shared/shared.module';
 import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
-import { GameService } from '@services/game.service';
-import { MockGameService } from '@services/game.service.spec';
+import { ModalDialogService } from '@services/modal/modal-dialog.service';
 import { SocketService } from '@services/socket-service.service';
 import { MockSocketService } from '@services/socket-service.service.spec';
-import { UserService } from '@services/user.service';
-import { MockUserService } from '@services/user.service.spec';
-import { ChatComponent } from './chat.component';
 
-describe('ChatComponent', () => {
-  let component: ChatComponent;
-  let fixture: ComponentFixture<ChatComponent>;
+import { ChatRoomsComponent } from './chat-rooms.component';
+
+describe('ChatRoomsComponent', () => {
+  let component: ChatRoomsComponent;
+  let fixture: ComponentFixture<ChatRoomsComponent>;
+  const modalDialogServiceSpy = jasmine.createSpyObj('ModalDialogService', ['openByName']);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule],
+      imports: [SharedModule],
+      declarations: [ChatRoomsComponent],
       providers: [
-        { provide: UserService, useValue: MockUserService },
-        { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
         { provide: SocketService, useValue: MockSocketService },
+        {
+          provide: ModalDialogService,
+          useValue: modalDialogServiceSpy,
+        },
       ],
     }).compileComponents();
-    fixture = TestBed.createComponent(ChatComponent);
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ChatRoomsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

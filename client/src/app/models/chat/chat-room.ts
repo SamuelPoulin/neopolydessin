@@ -15,4 +15,5 @@ export enum ChatRoomType {
   GENERAL = 0,
   GAME = 1,
   PRIVATE = 2,
+  GROUP = 3,
 }

@@ -11,6 +11,7 @@ import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
+import { ChatRoomMessage } from '@common/communication/chat-room-history';
 import {
   CurrentGameState,
   Difficulty,
@@ -99,6 +100,24 @@ export class SocketService {
     });
   }
 
+  receiveChatRoomMessage(): Observable<ChatRoomMessage> {
+    return new Observable<ChatRoomMessage>((obs) => {
+      this.socket.on(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, (chatRoomMessage: ChatRoomMessage) => obs.next(chatRoomMessage));
+    });
+  }
+
+  receiveChatRooms(): Observable<string[]> {
+    return new Observable<string[]>((obs) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => obs.next(chatRooms));
+    });
+  }
+
+  receiveChatRoomsImIn(): Observable<string[]> {
+    return new Observable<string[]>((obs) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS_IM_IN, (chatRooms: string[]) => obs.next(chatRooms));
+    });
+  }
+
   receiveNextTimestamp(): Observable<TimeInfo> {
     return new Observable<TimeInfo>((obs) => {
       this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));
@@ -132,6 +151,30 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
+  async joinChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.JOIN_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  async leaveChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.LEAVE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
   getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
       this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
@@ -145,6 +188,34 @@ export class SocketService {
 
   sendPrivateMessage(message: string, friendId: string) {
     this.socket.emit(SocketMessages.SEND_PRIVATE_MESSAGE, { receiverAccountId: friendId, content: message } as PrivateMessageTo);
+  }
+
+  sendRoomMessage(message: string, roomName: string) {
+    this.socket.emit(SocketMessages.SEND_MESSAGE_TO_ROOM, roomName, { content: message } as Message);
+  }
+
+  async createChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.CREATE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  async deleteChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.DELETE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
   }
 
   sendGuess(guess: string) {
