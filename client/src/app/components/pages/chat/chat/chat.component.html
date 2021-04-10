@@ -1,8 +1,4 @@
-<div id="chat-container">
-  <div id="chat-friendslist-anchor">
-    <app-chat-friendslist [opened]="chatService.friendslistOpened"></app-chat-friendslist>
-    <app-chat-rooms [opened]="chatService.chatRoomsOpened"></app-chat-rooms>
-  </div>
+<div id="chat-container" [style.height]="chatService.standalone ? electronContainer ? 'calc(100vh - 30px)' : '100vh' : '100%'">
   <div id="chat-header">
     <img id="chat-logo" src="assets/chat.png" />
     <h1 id="chat-text">Chat</h1>
@@ -18,6 +14,10 @@
     </div>
   </div>
   <app-chat-tabs></app-chat-tabs>
+  <div id="chat-friendslist-anchor">
+    <app-chat-friendslist [opened]="chatService.friendslistOpened"></app-chat-friendslist>
+    <app-chat-rooms [opened]="chatService.chatRoomsOpened"></app-chat-rooms>
+  </div>
   <div id="chat-messages">
     <ng-container *ngFor="let message of chatService.messages">
       <ng-container *ngIf="!isSystem(message)">

@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
 import { Subscription } from 'rxjs';
@@ -31,7 +32,6 @@ export class ChatService {
   guessing: boolean = false;
   friendslistOpened: boolean = false;
   chatRoomsOpened: boolean = false;
-
   chatRoomChanged: EventEmitter<void>;
 
   constructor(
@@ -39,6 +39,7 @@ export class ChatService {
     private gameService: GameService,
     private apiService: APIService,
     private userService: UserService,
+    private router: Router,
   ) {
     this.chatRoomChanged = new EventEmitter<void>();
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
@@ -275,5 +276,9 @@ export class ChatService {
 
   get canGuess(): boolean {
     return this.gameService.canGuess && this.rooms[this.currentRoomIndex].type === ChatRoomType.GAME;
+  }
+
+  get standalone(): boolean {
+    return this.router.url === '/chat';
   }
 }

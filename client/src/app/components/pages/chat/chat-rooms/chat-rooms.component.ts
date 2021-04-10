@@ -17,7 +17,7 @@ export class ChatRoomsComponent {
 
   chatRooms: string[];
 
-  constructor(private chatService: ChatService, private socketService: SocketService, private modalService: ModalDialogService) {
+  constructor(public chatService: ChatService, private socketService: SocketService, private modalService: ModalDialogService) {
     this.chatRooms = [];
 
     this.chatRoomsSubscription = this.socketService.receiveChatRooms().subscribe((chatRooms) => {
@@ -36,5 +36,9 @@ export class ChatRoomsComponent {
 
   openCreateChatRoom() {
     this.modalService.openByName(ModalType.CREATE_CHAT_ROOM);
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }
