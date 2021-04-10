@@ -23,9 +23,10 @@ export class AccountNavbarComponent {
     public userService: UserService,
     private snackBar: MatSnackBar
   ) {
-    this.firstName = this.userService.account.firstName;
-    this.lastName = this.userService.account.lastName;
-    this.username = this.userService.account.username;
+    this.setAccountInfo();
+    this.userService.accountUpdated.subscribe(() => {
+      this.setAccountInfo();
+    });
 
     this.matcher = this.mediaMatcher.matchMedia('(min-width: 635px)');
     this.matcher.addEventListener('change', this.screenChanged);
@@ -62,11 +63,16 @@ export class AccountNavbarComponent {
   }
 
   sendNotification(message: string) {
-
     this.snackBar.open(message, 'Ok', {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
     });
+  }
+
+  private setAccountInfo() {
+    this.firstName = this.userService.account.firstName;
+    this.lastName = this.userService.account.lastName;
+    this.username = this.userService.account.username;
   }
 }
