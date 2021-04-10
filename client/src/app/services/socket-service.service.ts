@@ -12,7 +12,6 @@ import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomMessage } from '@common/communication/chat-room-history';
-import { ChatRoom } from '@models/chat/chat-room';
 import {
   CurrentGameState,
   Difficulty,
@@ -109,9 +108,15 @@ export class SocketService {
     });
   }
 
-  receiveChatRooms(): Observable<ChatRoom[]> {
-    return new Observable<ChatRoom[]>((obs) => {
-      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: ChatRoom[]) => obs.next(chatRooms));
+  receiveChatRooms(): Observable<string[]> {
+    return new Observable<string[]>((obs) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => obs.next(chatRooms));
+    });
+  }
+
+  receiveChatRoomsImIn(): Observable<string[]> {
+    return new Observable<string[]>((obs) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS_IM_IN, (chatRooms: string[]) => obs.next(chatRooms));
     });
   }
 
@@ -148,6 +153,30 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
+  async joinChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.JOIN_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  async leaveChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.LEAVE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
   getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
       this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
@@ -165,6 +194,30 @@ export class SocketService {
 
   sendRoomMessage(message: string, roomName: string) {
     this.socket.emit(SocketMessages.SEND_MESSAGE_TO_ROOM, roomName, { content: message } as Message);
+  }
+
+  async createChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.CREATE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  async deleteChatRoom(roomName: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socket.emit(SocketMessages.DELETE_CHAT_ROOM, roomName, (success: boolean) => {
+        if (success) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
   }
 
   sendGuess(guess: string) {

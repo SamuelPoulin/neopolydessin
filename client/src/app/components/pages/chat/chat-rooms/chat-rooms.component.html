@@ -3,10 +3,19 @@
     <button mat-icon-button id="chat-rooms-closer" (click)="closeChatRooms()">
       <mat-icon [inline]="true" id="chat-rooms-closer-icon">close</mat-icon>
     </button>
+    <button mat-flat-button class="chat-rooms-button" (click)="openCreateChatRoom()">Créer un salon</button>
   </div>
   <div id="chat-rooms-content-container">
     <div class="chat-rooms-section-title">
       Salons de discussion
     </div>
+    <ng-container *ngIf="chatRooms.length === 0">
+      <div class="chat-rooms-empty-message">
+        Aucun salon de discussion n'existe.
+      </div>
+    </ng-container>
+    <ng-container *ngFor="let chatRoom of chatRooms">
+      <app-chat-room [room]="chatRoom"></app-chat-room>
+    </ng-container>
   </div>
 </div>
