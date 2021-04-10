@@ -11,6 +11,7 @@ export enum SocketMessages {
     LEAVE_CHAT_ROOM = 'leaveChatRoom',              // roomName: string, callback (successfullyLeft: boolean)
     CREATE_CHAT_ROOM = 'createChatRoom',            // roomName: string, callback (successfullyCreated: boolean)
     DELETE_CHAT_ROOM = 'deleteChatRoom',            // roomName: string, callback (successfullyDeleted: boolean)
+    CHAT_ROOMS_UPDATED = 'updatedChatRooms',        // rooms: string[]
 
     SEND_PRIVATE_MESSAGE = 'SendPrivateMsg',
     RECEIVE_PRIVATE_MESSAGE = 'ReceivePrivateMsg',

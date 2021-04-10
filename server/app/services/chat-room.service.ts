@@ -76,6 +76,7 @@ export class ChatRoomService {
           .then((result) => {
             callback(true);
           });
+        this.io.emit(SocketMessages.CHAT_ROOMS_UPDATED, this.rooms);
       } else {
         callback(false);
       }
@@ -93,6 +94,7 @@ export class ChatRoomService {
             .then((result) => {
               callback(true);
             });
+          this.io.emit(SocketMessages.CHAT_ROOMS_UPDATED, this.rooms);
         }
       } else {
         callback(false);
