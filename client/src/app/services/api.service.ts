@@ -10,7 +10,8 @@ import { AccountInfo, PublicAccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
 import { Decision } from '@common/communication/friend-request';
 import { PrivateMessage } from '@common/communication/private-message';
-import { LoginResponse } from '../../../../common/communication/login';
+import { DashBoardInfo } from '@common/communication/dashboard';
+import { LoginResponse } from '@common/communication/login';
 import { LocalSaveService } from './localsave.service';
 
 @Injectable({
@@ -25,6 +26,7 @@ export class APIService {
 
   private static API_BASE_URL: string;
   private static API_DATABASE_ROUTE: string;
+  private static API_DASHBOARD_ROUTE: string;
   private static API_PICTUREWORD_ROUTE: string;
   private static API_DRAWINGS_ROUTE: string;
   private static API_DRAWING_ROUTE: string;
@@ -34,6 +36,7 @@ export class APIService {
   private static API_REFRESH_ROUTE: string;
   private static API_REGISTER_ROUTE: string;
   private static API_AVATAR_ROUTE: string;
+  private static API_UPLOAD_AVATAR_ROUTE: string;
   private static API_ACCOUNT_ROUTE: string;
   private static API_FRIENDS_ROUTE: string;
   private static API_FRIENDS_DECISION_ROUTE: string;
@@ -47,12 +50,14 @@ export class APIService {
     APIService.API_DRAWINGS_ROUTE = '/drawings';
     APIService.API_DRAWING_ROUTE = '/drawing';
     APIService.API_DATABASE_ROUTE = APIService.API_BASE_URL + '/database';
+    APIService.API_DASHBOARD_ROUTE = APIService.API_DATABASE_ROUTE + '/dashboard';
     APIService.API_PICTUREWORD_ROUTE = APIService.API_BASE_URL + '/pictureword';
     APIService.API_AUTH_ROUTE = APIService.API_DATABASE_ROUTE + '/auth';
     APIService.API_LOGIN_ROUTE = APIService.API_AUTH_ROUTE + '/login';
     APIService.API_REFRESH_ROUTE = APIService.API_AUTH_ROUTE + '/refresh';
     APIService.API_REGISTER_ROUTE = APIService.API_AUTH_ROUTE + '/register';
     APIService.API_AVATAR_ROUTE = APIService.API_BASE_URL + '/avatar';
+    APIService.API_UPLOAD_AVATAR_ROUTE = APIService.API_AVATAR_ROUTE + '/upload';
     APIService.API_ACCOUNT_ROUTE = APIService.API_DATABASE_ROUTE + '/account';
     APIService.API_FRIENDS_ROUTE = APIService.API_DATABASE_ROUTE + '/friends';
     APIService.API_FRIENDS_DECISION_ROUTE = APIService.API_FRIENDS_ROUTE + '/decision';
@@ -205,6 +210,25 @@ export class APIService {
     });
   }
 
+  async uploadAvatar(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return new Promise<string>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http
+          .post(
+            APIService.API_UPLOAD_AVATAR_ROUTE,
+            formData,
+            { headers: { authorization: this.localSaveService.accessToken } })
+          .subscribe((avatarId: { id: string }) => {
+            resolve(avatarId.id);
+          }, (e) => {
+            reject(e);
+          });
+      }
+    });
+  }
+
   async getAccount(): Promise<AccountInfo> {
     return new Promise<AccountInfo>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
@@ -233,6 +257,43 @@ export class APIService {
             },
             (e) => reject(e),
           );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async getDashBoardInfo(): Promise<DashBoardInfo> {
+    return new Promise<DashBoardInfo>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http.get(APIService.API_DASHBOARD_ROUTE, {
+          headers: { authorization: this.localSaveService.accessToken }
+        }).subscribe(
+          (dashboard: DashBoardInfo) => {
+            resolve(dashboard);
+          }, (e) => {
+            reject(e);
+          });
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async updateAccount(firstName?: string, lastName?: string, username?: string, email?: string): Promise<AccountInfo> {
+    return new Promise<AccountInfo>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        this.http.post(APIService.API_ACCOUNT_ROUTE,
+          { firstName, lastName, email, username },
+          { headers: { authorization: this.localSaveService.accessToken } }
+        ).subscribe(
+          (accountInfo: AccountInfo) => {
+            resolve(accountInfo);
+          },
+          (err) => {
+            reject(err);
+          }
+        );
       } else {
         reject();
       }

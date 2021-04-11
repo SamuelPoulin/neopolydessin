@@ -4,18 +4,18 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 
 import { injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
-import gameHistoryModel, { Game, GameHistory, GameResult } from '../../models/schemas/game-history';
+import gameHistoryModel, { GameHistory } from '../../models/schemas/game-history';
 import { Observable } from '../utils/observable';
 import { login, LoginResponse } from '../../../common/communication/login';
 import { Register } from '../../../common/communication/register';
 import { AccountFriend, AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
 import accountModel, { Account } from '../../models/schemas/account';
 import avatarModel, { Avatar } from '../../models/schemas/avatar';
-import loginsModel, { Logins } from '../../models/schemas/logins';
+import loginsModel, { Login, Logins } from '../../models/schemas/logins';
 import messagesHistoryModel from '../../models/schemas/messages-history';
 import refreshModel, { Refresh } from '../../models/schemas/refresh';
 import * as jwtUtils from '../utils/jwt-util';
-import { DashBoardInfo, GameHistoryDashBoard } from '../../../common/communication/dashboard';
+import { DashBoardInfo, Game, GameHistoryDashBoard, GameResult } from '../../../common/communication/dashboard';
 import { GameType } from '../../../common/communication/lobby';
 import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
 
@@ -125,7 +125,7 @@ export class DatabaseService {
       try {
         gameHistoryModel.addGame(id, gameInfo)
           .then((gameAdded: GameHistory) => {
-            resolve({ statusCode: OK, documents: gameAdded});
+            resolve({ statusCode: OK, documents: gameAdded });
           })
           .catch((err: Error) => {
             reject(DatabaseService.rejectErrorMessage(err));
@@ -367,8 +367,8 @@ export class DatabaseService {
     });
   }
 
-  async updateAccount(id: string, body: Account): Promise<Response<Account>> {
-    return new Promise<Response<Account>>((resolve, reject) => {
+  async updateAccount(id: string, body: Account): Promise<Response<AccountInfo>> {
+    return new Promise<Response<AccountInfo>>((resolve, reject) => {
       this.getAccountByUsername(body.username)
         .then((account: Response<Account>) => {
           throw new Error(BAD_REQUEST.toString());
@@ -391,7 +391,7 @@ export class DatabaseService {
             friends: doc.friends,
             type: NotificationType.userUpdatedAccount
           });
-          resolve({ statusCode: OK, documents: doc });
+          resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });
         })
         .catch((err: Error | ErrorMsg) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -427,8 +427,7 @@ export class DatabaseService {
       lastName: account.lastName,
       username: account.username,
       email: account.email,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logins: account.logins as any,
+      logins: (account.logins as unknown as { _id: string; logins: [Login] }).logins,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       gameHistory: this.gameHistoryToGameHistoryDashBoard(account.gameHistory as any),
       createdDate: account.createdDate,

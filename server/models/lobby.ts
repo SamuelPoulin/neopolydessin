@@ -27,8 +27,7 @@ import {
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from '../../common/communication/drawing-sequence';
 import { BotService } from '../app/services/bot.service';
-import { Game, GameResult, Team } from './schemas/game-history';
-
+import { Game, GameResult, Team } from '../../common/communication/dashboard';
 
 export interface ServerPlayer extends Player {
   socket: Socket;
