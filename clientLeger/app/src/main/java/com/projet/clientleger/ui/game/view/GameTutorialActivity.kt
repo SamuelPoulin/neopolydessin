@@ -11,17 +11,21 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.fragment.app.commit
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
 import kotlinx.android.synthetic.main.dialog_gamemode.*
+import javax.inject.Inject
 
 const val GAME_WELCOME = "Bienvenue dans le tutoriel de partie de Polydessin !"
 const val GAME_INFOS_INTRO = "Voici le panneau contenant toutes les informations importante à la partie." +
@@ -29,12 +33,16 @@ const val GAME_INFOS_INTRO = "Voici le panneau contenant toutes les informations
         "\nPar la suite, on a l'icône de crayon représentant que vous êtes actuellement le dessinateur" +
         "\nFinalement, on a les informations des joueurs dans la partie ainsi que le score d'équipe"
 const val DRAWBOARD_INTRO = "Nous passons maintenant à la partie intéressante de la partie, c'est-à-dire le dessin !"
-const val CHOOSE_PEN = "Choisissez maintenant votre outil pour commencer votre dessin. Appuyez sur l'icône de crayon."
+const val INTRO_CONCLUSION = "Félicitation, vous avez terminé le tutoriel de Polydessin!" +
+        "\nPour revenir au menu principal et commencer à jouer, appuyez sur le bouton quitter en bas à gauche de l'écran"
 @AndroidEntryPoint
 class GameTutorialActivity: AppCompatActivity()  {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
+
+    @Inject
+    lateinit var drawboardFragment:DrawboardFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +66,26 @@ class GameTutorialActivity: AppCompatActivity()  {
         }
         binding.currentRole.setImageResource(R.drawable.ic_drawer)
 
+        supportFragmentManager.commit{
+            add(R.id.drawboardContainer, drawboardFragment)
+        }
+
+        supportFragmentManager.setFragmentResultListener("ready",this){requestKey, bundle ->
+            startTutorialSequence()
+        }
+    }
+
+    private fun startTutorialSequence(){
         val models:ArrayList<SequenceModel> = ArrayList()
         models.add(SequenceModel(GAME_WELCOME,binding.drawboardContainer,this))
         models.add(SequenceModel(GAME_INFOS_INTRO,binding.team,this))
         models.add(SequenceModel(DRAWBOARD_INTRO,binding.drawboardContainer,this))
+        val drawBoardSequenceModels = drawboardFragment.getTutorialSequence()
+        for(i in 0 until drawBoardSequenceModels.size){
+            models.add(drawBoardSequenceModels[i])
+        }
+        models.add(SequenceModel(INTRO_CONCLUSION, binding.drawboardContainer,this))
         vm.createSequence(models)
-
     }
 
     private fun setupTeamsUi(){
