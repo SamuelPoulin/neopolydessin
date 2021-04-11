@@ -15,14 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
-import com.codertainment.materialintro.sequence.SkipLocation
-import com.codertainment.materialintro.shape.Focus
-import com.codertainment.materialintro.shape.FocusGravity
-import com.codertainment.materialintro.shape.Shape
-import com.codertainment.materialintro.shape.ShapeType
-import com.codertainment.materialintro.utils.materialIntro
-import com.codertainment.materialintro.utils.materialIntroSequence
-import com.codertainment.materialintro.view.MaterialIntroView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
@@ -38,12 +30,6 @@ import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
-import smartdevelop.ir.eram.showcaseviewlib.GuideView
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
-import smartdevelop.ir.eram.showcaseviewlib.listener.GuideListener
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import javax.inject.Inject
 const val WELCOME_MESSAGE = "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
 const val INTRO_CREATE_GAME_MESSAGE = "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
@@ -86,16 +72,13 @@ class MainmenuActivity : AppCompatActivity() {
             finish()
         }
         binding.createGameBtn.setOnClickListener {
-            val intent = Intent(this,GameTutorialActivity::class.java)
-            startActivity(intent)
-            //TODO enlever le if de commentaire
-            /*if(vm.isTutorialActive()){
+            if(vm.isTutorialActive()){
                 val intent = Intent(this,GameTutorialActivity::class.java)
                 startActivity(intent)
             }
             else{
                 showGameDialog(true)
-            }*/
+            }
         }
     }
     fun goToDashBoard(){
@@ -105,13 +88,13 @@ class MainmenuActivity : AppCompatActivity() {
     }
     fun startTutorial(){
         val sequence:ArrayList<SequenceModel> = ArrayList()
-        sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo,this))
-        sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn,this))
-        sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE,binding.joinGamebtn,this))
-        sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE,binding.accountBtn,this))
-        sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar,this))
-        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot,this))
-        sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE,binding.createGameBtn,this))
+        sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo,this,false))
+        sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn,this,false))
+        sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE,binding.joinGamebtn,this,false))
+        sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE,binding.accountBtn,this,false))
+        sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar,this,false))
+        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot,this,false))
+        sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE,binding.createGameBtn,this,true))
         vm.createShowcaseSequence(sequence)
     }
 

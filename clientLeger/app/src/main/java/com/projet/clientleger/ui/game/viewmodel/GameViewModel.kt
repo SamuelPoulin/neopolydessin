@@ -83,4 +83,10 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun createSequence(models:ArrayList<SequenceModel>){
         tutorialService.createShowcaseSequence(models)
     }
+    fun getUsername():String{
+        return gameRepository.getUsername()
+    }
+    fun finishTutorial(){
+        tutorialService.finishTutorial()
+    }
 }

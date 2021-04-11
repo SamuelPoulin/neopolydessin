@@ -17,6 +17,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.DrawTool
 import com.projet.clientleger.data.model.Coordinate
+import com.projet.clientleger.data.model.PathData
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -56,10 +57,14 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     private fun setSubscriptions(){
         vm.isUndoPossibleLiveData.observe(requireActivity()){
-            binding!!.undoBtn.isEnabled = it
+            if(!vm.isTutorialActive()){
+                binding!!.undoBtn.isEnabled = it
+            }
         }
         vm.isRedoPossibleLiveData.observe(requireActivity()){
-            binding!!.redoBtn.isEnabled = it
+            if(!vm.isTutorialActive()){
+                binding!!.redoBtn.isEnabled = it
+            }
         }
     }
 
@@ -81,7 +86,6 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        println("BINDING ONVIEWCREATED $binding")
         setFragmentResult("ready",  bundleOf())
     }
 
@@ -139,20 +143,41 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     private fun handleEraserViewEvent(event: MotionEvent){
         when(event.action){
-            MotionEvent.ACTION_DOWN -> vm.erase(Coordinate(event.x, event.y))
+            MotionEvent.ACTION_DOWN -> if(vm.isTutorialActive()){
+                vm.localErase(Coordinate(event.x,event.y))
+            }
+            else{
+                vm.erase(Coordinate(event.x, event.y))
+            }
         }
     }
 
     private fun handlePenViewEvent(event: MotionEvent) {
-        when(event.action){
-            MotionEvent.ACTION_DOWN -> {
-                vm.startPath(Coordinate(event.x, event.y))
+        if(vm.isTutorialActive()){
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> {
+                    vm.startLocalPath(Coordinate(event.x,event.y))
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    vm.receiveUpdateCurrentPath(Coordinate(event.x,event.y))
+                }
+                MotionEvent.ACTION_UP -> {
+                    vm.endPath(Coordinate(event.x, event.y))
+                    vm.receiveEndPath(Coordinate(event.x,event.y))
+                }
             }
-            MotionEvent.ACTION_MOVE -> {
-                vm.updateCurrentPath(Coordinate(event.x, event.y))
-            }
-            MotionEvent.ACTION_UP -> {
-                vm.endPath(Coordinate(event.x, event.y))
+        }
+        else{
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> {
+                    vm.startPath(Coordinate(event.x, event.y))
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    vm.updateCurrentPath(Coordinate(event.x, event.y))
+                }
+                MotionEvent.ACTION_UP -> {
+                    vm.endPath(Coordinate(event.x, event.y))
+                }
             }
         }
     }
@@ -185,16 +210,15 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         binding!!.strokeWidthSlider.value = vm.getCurrentToolWidth()
     }
     fun getTutorialSequence():ArrayList<SequenceModel>{
-        println("BINDING CRÉÉ ICI $binding")
         val models = ArrayList<SequenceModel>()
-        models.add(SequenceModel(DRAWBOARD_MESSAGE, binding!!.drawingBoardContainer,requireActivity()))
-        models.add(SequenceModel(CHOOSE_PEN, binding!!.pencilBtn, requireActivity()))
-        models.add(SequenceModel(PEN_PREVIEW_MESSAGE, binding!!.strokeWidthSlider,requireActivity()))
-        models.add(SequenceModel(TRY_DRAWING,binding!!.drawingBoardContainer,requireActivity()))
-        models.add(SequenceModel(BUTTON_PANNEL_DEMO,binding!!.buttonPanel,requireActivity()))
-        models.add(SequenceModel(UNDO_BUTTON_DEMO,binding!!.undoBtn,requireActivity()))
-        models.add(SequenceModel(REDO_BUTTON_DEMO,binding!!.redoBtn,requireActivity()))
-        models.add(SequenceModel(TRASH_BUTTON_DEMO,binding!!.eraserBtn,requireActivity()))
+        models.add(SequenceModel(DRAWBOARD_MESSAGE, binding!!.drawingBoardContainer,requireActivity(),false))
+        models.add(SequenceModel(CHOOSE_PEN, binding!!.pencilBtn, requireActivity(),true))
+        models.add(SequenceModel(PEN_PREVIEW_MESSAGE, binding!!.strokeWidthSlider,requireActivity(),true))
+        models.add(SequenceModel(TRY_DRAWING,binding!!.drawingBoardContainer,requireActivity(),true))
+        models.add(SequenceModel(BUTTON_PANNEL_DEMO,binding!!.buttonPanel,requireActivity(),false))
+        models.add(SequenceModel(UNDO_BUTTON_DEMO,binding!!.undoBtn,requireActivity(),false))
+        models.add(SequenceModel(REDO_BUTTON_DEMO,binding!!.redoBtn,requireActivity(),false))
+        models.add(SequenceModel(TRASH_BUTTON_DEMO,binding!!.eraserBtn,requireActivity(),false))
         return models
     }
 

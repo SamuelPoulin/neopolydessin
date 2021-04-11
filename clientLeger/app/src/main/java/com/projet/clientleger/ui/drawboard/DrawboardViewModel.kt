@@ -10,13 +10,14 @@ import com.projet.clientleger.data.model.command.DrawPathCommand
 import com.projet.clientleger.data.model.command.ErasePathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
 import com.projet.clientleger.data.service.DrawingCommandsService
+import com.projet.clientleger.data.service.TutorialService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 @HiltViewModel
-class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService) :
+class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService,private val tutorialService: TutorialService) :
         ViewModel() {
     companion object {
         val DEFAULT_TOOL = DrawTool.PEN
@@ -36,6 +37,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     var currentTool = DEFAULT_TOOL
     var isUndoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
     var isRedoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
+    var localStartPathCpt = 0
 
     init {
         drawboardRepository.receiveStartPath().subscribe {
@@ -102,6 +104,13 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         paths.value?.add(newPath)
         paths.postValue(paths.value)
     }
+    fun startLocalPath(coord:Coordinate){
+        localStartPathCpt++
+        val list = ArrayList<Coordinate>()
+        list.add(coord)
+        receiveStartPath(PathData(localStartPathCpt,0,currentBrushInfo.clone(),list))
+    }
+
 
     fun redo(){
         drawingCommandsService.redo()
@@ -117,7 +126,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         drawboardRepository.sendStartPath(coord, currentBrushInfo)
     }
 
-    private fun receiveUpdateCurrentPath(coord: Coordinate) {
+    fun receiveUpdateCurrentPath(coord: Coordinate) {
         if(paths.value!!.isNotEmpty()){
             paths.value?.last()?.addCoord(coord)
             paths.postValue(paths.value)
@@ -140,8 +149,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             drawboardRepository.sendUpdatePath(coords)
         }
     }
-
-    private fun receiveEndPath(coord: Coordinate) {
+    fun receiveEndPath(coord: Coordinate) {
         paths.value?.last()?.addEndCoord(coord)
         paths.postValue(paths.value)
     }
@@ -155,7 +163,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         paths.postValue(paths.value)
     }
 
-    private fun deletePath(pathId: Int){
+    fun deletePath(pathId: Int){
         for(i in 0 until paths.value!!.size){
             paths.value!!.removeIf{
                 it.data.pathId == pathId
@@ -166,8 +174,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun endPath(coord: Coordinate) {
         drawboardRepository.sendEndPath(coord)
-        //TODO ENLEVER CETTE LIGNE DE COMMENTAIRE
-        //drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
+        drawingCommandsService.add(DrawPathCommand(paths.value!!.last().data.pathId, drawboardRepository))
         isUndoPossibleLiveData.postValue(true)
         isRedoPossibleLiveData.postValue(false)
     }
@@ -184,6 +191,14 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         val pathId = detectPathCollision(coord)
         if(pathId != -1){
             drawboardRepository.sendErasePath(pathId)
+            drawingCommandsService.add(ErasePathCommand(pathId, drawboardRepository))
+        }
+        isUndoPossibleLiveData.postValue(true)
+    }
+    fun localErase(coord:Coordinate){
+        val pathId = detectPathCollision(coord)
+        if(pathId != -1){
+            deletePath(pathId)
             drawingCommandsService.add(ErasePathCommand(pathId, drawboardRepository))
         }
         isUndoPossibleLiveData.postValue(true)
@@ -207,5 +222,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
             }
         }
         return -1
+    }
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
     }
 }

@@ -32,8 +32,11 @@ const val GAME_INFOS_INTRO = "Voici le panneau contenant toutes les informations
         "\nPremièrement, on peut y trouver le décompte de la partie. Ce décompte représente le temps avant un changement de devineur" +
         "\nPar la suite, on a l'icône de crayon représentant que vous êtes actuellement le dessinateur" +
         "\nFinalement, on a les informations des joueurs dans la partie ainsi que le score d'équipe"
+const val CHAT_INTRO = "La boîte de Chat permet non seulement de communiquer avec les autres joueurs dans la partie," +
+        "\nmais également à deviner ce que tes coéquipiers dessinent. Quand la barre de texte est verte il est temps de deviner ! "
 const val DRAWBOARD_INTRO = "Nous passons maintenant à la partie intéressante de la partie, c'est-à-dire le dessin !"
 const val INTRO_CONCLUSION = "Félicitation, vous avez terminé le tutoriel de Polydessin!" +
+        "\nVous pouvez rester et vous familiariser avec le jeu, mais prenez en compte que les boutons Annuler et Refaire ne sont pas disponibles dans le tutoriel" +
         "\nPour revenir au menu principal et commencer à jouer, appuyez sur le bouton quitter en bas à gauche de l'écran"
 @AndroidEntryPoint
 class GameTutorialActivity: AppCompatActivity()  {
@@ -77,19 +80,20 @@ class GameTutorialActivity: AppCompatActivity()  {
 
     private fun startTutorialSequence(){
         val models:ArrayList<SequenceModel> = ArrayList()
-        models.add(SequenceModel(GAME_WELCOME,binding.drawboardContainer,this))
-        models.add(SequenceModel(GAME_INFOS_INTRO,binding.team,this))
-        models.add(SequenceModel(DRAWBOARD_INTRO,binding.drawboardContainer,this))
+        models.add(SequenceModel(GAME_WELCOME,binding.drawboardContainer,this,false))
+        models.add(SequenceModel(GAME_INFOS_INTRO,binding.team,this,false))
+        models.add(SequenceModel(CHAT_INTRO,binding.chatRoot,this,false))
+        models.add(SequenceModel(DRAWBOARD_INTRO,binding.drawboardContainer,this,false))
         val drawBoardSequenceModels = drawboardFragment.getTutorialSequence()
         for(i in 0 until drawBoardSequenceModels.size){
             models.add(drawBoardSequenceModels[i])
         }
-        models.add(SequenceModel(INTRO_CONCLUSION, binding.drawboardContainer,this))
+        models.add(SequenceModel(INTRO_CONCLUSION, binding.drawboardContainer,this,false))
         vm.createSequence(models)
     }
 
     private fun setupTeamsUi(){
-        team1.add(PlayerInfo(username = "stonkMaster"))
+        team1.add(PlayerInfo(username = vm.getUsername()))
         binding.team1Rv.adapter?.notifyDataSetChanged()
         binding.team1Score.text = "0"
         binding.team2Label.visibility = View.GONE
@@ -113,43 +117,11 @@ class GameTutorialActivity: AppCompatActivity()  {
                 "activityChange",
                 bundleOf("currentActivity" to "lobby")
             )
+            vm.finishTutorial()
             finish()
         }
             dialog.continueBtn.setOnClickListener {
                 dialog.dismiss()
             }
     }
-    /*private fun getFrenchRole(role:String):String{
-        return when (role){
-            PlayerRole.DRAWER.value -> "Dessinateur"
-            PlayerRole.GUESSER.value -> "Devineur"
-            else -> "Passif"
-        }
-    }
-    private fun setTimer(timeInMilis:Long){
-        timer?.cancel()
-        timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
-            @SuppressLint("SetTextI18n")
-            override fun onTick(millisUntilFinished:Long){
-                if(millisUntilFinished <= TIME_ALMOST_UP){
-                    binding.timer.setTextColor(Color.RED)
-                    binding.timerIcon.setImageResource(R.drawable.ic_timer_red)
-                }
-                else{
-                    binding.timer.setTextColor(Color.GREEN)
-                    binding.timerIcon.setImageResource(R.drawable.ic_timer_green)
-                }
-                val secRemaining = (((millisUntilFinished / MILLIS_IN_SEC)) % SEC_IN_MIN).toInt()
-                val minRemaining:Int = (((millisUntilFinished / MILLIS_IN_SEC) - secRemaining) / SEC_IN_MIN).toInt()
-                if(secRemaining < TWO_DIGITS){
-                    binding.timer.text = "$minRemaining:0$secRemaining"
-                }
-                else{
-                    binding.timer.text = "$minRemaining:$secRemaining"
-                }
-            }
-            override fun onFinish(){}
-        }
-        timer?.start()
-    }*/
 }
