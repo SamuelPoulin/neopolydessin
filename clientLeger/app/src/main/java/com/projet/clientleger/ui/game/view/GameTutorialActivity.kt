@@ -1,32 +1,38 @@
 package com.projet.clientleger.ui.game.view
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.CountDownTimer
+import android.util.AttributeSet
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
-import com.projet.clientleger.data.enumData.GameType
-import com.projet.clientleger.data.enumData.PlayerRole
-import com.projet.clientleger.data.enumData.ReasonEndGame
+import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
 import kotlinx.android.synthetic.main.dialog_gamemode.*
-import kotlinx.coroutines.launch
 
+const val GAME_WELCOME = "Bienvenue dans le tutoriel de partie de Polydessin !"
+const val GAME_INFOS_INTRO = "Voici le panneau contenant toutes les informations importante à la partie." +
+        "\nPremièrement, on peut y trouver le décompte de la partie. Ce décompte représente le temps avant un changement de devineur" +
+        "\nPar la suite, on a l'icône de crayon représentant que vous êtes actuellement le dessinateur" +
+        "\nFinalement, on a les informations des joueurs dans la partie ainsi que le score d'équipe"
+const val DRAWBOARD_INTRO = "Nous passons maintenant à la partie intéressante de la partie, c'est-à-dire le dessin !"
+const val CHOOSE_PEN = "Choisissez maintenant votre outil pour commencer votre dessin. Appuyez sur l'icône de crayon."
+@AndroidEntryPoint
 class GameTutorialActivity: AppCompatActivity()  {
+    private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
 
@@ -41,7 +47,7 @@ class GameTutorialActivity: AppCompatActivity()  {
             val heightDiff = binding.root.height - rect.bottom
             supportFragmentManager.setFragmentResult("keyboardEvent", bundleOf("height" to heightDiff))
         }
-        supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
+        supportFragmentManager.setFragmentResult("isDrawing", bundleOf("boolean" to true))
 
         setupTeamsUi()
         binding.team1Rv.layoutManager = LinearLayoutManager(this)
@@ -50,9 +56,19 @@ class GameTutorialActivity: AppCompatActivity()  {
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
+        binding.currentRole.setImageResource(R.drawable.ic_drawer)
+
+        val models:ArrayList<SequenceModel> = ArrayList()
+        models.add(SequenceModel(GAME_WELCOME,binding.drawboardContainer,this))
+        models.add(SequenceModel(GAME_INFOS_INTRO,binding.team,this))
+        models.add(SequenceModel(DRAWBOARD_INTRO,binding.drawboardContainer,this))
+        vm.createSequence(models)
+
     }
 
     private fun setupTeamsUi(){
+        team1.add(PlayerInfo(username = "stonkMaster"))
+        binding.team1Rv.adapter?.notifyDataSetChanged()
         binding.team1Score.text = "0"
         binding.team2Label.visibility = View.GONE
         binding.team2Score.visibility = View.GONE
