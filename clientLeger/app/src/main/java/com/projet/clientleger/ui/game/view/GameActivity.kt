@@ -98,7 +98,7 @@ class GameActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.title.text = message
+        dialog.titleMessage.text = message
 
         dialog.quitBtn.setOnClickListener {
             dialog.dismiss()

@@ -1,11 +1,14 @@
 package com.projet.clientleger.ui.mainmenu
 
+import android.app.Activity
 import android.view.View
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.repository.MainmenuRepository
 import com.projet.clientleger.data.service.TutorialService
+import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -24,10 +27,14 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun disconnect(){
         mainmenuRepository.disconnect()
     }
-    /*fun isTutorialActive():Boolean{
-        return tutorialService.isTutorialActive
-    }*/
-    /*fun showTutorialStep(message:String, target: View){
-        tutorialService.userGuide(message,target)
-    }*/
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
+    }
+    fun addShowcase(model:SequenceModel){
+        tutorialService.userGuide(model)
+    }
+    fun createShowcaseSequence(models:ArrayList<SequenceModel>){
+        tutorialService.createShowcaseSequence(models)
+
+    }
 }

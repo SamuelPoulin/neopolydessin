@@ -18,34 +18,49 @@ import androidx.fragment.app.commit
 import com.codertainment.materialintro.sequence.SkipLocation
 import com.codertainment.materialintro.shape.Focus
 import com.codertainment.materialintro.shape.FocusGravity
+import com.codertainment.materialintro.shape.Shape
 import com.codertainment.materialintro.shape.ShapeType
 import com.codertainment.materialintro.utils.materialIntro
 import com.codertainment.materialintro.utils.materialIntroSequence
 import com.codertainment.materialintro.view.MaterialIntroView
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
+import com.projet.clientleger.ui.game.view.GameTutorialActivity
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobbylist.view.SearchLobbyActivity
 import com.projet.clientleger.ui.mainmenu.MainMenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
+import smartdevelop.ir.eram.showcaseviewlib.GuideView
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType
+import smartdevelop.ir.eram.showcaseviewlib.listener.GuideListener
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
+import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import javax.inject.Inject
-
+const val WELCOME_MESSAGE = "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
+const val INTRO_CREATE_GAME_MESSAGE = "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
+const val INTRO_JOIN_GAME_MESSAGE = "Le bouton Rejoindre Une Partie sert à rejoindre une partie déjà existante pour jouer avec d'autres utilisateurs de l'application.\ntu peux également rechercher une partie selon tes préférences de difficulté et de mode de jeu"
+const val INTRO_DASHBOARD_MESSAGE = "Le tableau de bord permet de voir toutes les statistiques de ton compte, n'hésites pas à aller regarder cela suite au tutoriel !"
+const val INTRO_TOOLBAR_MESSAGE = "La barre d'outil permet de se déconnecter et d'accéder à la liste d'amis\nVous pouvez ainsi ajouter et écrire à des amis ici si vous voulez être en mesure de jouer avec eux"
+const val INTRO_CHATBOX_MESSAGE = "Vous pouvez également écrire aux autres utilisateurs connectés à l'application par le boîte de chat ici"
+const val INTRO_START_GAME_MESSAGE = "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
 
     var selectedGameType: GameType = GameType.CLASSIC
     var selectedDifficulty: Difficulty = Difficulty.EASY
-    var isTutorialStarted:Boolean = false
     lateinit var binding: ActivityMainmenuBinding
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
+    lateinit var dialog:AlertDialog
     val vm: MainMenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,11 +77,6 @@ class MainmenuActivity : AppCompatActivity() {
             }
             true
         }
-        binding.accountBtn.setOnClickListener {
-            val intent = Intent(this, AccountManagementActivity::class.java)
-            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
-            startActivity(intent)
-        }
 
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
@@ -75,70 +85,35 @@ class MainmenuActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
-        binding.userGuideBtn.setOnClickListener {
-            //userGuide("Haha tu sais meme pas comment utiliser l'application", binding.createGameBtn)
-            tutorialSequence()
-        }
-    }
-    private fun tutorialSequence(){
-        materialIntroSequence(showSkip = true, persistSkip = true) {
-            addConfig {
-                viewId = "createGameBtn"
-                targetView = binding.createGameBtn
-                skipLocation = SkipLocation.BOTTOM_LEFT
-                skipText = "Skip"
-                isFadeInAnimationEnabled = true
-                isFadeOutAnimationEnabled = true
-                fadeAnimationDurationMillis = 300
-                infoText=  "Haha tu sais meme pas comment utiliser l'application"
-                focusType = Focus.ALL
-                focusGravity = FocusGravity.CENTER
-                dismissOnTouch = false
-                isInfoEnabled = true
-                infoTextColor = Color.BLACK
-                infoTextSize = 18f
-                infoTextAlignment = View.TEXT_ALIGNMENT_CENTER
-                infoTextTypeface = Typeface.DEFAULT_BOLD
-                infoCardBackgroundColor = Color.WHITE
-                isHelpIconEnabled = true
-                helpIconResource = R.drawable.ic_pencil
-                helpIconColor = Color.BLUE
-                isDotViewEnabled = false
-                //viewId = "unique_id" // or automatically picked from view's tag
-                isPerformClick = true
-                showOnlyOnce = false
-                shapeType = ShapeType.RECTANGLE
-                dismissOnTouch = true
+        binding.createGameBtn.setOnClickListener {
+            val intent = Intent(this,GameTutorialActivity::class.java)
+            startActivity(intent)
+            //TODO enlever le if de commentaire
+            /*if(vm.isTutorialActive()){
+                val intent = Intent(this,GameTutorialActivity::class.java)
+                startActivity(intent)
             }
-
+            else{
+                showGameDialog(true)
+            }*/
         }
     }
-    /*fun userGuide(message:String, target: View){
-        materialIntro(show = true) {
-            isFadeInAnimationEnabled = true
-            isFadeOutAnimationEnabled = true
-            fadeAnimationDurationMillis = 300
-            focusType = Focus.ALL
-            focusGravity = FocusGravity.CENTER
-            dismissOnTouch = false
-            isInfoEnabled = true
-            infoText = message
-            infoTextColor = Color.BLACK
-            infoTextSize = 18f
-            infoTextAlignment = View.TEXT_ALIGNMENT_CENTER
-            infoTextTypeface = Typeface.DEFAULT_BOLD
-            infoCardBackgroundColor = Color.WHITE
-            isHelpIconEnabled = true
-            helpIconResource = R.drawable.ic_pencil
-            helpIconColor = Color.BLUE
-            isDotViewEnabled = false
-            //viewId = "unique_id" // or automatically picked from view's tag
-            targetView = target
-            isPerformClick = true
-            showOnlyOnce = false
-            shapeType = ShapeType.RECTANGLE
-            dismissOnTouch = true
-        }*/
+    fun goToDashBoard(){
+        val intent = Intent(this, AccountManagementActivity::class.java)
+        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
+        startActivity(intent)
+    }
+    fun startTutorial(){
+        val sequence:ArrayList<SequenceModel> = ArrayList()
+        sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo,this))
+        sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn,this))
+        sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE,binding.joinGamebtn,this))
+        sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE,binding.accountBtn,this))
+        sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar,this))
+        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot,this))
+        sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE,binding.createGameBtn,this))
+        vm.createShowcaseSequence(sequence)
+    }
 
     fun showGameDialog(isCreating: Boolean) {
         val visibility: Int
