@@ -4,6 +4,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.SoundPool
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -15,10 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
+import com.projet.clientleger.DaggerPolydessinApplication_HiltComponents_SingletonC.builder
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
@@ -40,13 +45,11 @@ const val INTRO_CHATBOX_MESSAGE = "Vous pouvez également écrire aux autres uti
 const val INTRO_START_GAME_MESSAGE = "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
-
     var selectedGameType: GameType = GameType.CLASSIC
     var selectedDifficulty: Difficulty = Difficulty.EASY
     lateinit var binding: ActivityMainmenuBinding
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
-    lateinit var dialog:AlertDialog
     val vm: MainMenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,6 +75,7 @@ class MainmenuActivity : AppCompatActivity() {
             finish()
         }
         binding.createGameBtn.setOnClickListener {
+            vm.playSound()
             if(vm.isTutorialActive()){
                 val intent = Intent(this,GameTutorialActivity::class.java)
                 startActivity(intent)
@@ -80,6 +84,7 @@ class MainmenuActivity : AppCompatActivity() {
                 showGameDialog(true)
             }
         }
+        vm.setupAudio(baseContext)
     }
     fun goToDashBoard(){
         val intent = Intent(this, AccountManagementActivity::class.java)
