@@ -23,14 +23,13 @@ export class ChatComponent {
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
-  friendslistOpened: boolean = false;
   chatRoomChangedSubscription: Subscription;
   isElectronApp: boolean;
 
   constructor(
     private snackBar: MatSnackBar,
     private electronService: ElectronService,
-    public chatService: ChatService,
+    private chatService: ChatService,
     public userService: UserService,
     public dialog: MatDialog,
     public router: Router,
@@ -124,6 +123,30 @@ export class ChatComponent {
 
   get maxLength(): number {
     return ChatComponent.MAX_CHARACTER_COUNT;
+  }
+
+  get standalone(): boolean {
+    return this.chatService.standalone;
+  }
+
+  get guessing(): boolean {
+    return this.chatService.guessing;
+  }
+
+  get messages(): Message[] {
+    return this.chatService.messages;
+  }
+
+  get friendslistOpened(): boolean {
+    return this.chatService.friendslistOpened;
+  }
+
+  get chatRoomsOpened(): boolean {
+    return this.chatService.chatRoomsOpened;
+  }
+
+  get canGuess(): boolean {
+    return this.chatService.canGuess;
   }
 
   sendNotification(message: string) {

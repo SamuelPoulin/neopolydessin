@@ -25,8 +25,10 @@ export class ChatService {
   playerDisconnectionSubscription: Subscription;
   friendslistSocketSubscription: Subscription;
   friendslistAPISubscription: Subscription;
+  chatRoomsSubscription: Subscription;
 
   rooms: ChatRoom[] = [];
+  joinableRooms: string[] = [];
   friends: FriendWithConnection[] = [];
   friendRequests: FriendWithConnection[] = [];
   currentRoomIndex: number = 0;
@@ -162,6 +164,14 @@ export class ChatService {
     this.friendslistAPISubscription = this.apiService.friendslistUpdated.subscribe((friendslist: FriendsList) => {
       this.updateFriendsList(friendslist);
     });
+
+    this.chatRoomsSubscription = this.socketService.receiveChatRooms().subscribe((chatRooms) => {
+      for (const chatRoom of chatRooms) {
+        if (chatRoom !== 'general') {
+          this.joinableRooms.push(chatRoom);
+        }
+      }
+    });
   }
 
   updateFriendsList(friendslist: FriendsList) {
@@ -243,6 +253,10 @@ export class ChatService {
       .catch((error) => {
         console.log(error);
       });
+  }
+
+  createChatRoom(roomName: string) {
+    this.socketService.createChatRoom(roomName);
   }
 
   joinChatRoom(roomName: string) {

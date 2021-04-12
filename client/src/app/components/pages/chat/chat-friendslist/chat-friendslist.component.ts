@@ -12,7 +12,7 @@ import { ModalType } from '@services/modal/modal-type.enum';
 export class ChatFriendslistComponent {
   @Input() opened: boolean;
 
-  constructor(public chatService: ChatService, private modalService: ModalDialogService) {}
+  constructor(private chatService: ChatService, private modalService: ModalDialogService) {}
 
   closeFriendslist() {
     this.chatService.friendslistOpened = false;
@@ -32,5 +32,9 @@ export class ChatFriendslistComponent {
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
+  }
+
+  get standalone(): boolean {
+    return this.chatService.standalone;
   }
 }

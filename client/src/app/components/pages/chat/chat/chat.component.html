@@ -1,17 +1,17 @@
-<div id="chat-container" [style.height]="chatService.standalone ? electronContainer ? 'calc(100vh - 30px)' : '100vh' : '100%'">
+<div id="chat-container" [style.height]="standalone ? electronContainer ? 'calc(100vh - 30px)' : '100vh' : '100%'">
   <div id="chat-header">
     <img id="chat-logo" src="assets/chat.png" />
     <h1 id="chat-text">Chat</h1>
     <div id="chat-friendslist-toggler-container">
-      <button color="warn" mat-flat-button id="chat-rooms-toggler" (click)="toggleChatRooms()" [style.background-color]="chatService.chatRoomsOpened ? '#464646' : '#2F2F2F'">
+      <button color="warn" mat-flat-button id="chat-rooms-toggler" (click)="toggleChatRooms()" [style.background-color]="chatRoomsOpened ? '#464646' : '#2F2F2F'">
         <mat-icon>weekend</mat-icon>
         Salons
       </button>
-      <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="chatService.friendslistOpened ? '#464646' : '#2F2F2F'" [style.margin-right]="isElectronApp ? chatService.standalone ? '15px' : '0px' : '15px'">
+      <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="friendslistOpened ? '#464646' : '#2F2F2F'" [style.margin-right]="isElectronApp ? standalone ? '15px' : '0px' : '15px'">
         <mat-icon>group</mat-icon>
         Amis
       </button>
-      <ng-container *ngIf="isElectronApp && !chatService.standalone">
+      <ng-container *ngIf="isElectronApp && !standalone">
         <button mat-icon-button id="chat-popout-toggler" (click)="popout()">
           <mat-icon>launch</mat-icon>
         </button>
@@ -20,11 +20,11 @@
   </div>
   <app-chat-tabs></app-chat-tabs>
   <div id="chat-friendslist-anchor">
-    <app-chat-friendslist [opened]="chatService.friendslistOpened"></app-chat-friendslist>
-    <app-chat-rooms [opened]="chatService.chatRoomsOpened"></app-chat-rooms>
+    <app-chat-friendslist [opened]="friendslistOpened"></app-chat-friendslist>
+    <app-chat-rooms [opened]="chatRoomsOpened"></app-chat-rooms>
   </div>
   <div id="chat-messages">
-    <ng-container *ngFor="let message of chatService.messages">
+    <ng-container *ngFor="let message of messages">
       <ng-container *ngIf="!isSystem(message)">
         <chat-message [message]="message"
           [ngStyle]="{'align-self': message.senderUsername === userService.account.username && 'flex-end'}"></chat-message>
@@ -34,10 +34,10 @@
       </ng-container>
     </ng-container>
   </div>
-  <div id="chat-writer" [style.background-color]="chatService.guessing ? correctColor : 'white'">
+  <div id="chat-writer" [style.background-color]="guessing ? correctColor : 'white'">
     <div id="emoji-section-container">
       <button id="emoji-button" mat-icon-button (click)="toggleEmojiMart()">
-        <mat-icon [style.color]="chatService.guessing ? 'white' : iconColor">sentiment_satisfied_alt</mat-icon>
+        <mat-icon [style.color]="guessing ? 'white' : iconColor">sentiment_satisfied_alt</mat-icon>
       </button>
       <ng-container *ngIf="emojiMartOpen">
         <div id="emoji-picker-anchor">
@@ -45,17 +45,17 @@
         </div>
       </ng-container>
     </div>
-    <ng-container *ngIf="chatService.canGuess">
+    <ng-container *ngIf="canGuess">
       <button id="guess-button" mat-icon-button (click)="toggleGuessMode()">
-        <mat-icon [style.color]="chatService.guessing ? 'white' : iconColor">lightbulb</mat-icon>
+        <mat-icon [style.color]="guessing ? 'white' : iconColor">lightbulb</mat-icon>
       </button>
     </ng-container>
-    <input type="text" id="message-textbox" [style.color]="chatService.guessing ? 'white' : 'black'" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" placeholder="Aa" />
+    <input type="text" id="message-textbox" [style.color]="guessing ? 'white' : 'black'" [(ngModel)]="inputValue" (keyup.enter)="sendMessage()" placeholder="Aa" />
     <ng-container *ngIf="length > maxLength">
       <div id="message-length">{{ length }}/{{ maxLength }}</div>
     </ng-container>
     <button id="send-button" mat-icon-button (click)="sendMessage()">
-      <mat-icon [style.color]="chatService.guessing ? correctColor : iconColor">send</mat-icon>
+      <mat-icon [style.color]="guessing ? correctColor : iconColor">send</mat-icon>
     </button>
   </div>
 </div>

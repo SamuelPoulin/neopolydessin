@@ -12,7 +12,7 @@ import { ChatService } from '@services/chat.service';
 export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
 
-  constructor(private apiService: APIService, private chatService: ChatService) {
+  constructor(private chatService: ChatService, private apiService: APIService) {
     this.friend = { friendId: { _id: '', avatar: '', username: '' }, isOnline: false, status: FriendStatus.PENDING, received: false };
   }
 
