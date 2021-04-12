@@ -1,9 +1,12 @@
 import { EventEmitter } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { ChatState } from '@models/chat/chat-state';
+import { ElectronService } from 'ngx-electron';
 import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
 import { ChatService } from './chat.service';
+import { MockElectronService } from './electron.service.spec';
 import { GameService } from './game.service';
 import { MockGameService } from './game.service.spec';
 import { SocketService } from './socket-service.service';
@@ -20,9 +23,18 @@ export const MockChatService = jasmine.createSpyObj('ChatService', {
   resetGameMessages: null,
 });
 
+MockChatService.chatState = {
+  rooms: [],
+  joinableRooms: [],
+  friends: [],
+  friendRequests: [],
+  currentRoomIndex: 0,
+  canGuess: false,
+  guessing: false,
+  friendslistOpened: false,
+  chatRoomsOpened: false,
+} as ChatState;
 MockChatService.messages = [];
-MockChatService.friends = [];
-MockChatService.friendRequests = [];
 MockChatService.chatRoomChanged = new EventEmitter<void>();
 
 describe('ChatService', () => {
@@ -36,6 +48,7 @@ describe('ChatService', () => {
         { provide: GameService, useValue: MockGameService },
         { provide: APIService, useValue: MockAPIService },
         { provide: UserService, useValue: MockUserService },
+        { provide: ElectronService, useValue: MockElectronService },
       ],
     }).compileComponents();
   }));
