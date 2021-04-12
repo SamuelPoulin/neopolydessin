@@ -15,7 +15,7 @@ export class ChatFriendslistComponent {
   constructor(private chatService: ChatService, private modalService: ModalDialogService) {}
 
   closeFriendslist() {
-    this.chatService.chatState.friendslistOpened = false;
+    this.chatService.toggleFriendslist();
   }
 
   openAddFriend() {

@@ -90,17 +90,15 @@ export class ChatComponent {
   }
 
   toggleGuessMode(): void {
-    this.chatService.chatState.guessing = !this.chatService.chatState.guessing;
+    this.chatService.toggleGuessMode();
   }
 
   toggleFriendslist() {
-    this.chatService.chatState.friendslistOpened = !this.chatService.chatState.friendslistOpened;
-    this.chatService.chatState.chatRoomsOpened = false;
+    this.chatService.toggleFriendslist();
   }
 
   toggleChatRooms() {
-    this.chatService.chatState.chatRoomsOpened = !this.chatService.chatState.chatRoomsOpened;
-    this.chatService.chatState.friendslistOpened = false;
+    this.chatService.toggleChatRooms();
   }
 
   addEmoji(e: EmojiEvent) {

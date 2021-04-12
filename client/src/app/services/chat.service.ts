@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { EventEmitter, Injectable, Injector, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { Decision } from '@common/communication/friend-request';
 import { FriendsList, FriendStatus } from '@common/communication/friends';
 import { ChatRoomType } from '@models/chat/chat-room';
 import { ChatState } from '@models/chat/chat-state';
@@ -28,6 +29,7 @@ export class ChatService {
   friendslistSocketSubscription: Subscription;
   friendslistAPISubscription: Subscription;
   chatRoomsSubscription: Subscription;
+  canGuessChangedSubscription: Subscription;
 
   chatRoomChanged: EventEmitter<void>;
   chatPoppedOut: boolean;
@@ -51,6 +53,7 @@ export class ChatService {
       friends: [],
       friendRequests: [],
       currentRoomIndex: 0,
+      canGuess: false,
       guessing: false,
       friendslistOpened: false,
       chatRoomsOpened: false,
@@ -90,6 +93,43 @@ export class ChatService {
       });
       this.electronService.ipcRenderer.on('chat-action-focus-room', (event, arg) => {
         this.focusRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-toggle-guess', (event, arg) => {
+        this.toggleGuessMode();
+      });
+      this.electronService.ipcRenderer.on('chat-action-toggle-friends', (event, arg) => {
+        this.toggleFriendslist();
+      });
+      this.electronService.ipcRenderer.on('chat-action-toggle-rooms', (event, arg) => {
+        this.toggleChatRooms();
+      });
+      this.electronService.ipcRenderer.on('chat-action-create-dm', (event, arg) => {
+        console.log(arg);
+        this.createDM(arg.friendUsername, arg.friendId);
+      });
+      this.electronService.ipcRenderer.on('chat-action-create-room', (event, arg) => {
+        this.createChatRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-delete-room', (event, arg) => {
+        this.deleteChatRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-join-room', (event, arg) => {
+        this.joinChatRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-leave-room', (event, arg) => {
+        this.leaveChatRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-add-friend', (event, arg) => {
+        this.addFriend(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-remove-friend', (event, arg) => {
+        this.removeFriend(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-confirm-friend', (event, arg) => {
+        this.confirmFriend(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-reject-friend', (event, arg) => {
+        this.rejectFriend(arg);
       });
     }
 
@@ -226,6 +266,11 @@ export class ChatService {
       }
       this.updatePoppedOutChat();
     });
+
+    this.canGuessChangedSubscription = this.gameService.canGuessChanged.subscribe(() => {
+      this.chatState.canGuess = this.gameService.canGuess;
+      this.updatePoppedOutChat();
+    });
   }
 
   updateFriendsList(friendslist: FriendsList) {
@@ -258,6 +303,35 @@ export class ChatService {
       } else if (room.type === ChatRoomType.PRIVATE) {
         this.socketService.sendPrivateMessage(text, room.id);
       }
+      this.updatePoppedOutChat();
+    }
+  }
+
+  toggleGuessMode() {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-toggle-guess');
+    } else {
+      this.chatState.guessing = !this.chatState.guessing;
+      this.updatePoppedOutChat();
+    }
+  }
+
+  toggleFriendslist() {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-toggle-friends');
+    } else {
+      this.chatState.friendslistOpened = !this.chatState.friendslistOpened;
+      this.chatState.chatRoomsOpened = false;
+      this.updatePoppedOutChat();
+    }
+  }
+
+  toggleChatRooms() {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-toggle-rooms');
+    } else {
+      this.chatState.chatRoomsOpened = !this.chatState.chatRoomsOpened;
+      this.chatState.friendslistOpened = false;
       this.updatePoppedOutChat();
     }
   }
@@ -307,48 +381,112 @@ export class ChatService {
   }
 
   createDM(friendUsername: string, friendId: string) {
-    this.apiService
-      .getMessageHistory(friendId)
-      .then((privateMessages) => {
-        const chatMessages: ChatMessage[] = [];
-        for (const privateMessage of privateMessages) {
-          chatMessages.push({
-            senderUsername:
-              privateMessage.senderAccountId === this.userService.account._id ? this.userService.account.username : friendUsername,
-            content: privateMessage.content,
-            timestamp: privateMessage.timestamp,
-          });
-        }
-        this.chatState.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
-        this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === friendUsername);
-        this.chatState.friendslistOpened = false;
-        this.chatRoomChanged.emit();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-create-dm', { friendUsername, friendId });
+    } else {
+      this.apiService
+        .getMessageHistory(friendId)
+        .then((privateMessages) => {
+          const chatMessages: ChatMessage[] = [];
+          for (const privateMessage of privateMessages) {
+            chatMessages.push({
+              senderUsername:
+                privateMessage.senderAccountId === this.userService.account._id ? this.userService.account.username : friendUsername,
+              content: privateMessage.content,
+              timestamp: privateMessage.timestamp,
+            });
+          }
+          this.chatState.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
+          this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === friendUsername);
+          this.chatState.friendslistOpened = false;
+          this.chatRoomChanged.emit();
+          this.updatePoppedOutChat();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }
+
+  addFriend(username: string) {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-add-friend', username);
+    } else {
+      this.apiService.addFriend(username);
+      this.updatePoppedOutChat();
+    }
+  }
+
+  confirmFriend(friendId: string) {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-confirm-friend', friendId);
+    } else {
+      this.apiService.sendFriendDecision(friendId, Decision.ACCEPT);
+      this.updatePoppedOutChat();
+    }
+  }
+
+  rejectFriend(friendId: string) {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-reject-friend', friendId);
+    } else {
+      this.apiService.sendFriendDecision(friendId, Decision.REFUSE);
+      this.updatePoppedOutChat();
+    }
+  }
+
+  removeFriend(friendId: string) {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-remove-friend', friendId);
+    } else {
+      this.apiService.removeFriend(friendId);
+      this.updatePoppedOutChat();
+    }
   }
 
   createChatRoom(roomName: string) {
-    this.socketService.createChatRoom(roomName);
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-create-room', roomName);
+    } else {
+      this.socketService.createChatRoom(roomName).then(() => {
+        this.updatePoppedOutChat();
+      });
+    }
   }
 
   joinChatRoom(roomName: string) {
-    this.socketService.joinChatRoom(roomName).then(() => {
-      this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
-      this.chatState.chatRoomsOpened = false;
-      this.chatRoomChanged.emit();
-    });
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-join-room', roomName);
+    } else {
+      this.socketService.joinChatRoom(roomName).then(() => {
+        this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
+        this.chatState.chatRoomsOpened = false;
+        this.chatRoomChanged.emit();
+        this.updatePoppedOutChat();
+      });
+    }
   }
 
   leaveChatRoom(roomName: string) {
-    this.socketService.leaveChatRoom(roomName);
-    this.closeRoom(roomName);
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-leave-room', roomName);
+    } else {
+      this.socketService.leaveChatRoom(roomName).then(() => {
+        this.closeRoom(roomName);
+        this.updatePoppedOutChat();
+      });
+    }
   }
 
   deleteChatRoom(roomName: string) {
-    this.socketService.deleteChatRoom(roomName);
-    this.closeRoom(roomName);
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-delete-room', roomName);
+    } else {
+      this.socketService.deleteChatRoom(roomName).then(() => {
+        this.closeRoom(roomName);
+        this.updatePoppedOutChat();
+      });
+    }
   }
 
   get messages() {
@@ -368,11 +506,7 @@ export class ChatService {
   }
 
   get canGuess(): boolean {
-    if (this.gameService) {
-      return this.gameService.canGuess && this.chatState.rooms[this.chatState.currentRoomIndex].type === ChatRoomType.GAME;
-    } else {
-      return false;
-    }
+    return this.chatState.canGuess && this.chatState.rooms[this.chatState.currentRoomIndex].type === ChatRoomType.GAME;
   }
 
   get standalone(): boolean {

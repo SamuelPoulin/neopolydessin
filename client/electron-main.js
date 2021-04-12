@@ -118,19 +118,94 @@ ipcMain.on('chat-action-send-guess', (event, arg) => {
   if(appWindow) {
     appWindow.webContents.send('chat-action-send-guess', arg);
   }
+
 });
 ipcMain.on('chat-action-send-message', (event, arg) => {
   if(appWindow) {
     appWindow.webContents.send('chat-action-send-message', arg);
   }
+
 });
 ipcMain.on('chat-action-focus-room', (event, arg) => {
   if(appWindow) {
     appWindow.webContents.send('chat-action-focus-room', arg);
   }
+
 });
 ipcMain.on('chat-action-close-room', (event, arg) => {
   if(appWindow) {
     appWindow.webContents.send('chat-action-close-room', arg);
+  }
+});
+
+ipcMain.on('chat-action-toggle-guess', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-toggle-guess');
+  }
+});
+
+ipcMain.on('chat-action-toggle-friends', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-toggle-friends');
+  }
+});
+
+ipcMain.on('chat-action-toggle-rooms', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-toggle-rooms');
+  }
+});
+
+ipcMain.on('chat-action-create-dm', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-create-dm', arg);
+  }
+});
+
+ipcMain.on('chat-action-create-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-create-room', arg);
+  }
+});
+
+ipcMain.on('chat-action-delete-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-delete-room', arg);
+  }
+});
+
+ipcMain.on('chat-action-join-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-join-room', arg);
+  }
+});
+
+ipcMain.on('chat-action-leave-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-leave-room', arg);
+  }
+});
+
+ipcMain.on('chat-action-add-friend', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-add-friend', arg);
+  }
+});
+
+ipcMain.on('chat-action-remove-friend', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-remove-friend', arg);
+  }
+});
+
+ipcMain.on('chat-action-confirm-friend', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-confirm-friend', arg);
+  }
+});
+
+ipcMain.on('chat-action-reject-friend', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-reject-friend', arg);
   }
 });

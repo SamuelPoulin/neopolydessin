@@ -7,6 +7,7 @@ export interface ChatState {
   friends: FriendWithConnection[];
   friendRequests: FriendWithConnection[];
   currentRoomIndex: number;
+  canGuess: boolean;
   guessing: boolean;
   friendslistOpened: boolean;
   chatRoomsOpened: boolean;
