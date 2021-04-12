@@ -57,13 +57,17 @@ export class ChatService {
     };
 
     // Popped out Electron
-    if (this.electronService.isElectronApp && this.standalone) {
+    if (this.shouldUseMainProcess) {
       this.electronService.ipcRenderer.on('chat-update', (event, arg) => {
         this.nz.run(() => {
           this.chatState = arg;
           console.log(arg);
         });
       });
+    } else {
+      this.socketService = this.injector.get(SocketService) as SocketService;
+      this.gameService = this.injector.get(GameService) as GameService;
+      this.initSubscriptions();
     }
 
     // Main Electron
@@ -75,13 +79,18 @@ export class ChatService {
       this.electronService.ipcRenderer.on('chat-closed', () => {
         this.chatPoppedOut = false;
       });
-    }
-
-    // Not electron or popped out
-    if (!(this.electronService.isElectronApp && this.standalone)) {
-      this.socketService = this.injector.get(SocketService) as SocketService;
-      this.gameService = this.injector.get(GameService) as GameService;
-      this.initSubscriptions();
+      this.electronService.ipcRenderer.on('chat-action-send-message', (event, arg) => {
+        this.sendMessage(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-send-guess', (event, arg) => {
+        this.sendGuess(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-close-room', (event, arg) => {
+        this.closeRoom(arg);
+      });
+      this.electronService.ipcRenderer.on('chat-action-focus-room', (event, arg) => {
+        this.focusRoom(arg);
+      });
     }
 
     this.chatRoomChanged = new EventEmitter<void>();
@@ -236,37 +245,57 @@ export class ChatService {
   }
 
   sendMessage(text: string) {
-    const room = this.chatState.rooms[this.chatState.currentRoomIndex];
-    if (room.type === ChatRoomType.GAME) {
-      this.socketService.sendMessage(text);
-    } else if (room.type === ChatRoomType.GENERAL) {
-      this.socketService.sendRoomMessage(text, 'general');
-    } else if (room.type === ChatRoomType.GROUP) {
-      this.socketService.sendRoomMessage(text, room.name);
-    } else if (room.type === ChatRoomType.PRIVATE) {
-      this.socketService.sendPrivateMessage(text, room.id);
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-send-message', text);
+    } else {
+      const room = this.chatState.rooms[this.chatState.currentRoomIndex];
+      if (room.type === ChatRoomType.GAME) {
+        this.socketService.sendMessage(text);
+      } else if (room.type === ChatRoomType.GENERAL) {
+        this.socketService.sendRoomMessage(text, 'general');
+      } else if (room.type === ChatRoomType.GROUP) {
+        this.socketService.sendRoomMessage(text, room.name);
+      } else if (room.type === ChatRoomType.PRIVATE) {
+        this.socketService.sendPrivateMessage(text, room.id);
+      }
+      this.updatePoppedOutChat();
     }
   }
 
   sendGuess(text: string) {
-    this.socketService.sendGuess(text);
-    this.chatState.guessing = false;
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-send-guess', text);
+    } else {
+      this.socketService.sendGuess(text);
+      this.chatState.guessing = false;
+      this.updatePoppedOutChat();
+    }
   }
 
   closeRoom(roomName: string) {
-    const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
-    if (roomIndex > -1) {
-      this.chatState.rooms.splice(roomIndex, 1);
-      this.chatState.currentRoomIndex = 0;
-      this.chatRoomChanged.emit();
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-close-room', roomName);
+    } else {
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
+      if (roomIndex > -1) {
+        this.chatState.rooms.splice(roomIndex, 1);
+        this.chatState.currentRoomIndex = 0;
+        this.chatRoomChanged.emit();
+        this.updatePoppedOutChat();
+      }
     }
   }
 
   focusRoom(roomName: string) {
-    const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
-    if (roomIndex > -1) {
-      this.chatState.currentRoomIndex = roomIndex;
-      this.chatRoomChanged.emit();
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-focus-room', roomName);
+    } else {
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
+      if (roomIndex > -1) {
+        this.chatState.currentRoomIndex = roomIndex;
+        this.chatRoomChanged.emit();
+        this.updatePoppedOutChat();
+      }
     }
   }
 
@@ -354,6 +383,10 @@ export class ChatService {
     if (this.chatPoppedOut) {
       this.electronService.ipcRenderer.send('chat-update', this.chatState);
     }
+  }
+
+  get shouldUseMainProcess(): boolean {
+    return this.electronService.isElectronApp && this.standalone;
   }
 
   popOut() {

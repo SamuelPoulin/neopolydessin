@@ -113,3 +113,24 @@ ipcMain.on('chat-update', (event, arg) => {
     chatWindow.webContents.send('chat-update', arg);
   }
 });
+
+ipcMain.on('chat-action-send-guess', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-send-guess', arg);
+  }
+});
+ipcMain.on('chat-action-send-message', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-send-message', arg);
+  }
+});
+ipcMain.on('chat-action-focus-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-focus-room', arg);
+  }
+});
+ipcMain.on('chat-action-close-room', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-close-room', arg);
+  }
+});
