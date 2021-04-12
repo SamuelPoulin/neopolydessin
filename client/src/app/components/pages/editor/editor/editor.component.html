@@ -35,7 +35,9 @@
           </ng-container>
         </div>
       </div>
-      <app-chat></app-chat>
+      <ng-container *ngIf="!chatService.chatPoppedOut">
+        <app-chat></app-chat>
+      </ng-container>
     </div>
   </ng-template>
 

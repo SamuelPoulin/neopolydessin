@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
+import { ElectronService } from 'ngx-electron';
 import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
@@ -24,9 +25,11 @@ export class ChatComponent {
 
   friendslistOpened: boolean = false;
   chatRoomChangedSubscription: Subscription;
+  isElectronApp: boolean;
 
   constructor(
     private snackBar: MatSnackBar,
+    private electronService: ElectronService,
     public chatService: ChatService,
     public userService: UserService,
     public dialog: MatDialog,
@@ -37,6 +40,19 @@ export class ChatComponent {
     this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
       this.scrollToBottom();
     });
+
+    if (this.electronService.isElectronApp) {
+      this.isElectronApp = true;
+
+      this.electronService.ipcRenderer.on('asynchronous-reply', (event, arg) => {
+        console.log(arg);
+      });
+      this.electronService.ipcRenderer.send('asynchronous-message', 'ping');
+
+      this.electronService.ipcRenderer.on('chat-update', (event, arg) => {
+        console.log(arg);
+      });
+    }
   }
 
   sendMessage(): void {
@@ -116,5 +132,10 @@ export class ChatComponent {
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
     });
+  }
+
+  popout() {
+    this.electronService.ipcRenderer.send('chat-init');
+    this.chatService.chatPoppedOut = true;
   }
 }

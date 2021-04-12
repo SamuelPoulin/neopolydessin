@@ -112,12 +112,6 @@ export class SocketService {
     });
   }
 
-  receiveChatRoomsImIn(): Observable<string[]> {
-    return new Observable<string[]>((obs) => {
-      this.socket.emit(SocketMessages.GET_CHAT_ROOMS_IM_IN, (chatRooms: string[]) => obs.next(chatRooms));
-    });
-  }
-
   receiveNextTimestamp(): Observable<TimeInfo> {
     return new Observable<TimeInfo>((obs) => {
       this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));

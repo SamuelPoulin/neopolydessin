@@ -27,6 +27,7 @@ import { HexInputComponent } from 'src/app/components/shared/inputs/hex-input/he
 import { NumberInputComponent } from 'src/app/components/shared/inputs/number-input/number-input.component';
 import { LayoutModule } from '@angular/cdk/layout';
 import { BrowserModule } from '@angular/platform-browser';
+import { NgxElectronModule } from 'ngx-electron';
 import { AbstractModalComponent } from './abstract-modal/abstract-modal.component';
 import { ConfirmModalComponent } from './abstract-modal/confirm-modal/confirm-modal/confirm-modal.component';
 import { ColorHistoryComponent } from './color-picker/color-history/color-history.component';
@@ -47,11 +48,12 @@ import { TeamComponent } from './team/team.component';
 
 @NgModule({
   imports: [
+    NgxElectronModule,
+    BrowserModule,
     LayoutModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    BrowserModule,
     BrowserAnimationsModule,
     MatSliderModule,
     MatDialogModule,

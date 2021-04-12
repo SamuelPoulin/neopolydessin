@@ -44,7 +44,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     public gameService: GameService,
     public dialog: ModalDialogService,
     private apiService: APIService,
-    private chatService: ChatService,
+    public chatService: ChatService,
   ) {
     this.chatService.resetGameMessages();
 
@@ -110,7 +110,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.toolbar.close();
     }
-    this.keyboardListener.listening = !(opened);
+    this.keyboardListener.listening = !opened;
   }
 
   get currentTool(): Tool | undefined {

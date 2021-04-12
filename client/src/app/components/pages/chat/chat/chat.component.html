@@ -7,10 +7,15 @@
         <mat-icon>weekend</mat-icon>
         Salons
       </button>
-      <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="chatService.friendslistOpened ? '#464646' : '#2F2F2F'">
+      <button color="warn" mat-flat-button id="chat-friendslist-toggler" (click)="toggleFriendslist()" [style.background-color]="chatService.friendslistOpened ? '#464646' : '#2F2F2F'" [style.margin-right]="isElectronApp ? chatService.standalone ? '15px' : '0px' : '15px'">
         <mat-icon>group</mat-icon>
         Amis
       </button>
+      <ng-container *ngIf="isElectronApp && !chatService.standalone">
+        <button mat-icon-button id="chat-popout-toggler" (click)="popout()">
+          <mat-icon>launch</mat-icon>
+        </button>
+      </ng-container>
     </div>
   </div>
   <app-chat-tabs></app-chat-tabs>

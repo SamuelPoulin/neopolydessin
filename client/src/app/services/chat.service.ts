@@ -2,6 +2,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
+import { ElectronService } from 'ngx-electron';
 import { Subscription } from 'rxjs';
 import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
 import { APIService } from './api.service';
@@ -33,6 +34,7 @@ export class ChatService {
   friendslistOpened: boolean = false;
   chatRoomsOpened: boolean = false;
   chatRoomChanged: EventEmitter<void>;
+  chatPoppedOut: boolean;
 
   constructor(
     private socketService: SocketService,
@@ -40,6 +42,7 @@ export class ChatService {
     private apiService: APIService,
     private userService: UserService,
     private router: Router,
+    private electronService: ElectronService,
   ) {
     this.chatRoomChanged = new EventEmitter<void>();
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
@@ -50,6 +53,12 @@ export class ChatService {
       this.updateFriendsList(friendslist);
     });
     this.initSubscriptions();
+
+    if (this.electronService.isElectronApp) {
+      this.electronService.ipcRenderer.on('chat-closed', () => {
+        this.chatPoppedOut = false;
+      });
+    }
   }
 
   initSubscriptions() {
@@ -136,10 +145,6 @@ export class ChatService {
       }
 
       this.chatRoomChanged.emit();
-    });
-
-    this.chatRoomImInSubscription = this.socketService.receiveChatRoomsImIn().subscribe((chatRooms) => {
-      console.log(chatRooms);
     });
 
     this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
