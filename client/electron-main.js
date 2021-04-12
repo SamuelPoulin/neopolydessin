@@ -73,11 +73,6 @@ app.setAsDefaultProtocolClient('polydessin');
 
 let chatWindow;
 
-ipcMain.on('asynchronous-message', (event, arg) => {
-  console.log(arg); // prints "ping"
-  event.reply('asynchronous-reply', 'nice man');
-});
-
 ipcMain.on('chat-init', (event, arg) => {
   chatWindow = new BrowserWindow({
     icon: url.format(path.join(__dirname, '/resources/icon.png')),
@@ -92,7 +87,12 @@ ipcMain.on('chat-init', (event, arg) => {
     },
   });
 
-  chatWindow.on('close', () => {
+  chatWindow.on('ready-to-show', () => {
+    if(appWindow) {
+      appWindow.webContents.send('chat-ready');
+    }
+  });
+  chatWindow.on('closed', () => {
     if(appWindow) {
       appWindow.webContents.send('chat-closed');
     }

@@ -42,15 +42,6 @@ export class ChatComponent {
 
     if (this.electronService.isElectronApp) {
       this.isElectronApp = true;
-
-      this.electronService.ipcRenderer.on('asynchronous-reply', (event, arg) => {
-        console.log(arg);
-      });
-      this.electronService.ipcRenderer.send('asynchronous-message', 'ping');
-
-      this.electronService.ipcRenderer.on('chat-update', (event, arg) => {
-        console.log(arg);
-      });
     }
   }
 
@@ -159,6 +150,5 @@ export class ChatComponent {
 
   popout() {
     this.electronService.ipcRenderer.send('chat-init');
-    this.chatService.chatPoppedOut = true;
   }
 }

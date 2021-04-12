@@ -33,6 +33,7 @@ export class SocketService {
   loggedInSubscription: Subscription;
 
   constructor(private userService: UserService) {
+    console.log('SocketService');
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.initSocket();
@@ -185,6 +186,8 @@ export class SocketService {
   }
 
   sendRoomMessage(message: string, roomName: string) {
+    console.log(message);
+    console.log(roomName);
     this.socket.emit(SocketMessages.SEND_MESSAGE_TO_ROOM, roomName, { content: message } as Message);
   }
 

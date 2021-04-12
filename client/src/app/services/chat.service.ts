@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
@@ -38,14 +38,30 @@ export class ChatService {
   chatRoomChanged: EventEmitter<void>;
   chatPoppedOut: boolean;
 
+  socketService: SocketService;
+
   constructor(
-    private socketService: SocketService,
     private gameService: GameService,
     private apiService: APIService,
     private userService: UserService,
     private router: Router,
     private electronService: ElectronService,
+    private injector: Injector,
   ) {
+    if (this.electronService.isElectronApp) {
+      this.electronService.ipcRenderer.on('chat-ready', () => {
+        this.chatPoppedOut = true;
+      });
+      this.electronService.ipcRenderer.on('chat-closed', () => {
+        this.chatPoppedOut = false;
+      });
+    }
+
+    if (!(this.electronService.isElectronApp && this.standalone)) {
+      this.socketService = this.injector.get(SocketService) as SocketService;
+      this.initSubscriptions();
+    }
+
     this.chatRoomChanged = new EventEmitter<void>();
     this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
@@ -54,13 +70,10 @@ export class ChatService {
     this.apiService.getFriendsList().then((friendslist) => {
       this.updateFriendsList(friendslist);
     });
-    this.initSubscriptions();
 
-    if (this.electronService.isElectronApp) {
-      this.electronService.ipcRenderer.on('chat-closed', () => {
-        this.chatPoppedOut = false;
-      });
-    }
+    setInterval(() => {
+      console.log(this.socketService.socket.id);
+    });
   }
 
   initSubscriptions() {
