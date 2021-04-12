@@ -12,6 +12,7 @@ import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.GameRepository
+import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.TutorialService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -19,7 +20,7 @@ import javax.inject.Inject
 const val FIRST_TEAM = 0
 const val SECOND_TEAM = 0
 @HiltViewModel
-class GameViewModel @Inject constructor(private val gameRepository: GameRepository,private val tutorialService: TutorialService): ViewModel() {
+class GameViewModel @Inject constructor(private val gameRepository: GameRepository,private val tutorialService: TutorialService, private val audioService: AudioService): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
     val currentRoleLiveData: MutableLiveData<PlayerRole> = MutableLiveData()
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
@@ -88,5 +89,8 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     }
     fun finishTutorial(){
         tutorialService.finishTutorial()
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

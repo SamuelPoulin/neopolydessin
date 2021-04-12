@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.account.Account
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.databinding.ActivityAccountManagementBinding
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DOUBLE_DIGIT
@@ -51,6 +52,7 @@ class AccountManagementActivity : AppCompatActivity() {
         fragmentManager.beginTransaction().add(R.id.fragmentContainer, dashboardFragment, "fragment").commit()
         binding.toggleGroup.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
             if (isChecked) {
+                vm.playSound(SoundId.CLICK.value)
                 when (checkedId) {
                     R.id.dashboardBtn -> changeFragment(dashboardFragment)
                     R.id.userProfileBtn -> changeFragment(profileFragment)

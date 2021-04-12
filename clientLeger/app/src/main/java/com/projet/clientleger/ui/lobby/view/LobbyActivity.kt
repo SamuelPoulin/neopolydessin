@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.databinding.ActivityLobbyBinding
@@ -42,6 +43,7 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun setSubscriptions() {
         vm.receiveStartGame().subscribe{
+            vm.playSound(SoundId.START_GAME.value)
             goToGame()
         }
     }
@@ -65,14 +67,10 @@ class LobbyActivity : AppCompatActivity() {
         }
         setupToolbar()
         setupTeamsRv()
-
         setupUiMode()
 
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        }
-        if(vm.isTutorialActive()){
-            //vm.addShowcase("Nous sommes maintenant dans le lobby \n Maintenant que le lobby est créé, nous allons pouvoir démarrer la partie", binding.startGameButton,this)
         }
     }
 
@@ -90,6 +88,7 @@ class LobbyActivity : AppCompatActivity() {
 
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
+            vm.playSound(SoundId.ERROR.value)
             leaveLobby()
         }
     }
@@ -123,6 +122,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun leaveLobby(){
+        vm.playSound(SoundId.ERROR.value)
         vm.leaveLobby()
         supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
         supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
@@ -192,6 +192,7 @@ class LobbyActivity : AppCompatActivity() {
 
     }
     private fun startGame(){
+        vm.playSound(SoundId.CLICK.value)
         vm.startGame()
     }
     private fun goToGame(){

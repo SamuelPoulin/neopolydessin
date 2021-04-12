@@ -23,6 +23,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
@@ -59,6 +60,12 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
+        supportFragmentManager.commit{
+            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
+        }
+        setupButtons()
+    }
+    private fun setupButtons(){
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
@@ -66,16 +73,21 @@ class MainmenuActivity : AppCompatActivity() {
             }
             true
         }
-
-        supportFragmentManager.commit{
-            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        }
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
+            vm.playSound(SoundId.ERROR.value)
             finish()
         }
+        binding.accountBtn.setOnClickListener {
+            vm.playSound(SoundId.CLICK.value)
+            goToDashBoard()
+        }
+        binding.joinGamebtn.setOnClickListener {
+            vm.playSound(SoundId.CLICK.value)
+            showGameDialog(false)
+        }
         binding.createGameBtn.setOnClickListener {
-            vm.playSound()
+            vm.playSound(SoundId.CLICK.value)
             if(vm.isTutorialActive()){
                 val intent = Intent(this,GameTutorialActivity::class.java)
                 startActivity(intent)
@@ -84,14 +96,17 @@ class MainmenuActivity : AppCompatActivity() {
                 showGameDialog(true)
             }
         }
-        vm.setupAudio(baseContext)
+        binding.userGuideBtn.setOnClickListener {
+            vm.playSound(SoundId.CLICK.value)
+            startTutorial()
+        }
     }
-    fun goToDashBoard(){
+    private fun goToDashBoard(){
         val intent = Intent(this, AccountManagementActivity::class.java)
         supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
         startActivity(intent)
     }
-    fun startTutorial(){
+    private fun startTutorial(){
         val sequence:ArrayList<SequenceModel> = ArrayList()
         sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo,this,false))
         sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn,this,false))
@@ -103,7 +118,7 @@ class MainmenuActivity : AppCompatActivity() {
         vm.createShowcaseSequence(sequence)
     }
 
-    fun showGameDialog(isCreating: Boolean) {
+    private fun showGameDialog(isCreating: Boolean) {
         val visibility: Int
         val action: String
         val title: String
@@ -132,12 +147,15 @@ class MainmenuActivity : AppCompatActivity() {
         dialogView.actionBtn.setOnClickListener {
             val intent: Intent
             if(isCreating) {
+                vm.playSound(SoundId.CONNECTED.value)
                 intent = Intent(this, LobbyActivity::class.java)
                 intent.putExtra("gameName", getGameName(dialog))
                 intent.putExtra("isPrivate", false)
             }
-            else
+            else{
+                vm.playSound(SoundId.CONFIRM.value)
                 intent = Intent(this, SearchLobbyActivity::class.java)
+            }
 
             intent.putExtra("gameType", selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
@@ -147,6 +165,7 @@ class MainmenuActivity : AppCompatActivity() {
         }
 
         dialogView.cancelButton.setOnClickListener {
+            vm.playSound(SoundId.ERROR.value)
             dialog.dismiss()
         }
     }
@@ -167,12 +186,11 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
+                vm.playSound(SoundId.SELECTED.value)
                 selectedGameType = GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // write code to perform some action
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
     private fun setupDifficultySpinner(dialogView: View){
@@ -185,12 +203,11 @@ class MainmenuActivity : AppCompatActivity() {
                 AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>,
                                         view: View, position: Int, id: Long) {
+                vm.playSound(SoundId.SELECTED.value)
                 selectedDifficulty = Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
                 }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // write code to perform some action
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 

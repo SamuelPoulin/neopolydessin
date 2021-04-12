@@ -14,6 +14,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,11 +75,13 @@ class ChatFragment @Inject constructor() : Fragment() {
 
             when(newVisibility) {
                 View.VISIBLE ->{
+                    vm.playSound(SoundId.OPEN_CHAT.value)
                     mBinding.root.setBackgroundResource(R.drawable.chat_background)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_hide_chat))
                     mBinding.headerSpaceBuffer.visibility = View.GONE
                 }
                 else -> {
+                    vm.playSound(SoundId.CLOSE_CHAT.value)
                     mBinding.root.setBackgroundColor(Color.TRANSPARENT)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
                     mBinding.headerSpaceBuffer.visibility = View.VISIBLE
@@ -98,7 +101,6 @@ class ChatFragment @Inject constructor() : Fragment() {
                 it.rvMessages.adapter?.notifyDataSetChanged()
                 it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
             }
-
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
@@ -128,7 +130,6 @@ class ChatFragment @Inject constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRvMessages()
-
         setupMessagesObserver()
 
         binding?.let {

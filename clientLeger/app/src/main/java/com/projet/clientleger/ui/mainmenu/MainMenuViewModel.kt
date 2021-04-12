@@ -41,7 +41,7 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun setupAudio(context: Context){
         audioService.setupAudio(context)
     }
-    fun playSound(){
-        audioService.playSound()
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }
