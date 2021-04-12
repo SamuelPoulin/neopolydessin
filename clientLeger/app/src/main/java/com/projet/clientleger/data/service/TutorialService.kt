@@ -9,6 +9,7 @@ import com.projet.clientleger.R
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.projet.clientleger.data.api.model.SequenceModel
+import uk.co.deanwild.materialshowcaseview.IShowcaseListener
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
@@ -62,6 +63,16 @@ class TutorialService @Inject constructor() {
             .renderOverNavigationBar()
             .setShape(RectangleShape(Rect()))
             .setSkipText(QUIT_TUTORIAL_LABEL)
+                .setListener(object:IShowcaseListener{
+                    override fun onShowcaseDisplayed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                    override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = false
+                    }
+
+                })
             .setTarget(model.target)
             .setDismissOnTargetTouch(true)
             .setTargetTouchable(true)
@@ -74,6 +85,16 @@ class TutorialService @Inject constructor() {
                 .renderOverNavigationBar()
                 .setShape(RectangleShape(Rect()))
                 .setSkipText(QUIT_TUTORIAL_LABEL)
+                .setListener(object:IShowcaseListener{
+                    override fun onShowcaseDisplayed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                    override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = false
+                    }
+
+                })
                 .setTarget(model.target)
                 .setDismissOnTargetTouch(true)
                 .setTargetTouchable(true)
@@ -88,6 +109,16 @@ class TutorialService @Inject constructor() {
             .setDismissText(NEXT_LABEL)
             .setDismissTextColor(Color.GREEN)
             .setSkipText(QUIT_TUTORIAL_LABEL)
+                .setListener(object:IShowcaseListener{
+                    override fun onShowcaseDisplayed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                    override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = false
+                    }
+
+                })
             .setTarget(model.target)
             .setContentText(model.message)
             .setDelay(BASE_DELAY)

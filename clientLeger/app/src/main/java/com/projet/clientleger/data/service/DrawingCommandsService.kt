@@ -24,7 +24,6 @@ class DrawingCommandsService @Inject constructor() {
             return
         val command = doneCommands.removeLast()
         undoneCommands.add(command)
-        println(command)
         command.undo()
     }
 
@@ -33,7 +32,6 @@ class DrawingCommandsService @Inject constructor() {
         if(undoneCommands.isEmpty())
             return
         val command = undoneCommands.removeLast()
-        println(command)
         command.execute()
     }
 

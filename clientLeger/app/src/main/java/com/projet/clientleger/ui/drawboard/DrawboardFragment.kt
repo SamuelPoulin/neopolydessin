@@ -23,7 +23,7 @@ import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-const val DRAWBOARD_MESSAGE = "Voici la surface de dessin, Elle te permet de dessiner lorsque ton rôle est celui du dessinateur"
+const val DRAWBOARD_MESSAGE = "Voici la surface de dessin, elle te permet de dessiner lorsque ton rôle est celui du dessinateur"
 const val CHOOSE_PEN = "Avant de dessiner, il faut choisir son outil de dessin. Cliques sur le crayon pour commencer à dessiner"
 const val PEN_PREVIEW_MESSAGE = "Tu as bien choisi le crayon !" +
         "\nMaintenant, tu peux choisir la largeur de ton trait à l'aide de la barre bleue ici"
