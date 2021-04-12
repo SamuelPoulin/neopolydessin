@@ -1,7 +1,9 @@
-import { EventEmitter, Injectable, Injector } from '@angular/core';
+/* eslint-disable max-lines */
+import { EventEmitter, Injectable, Injector, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { FriendsList, FriendStatus, FriendWithConnection } from '@common/communication/friends';
-import { ChatRoom, ChatRoomType } from '@models/chat/chat-room';
+import { FriendsList, FriendStatus } from '@common/communication/friends';
+import { ChatRoomType } from '@models/chat/chat-room';
+import { ChatState } from '@models/chat/chat-state';
 import { ElectronService } from 'ngx-electron';
 import { Subscription } from 'rxjs';
 import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
@@ -27,70 +29,88 @@ export class ChatService {
   friendslistAPISubscription: Subscription;
   chatRoomsSubscription: Subscription;
 
-  rooms: ChatRoom[] = [];
-  joinableRooms: string[] = [];
-  friends: FriendWithConnection[] = [];
-  friendRequests: FriendWithConnection[] = [];
-  currentRoomIndex: number = 0;
-  guessing: boolean = false;
-  friendslistOpened: boolean = false;
-  chatRoomsOpened: boolean = false;
   chatRoomChanged: EventEmitter<void>;
   chatPoppedOut: boolean;
 
   socketService: SocketService;
+  gameService: GameService;
+
+  chatState: ChatState;
 
   constructor(
-    private gameService: GameService,
     private apiService: APIService,
     private userService: UserService,
     private router: Router,
     private electronService: ElectronService,
     private injector: Injector,
+    private nz: NgZone,
   ) {
-    if (this.electronService.isElectronApp) {
+    this.chatState = {
+      rooms: [],
+      joinableRooms: [],
+      friends: [],
+      friendRequests: [],
+      currentRoomIndex: 0,
+      guessing: false,
+      friendslistOpened: false,
+      chatRoomsOpened: false,
+    };
+
+    // Popped out Electron
+    if (this.electronService.isElectronApp && this.standalone) {
+      this.electronService.ipcRenderer.on('chat-update', (event, arg) => {
+        this.nz.run(() => {
+          this.chatState = arg;
+          console.log(arg);
+        });
+      });
+    }
+
+    // Main Electron
+    if (this.electronService.isElectronApp && !this.standalone) {
       this.electronService.ipcRenderer.on('chat-ready', () => {
         this.chatPoppedOut = true;
+        this.updatePoppedOutChat();
       });
       this.electronService.ipcRenderer.on('chat-closed', () => {
         this.chatPoppedOut = false;
       });
     }
 
+    // Not electron or popped out
     if (!(this.electronService.isElectronApp && this.standalone)) {
       this.socketService = this.injector.get(SocketService) as SocketService;
+      this.gameService = this.injector.get(GameService) as GameService;
       this.initSubscriptions();
     }
 
     this.chatRoomChanged = new EventEmitter<void>();
-    this.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
-    this.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
-    this.currentRoomIndex = 0;
+    this.chatState.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
+    this.chatState.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
+    this.chatState.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
       this.updateFriendsList(friendslist);
-    });
-
-    setInterval(() => {
-      console.log(this.socketService.socket.id);
     });
   }
 
   initSubscriptions() {
     this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
-      const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
       if (roomIndex > -1) {
-        this.rooms[roomIndex].messages.push(message);
+        this.chatState.rooms[roomIndex].messages.push(message);
       }
 
       this.chatRoomChanged.emit();
+      this.updatePoppedOutChat();
     });
 
     this.guessSubscription = this.socketService.receiveGuess().subscribe((message) => {
-      const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
       if (roomIndex > -1) {
-        this.rooms[roomIndex].messages.push(message);
+        this.chatState.rooms[roomIndex].messages.push(message);
       }
+      this.updatePoppedOutChat();
     });
 
     this.privateMessageSubscription = this.socketService.receivePrivateMessage().subscribe((privateMessage) => {
@@ -98,19 +118,24 @@ export class ChatService {
       const isSender: boolean = privateMessage.senderAccountId === this.userService.account._id;
 
       if (isSender) {
-        roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.receiverAccountId);
+        roomIndex = this.chatState.rooms.findIndex((room) => room.id === privateMessage.receiverAccountId);
       } else {
-        roomIndex = this.rooms.findIndex((room) => room.id === privateMessage.senderAccountId);
+        roomIndex = this.chatState.rooms.findIndex((room) => room.id === privateMessage.senderAccountId);
       }
 
       if (roomIndex === -1) {
         this.apiService
           .getPublicAccount(privateMessage.senderAccountId)
           .then((accountInfo) => {
-            this.rooms.push({ name: accountInfo.username, id: privateMessage.senderAccountId, type: ChatRoomType.PRIVATE, messages: [] });
-            roomIndex = this.rooms.length - 1;
+            this.chatState.rooms.push({
+              name: accountInfo.username,
+              id: privateMessage.senderAccountId,
+              type: ChatRoomType.PRIVATE,
+              messages: [],
+            });
+            roomIndex = this.chatState.rooms.length - 1;
 
-            this.rooms[roomIndex].messages.push({
+            this.chatState.rooms[roomIndex].messages.push({
               senderUsername: accountInfo.username,
               content: privateMessage.content,
               timestamp: privateMessage.timestamp,
@@ -118,40 +143,41 @@ export class ChatService {
           })
           .catch();
       } else {
-        this.rooms[roomIndex].messages.push({
-          senderUsername: isSender ? this.userService.account.username : this.rooms[roomIndex].name,
+        this.chatState.rooms[roomIndex].messages.push({
+          senderUsername: isSender ? this.userService.account.username : this.chatState.rooms[roomIndex].name,
           content: privateMessage.content,
           timestamp: privateMessage.timestamp,
         } as ChatMessage);
       }
 
       this.chatRoomChanged.emit();
+      this.updatePoppedOutChat();
     });
 
     this.chatRoomMessageSubscription = this.socketService.receiveChatRoomMessage().subscribe((chatRoomMessage) => {
       if (chatRoomMessage.roomName === 'general') {
-        const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GENERAL);
-        this.rooms[roomIndex].messages.push({
+        const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GENERAL);
+        this.chatState.rooms[roomIndex].messages.push({
           senderUsername: chatRoomMessage.senderUsername,
           timestamp: chatRoomMessage.timestamp,
           content: chatRoomMessage.content,
         } as ChatMessage);
       } else {
-        let roomIndex = this.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
+        let roomIndex = this.chatState.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
 
         if (roomIndex === -1) {
-          this.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages: [] });
+          this.chatState.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages: [] });
         } else {
-          roomIndex = this.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
+          roomIndex = this.chatState.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
 
           if (chatRoomMessage.senderUsername) {
-            this.rooms[roomIndex].messages.push({
+            this.chatState.rooms[roomIndex].messages.push({
               content: chatRoomMessage.content,
               senderUsername: chatRoomMessage.senderUsername,
               timestamp: chatRoomMessage.timestamp,
             } as ChatMessage);
           } else {
-            this.rooms[roomIndex].messages.push({
+            this.chatState.rooms[roomIndex].messages.push({
               content: chatRoomMessage.content,
               timestamp: chatRoomMessage.timestamp,
             } as SystemMessage);
@@ -160,41 +186,47 @@ export class ChatService {
       }
 
       this.chatRoomChanged.emit();
+      this.updatePoppedOutChat();
     });
 
     this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
       this.handleMessage(message);
+      this.updatePoppedOutChat();
     });
 
     this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
       this.handleMessage(message);
+      this.updatePoppedOutChat();
     });
 
     this.friendslistSocketSubscription = this.socketService.receiveFriendslist().subscribe((friendslist) => {
       this.updateFriendsList(friendslist);
+      this.updatePoppedOutChat();
     });
 
     this.friendslistAPISubscription = this.apiService.friendslistUpdated.subscribe((friendslist: FriendsList) => {
       this.updateFriendsList(friendslist);
+      this.updatePoppedOutChat();
     });
 
     this.chatRoomsSubscription = this.socketService.receiveChatRooms().subscribe((chatRooms) => {
       for (const chatRoom of chatRooms) {
         if (chatRoom !== 'general') {
-          this.joinableRooms.push(chatRoom);
+          this.chatState.joinableRooms.push(chatRoom);
         }
       }
+      this.updatePoppedOutChat();
     });
   }
 
   updateFriendsList(friendslist: FriendsList) {
-    this.friends = [];
-    this.friendRequests = [];
+    this.chatState.friends = [];
+    this.chatState.friendRequests = [];
     for (const user of friendslist.friends) {
       if (user.status === FriendStatus.FRIEND) {
-        this.friends.push(user);
+        this.chatState.friends.push(user);
       } else if (user.status === FriendStatus.PENDING) {
-        this.friendRequests.push(user);
+        this.chatState.friendRequests.push(user);
       }
     }
   }
@@ -204,7 +236,7 @@ export class ChatService {
   }
 
   sendMessage(text: string) {
-    const room = this.rooms[this.currentRoomIndex];
+    const room = this.chatState.rooms[this.chatState.currentRoomIndex];
     if (room.type === ChatRoomType.GAME) {
       this.socketService.sendMessage(text);
     } else if (room.type === ChatRoomType.GENERAL) {
@@ -218,30 +250,30 @@ export class ChatService {
 
   sendGuess(text: string) {
     this.socketService.sendGuess(text);
-    this.guessing = false;
+    this.chatState.guessing = false;
   }
 
   closeRoom(roomName: string) {
-    const roomIndex = this.rooms.findIndex((room) => room.name === roomName);
+    const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
     if (roomIndex > -1) {
-      this.rooms.splice(roomIndex, 1);
-      this.currentRoomIndex = 0;
+      this.chatState.rooms.splice(roomIndex, 1);
+      this.chatState.currentRoomIndex = 0;
       this.chatRoomChanged.emit();
     }
   }
 
   focusRoom(roomName: string) {
-    const roomIndex = this.rooms.findIndex((room) => room.name === roomName);
+    const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
     if (roomIndex > -1) {
-      this.currentRoomIndex = roomIndex;
+      this.chatState.currentRoomIndex = roomIndex;
       this.chatRoomChanged.emit();
     }
   }
 
   resetGameMessages() {
-    const roomIndex = this.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+    const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
     if (roomIndex > -1) {
-      this.rooms[roomIndex].messages = [];
+      this.chatState.rooms[roomIndex].messages = [];
     }
   }
 
@@ -258,9 +290,9 @@ export class ChatService {
             timestamp: privateMessage.timestamp,
           });
         }
-        this.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
-        this.currentRoomIndex = this.rooms.findIndex((room) => room.name === friendUsername);
-        this.friendslistOpened = false;
+        this.chatState.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
+        this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === friendUsername);
+        this.chatState.friendslistOpened = false;
         this.chatRoomChanged.emit();
       })
       .catch((error) => {
@@ -274,8 +306,8 @@ export class ChatService {
 
   joinChatRoom(roomName: string) {
     this.socketService.joinChatRoom(roomName).then(() => {
-      this.currentRoomIndex = this.rooms.findIndex((room) => room.name === roomName);
-      this.chatRoomsOpened = false;
+      this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
+      this.chatState.chatRoomsOpened = false;
       this.chatRoomChanged.emit();
     });
   }
@@ -291,26 +323,40 @@ export class ChatService {
   }
 
   get messages() {
-    if (this.rooms[this.currentRoomIndex]) {
-      return this.rooms[this.currentRoomIndex].messages;
+    if (this.chatState.rooms[this.chatState.currentRoomIndex]) {
+      return this.chatState.rooms[this.chatState.currentRoomIndex].messages;
     } else {
       return [];
     }
   }
 
   get roomName() {
-    if (this.rooms[this.currentRoomIndex]) {
-      return this.rooms[this.currentRoomIndex].name;
+    if (this.chatState.rooms[this.chatState.currentRoomIndex]) {
+      return this.chatState.rooms[this.chatState.currentRoomIndex].name;
     } else {
       return null;
     }
   }
 
   get canGuess(): boolean {
-    return this.gameService.canGuess && this.rooms[this.currentRoomIndex].type === ChatRoomType.GAME;
+    if (this.gameService) {
+      return this.gameService.canGuess && this.chatState.rooms[this.chatState.currentRoomIndex].type === ChatRoomType.GAME;
+    } else {
+      return false;
+    }
   }
 
   get standalone(): boolean {
     return this.router.url === '/chat';
+  }
+
+  updatePoppedOutChat() {
+    if (this.chatPoppedOut) {
+      this.electronService.ipcRenderer.send('chat-update', this.chatState);
+    }
+  }
+
+  popOut() {
+    this.electronService.ipcRenderer.send('chat-init');
   }
 }

@@ -10,6 +10,6 @@ export class ChatTabsComponent {
   constructor(private chatService: ChatService) {}
 
   get rooms() {
-    return this.chatService.rooms;
+    return this.chatService.chatState.rooms;
   }
 }

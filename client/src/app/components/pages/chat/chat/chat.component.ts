@@ -47,7 +47,7 @@ export class ChatComponent {
 
   sendMessage(): void {
     if (this.inputValid) {
-      if (this.chatService.guessing) {
+      if (this.chatService.chatState.guessing) {
         this.chatService.sendGuess(this.inputValue);
       } else {
         this.chatService.sendMessage(this.inputValue);
@@ -90,17 +90,17 @@ export class ChatComponent {
   }
 
   toggleGuessMode(): void {
-    this.chatService.guessing = !this.chatService.guessing;
+    this.chatService.chatState.guessing = !this.chatService.chatState.guessing;
   }
 
   toggleFriendslist() {
-    this.chatService.friendslistOpened = !this.chatService.friendslistOpened;
-    this.chatService.chatRoomsOpened = false;
+    this.chatService.chatState.friendslistOpened = !this.chatService.chatState.friendslistOpened;
+    this.chatService.chatState.chatRoomsOpened = false;
   }
 
   toggleChatRooms() {
-    this.chatService.chatRoomsOpened = !this.chatService.chatRoomsOpened;
-    this.chatService.friendslistOpened = false;
+    this.chatService.chatState.chatRoomsOpened = !this.chatService.chatState.chatRoomsOpened;
+    this.chatService.chatState.friendslistOpened = false;
   }
 
   addEmoji(e: EmojiEvent) {
@@ -121,7 +121,7 @@ export class ChatComponent {
   }
 
   get guessing(): boolean {
-    return this.chatService.guessing;
+    return this.chatService.chatState.guessing;
   }
 
   get messages(): Message[] {
@@ -129,11 +129,11 @@ export class ChatComponent {
   }
 
   get friendslistOpened(): boolean {
-    return this.chatService.friendslistOpened;
+    return this.chatService.chatState.friendslistOpened;
   }
 
   get chatRoomsOpened(): boolean {
-    return this.chatService.chatRoomsOpened;
+    return this.chatService.chatState.chatRoomsOpened;
   }
 
   get canGuess(): boolean {
@@ -149,6 +149,6 @@ export class ChatComponent {
   }
 
   popout() {
-    this.electronService.ipcRenderer.send('chat-init');
+    this.chatService.popOut();
   }
 }

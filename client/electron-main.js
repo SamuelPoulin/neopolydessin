@@ -108,3 +108,8 @@ ipcMain.on('chat-init', (event, arg) => {
   );
 });
 
+ipcMain.on('chat-update', (event, arg) => {
+  if(chatWindow) {
+    chatWindow.webContents.send('chat-update', arg);
+  }
+});

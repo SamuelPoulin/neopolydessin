@@ -33,7 +33,6 @@ export class SocketService {
   loggedInSubscription: Subscription;
 
   constructor(private userService: UserService) {
-    console.log('SocketService');
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.initSocket();

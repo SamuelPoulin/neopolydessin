@@ -14,8 +14,8 @@ export class ChatRoomsComponent {
   constructor(private chatService: ChatService, private modalService: ModalDialogService) {}
 
   closeChatRooms() {
-    this.chatService.chatRoomsOpened = false;
-    this.chatService.friendslistOpened = false;
+    this.chatService.chatState.chatRoomsOpened = false;
+    this.chatService.chatState.friendslistOpened = false;
   }
 
   openCreateChatRoom() {
@@ -27,7 +27,7 @@ export class ChatRoomsComponent {
   }
 
   get joinableRooms() {
-    return this.chatService.joinableRooms;
+    return this.chatService.chatState.joinableRooms;
   }
 
   get standalone() {
