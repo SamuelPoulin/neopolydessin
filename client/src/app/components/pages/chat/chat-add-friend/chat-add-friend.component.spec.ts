@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '@components/shared/shared.module';
-import { APIService } from '@services/api.service';
-import { MockAPIService } from '@services/api.service.spec';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 
 import { ChatAddFriendComponent } from './chat-add-friend.component';
 
@@ -15,7 +15,7 @@ describe('ChatAddFriendComponent', () => {
       imports: [SharedModule],
       declarations: [ChatAddFriendComponent],
       providers: [
-        { provide: APIService, useValue: MockAPIService },
+        { provide: ChatService, useValue: MockChatService },
         { provide: MatDialogRef, useValue: {} },
       ],
     }).compileComponents();
