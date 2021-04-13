@@ -64,8 +64,8 @@ export const messagesSchema = new Schema<Messages, MessagesModel>({
 
 messagesSchema.statics.findHistory = (id: string, otherId: string, page: number, limit: number) => {
   const skips = limit * (page - 1);
-  return messagesHistoryModel.findOne(findMessagesQuery(id, otherId), 'messages')
-    .skip(skips).limit(limit);
+  return messagesHistoryModel.findOne(findMessagesQuery(id, otherId))
+    .slice('messages', [skips, limit]);
 };
 
 messagesSchema.statics.addMessageToHistory = (msg: PrivateMessageTo, senderId: string, receiverId: string, timestamp: number) => {
@@ -73,12 +73,15 @@ messagesSchema.statics.addMessageToHistory = (msg: PrivateMessageTo, senderId: s
     {
       $push: {
         messages: {
-          senderAccountId: senderId,
-          receiverAccountId: receiverId,
-          content: msg.content,
-          timestamp,
-        }
-      }
+          $each: [{
+            senderAccountId: senderId,
+            receiverAccountId: receiverId,
+            content: msg.content,
+            timestamp,
+          }],
+          $position: 0
+        },
+      },
     }
   );
 };

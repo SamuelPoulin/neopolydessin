@@ -11,7 +11,7 @@ import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
-import { ChatRoomMessage } from '@common/communication/chat-room-history';
+import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
 import {
   CurrentGameState,
   Difficulty,
@@ -27,6 +27,9 @@ import { UserService } from './user.service';
 @Injectable()
 export class SocketService {
   private static API_BASE_URL: string;
+
+  private readonly roomHistoryPage: number = 1;
+  private readonly roomHistoryMax: number = 10;
 
   socket: Socket;
   loggedOutSubscription: Subscription;
@@ -76,7 +79,6 @@ export class SocketService {
   receiveFriendslist(): Observable<FriendsList> {
     return new Observable<FriendsList>((obs) => {
       this.socket.on(SocketFriendActions.UPDATE, (friendslist: FriendsList) => {
-        console.log(friendslist);
         obs.next(friendslist);
       });
     });
@@ -185,8 +187,6 @@ export class SocketService {
   }
 
   sendRoomMessage(message: string, roomName: string) {
-    console.log(message);
-    console.log(roomName);
     this.socket.emit(SocketMessages.SEND_MESSAGE_TO_ROOM, roomName, { content: message } as Message);
   }
 
@@ -243,6 +243,18 @@ export class SocketService {
       this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
         obs.next(players);
       });
+    });
+  }
+
+  getRoomMessageHistory(roomName: string): Observable<ChatRoomHistory> {
+    return new Observable<ChatRoomHistory>((obs) => {
+      this.socket.emit(
+        SocketMessages.GET_CHAT_ROOM_HISTORY,
+        roomName,
+        this.roomHistoryPage,
+        this.roomHistoryMax,
+        (chatRoomHistory: ChatRoomHistory) => obs.next(chatRoomHistory),
+      );
     });
   }
 
