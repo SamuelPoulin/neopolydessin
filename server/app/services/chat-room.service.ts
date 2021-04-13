@@ -48,7 +48,12 @@ export class ChatRoomService {
         if (this.chatRoomExists(roomName)) {
           this.getMessageHistory(roomName, page, limit)
             .then((chatHistory) => {
-              callback({...chatHistory, messages: chatHistory.messages.reverse()});
+              chatHistory.messages.reverse()
+              const history: ChatRoomHistory = {
+                roomName: chatHistory.roomName,
+                messages: chatHistory.messages
+              };
+              callback(history);
             }).catch((err) => {
               callback(null);
             });
