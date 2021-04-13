@@ -12,6 +12,7 @@ import com.projet.clientleger.data.api.socket.*
 import com.projet.clientleger.data.service.AvatarStorageService
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.data.service.DrawingCommandsService
+import com.projet.clientleger.data.service.TutorialService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -86,4 +87,8 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideChatStorageService(): ChatStorageService = ChatStorageService()
+
+    @Provides
+    @Singleton
+    fun provideTutorialService():TutorialService = TutorialService()
 }
