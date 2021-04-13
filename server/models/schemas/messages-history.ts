@@ -80,8 +80,8 @@ messagesSchema.statics.addMessageToHistory = (msg: PrivateMessageTo, senderId: s
             timestamp,
           }],
           $position: 0
-        },
-      },
+        }
+      }
     }
   );
 };
