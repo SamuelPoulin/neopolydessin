@@ -11,6 +11,7 @@ export class GameService {
   canDraw: boolean = false;
   drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
+  canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
   isHost: boolean = false;
   wordToDraw: string = '';
 
@@ -75,6 +76,7 @@ export class GameService {
         if (player.playerRole === PlayerRole.DRAWER) this.drawer = player;
         if (player.username === this.userService.account.username) {
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
+          this.canGuessChanged.emit();
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
         }
         if (player.playerRole === PlayerRole.DRAWER && this.drawer.username !== player.username) {

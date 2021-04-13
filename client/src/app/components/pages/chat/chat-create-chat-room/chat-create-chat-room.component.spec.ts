@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '@components/shared/shared.module';
-import { SocketService } from '@services/socket-service.service';
-import { MockSocketService } from '@services/socket-service.service.spec';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 
 import { ChatCreateChatRoomComponent } from './chat-create-chat-room.component';
 
@@ -16,7 +16,7 @@ describe('ChatCreateChatRoomComponent', () => {
       declarations: [ChatCreateChatRoomComponent],
       providers: [
         { provide: MatDialogRef, useValue: {} },
-        { provide: SocketService, useValue: MockSocketService },
+        { provide: ChatService, useValue: MockChatService },
       ],
     }).compileComponents();
   });
