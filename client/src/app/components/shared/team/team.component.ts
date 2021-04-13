@@ -14,9 +14,13 @@ export class TeamComponent {
   @Input() hideScore: boolean;
   @Input() ennemy: boolean;
 
-  constructor(private gameService: GameService) {
+  constructor(public gameService: GameService) {
     this.team = [];
     this.name = '';
+  }
+
+  removeBot(username: string): void {
+    this.gameService.removeBot(username);
   }
 
   get playerRole() {

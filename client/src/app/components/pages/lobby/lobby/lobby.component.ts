@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import randomColor from 'randomcolor';
@@ -15,7 +14,7 @@ export class LobbyComponent {
   inviteCode: string = 'Bientôt';
   teams: Player[][];
 
-  constructor(private clipboard: Clipboard, private snackBar: MatSnackBar, public gameService: GameService, private router: Router) {}
+  constructor(private snackBar: MatSnackBar, public gameService: GameService, private router: Router) { }
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
@@ -29,18 +28,20 @@ export class LobbyComponent {
     return randomColor({ seed: username, luminosity: 'bright' });
   }
 
-  copyInviteCode(): void {
-    this.clipboard.copy(this.inviteCode);
-    this.snackBar.open("Code d'invitation copié.", 'Ok', {
-      duration: 2000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-    });
-  }
-
   startGame(): void {
     this.gameService.startGame();
     this.router.navigate(['edit']);
+  }
+
+  addBot(teamNumber: number): void {
+    this.gameService.addBot(teamNumber)
+      .catch(() => {
+        this.snackBar.open('Il y a déjà un bot dans cette équipe!', 'Ok', {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        });
+      });
   }
 
   get gamemode(): GameType {

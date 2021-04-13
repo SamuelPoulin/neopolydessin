@@ -182,6 +182,19 @@ export class SocketService {
     });
   }
 
+  addBot(teamNumber: number): Observable<boolean> {
+    teamNumber = teamNumber === 0 || teamNumber === 1 ? teamNumber : 0;
+    return new Observable<boolean>((obs) => {
+      this.socket.emit(SocketLobby.ADD_BOT, teamNumber, (successfull: boolean) => {
+        obs.next(successfull);
+      });
+    });
+  }
+
+  removeBot(username: string): void {
+    this.socket.emit(SocketLobby.REMOVE_BOT, username);
+  }
+
   sendMessage(message: string): void {
     this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message } as Message);
   }
