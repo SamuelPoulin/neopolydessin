@@ -129,6 +129,7 @@ class GameActivity : AppCompatActivity() {
         }
         else{
             dialog.continueBtn.setOnClickListener {
+                vm.playSound(SoundId.SELECTED.value)
                 dialog.dismiss()
             }
         }
