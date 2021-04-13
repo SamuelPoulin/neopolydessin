@@ -1,3 +1,5 @@
+@use 'src/assets/menuButtons';
+
 .players-title {
   color: #2F2F2F;
   font-size: 32px;
@@ -41,4 +43,20 @@
   padding: 5px 0px;
 
   border-left: 2px solid blue;
+}
+
+.add-button {
+  color: green;
+}
+
+.remove-button-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+}
+
+.remove-button {
+  color: red;
+  margin-right: 25px;
 }
