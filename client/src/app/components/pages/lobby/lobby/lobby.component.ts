@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import randomColor from 'randomcolor';
 import { GameService } from '@services/game.service';
+import { ChatService } from '@services/chat.service';
 import { GameType, Player } from '../../../../../../../common/communication/lobby';
 
 @Component({
@@ -15,7 +16,13 @@ export class LobbyComponent {
   inviteCode: string = 'Bientôt';
   teams: Player[][];
 
-  constructor(private clipboard: Clipboard, private snackBar: MatSnackBar, public gameService: GameService, private router: Router) {}
+  constructor(
+    private clipboard: Clipboard,
+    private snackBar: MatSnackBar,
+    public gameService: GameService,
+    private router: Router,
+    public chatService: ChatService,
+  ) {}
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');

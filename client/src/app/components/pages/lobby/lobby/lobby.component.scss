@@ -22,6 +22,15 @@
   background-color: #FBFBFB;
 }
 
+#lobby-divider {
+  display: flex;
+  height: 100%;
+}
+
+app-chat {
+  min-width: 400px;
+}
+
 #content-container {
   display: flex;
   justify-content: space-evenly;
