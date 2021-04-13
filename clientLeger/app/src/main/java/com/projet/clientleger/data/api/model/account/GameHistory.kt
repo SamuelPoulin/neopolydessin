@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class GameHistory(val games:ArrayList<Game>,
                        val nbGamePlayed:String,
                        val winPercentage:Float,
-                       val averageGameTime:Long,
+                       val averageGameTime:Float,
                        val totalTimePlayed:Long,
                        val bestScoreSolo:Int,
                        val bestScoreCoop:Int)
