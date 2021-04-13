@@ -2,20 +2,17 @@
   margin-top: 30px;
 }
 
+.input {
+  width: 30%;
+}
+
 #uploaded-image {
-
+  object-fit: contain;
+  object-position: top;
 }
 
-#btn-image {
-  padding: 0;
-  height: 30px;
-  width: 30px;
-}
-
-#btn-image-icon {
-  font-size: 30px;
-  height: 30px;
-  width: 30px;
+#actions > button {
+  margin-left: 10px;
 }
 
 #upload-input {

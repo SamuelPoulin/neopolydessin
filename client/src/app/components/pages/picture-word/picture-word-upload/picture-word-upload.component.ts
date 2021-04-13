@@ -13,6 +13,7 @@ import { EditorService } from '@services/editor.service';
 import { BaseShape } from '@models/shapes/base-shape';
 import { Path } from '@models/shapes/path';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ImageString } from '@utils/color/image-string';
 
 @Component({
   selector: 'app-picture-word-upload',
@@ -20,16 +21,26 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./picture-word-upload.component.scss'],
 })
 export class PictureWordUploadComponent extends AbstractModalComponent {
+  static readonly DEFAULT_THRESHOLD: number = 200;
+
+  readonly size: number = 600;
+  dataUploaded: boolean = false;
+  displayPreview: boolean = false;
+  imageString: SafeResourceUrl = ImageString.WHITE;
+
   word: string = '';
   hints: string[] = [];
   difficulty: Difficulty;
   drawMode: DrawMode;
   color: Color;
-  imageString: SafeResourceUrl = '';
   imageData: string = '';
-  readonly size: number = 600;
+  threshold: number = PictureWordUploadComponent.DEFAULT_THRESHOLD;
+
+  drawModes: string[] = ['conventional', 'random', 'panlr', 'panrl', 'pantb', 'panbt', 'center'];
+  difficulties: string[] = ['easy', 'intermediate', 'hard'];
 
   @ViewChild('preview') preview: ElementRef;
+  @ViewChild('uploadLabel') uploadLabel: ElementRef;
 
   constructor(
     dialogRef: MatDialogRef<AbstractModalComponent>,
@@ -45,16 +56,38 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     }
   }
 
-  upload(): void {
+  async save(): Promise<void> {
+    if (this.dataUploaded) {
+      return this.update();
+    } else {
+      return this.upload();
+    }
+  }
+
+  exit(): void {
+    this.save().then(() => {
+      this.dialogRef.close();
+    });
+  }
+
+  update(): void {
+    //
+  }
+
+  async upload(): Promise<void> {
     this.hints = ['1', '2', '3'];
     this.color = Color.BLACK;
-    this.difficulty = Difficulty.EASY;
-    this.drawMode = DrawMode.CONVENTIONAL;
 
     if (this.dialogRef.id === 'drawing') {
-      this.uploadDrawing().then((id) => this.showPreview(id));
+      return this.uploadDrawing().then((id) => {
+        this.dataUploaded = true;
+        this.showPreview(id);
+      });
     } else {
-      this.uploadPicture().then((id) => this.showPreview(id));
+      return this.uploadPicture().then((id) => {
+        this.dataUploaded = true;
+        this.showPreview(id);
+      });
     }
   }
 
@@ -89,10 +122,19 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       difficulty: this.difficulty,
       drawMode: this.drawMode,
       color: this.color.hexString,
+      threshold: this.threshold,
       picture: this.imageData,
     };
 
     return this.api.uploadPicture(data);
+  }
+
+  togglePreview(): void {
+    this.displayPreview = !this.displayPreview;
+  }
+
+  openUpload(): void {
+    this.uploadLabel.nativeElement.click();
   }
 
   acceptFile(fileList: FileList): void {
@@ -113,6 +155,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   showPreview(id: string) {
     this.api.getDrawingPreview(id).then((sequence: DrawingSequence) => {
+      this.displayPreview = true;
       this.drawPreview(sequence);
     });
   }
