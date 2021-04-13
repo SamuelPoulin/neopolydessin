@@ -14,19 +14,9 @@
         </ng-container>
       </div>
       <div id="players-container">
-
-        <div class="team-name-container">
-          <ng-container *ngIf="splitTeams">
-            <button mat-flat-button class="menu-button" (click)="this.addBot(0)">Add bot</button>
-          </ng-container>
-          <app-team [team]="gameService.teams[0]" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"></app-team>
-        </div>
-
+          <app-team [team]="gameService.teams[0]" teamIndex="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"></app-team>
         <ng-container *ngIf="splitTeams">
-          <div class="team-name-container">
-            <button mat-flat-button class="menu-button" (click)="this.addBot(1)">Add bot</button>
-            <app-team [team]="gameService.teams[1]" name="Équipe 2" ennemy></app-team>
-          </div>
+            <app-team [team]="gameService.teams[1]" teamIndex="1" name="Équipe 2" ennemy></app-team>
         </ng-container>
       </div>
     </div>

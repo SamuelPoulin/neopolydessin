@@ -48,14 +48,14 @@
   border-radius: 25px;
 }
 
-.team-name-container {
-  display: flex;
-  flex-direction: row;
-}
-
 #start-button {
   color: white;
   background-color: #04D800;
+
+  &:disabled {
+    opacity: 50%;
+    background-color: grey;
+  }
 }
 
 #start-button-icon {

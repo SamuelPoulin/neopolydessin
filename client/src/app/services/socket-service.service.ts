@@ -183,7 +183,6 @@ export class SocketService {
   }
 
   addBot(teamNumber: number): Observable<boolean> {
-    teamNumber = teamNumber === 0 || teamNumber === 1 ? teamNumber : 0;
     return new Observable<boolean>((obs) => {
       this.socket.emit(SocketLobby.ADD_BOT, teamNumber, (successfull: boolean) => {
         obs.next(successfull);
