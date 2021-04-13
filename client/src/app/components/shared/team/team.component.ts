@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { GameService } from '@services/game.service';
 import { Player, PlayerRole } from '@common/communication/lobby';
 
