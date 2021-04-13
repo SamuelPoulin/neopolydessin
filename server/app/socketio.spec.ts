@@ -219,8 +219,8 @@ describe('Socketio', () => {
                     testClient.socket.on('connect', () => {
                         testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
                             testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
-                            clients[0].emit(SocketLobby.ADD_BOT, 1);
-                            clients[0].emit(SocketLobby.ADD_BOT, 0);
+                            clients[0].emit(SocketLobby.ADD_BOT, 1, (success: boolean) => expect(success).to.be.true);
+                            clients[0].emit(SocketLobby.ADD_BOT, 0, (success: boolean) => expect(success).to.be.true);
                         });
                     });
 
