@@ -468,9 +468,13 @@ export abstract class Lobby {
           score: 0,
           playerNames: []
         });
-        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
+        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam)
           .map((playerToModify) => {
-            return playerToModify.username;
+            if (playerToModify.isBot) {
+              return playerToModify.username + ' - Bot';
+            } else {
+              return playerToModify.username;
+            }
           });
         teams[indexTeam].score = teamScore;
       });
