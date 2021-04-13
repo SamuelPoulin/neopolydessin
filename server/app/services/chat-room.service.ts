@@ -48,7 +48,7 @@ export class ChatRoomService {
         if (this.chatRoomExists(roomName)) {
           this.getMessageHistory(roomName, page, limit)
             .then((chatHistory) => {
-              callback({...chatHistory, messages: chatHistory.messages.reverse()});
+              callback({ ...chatHistory, messages: chatHistory.messages.reverse() });
             }).catch((err) => {
               callback(null);
             });
@@ -101,7 +101,7 @@ export class ChatRoomService {
       }
     });
 
-    socket.on(SocketMessages.JOIN_CHAT_ROOM, async (roomName: string, successfullyJoined: (joined: boolean) => void) => {
+    socket.on(SocketMessages.JOIN_CHAT_ROOM, async (roomName: string, callback: (joined: boolean) => void) => {
       if (this.chatRoomExists(roomName)) {
         const accountInfo = await this.getAccountOfUser(socket);
         if (accountInfo) {
@@ -112,14 +112,14 @@ export class ChatRoomService {
             timestamp: Date.now(),
           };
           this.io.in(roomName).emit(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, playerJoinedMsg);
-          successfullyJoined(true);
+          callback(true);
         } else {
-          successfullyJoined(false);
+          callback(false);
         }
       }
     });
 
-    socket.on(SocketMessages.LEAVE_CHAT_ROOM, async (roomName, successfullyLeft: (left: boolean) => void) => {
+    socket.on(SocketMessages.LEAVE_CHAT_ROOM, async (roomName, callback: (left: boolean) => void) => {
       if (this.chatRoomExists(roomName) && socket.rooms.has(roomName)) {
         const accountInfo = await this.getAccountOfUser(socket);
         if (accountInfo) {
@@ -130,9 +130,9 @@ export class ChatRoomService {
             timestamp: Date.now(),
           };
           this.io.in(roomName).emit(SocketMessages.RECEIVE_MESSAGE_OF_ROOM, playerLeft);
-          successfullyLeft(true);
+          callback(true);
         } else {
-          successfullyLeft(false);
+          callback(false);
         }
       }
     });

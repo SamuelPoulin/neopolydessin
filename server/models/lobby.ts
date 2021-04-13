@@ -308,7 +308,7 @@ export abstract class Lobby {
             this.io.in(this.lobbyId).emit(SocketDrawing.ERASE_ID_BC, id);
           })
           .catch(() => {
-            console.log(`failed to start erase for ${this.lobbyId}`);
+            console.log(`failed to erase for ${this.lobbyId}`);
           });
       }
     });
@@ -320,7 +320,7 @@ export abstract class Lobby {
             this.io.in(this.lobbyId).emit(SocketDrawing.ADD_PATH_BC, addedPath.id, addedPath.id, addedPath.path, addedPath.brushInfo);
           })
           .catch(() => {
-            console.log(`failed to update erase for ${this.lobbyId}`);
+            console.log(`failed to add path for ${this.lobbyId}`);
           });
       }
     });
