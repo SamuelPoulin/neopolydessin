@@ -12,5 +12,5 @@ enum class ChatSocketEndpoints(val value: String) {
     RECEIVE_GUESS_SOLO_COOP("soloCoopGuessBroadcast"),
     RECEIVE_MESSAGE_ROOM("ReceiveMsgFromRoom"),
     GET_ROOM_HISTORY("getChatRoomHistory"),
-    SEND_ROOM_MESSAGE("SendMsgToRoom")
+    SEND_ROOM_MESSAGE("SendMsgToRoom"),
 }

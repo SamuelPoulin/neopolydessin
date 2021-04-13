@@ -75,8 +75,8 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         chatSocketService.clearSubscriptions()
     }
 
-    fun getRoomHistory(): Observable<ChatRoomHistory> {
-        return chatSocketService.getRoomHistory()
+    fun getRoomHistory(roomName: String, page: Int, limit: Int): Observable<ChatRoomHistory> {
+        return chatSocketService.getRoomHistory(roomName, page, limit)
     }
 
     fun sendRoomMessage(roomName: String, content: String){

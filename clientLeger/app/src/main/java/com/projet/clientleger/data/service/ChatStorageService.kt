@@ -24,6 +24,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val GENERAL_ROOM_ID = "general"
+
 @AndroidEntryPoint
 class ChatStorageService @Inject constructor() : Service() {
 
@@ -36,7 +38,7 @@ class ChatStorageService @Inject constructor() : Service() {
     val convos: ArrayList<Convo> = ArrayList()
     lateinit var accountInfo: AccountInfo
     var currentConvo: Convo? = null
-    lateinit var convosListeners: ArrayList<() -> Unit>
+    lateinit var convosListeners: ArrayList<(ArrayList<Convo>) -> Unit>
     private lateinit var currentConvoListeners: ArrayList<() -> Unit>
     private lateinit var currentTabListeners: ArrayList<(TabInfo?) -> Unit>
 
@@ -55,12 +57,14 @@ class ChatStorageService @Inject constructor() : Service() {
 
         accountInfo = sessionManager.getAccountInfo()
         receiveMsgSubscriptions()
+        addNewConvo(TabInfo("General", GENERAL_ROOM_ID, TabType.STATIC_ROOM), true)
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder
     }
+
 
     private fun receiveMsgSubscriptions() {
         chatRepository.receivePlayerConnection().subscribe {
@@ -91,13 +95,18 @@ class ChatStorageService @Inject constructor() : Service() {
             receiveMessage(it, tabInfo)
         }
         chatRepository.receiveRoomMessage().subscribe {
-            val tabInfo: TabInfo = if (it is RoomMessage) {
-                TabInfo(it.roomName, it.roomName, TabType.ROOM)
+            val message: IMessage
+            val tabInfo: TabInfo
+            if (it is RoomMessage) {
+                tabInfo = TabInfo(it.roomName, it.roomName, TabType.ROOM)
+                message = it.toMessageChat()
             } else {
                 it as RoomSystemMessage
-                TabInfo(it.roomName, it.roomName, TabType.ROOM)
+                tabInfo = TabInfo(it.roomName, it.roomName, TabType.ROOM)
+                message = it.toMessageSystem()
             }
-            receiveMessage(it, tabInfo)
+
+            receiveMessage(message, tabInfo)
         }
     }
 
@@ -110,6 +119,7 @@ class ChatStorageService @Inject constructor() : Service() {
                 emitConvosChange()
             }
             newMessageConvo.messages.add(newMessage)
+            emitCurrentConvoChange()
         }
         // If not selected tab
         if (tabInfo.convoId != currentConvo?.tabInfo?.convoId) {
@@ -122,19 +132,18 @@ class ChatStorageService @Inject constructor() : Service() {
         val convoId = if (msg.senderAccountId != accountInfo.accountId) msg.senderAccountId else msg.receiverAccountId
         val convoOfMsg = convos.find { it.tabInfo.convoId == convoId }
         return if (convoOfMsg != null) {
-            MessageChat(msg.content, msg.timestamp, convoOfMsg.tabInfo.convoName)
+            val senderUsername = if (msg.senderAccountId == accountInfo.accountId) accountInfo.username else convoOfMsg.tabInfo.convoName
+            MessageChat(msg.content, msg.timestamp, senderUsername)
         } else {
             MessageChat(msg.content, msg.timestamp, "idk man")
         }
     }
 
     fun addNewConvo(tabInfo: TabInfo, isSelected: Boolean) {
-        println("new convo: ${tabInfo}")
         if (convos.find { it.tabInfo.convoId == tabInfo.convoId } == null) {
             if(tabInfo.tabType != TabType.GAME){
-                getHistory(tabInfo).subscribe{
+                getHistory(tabInfo).subscribe {
                     convos.add(Convo(tabInfo, it))
-                    println("getHistory: ${it}")
                     emitConvosChange()
                     if (isSelected)
                         changeSelectedConvo(tabInfo)
@@ -144,7 +153,6 @@ class ChatStorageService @Inject constructor() : Service() {
             }
         }
     }
-
     private fun getHistory(tabInfo: TabInfo): Observable<ArrayList<IMessage>> {
         return Observable.create { emitter ->
             if (tabInfo.tabType == TabType.FRIEND) {
@@ -154,9 +162,9 @@ class ChatStorageService @Inject constructor() : Service() {
                     emitter.onNext(newMessages)
                 }
             } else {
-                chatRepository.getRoomHistory().subscribe {
+                chatRepository.getRoomHistory(tabInfo.convoId, 1, 20).subscribe {
                     val messages = ArrayList<IMessage>()
-                    messages.addAll(it.messages)
+                    messages.addAll(it.messagesToMessagesChat())
                     emitter.onNext(messages)
                 }
             }
@@ -189,11 +197,11 @@ class ChatStorageService @Inject constructor() : Service() {
         currentConvoListeners.add(listener)
     }
 
-    fun subscribeConvosChange(listener: () -> Unit) {
+    fun subscribeConvosChange(listener: (ArrayList<Convo>) -> Unit) {
         convosListeners.add(listener)
     }
 
-    fun subscribeCurrentTabChange(listener: (TabInfo?) -> Unit){
+    fun subscribeCurrentTabChange(listener: (TabInfo?) -> Unit) {
         currentTabListeners.add(listener)
     }
 
@@ -207,13 +215,14 @@ class ChatStorageService @Inject constructor() : Service() {
 
     private fun emitConvosChange() {
         for (listener in convosListeners)
-            listener.invoke()
+            listener.invoke(convos)
     }
 
     private fun emitCurrentConvoChange() {
         for (listener in currentConvoListeners)
             listener.invoke()
     }
+
     private fun emitCurrentTabChange() {
         for (listener in currentTabListeners)
             listener.invoke(currentConvo?.tabInfo)
@@ -233,7 +242,7 @@ class ChatStorageService @Inject constructor() : Service() {
 
     fun addEmptyTab(tabInfo: TabInfo, index: Int = 0, isSelected: Boolean = false) {
         convos.add(index, Convo(tabInfo, ArrayList()))
-        if(isSelected)
+        if (isSelected)
             changeSelectedConvo(tabInfo)
     }
 }

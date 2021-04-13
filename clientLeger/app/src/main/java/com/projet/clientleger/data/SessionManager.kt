@@ -18,6 +18,8 @@ import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.utils.BitmapConversion
+import io.reactivex.rxjava3.annotations.NonNull
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -54,7 +56,7 @@ open class SessionManager @Inject constructor(
             context?.getSharedPreferences(context.getString(R.string.user_creds), Context.MODE_PRIVATE)
 
 
-    val scope = CoroutineScope(Job() + Dispatchers.Main)
+    private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     init {
         if (context != null) {
@@ -62,43 +64,60 @@ open class SessionManager @Inject constructor(
         }
     }
 
-    suspend fun saveCreds(accessToken: String, refreshToken: String) {
-        userPrefs?.edit {
-            putString(ACCESS_TOKEN, accessToken)
-            putString(REFRESH_TOKEN, refreshToken)
-            apply()
-        }
-        tokenInterceptor.setAccessToken(accessToken)
-        val res = apiSessionManagerInterface.getAccountInfo()
-        socketService.connect(accessToken)
-        when (res.code()) {
-            HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body())
-            HttpsURLConnection.HTTP_UNAUTHORIZED -> logoutAndRestart(SESSION_EXPIRED)
-            else -> logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
+    fun saveCreds(accessToken: String, refreshToken: String): Observable<Boolean> {
+        return Observable.create<Boolean> { emiter ->
+            userPrefs?.edit {
+                putString(ACCESS_TOKEN, accessToken)
+                putString(REFRESH_TOKEN, refreshToken)
+                apply()
+            }
+            tokenInterceptor.setAccessToken(accessToken)
+            scope.launch {
+                val res = apiSessionManagerInterface.getAccountInfo()
+
+                socketService.connect(accessToken)
+                when (res.code()) {
+                    HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body()).subscribe {
+                        emiter.onNext(true)
+                    }
+                    HttpsURLConnection.HTTP_UNAUTHORIZED -> {
+                        logoutAndRestart(SESSION_EXPIRED)
+                        emiter.onNext(false)
+                    }
+                    else -> {
+                        logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
+                        emiter.onNext(false)
+                    }
+                }
+            }
         }
     }
 
-    private fun saveAccountInfo(info: Account?) {
-        if (info != null) {
-            apiAvatarInterface.getAvatar(info.avatar).enqueue(object : Callback<ResponseBody> {
-                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                    val avatar: Bitmap? = if (response.code() == HttpsURLConnection.HTTP_OK) {
-                        val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
-                        BitmapConversion.toRoundedBitmap(bitmap)
-                    } else {
-                        if (context != null) {
-                            BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
+    private fun saveAccountInfo(info: Account?): Observable<Boolean> {
+        return Observable.create { emitter ->
+            if (info != null) {
+                apiAvatarInterface.getAvatar(info.avatar).enqueue(object : Callback<ResponseBody> {
+                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                        val avatar: Bitmap? = if (response.code() == HttpsURLConnection.HTTP_OK) {
+                            val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
+                            BitmapConversion.toRoundedBitmap(bitmap)
                         } else {
-                            null
+                            if (context != null) {
+                                BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
+                            } else {
+                                null
+                            }
                         }
+                        accountInfo = info.toAccountInfo(avatar)
+                        emitter.onNext(true)
                     }
-                    accountInfo = info.toAccountInfo(avatar)
-                }
 
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                    TODO("Not yet implemented")
-                }
-            })
+                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                        //TODO("Not yet implemented")
+                        emitter.onNext(false)
+                    }
+                })
+            }
         }
     }
 
@@ -177,7 +196,7 @@ open class SessionManager @Inject constructor(
         return res
     }
 
-    open suspend fun <Q,R,S,T> request(qSend: Q, rSend: R, sSend: S, callback: KSuspendFunction3<Q, R, S, Response<T>>): Response<T>{
+    open suspend fun <Q, R, S, T> request(qSend: Q, rSend: R, sSend: S, callback: KSuspendFunction3<Q, R, S, Response<T>>): Response<T> {
         var res = callback.invoke(qSend, rSend, sSend)
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
@@ -199,7 +218,8 @@ open class SessionManager @Inject constructor(
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context?.startActivity(intent, bundle)
     }
-    fun logout(){
+
+    fun logout() {
         tokenInterceptor.clearToken()
         clearCred()
         socketService.disconnect()

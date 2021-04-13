@@ -10,6 +10,7 @@ import io.socket.client.Ack
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -83,9 +84,9 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
             socketService.socket.off(endpoint.value)
     }
 
-    fun getRoomHistory(): Observable<ChatRoomHistory> {
+    fun getRoomHistory(roomName: String, page: Int, limit: Int): Observable<ChatRoomHistory> {
         return Observable.create { emitter ->
-            socketService.socket.emit(ChatSocketEndpoints.GET_ROOM_HISTORY.value, Ack{ historyObj ->
+            socketService.socket.emit(ChatSocketEndpoints.GET_ROOM_HISTORY.value, roomName, page, limit, Ack{ (historyObj) ->
                 val history = Json.decodeFromString(ChatRoomHistory.serializer(), historyObj.toString())
                 emitter.onNext(history)
             })
@@ -93,11 +94,8 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
     }
 
     fun sendRoomMessage(roomName: String, content: String){
-        val obj = JSONObject()
         val msgObj = JSONObject()
         msgObj.put("content", content)
-        obj.put("roomName", roomName)
-        obj.put("message", msgObj)
-        socketService.socket.emit(ChatSocketEndpoints.SEND_ROOM_MESSAGE.value, obj)
+        socketService.socket.emit(ChatSocketEndpoints.SEND_ROOM_MESSAGE.value, roomName, msgObj)
     }
 }

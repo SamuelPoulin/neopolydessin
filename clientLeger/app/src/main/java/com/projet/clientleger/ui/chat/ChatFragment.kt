@@ -46,8 +46,9 @@ class ChatFragment @Inject constructor() : Fragment() {
     private val chatConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             chatService = (service as ChatStorageService.LocalBinder).getService()
-            (binding?.rvTabs?.adapter as TabAdapter).clickCallback = chatService!!::removeConvo
+            (binding?.rvTabs?.adapter as TabAdapter).removeCallback = chatService!!::removeConvo
             setupChatServiceSubscriptions()
+            vm.fetchSavedData(chatService!!.convos, chatService!!.currentConvo)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -172,7 +173,7 @@ class ChatFragment @Inject constructor() : Fragment() {
             val manager = LinearLayoutManager(activity)
             manager.orientation = LinearLayoutManager.HORIZONTAL
             it.rvTabs.layoutManager = manager
-            it.rvTabs.adapter = TabAdapter(vm.convos.value!!)
+            it.rvTabs.adapter = TabAdapter(vm.convos.value!!, vm::changeCurrentTab)
         }
     }
 

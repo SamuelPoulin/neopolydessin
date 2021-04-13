@@ -25,11 +25,11 @@
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/closeIcon"
+            app:layout_constraintRight_toLeftOf="@+id/closeBtn"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/closeIcon"
+            android:id="@+id/closeBtn"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="?android:selectableItemBackground"

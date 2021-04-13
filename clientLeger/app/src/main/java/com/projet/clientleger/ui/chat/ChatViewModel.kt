@@ -67,23 +67,30 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     }
 
-    fun updateConvos(){
-        println("vm update convo")
+    fun updateConvos(updatedConvos: ArrayList<Convo>){
         convos.value?.let { convosList ->
-            println("new convo: ${convosList}")
+            convosList.clear()
+            convosList.addAll(updatedConvos)
             convos.postValue(convosList)
         }
     }
 
     fun updateCurrentConvo(){
-        println("vm update current convo")
-        for(i in messagesLiveData.value!!.size - 1 until currentConvo.value!!.messages.size)
+        val minIndex = if(messagesLiveData.value!!.size == 0) 0 else messagesLiveData.value!!.size - 1
+        for(i in minIndex until currentConvo.value!!.messages.size)
             messagesLiveData.value!!.add(currentConvo.value!!.messages[i])
         messagesLiveData.postValue(messagesLiveData.value!!)
     }
 
     fun changeCurrentTab(newTabId: TabInfo?){
         val newCurrentConvo = convos.value!!.find { it.tabInfo.convoId== newTabId?.convoId }
+        if(newCurrentConvo != null){
+            messagesLiveData.value?.let {
+                it.clear()
+                it.addAll(newCurrentConvo.messages)
+                messagesLiveData.postValue(it)
+            }
+        }
         currentConvo.postValue(newCurrentConvo)
     }
 
@@ -92,7 +99,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
             when(currentConvo.value!!.tabInfo.tabType){
                 TabType.GAME -> sendGameMessage(it)
                 TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
-                TabType.ROOM -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoName, it)
+                else -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoId, it)
             }
         }
     }
