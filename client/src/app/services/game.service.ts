@@ -8,6 +8,7 @@ import { UserService } from './user.service';
 @Injectable()
 export class GameService {
   static readonly SECOND: number = 1000;
+  static readonly CLASSIC_PLAYER_NUMBER: number = 4;
   canDraw: boolean = false;
   drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
@@ -33,12 +34,14 @@ export class GameService {
   nextTimestamp: number;
   timeRemaining: number;
   canGuess: boolean;
+  canStartGame: boolean;
 
   loggedInSubscription: Subscription;
 
   constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
     this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
+    this.canStartGame = false;
     this.scores = [
       { teamNumber: 0, score: 0 },
       { teamNumber: 1, score: 0 },
@@ -49,6 +52,11 @@ export class GameService {
   initSubscriptions() {
     this.lobbySubscription = this.socketService.getLobbyInfo().subscribe((players) => {
       this.resetTeams();
+      if (this.gameType === GameType.CLASSIC) {
+        if (players.length === GameService.CLASSIC_PLAYER_NUMBER) {
+          this.canStartGame = true;
+        }
+      }
       for (const player of players) {
         if (player.username === this.userService.account.username) {
           this.isHost = player.isOwner;
@@ -105,6 +113,19 @@ export class GameService {
     this.socketService.startGame();
   }
 
+  async addBot(teamNumber: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socketService.addBot(teamNumber).subscribe((success) => {
+        if (success) resolve();
+        else reject();
+      });
+    });
+  }
+
+  removeBot(username: string) {
+    this.socketService.removeBot(username);
+  }
+
   leaveGame() {
     this.socketService.leaveLobby();
     this.resetTeams();
@@ -130,6 +151,7 @@ export class GameService {
   setGameInfo(gameType: GameType, difficulty: Difficulty) {
     this.gameType = gameType;
     this.difficulty = difficulty;
+    this.canStartGame = GameType.CLASSIC === this.gameType ? false : true;
   }
 
   clearGameInfo() {

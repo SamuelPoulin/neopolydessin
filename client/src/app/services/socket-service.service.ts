@@ -178,6 +178,18 @@ export class SocketService {
     });
   }
 
+  addBot(teamNumber: number): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.emit(SocketLobby.ADD_BOT, teamNumber, (successfull: boolean) => {
+        obs.next(successfull);
+      });
+    });
+  }
+
+  removeBot(username: string): void {
+    this.socket.emit(SocketLobby.REMOVE_BOT, username);
+  }
+
   sendMessage(message: string): void {
     this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message } as Message);
   }
