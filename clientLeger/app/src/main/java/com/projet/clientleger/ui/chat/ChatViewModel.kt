@@ -68,12 +68,15 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     }
 
     fun updateConvos(){
+        println("vm update convo")
         convos.value?.let { convosList ->
+            println("new convo: ${convosList}")
             convos.postValue(convosList)
         }
     }
 
     fun updateCurrentConvo(){
+        println("vm update current convo")
         for(i in messagesLiveData.value!!.size - 1 until currentConvo.value!!.messages.size)
             messagesLiveData.value!!.add(currentConvo.value!!.messages[i])
         messagesLiveData.postValue(messagesLiveData.value!!)

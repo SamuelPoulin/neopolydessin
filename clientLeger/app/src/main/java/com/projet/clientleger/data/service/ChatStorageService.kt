@@ -129,9 +129,12 @@ class ChatStorageService @Inject constructor() : Service() {
     }
 
     fun addNewConvo(tabInfo: TabInfo, isSelected: Boolean) {
+        println("new convo: ${tabInfo}")
         if (convos.find { it.tabInfo.convoId == tabInfo.convoId } == null) {
             if(tabInfo.tabType != TabType.GAME){
                 getHistory(tabInfo).subscribe{
+                    convos.add(Convo(tabInfo, it))
+                    println("getHistory: ${it}")
                     emitConvosChange()
                     if (isSelected)
                         changeSelectedConvo(tabInfo)

@@ -232,8 +232,10 @@ class ChatFragment @Inject constructor() : Fragment() {
             }
         }
         vm.currentConvo.observe(requireActivity()){
-            binding?.let { mBinding ->
-                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
+            if(it != null){
+                binding?.let { mBinding ->
+                    (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
+                }
             }
         }
     }

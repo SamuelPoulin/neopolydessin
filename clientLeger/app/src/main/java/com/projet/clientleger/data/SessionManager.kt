@@ -201,7 +201,6 @@ open class SessionManager @Inject constructor(
     }
     fun logout(){
         tokenInterceptor.clearToken()
-        chatStorageService.clear()
         clearCred()
         socketService.disconnect()
     }
