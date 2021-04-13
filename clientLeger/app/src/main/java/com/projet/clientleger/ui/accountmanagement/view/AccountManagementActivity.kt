@@ -89,7 +89,8 @@ class AccountManagementActivity : AppCompatActivity() {
     suspend fun changeProfileInfos(account:UpdateAccountModel){
         vm.updateAccountInfos(account)
     }
-    fun formatTimeMinSecFormat(time: Long):String{
+    fun formatTimeMinSecFormat(timer: Float):String{
+        val time = timer.toLong()
         val min = floor((TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN).toDouble()).toInt()
         val sec = TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN
         var result = "$min:$sec"
@@ -98,5 +99,4 @@ class AccountManagementActivity : AppCompatActivity() {
         }
         return result
     }
-
 }

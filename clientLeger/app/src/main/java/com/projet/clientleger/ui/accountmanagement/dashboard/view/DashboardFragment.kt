@@ -102,7 +102,6 @@ class DashboardFragment @Inject constructor(): Fragment() {
         var winCpt = 0
         var neutralCpt = 0
         var loseCpt = 0
-        var buffer = 0
         for(j in 0 until DAYS_IN_WEEK){
             for(i in 0 until games.size){
                 if(areDatesOnSameDay(Date(games[i].startDate), getDaysAgo(j))){
@@ -139,7 +138,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
         dialog.show()
         dialog.connectionHistory.layoutManager = LinearLayoutManager(requireActivity())
-        dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins.logins)
+        dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins)
         dialog.gameHistory.layoutManager = LinearLayoutManager(requireActivity())
         dialog.gameHistory.adapter = GameHistoryAdapter(accountDashboard.gameHistory.games)
         dialog.dismissBtn.setOnClickListener {
@@ -166,7 +165,7 @@ class DashboardFragment @Inject constructor(): Fragment() {
         calendar1.time = date1
         val calendar2 = Calendar.getInstance()
         calendar2.time = date2
-        return calendar1[Calendar.YEAR] === calendar2[Calendar.YEAR] && calendar1[Calendar.MONTH] === calendar2[Calendar.MONTH] && calendar1[Calendar.DAY_OF_MONTH] === calendar2[Calendar.DAY_OF_MONTH]
+        return calendar1[Calendar.YEAR] == calendar2[Calendar.YEAR] && calendar1[Calendar.MONTH] == calendar2[Calendar.MONTH] && calendar1[Calendar.DAY_OF_MONTH] == calendar2[Calendar.DAY_OF_MONTH]
     }
 
 }
