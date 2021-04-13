@@ -22,6 +22,19 @@
   background-color: #FBFBFB;
 }
 
+#home-divider {
+  display: flex;
+  height: 100%;
+}
+
+#home-menu {
+  width: 100%;
+}
+
+app-chat {
+  min-width: 400px;
+}
+
 #menu-container-title {
   display: flex;
   flex-direction: column;
