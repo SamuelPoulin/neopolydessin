@@ -1,9 +1,6 @@
 #chat-friendslist-container {
   position: absolute;
   overflow: hidden;
-  top: 75px;
-  max-height: calc(100vh - 135px);
-  width: 400px;
   background-color: #292929;
   transition: left 0.25s;
   z-index: 1;

@@ -10,6 +10,7 @@ export const MockUserService = jasmine.createSpyObj('UserService', {
   login: null,
   refreshToken: null,
   fetchAvatar: Promise.resolve(),
+  updateAccount: Promise.resolve(),
 });
 
 MockUserService.account = {
@@ -25,6 +26,7 @@ MockUserService.account = {
 
 MockUserService.loggedIn = new EventEmitter<void>();
 MockUserService.loggedOut = new EventEmitter<void>();
+MockUserService.accountUpdated = new EventEmitter<void>()
 
 describe('UserService', () => {
   let service: UserService;

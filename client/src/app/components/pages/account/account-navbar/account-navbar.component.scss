@@ -1,14 +1,20 @@
+app-avatar:hover {
+  opacity: 0.8;
+}
+
+#avatarInput {
+  display: none;
+}
+
 #navbar-container {
   position: fixed;
   left: 0px;
   z-index: 1;
-  
   display: flex;
   height: 100vh;
-  
   background-color: white;
   box-shadow: 10px 0px 10px rgba(0, 0, 0, 0.01);
-  
+
   transition: left 0.5s;
 }
 
@@ -16,7 +22,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  
+
   width: 265px;
 }
 
@@ -32,7 +38,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   margin: 10px 0px;
 }
 
@@ -76,7 +82,7 @@
 }
 
 #logout-button {
-  color:white;
+  color: white;
 }
 
 #logout-icon {

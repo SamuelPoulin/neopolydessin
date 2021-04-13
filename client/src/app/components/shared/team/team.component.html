@@ -8,5 +8,18 @@
     <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.GUESSER">help</mat-icon>
     <mat-icon class="player-role-icon" *ngIf="player.isBot">smart_toy</mat-icon>
     <mat-icon class="player-role-icon player-owner-role" *ngIf="player.isOwner">gamepad</mat-icon>
+    <ng-container *ngIf="gameService.gameType === 'classic' && player.isBot">
+      <div class="remove-button-container">
+        <button mat-icon-button (click)="this.removeBot(player.username)">
+          <mat-icon class="menu-button-icon remove-button">close</mat-icon>
+        </button>
+      </div>
+    </ng-container>
   </div>
+  <ng-container *ngIf="gameService.gameType === 'classic' && this.teamDoesntHaveBot()">
+    <button mat-flat-button class="menu-button" (click)="this.addBot()">
+      <mat-icon class="menu-button-icon add-button">add</mat-icon>
+      Joueur virtuel
+    </button>
+  </ng-container>
 </div>

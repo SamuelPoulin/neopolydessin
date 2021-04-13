@@ -27,8 +27,7 @@ import {
 import { ChatMessage, Message } from '../../common/communication/chat-message';
 import { Coord } from '../../common/communication/drawing-sequence';
 import { BotService } from '../app/services/bot.service';
-import { Game, GameResult, Team } from './schemas/game-history';
-
+import { Game, GameResult, Team } from '../../common/communication/dashboard';
 
 export interface ServerPlayer extends Player {
   socket: Socket;
@@ -219,20 +218,19 @@ export abstract class Lobby {
 
   protected bindLobbyEndPoints(socket: Socket) {
 
-    socket.on(SocketLobby.ADD_BOT, (teamNumber: number) => {
+    socket.on(SocketLobby.ADD_BOT, (teamNumber: number, successfull: (success: boolean) => void) => {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id && this.lobbyHasRoom()) {
-        if (this.gameType === GameType.CLASSIC && this.getTeamLength(teamNumber) >= this.size / 2) {
-          console.error(`already enough players in team ${teamNumber}`);
+        if (this.gameType === GameType.CLASSIC && this.teamDoesntHaveBot(teamNumber)) {
+          const bot = this.botService.getBot(teamNumber);
+          this.players.push(bot);
+          this.emitJoinInfo(bot, socket);
+          successfull(true);
         } else {
-          if (this.soloOrCoopGameAlreadyHasBot()) {
-            console.error(`Lobby - ${this.lobbyId} - already has a bot in it!`);
-          } else {
-            const bot = this.botService.getBot(teamNumber);
-            this.players.push(bot);
-            this.emitJoinInfo(bot, socket);
-          }
+          successfull(false);
         }
+      } else {
+        successfull(false);
       }
     });
 
@@ -425,10 +423,8 @@ export abstract class Lobby {
     return teamScoreArray;
   }
 
-  private soloOrCoopGameAlreadyHasBot(): boolean {
-    return this.gameType === GameType.SPRINT_COOP
-      || this.gameType === GameType.SPRINT_SOLO
-      && !this.players.find((player) => player.isBot);
+  private teamDoesntHaveBot(teamNumber: number): boolean {
+    return !this.players.find((player) => player.isBot && player.teamNumber === teamNumber);
   }
 
   private gameIsInDrawPhase(): boolean {

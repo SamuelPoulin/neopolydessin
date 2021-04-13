@@ -18,7 +18,7 @@ export class ChatTabComponent implements OnInit {
 
   ngOnInit() {
     if (this.room) {
-      this.closable = this.room.type === ChatRoomType.PRIVATE;
+      this.closable = this.room.type === ChatRoomType.PRIVATE || this.room.type === ChatRoomType.GROUP;
     } else {
       this.room = { name: '', id: '', type: ChatRoomType.GENERAL, messages: [] };
     }
@@ -26,7 +26,11 @@ export class ChatTabComponent implements OnInit {
 
   closeRoom(e: Event) {
     e.stopPropagation();
-    this.chatService.closeRoom(this.room.name);
+    if (this.room.type === ChatRoomType.GROUP) {
+      this.chatService.leaveChatRoom(this.room.name);
+    } else {
+      this.chatService.closeRoom(this.room.name);
+    }
   }
 
   focusRoom() {

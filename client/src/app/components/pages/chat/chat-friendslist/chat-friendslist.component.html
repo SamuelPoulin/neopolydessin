@@ -1,4 +1,8 @@
-<div id="chat-friendslist-container" [style.left]="opened ? '0px' : '400px'">
+<div id="chat-friendslist-container" 
+  [style.left]="opened ? '0' : '100%'"
+  [style.height]="standalone ? electronContainer ? 'calc(100vh - 155px)' : 'calc(100vh - 125px)' : 'calc(100vh - 135px)'"
+  [style.width]="standalone ? '100%' : '400px'"
+>
   <div id="chat-friendslist-header">
     <button mat-icon-button id="chat-friendslist-closer" (click)="closeFriendslist()">
       <mat-icon [inline]="true" id="chat-friendslist-closer-icon">close</mat-icon>

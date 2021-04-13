@@ -11,6 +11,11 @@ import randomColor from 'randomcolor';
 export class AvatarComponent implements OnInit {
   @Input() username: string;
   @Input() avatarId: string;
+
+  @Input() set updateFlag(value: boolean) {
+    this.updateAvatar();
+  }
+
   @Input() mainUser: boolean;
   @Input() size: number;
   @Input() fontSize: number;
@@ -26,10 +31,17 @@ export class AvatarComponent implements OnInit {
 
   ngOnInit() {
     this.color = randomColor({ seed: this.username, luminosity: 'bright' });
+    this.getAvatar(false);
+  }
 
+  updateAvatar() {
+    this.getAvatar(true);
+  }
+
+  private getAvatar(ignoreLocalStorage: boolean) {
     const reader = new FileReader();
     if (this.mainUser !== undefined) {
-      if (this.userService.avatarBlob) {
+      if (this.userService.avatarBlob && !ignoreLocalStorage) {
         reader.readAsDataURL(this.userService.avatarBlob);
         reader.onloadend = () => {
           if (reader.result) {

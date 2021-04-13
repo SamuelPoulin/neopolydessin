@@ -5,6 +5,8 @@ import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { ChatComponent } from './chat.component';
@@ -20,6 +22,7 @@ describe('ChatComponent', () => {
         { provide: UserService, useValue: MockUserService },
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
+        { provide: SocketService, useValue: MockSocketService },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(ChatComponent);

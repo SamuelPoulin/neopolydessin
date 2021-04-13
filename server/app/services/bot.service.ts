@@ -56,22 +56,24 @@ export class BotService {
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], this.currentCoordIndex + 1);
   }
 
-  playerGuess(guessStatus: GuessResponse): void {
-    switch (guessStatus) {
-      case GuessResponse.CORRECT:
-        this.playerCorrectGuess();
-        break;
-      case GuessResponse.CLOSE:
-        this.playerCloseGuess();
-        break;
-      case GuessResponse.WRONG:
-        this.playerIncorrectGuess();
-        break;
+  playerGuess(guessStatus: GuessResponse, guessTries?: number, guessLeft?: number): void {
+    if (this.currentBot < this.bots.length) {
+      switch (guessStatus) {
+        case GuessResponse.CORRECT:
+          this.bots[this.currentBot].onPlayerCorrectGuess(guessTries, guessLeft);
+          break;
+        case GuessResponse.CLOSE:
+          this.bots[this.currentBot].onPlayerCloseGuess(guessTries, guessLeft);
+          break;
+        case GuessResponse.WRONG:
+          this.bots[this.currentBot].onPlayerIncorrectGuess(guessTries, guessLeft);
+          break;
+      }
     }
   }
 
   requestHint(): void {
-    if (this.hintAvailable) {
+    if (this.hintAvailable && this.currentBot < this.bots.length) {
       this.hintAvailable = false;
       this.bots[this.currentBot].onPlayerRequestsHint();
       setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);
@@ -88,18 +90,6 @@ export class BotService {
       isBot: true,
       isOwner: false
     };
-  }
-
-  private playerCorrectGuess(): void {
-    this.bots[this.currentBot].onPlayerCorrectGuess();
-  }
-
-  private playerCloseGuess(): void {
-    this.bots[this.currentBot].onPlayerCloseGuess();
-  }
-
-  private playerIncorrectGuess(): void {
-    this.bots[this.currentBot].onPlayerIncorrectGuess();
   }
 
   private drawPath(segment: Segment, startAt: number): void {

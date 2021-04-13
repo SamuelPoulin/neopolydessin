@@ -15,7 +15,7 @@ export class ChatFriendslistComponent {
   constructor(private chatService: ChatService, private modalService: ModalDialogService) {}
 
   closeFriendslist() {
-    this.chatService.friendslistOpened = false;
+    this.chatService.toggleFriendslist();
   }
 
   openAddFriend() {
@@ -23,10 +23,18 @@ export class ChatFriendslistComponent {
   }
 
   get friends(): FriendWithConnection[] {
-    return this.chatService.friends;
+    return this.chatService.chatState.friends;
   }
 
   get friendRequests(): FriendWithConnection[] {
-    return this.chatService.friendRequests;
+    return this.chatService.chatState.friendRequests;
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
+  }
+
+  get standalone(): boolean {
+    return this.chatService.standalone;
   }
 }

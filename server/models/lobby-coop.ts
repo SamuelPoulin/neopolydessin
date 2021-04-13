@@ -9,9 +9,9 @@ import {
   GameType,
   PlayerRole,
   GuessResponse,
-  GuessMessageSoloCoop,
   ReasonEndGame,
-  CurrentGameState
+  CurrentGameState,
+  GuessMessage
 } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { DifficultyModifiers, Lobby } from './lobby';
@@ -90,16 +90,14 @@ export class LobbyCoop extends Lobby {
             this.guessLeft--;
             break;
         }
-        const guessMessage: GuessMessageSoloCoop = {
+        const guessMessage: GuessMessage = {
           content: word,
           timestamp: Date.now(),
           guessStatus,
-          nbGuessLeft: this.guessLeft,
           senderUsername: player.username
         };
-        this.io.in(this.lobbyId)
-          .emit(SocketLobby.SOLO_COOP_GUESS_BROADCAST, guessMessage);
-        this.botService.playerGuess(guessStatus);
+        this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessMessage);
+        this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
 
 
         if (this.guessLeft === 0 || guessStatus === GuessResponse.CORRECT) {

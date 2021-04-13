@@ -44,7 +44,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     public gameService: GameService,
     public dialog: ModalDialogService,
     private apiService: APIService,
-    private chatService: ChatService,
+    public chatService: ChatService,
   ) {
     this.chatService.resetGameMessages();
 

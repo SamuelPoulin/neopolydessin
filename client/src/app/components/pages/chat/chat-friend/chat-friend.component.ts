@@ -1,7 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Decision } from '@common/communication/friend-request';
 import { FriendStatus, FriendWithConnection } from '@common/communication/friends';
-import { APIService } from '@services/api.service';
 import { ChatService } from '@services/chat.service';
 
 @Component({
@@ -12,7 +10,7 @@ import { ChatService } from '@services/chat.service';
 export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
 
-  constructor(private apiService: APIService, private chatService: ChatService) {
+  constructor(private chatService: ChatService) {
     this.friend = { friendId: { _id: '', avatar: '', username: '' }, isOnline: false, status: FriendStatus.PENDING, received: false };
   }
 
@@ -34,13 +32,13 @@ export class ChatFriendComponent {
 
   confirm() {
     if (this.friend.friendId?._id) {
-      this.apiService.sendFriendDecision(this.friend.friendId?._id, Decision.ACCEPT);
+      this.chatService.confirmFriend(this.friend.friendId?._id);
     }
   }
 
   reject() {
     if (this.friend.friendId?._id) {
-      this.apiService.sendFriendDecision(this.friend.friendId?._id, Decision.REFUSE);
+      this.chatService.rejectFriend(this.friend.friendId?._id);
     }
   }
 
@@ -50,7 +48,7 @@ export class ChatFriendComponent {
 
   unfriend() {
     if (this.friend.friendId?._id) {
-      this.apiService.removeFriend(this.friend.friendId._id);
+      this.chatService.removeFriend(this.friend.friendId._id);
     }
   }
 

@@ -17,6 +17,10 @@ export const MockAPIService = jasmine.createSpyObj('APIService', {
   handleError: null,
   getAccount: Promise.resolve(),
   getFriendsList: Promise.resolve({ friends: [] }),
+  getDashBoardInfo: Promise.resolve({
+    gameHistory: { games: [] },
+    logins: []
+  }),
 });
 
 MockAPIService.friendslistUpdated = of();

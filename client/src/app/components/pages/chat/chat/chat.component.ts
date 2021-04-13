@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
 import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
+import { ElectronService } from 'ngx-electron';
+import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
 @Component({
@@ -20,15 +23,31 @@ export class ChatComponent {
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
-  friendslistOpened: boolean = false;
+  chatRoomChangedSubscription: Subscription;
+  isElectronApp: boolean;
 
-  constructor(private snackBar: MatSnackBar, public chatService: ChatService, public userService: UserService, public dialog: MatDialog) {
+  constructor(
+    private snackBar: MatSnackBar,
+    private electronService: ElectronService,
+    private chatService: ChatService,
+    public userService: UserService,
+    public dialog: MatDialog,
+    public router: Router,
+  ) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
+
+    this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
+      this.scrollToBottom();
+    });
+
+    if (this.electronService.isElectronApp) {
+      this.isElectronApp = true;
+    }
   }
 
   sendMessage(): void {
     if (this.inputValid) {
-      if (this.chatService.guessing) {
+      if (this.chatService.chatState.guessing) {
         this.chatService.sendGuess(this.inputValue);
       } else {
         this.chatService.sendMessage(this.inputValue);
@@ -54,7 +73,11 @@ export class ChatComponent {
 
   scrollToBottom(): void {
     setTimeout(() => {
-      document.querySelector('#chat-messages')?.scrollTo(0, document.body.scrollHeight);
+      const chatMessages = document.querySelector('#chat-messages');
+
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
     });
   }
 
@@ -71,11 +94,15 @@ export class ChatComponent {
   }
 
   toggleGuessMode(): void {
-    this.chatService.guessing = !this.chatService.guessing;
+    this.chatService.toggleGuessMode();
   }
 
   toggleFriendslist() {
-    this.chatService.friendslistOpened = !this.chatService.friendslistOpened;
+    this.chatService.toggleFriendslist();
+  }
+
+  toggleChatRooms() {
+    this.chatService.toggleChatRooms();
   }
 
   addEmoji(e: EmojiEvent) {
@@ -91,11 +118,39 @@ export class ChatComponent {
     return ChatComponent.MAX_CHARACTER_COUNT;
   }
 
+  get standalone(): boolean {
+    return this.chatService.standalone;
+  }
+
+  get guessing(): boolean {
+    return this.chatService.chatState.guessing;
+  }
+
+  get messages(): Message[] {
+    return this.chatService.messages;
+  }
+
+  get friendslistOpened(): boolean {
+    return this.chatService.chatState.friendslistOpened;
+  }
+
+  get chatRoomsOpened(): boolean {
+    return this.chatService.chatState.chatRoomsOpened;
+  }
+
+  get canGuess(): boolean {
+    return this.chatService.canGuess;
+  }
+
   sendNotification(message: string) {
     this.snackBar.open(message, 'Ok', {
       duration: 2000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
     });
+  }
+
+  popout() {
+    this.chatService.popOut();
   }
 }

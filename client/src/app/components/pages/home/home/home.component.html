@@ -1,27 +1,35 @@
-<div id="home-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
+<div id="home-container" [style.top]="electronContainer && '30px'"
+  [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <div id="menu-container">
     <app-status-bar></app-status-bar>
-    <div id="menu-container-title">
-      <img src="assets/icon.png">
-      <div>PolyDessin</div>
-    </div>
-    <div id="menu-container-buttons">
-      <button mat-flat-button class="menu-button menu-main-button" (click)="openGamemode()">
-        <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
-        Créer une partie privée
-      </button>
-      <button mat-flat-button class="menu-button menu-main-button" disabled>
-        <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
-        Rejoindre une partie
-      </button>
-      <button mat-flat-button class="menu-button menu-main-button" routerLink="browser">
-        <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
-        Liste des parties
-      </button>
-      <button mat-flat-button class="menu-button menu-main-button" routerLink="picture-word">
-        <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
-        Mot-image
-      </button>
+    <div id="home-divider" [style.max-height]="electronContainer ? 'calc(100vh - 90px)' : 'calc(100vh - 60px)'">
+      <div id="home-menu">
+        <div id="menu-container-title">
+          <img src="assets/icon.png">
+          <div>PolyDessin</div>
+        </div>
+        <div id="menu-container-buttons">
+          <button mat-flat-button class="menu-button menu-main-button" (click)="openGamemode()">
+            <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
+            Créer une partie privée
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" disabled>
+            <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
+            Rejoindre une partie
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" routerLink="browser">
+            <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
+            Liste des parties
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" routerLink="picture-word">
+            <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
+            Mot-image
+          </button>
+        </div>
+      </div>
+      <ng-container *ngIf="!chatService.chatPoppedOut">
+        <app-chat></app-chat>
+      </ng-container>
     </div>
   </div>
 </div>
