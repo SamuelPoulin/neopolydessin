@@ -43,12 +43,13 @@
 
             <ImageView
                 android:id="@+id/logo"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_width="207dp"
+                android:layout_height="114dp"
                 android:padding="5dp"
                 android:src="@mipmap/polydessin_icon_round"
                 app:layout_constraintBottom_toTopOf="@id/title"
                 app:layout_constraintHeight_percent="0.2"
+                app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -71,7 +72,6 @@
                 style="@style/MenuBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> activity.showGameDialog(true)}"
                 android:text="@string/createGame"
                 app:layout_constraintBottom_toTopOf="@+id/joinGamebtn"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -88,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> activity.showGameDialog(false)}"
                 android:text="@string/joinGame"
-                app:layout_constraintBottom_toTopOf="@+id/picwordBtn"
+                app:layout_constraintBottom_toTopOf="@+id/userGuideBtn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/createGameBtn"
@@ -96,18 +96,6 @@
                 app:layout_constraintVertical_chainStyle="packed"
                 app:layout_constraintWidth_percent="0.5" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/picwordBtn"
-                style="@style/MenuBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/picword"
-                app:layout_constraintBottom_toTopOf="@id/userGuideBtn"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/joinGamebtn"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintWidth_percent="0.5" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/userGuideBtn"
@@ -115,10 +103,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/userGuide"
+                android:onClick="@{()->activity.startTutorial()}"
                 app:layout_constraintBottom_toTopOf="@id/accountBtn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/picwordBtn"
+                app:layout_constraintTop_toBottomOf="@+id/joinGamebtn"
                 app:layout_constraintVertical_chainStyle="packed"
                 app:layout_constraintWidth_percent="0.5" />
 
@@ -126,6 +115,7 @@
                 android:id="@+id/accountBtn"
                 style="@style/MenuBtn"
                 android:layout_width="0dp"
+                android:onClick="@{()->activity.goToDashBoard()}"
                 android:layout_height="wrap_content"
                 android:text="@string/tableau_de_bord"
                 app:layout_constraintBottom_toBottomOf="parent"

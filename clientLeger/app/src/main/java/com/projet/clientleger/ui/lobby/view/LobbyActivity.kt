@@ -71,6 +71,9 @@ class LobbyActivity : AppCompatActivity() {
         supportFragmentManager.commit{
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
+        if(vm.isTutorialActive()){
+            //vm.addShowcase("Nous sommes maintenant dans le lobby \n Maintenant que le lobby est créé, nous allons pouvoir démarrer la partie", binding.startGameButton,this)
+        }
     }
 
     private fun setupToolbar(){

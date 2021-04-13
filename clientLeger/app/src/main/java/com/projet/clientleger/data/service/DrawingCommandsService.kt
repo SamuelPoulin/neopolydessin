@@ -27,17 +27,12 @@ class DrawingCommandsService @Inject constructor() {
         command.undo()
     }
 
+
     fun redo(){
         if(undoneCommands.isEmpty())
             return
         val command = undoneCommands.removeLast()
         command.execute()
-    }
-    fun canUndo():Boolean{
-        return doneCommands.isEmpty()
-    }
-    fun canRedo():Boolean{
-        return undoneCommands.isEmpty()
     }
 
     fun clear(){

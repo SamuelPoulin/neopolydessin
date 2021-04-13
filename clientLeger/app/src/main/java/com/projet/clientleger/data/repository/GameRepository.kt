@@ -57,4 +57,7 @@ open class GameRepository @Inject constructor(private val gameSocketService: Gam
     fun onLeaveGame() {
         gameSocketService.onLeaveGame()
     }
+    fun getUsername():String{
+        return sessionManager.getUsername()
+    }
 }

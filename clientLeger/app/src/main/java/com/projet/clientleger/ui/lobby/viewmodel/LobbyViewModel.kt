@@ -1,8 +1,11 @@
 package com.projet.clientleger.ui.lobby.viewmodel
 
+import android.app.Activity
 import android.graphics.Bitmap
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.enumData.TabType
@@ -11,18 +14,18 @@ import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
+import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.ui.chat.ChatViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
 @HiltViewModel
-class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
+class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository, private val tutorialService: TutorialService):ViewModel() {
 
     companion object {
         const val GAME_TAB_NAME = "Partie"
     }
-
     val teams: Array<MutableLiveData<ArrayList<PlayerInfo>>> =
             arrayOf(MutableLiveData(ArrayList()),
             MutableLiveData(ArrayList()))
@@ -95,5 +98,11 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun kickPlayer(){
         lobbyRepository.kickPlayer()
+    }
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
+    }
+    fun addShowcase(model: SequenceModel){
+        tutorialService.userGuide(model)
     }
 }
