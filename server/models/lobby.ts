@@ -149,12 +149,15 @@ export abstract class Lobby {
       const removedPlayer = this.players[index];
       this.players.splice(index, 1);
       this.unbindLobbyEndPoints(socket);
-      if (removedPlayer.isOwner && this.players.length === 1) {
-        this.players[0].isOwner = true;
+      if (removedPlayer.isOwner) {
+        const newOwnerIndex = this.players.findIndex((player) => !player.isBot);
+        if (newOwnerIndex > -1) {
+          this.players[newOwnerIndex].isOwner = true;
+        }
       }
       socket.leave(this.lobbyId);
       this.emitLeaveInfo(removedPlayer, socket);
-      if (this.players.length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
+      if (this.players.filter((player) => !player.isBot).length === 0 || this.currentGameState !== CurrentGameState.LOBBY) {
         this.endGame(ReasonEndGame.PLAYER_DISCONNECT);
       }
     }
@@ -218,11 +221,12 @@ export abstract class Lobby {
 
   protected bindLobbyEndPoints(socket: Socket) {
 
-    socket.on(SocketLobby.ADD_BOT, (teamNumber: number, successfull: (success: boolean) => void) => {
+    socket.on(SocketLobby.ADD_BOT, (teamNumber: string, successfull: (success: boolean) => void) => {
       const owner = this.getLobbyOwner();
+      const teamIndex: number = Number.parseInt(teamNumber, 10);
       if (owner && owner.socket.id === socket.id && this.lobbyHasRoom()) {
-        if (this.gameType === GameType.CLASSIC && this.teamDoesntHaveBot(teamNumber)) {
-          const bot = this.botService.getBot(teamNumber);
+        if (this.gameType === GameType.CLASSIC && this.teamDoesntHaveBot(teamIndex)) {
+          const bot = this.botService.getBot(teamIndex);
           this.players.push(bot);
           this.emitJoinInfo(bot, socket);
           successfull(true);
@@ -464,9 +468,13 @@ export abstract class Lobby {
           score: 0,
           playerNames: []
         });
-        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam && !player.isBot)
+        teams[indexTeam].playerNames = this.players.filter((player) => player.teamNumber === indexTeam)
           .map((playerToModify) => {
-            return playerToModify.username;
+            if (playerToModify.isBot) {
+              return playerToModify.username + ' - Bot';
+            } else {
+              return playerToModify.username;
+            }
           });
         teams[indexTeam].score = teamScore;
       });

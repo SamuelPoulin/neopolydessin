@@ -52,7 +52,7 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
   ],
   [
     Personnalities.GENTLEMAN, {
-      onStartDraw: 'Attention mesdames et messieurs, la partie va commencer!',
+      onStartDraw: 'Attention mesdames et messieurs, nous allons commencer!',
       onSlowDown: 'Je vais ralentir un peu, je suis à bout de souffle.',
       onSpeedUp: 'Augmentons la vitesse du jeu!',
       onResetDrawing: 'Allons-y pour un autre si cela ne vous derange pas?',
