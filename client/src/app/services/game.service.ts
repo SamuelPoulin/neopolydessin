@@ -57,6 +57,8 @@ export class GameService {
       if (this.gameType === GameType.CLASSIC) {
         if (players.length === GameService.CLASSIC_PLAYER_NUMBER) {
           this.canStartGame = true;
+        } else {
+          this.canStartGame = false;
         }
       }
       for (const player of players) {

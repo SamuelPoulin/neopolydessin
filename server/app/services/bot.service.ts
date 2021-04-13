@@ -30,6 +30,7 @@ export class BotService {
   }
 
   draw(drawing: DrawingSequence, hints: string[]): void {
+    clearInterval(this.pathTimer);
     this.drawing = drawing;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
