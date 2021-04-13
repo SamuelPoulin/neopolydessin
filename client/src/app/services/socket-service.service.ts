@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
