@@ -64,7 +64,6 @@ export class ChatService {
       this.electronService.ipcRenderer.on('chat-update', (event, arg) => {
         this.nz.run(() => {
           this.chatState = arg;
-          console.log(arg);
         });
       });
     } else {
@@ -104,7 +103,6 @@ export class ChatService {
         this.toggleChatRooms();
       });
       this.electronService.ipcRenderer.on('chat-action-create-dm', (event, arg) => {
-        console.log(arg);
         this.createDM(arg.friendUsername, arg.friendId);
       });
       this.electronService.ipcRenderer.on('chat-action-create-room', (event, arg) => {
@@ -135,7 +133,6 @@ export class ChatService {
 
     this.chatRoomChanged = new EventEmitter<void>();
     this.chatState.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
-    this.chatState.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages: [] });
     this.chatState.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
@@ -152,6 +149,14 @@ export class ChatService {
 
       this.chatRoomChanged.emit();
       this.updatePoppedOutChat();
+    });
+
+    this.socketService.getRoomMessageHistory('general').subscribe((chatRoomHistory) => {
+      const messages: Message[] = [];
+      for (const message of chatRoomHistory.messages) {
+        messages.push({ timestamp: message.timestamp, senderUsername: message.senderUsername, content: message.content } as ChatMessage);
+      }
+      this.chatState.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages });
     });
 
     this.guessSubscription = this.socketService.receiveGuess().subscribe((message) => {
@@ -215,7 +220,18 @@ export class ChatService {
         let roomIndex = this.chatState.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
 
         if (roomIndex === -1) {
-          this.chatState.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages: [] });
+          this.socketService.getRoomMessageHistory(chatRoomMessage.roomName).subscribe((chatRoomHistory) => {
+            const messages: Message[] = [];
+            for (const message of chatRoomHistory.messages) {
+              messages.push({
+                content: message.content,
+                senderUsername: message.senderUsername,
+                timestamp: message.timestamp,
+              } as ChatMessage);
+            }
+            this.chatState.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages });
+            this.focusRoom(chatRoomMessage.roomName);
+          });
         } else {
           roomIndex = this.chatState.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
 
@@ -385,7 +401,7 @@ export class ChatService {
       this.electronService.ipcRenderer.send('chat-action-create-dm', { friendUsername, friendId });
     } else {
       this.apiService
-        .getMessageHistory(friendId)
+        .getPrivateMessageHistory(friendId)
         .then((privateMessages) => {
           const chatMessages: ChatMessage[] = [];
           for (const privateMessage of privateMessages) {
@@ -397,7 +413,7 @@ export class ChatService {
             });
           }
           this.chatState.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
-          this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === friendUsername);
+          this.focusRoom(friendUsername);
           this.chatState.friendslistOpened = false;
           this.chatRoomChanged.emit();
           this.updatePoppedOutChat();
@@ -506,7 +522,9 @@ export class ChatService {
   }
 
   get canGuess(): boolean {
-    return this.chatState.canGuess && this.chatState.rooms[this.chatState.currentRoomIndex].type === ChatRoomType.GAME;
+    const currentRoom = this.chatState.rooms[this.chatState.currentRoomIndex];
+    if (currentRoom) return this.chatState.canGuess && currentRoom.type === ChatRoomType.GAME;
+    else return false;
   }
 
   get standalone(): boolean {

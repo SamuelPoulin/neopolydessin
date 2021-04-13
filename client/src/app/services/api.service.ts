@@ -216,15 +216,15 @@ export class APIService {
     return new Promise<string>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         this.http
-          .post(
-            APIService.API_UPLOAD_AVATAR_ROUTE,
-            formData,
-            { headers: { authorization: this.localSaveService.accessToken } })
-          .subscribe((avatarId: { id: string }) => {
-            resolve(avatarId.id);
-          }, (e) => {
-            reject(e);
-          });
+          .post(APIService.API_UPLOAD_AVATAR_ROUTE, formData, { headers: { authorization: this.localSaveService.accessToken } })
+          .subscribe(
+            (avatarId: { id: string }) => {
+              resolve(avatarId.id);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
       }
     });
   }
@@ -266,14 +266,18 @@ export class APIService {
   async getDashBoardInfo(): Promise<DashBoardInfo> {
     return new Promise<DashBoardInfo>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
-        this.http.get(APIService.API_DASHBOARD_ROUTE, {
-          headers: { authorization: this.localSaveService.accessToken }
-        }).subscribe(
-          (dashboard: DashBoardInfo) => {
-            resolve(dashboard);
-          }, (e) => {
-            reject(e);
-          });
+        this.http
+          .get(APIService.API_DASHBOARD_ROUTE, {
+            headers: { authorization: this.localSaveService.accessToken },
+          })
+          .subscribe(
+            (dashboard: DashBoardInfo) => {
+              resolve(dashboard);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
       } else {
         reject();
       }
@@ -283,17 +287,20 @@ export class APIService {
   async updateAccount(firstName?: string, lastName?: string, username?: string, email?: string): Promise<AccountInfo> {
     return new Promise<AccountInfo>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
-        this.http.post(APIService.API_ACCOUNT_ROUTE,
-          { firstName, lastName, email, username },
-          { headers: { authorization: this.localSaveService.accessToken } }
-        ).subscribe(
-          (accountInfo: AccountInfo) => {
-            resolve(accountInfo);
-          },
-          (err) => {
-            reject(err);
-          }
-        );
+        this.http
+          .post(
+            APIService.API_ACCOUNT_ROUTE,
+            { firstName, lastName, email, username },
+            { headers: { authorization: this.localSaveService.accessToken } },
+          )
+          .subscribe(
+            (accountInfo: AccountInfo) => {
+              resolve(accountInfo);
+            },
+            (err) => {
+              reject(err);
+            },
+          );
       } else {
         reject();
       }
@@ -415,7 +422,7 @@ export class APIService {
     });
   }
 
-  async getMessageHistory(friendId: string): Promise<PrivateMessage[]> {
+  async getPrivateMessageHistory(friendId: string): Promise<PrivateMessage[]> {
     return new Promise<PrivateMessage[]>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         this.http
@@ -423,7 +430,7 @@ export class APIService {
             params: {
               page: '1',
               otherId: friendId,
-              limit: '4',
+              limit: '10',
             },
             headers: {
               authorization: this.localSaveService.accessToken,

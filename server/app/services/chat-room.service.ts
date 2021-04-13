@@ -48,7 +48,7 @@ export class ChatRoomService {
         if (this.chatRoomExists(roomName)) {
           this.getMessageHistory(roomName, page, limit)
             .then((chatHistory) => {
-              callback(chatHistory);
+              callback({...chatHistory, messages: chatHistory.messages.reverse()});
             }).catch((err) => {
               callback(null);
             });
@@ -161,7 +161,7 @@ export class ChatRoomService {
     limit = limit < 0 ? 0 : limit;
     return new Promise<ChatRoomHistory>((resolve, reject) => {
       const skips = limit * (page - 1);
-      chatRoomHistoryModel.findOne({ roomName }, 'messages').skip(skips).limit(limit)
+      chatRoomHistoryModel.findOne({ roomName }).slice('messages', [skips, limit])
         .then((chatHistory) => {
           if (!chatHistory) throw Error();
           resolve(chatHistory);
