@@ -166,8 +166,6 @@ export class LobbyClassique extends Lobby {
   }
 
   private startReply() {
-    // SEND REPLY PHASE TO CLIENTS WITH ROLES (GUESS-GUESS / PASSIVE-PASSIVE)
-    // SEND TIME TO CLIENT (10 SECONDS)
     if (this.drawers[this.drawingTeamNumber].isBot) {
       this.botService.resetDrawing();
     }

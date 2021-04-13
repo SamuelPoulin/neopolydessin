@@ -9,6 +9,8 @@ import { UserService } from './user.service';
 export class GameService {
   static readonly SECOND: number = 1000;
   static readonly CLASSIC_PLAYER_NUMBER: number = 4;
+
+  isInGame: boolean = false;
   canDraw: boolean = false;
   drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
@@ -76,6 +78,7 @@ export class GameService {
       this.leaveGame();
     });
     this.startClientGameSubscription = this.socketService.receiveGameStart().subscribe(() => {
+      this.isInGame = true;
       this.router.navigate(['edit']);
     });
     this.rolesSubscription = this.socketService.receiveRoles().subscribe((players) => {
