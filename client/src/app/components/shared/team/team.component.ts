@@ -24,12 +24,16 @@ export class TeamComponent {
     this.gameService.addBot(this.teamIndex);
   }
 
+  removePlayer(accountId: string): void {
+    this.gameService.removePlayer(accountId);
+  }
+
   removeBot(username: string): void {
     this.gameService.removeBot(username);
   }
 
-  teamDoesntHaveBot(): boolean {
-    return !this.team.find((player) => player.isBot);
+  canAddBot(): boolean {
+    return this.team.length < 2 && !this.team.find((player) => player.isBot);
   }
 
   get playerRole() {

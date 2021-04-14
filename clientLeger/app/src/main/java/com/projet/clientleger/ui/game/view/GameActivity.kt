@@ -1,8 +1,10 @@
 package com.projet.clientleger.ui.game.view
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Rect
@@ -10,6 +12,7 @@ import android.graphics.drawable.ColorDrawable
 import android.opengl.Visibility
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.IBinder
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
@@ -26,11 +29,16 @@ import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.enumData.ReasonEndGame
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.model.chat.TabInfo
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
@@ -60,6 +68,18 @@ class GameActivity : AppCompatActivity() {
     private val team1: ArrayList<PlayerInfo> = ArrayList()
     private val team2:ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
+    private var chatService: ChatStorageService? = null
+
+
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            chatService = null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +112,24 @@ class GameActivity : AppCompatActivity() {
         vm.onPlayerReady()
     }
 
+    override fun onStart() {
+        super.onStart()
+        if(chatService == null) {
+            Intent(this, ChatStorageService::class.java).also { intent ->
+                bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        chatService?.let {
+            it.removeConvo(ChatViewModel.GAME_TAB_ID)
+            unbindService(chatConnection)
+        }
+
+    }
+
     private fun setupTeamsUi(){
         val gameType = intent.getSerializableExtra("gameType") as GameType
         binding.team1Score.text = "0"
@@ -111,6 +149,7 @@ class GameActivity : AppCompatActivity() {
         dialog.titleMessage.text = message
 
         dialog.quitBtn.setOnClickListener {
+            vm.playSound(SoundId.CLOSE_GAME.value)
             dialog.dismiss()
             supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
             supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
@@ -127,6 +166,7 @@ class GameActivity : AppCompatActivity() {
         }
         else{
             dialog.continueBtn.setOnClickListener {
+                vm.playSound(SoundId.SELECTED.value)
                 dialog.dismiss()
             }
         }
@@ -190,6 +230,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
         vm.reveiceBoardwipeNotice().subscribe{
+            vm.playSound(SoundId.BOARDWIPE.value)
             lifecycleScope.launch {
                 supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             }
@@ -199,19 +240,13 @@ class GameActivity : AppCompatActivity() {
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
         
     }
-    private fun getFrenchRole(role:String):String{
-        return when (role){
-            PlayerRole.DRAWER.value -> "Dessinateur"
-            PlayerRole.GUESSER.value -> "Devineur"
-            else -> "Passif"
-        }
-    }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
         timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
             @SuppressLint("SetTextI18n")
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){
+                    vm.playSound(SoundId.TICK.value)
                     binding.timer.setTextColor(Color.RED)
                     binding.timerIcon.setImageResource(R.drawable.ic_timer_red)
                 }
@@ -231,6 +266,7 @@ class GameActivity : AppCompatActivity() {
             override fun onFinish(){}
         }
         timer?.start()
+
     }
 
     override fun onDestroy() {

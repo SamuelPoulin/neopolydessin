@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -13,16 +13,8 @@ import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
-import {
-  CurrentGameState,
-  Difficulty,
-  GameType,
-  GuessMessage,
-  LobbyInfo,
-  Player,
-  TeamScore,
-  TimeInfo,
-} from '../../../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
+import { FriendInvitation } from '@models/chat/friend-invitation';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -36,8 +28,14 @@ export class SocketService {
   loggedOutSubscription: Subscription;
   loggedInSubscription: Subscription;
 
+  leftGame: EventEmitter<void>;
+  joinedGame: EventEmitter<void>;
+
   constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
+
+    this.leftGame = new EventEmitter<void>();
+    this.joinedGame = new EventEmitter<void>();
 
     this.initSocket();
 
@@ -134,6 +132,7 @@ export class SocketService {
 
   leaveLobby(): void {
     this.socket.emit(SocketLobby.LEAVE_LOBBY);
+    this.leftGame.emit();
   }
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
@@ -146,6 +145,16 @@ export class SocketService {
 
   joinLobby(lobbyId: string) {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
+    this.joinedGame.emit();
+  }
+
+  async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CHANGE_PRIVACY_SETTING, privateGame);
+      this.socket.on(SocketLobby.CHANGED_PRIVACY_SETTING, (newPrivacy: boolean) => {
+        resolve(newPrivacy);
+      });
+    });
   }
 
   async joinChatRoom(roomName: string): Promise<void> {
@@ -189,6 +198,18 @@ export class SocketService {
 
   removeBot(username: string): void {
     this.socket.emit(SocketLobby.REMOVE_BOT, username);
+  }
+
+  removePlayer(accountId: string): void {
+    this.socket.emit(SocketLobby.REMOVE_PLAYER, accountId);
+  }
+
+  removedFromLobby(): Observable<void> {
+    return new Observable<void>((obs) => {
+      this.socket.on(SocketLobby.PLAYER_REMOVED, () => {
+        obs.next();
+      });
+    });
   }
 
   sendMessage(message: string): void {
@@ -235,10 +256,21 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
+      this.joinedGame.emit();
       resolve();
+    });
+  }
+
+  inviteFriend(friendId: string) {
+    this.socket.emit(SocketLobby.SEND_INVITE, friendId);
+  }
+
+  receiveFriendInvites(): Observable<FriendInvitation> {
+    return new Observable<FriendInvitation>((obs) => {
+      this.socket.on(SocketLobby.RECEIVE_INVITE, (username: string, lobbyId: string) => obs.next({ username, lobbyId }));
     });
   }
 
@@ -317,7 +349,7 @@ export class SocketService {
 
   receiveAddPath(): Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }> {
     return new Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }>((obs) => {
-      this.socket.on(SocketDrawing.ADD_PATH_BC, (id: number, path: Coordinate[], brush: BrushInfo) => {
+      this.socket.on(SocketDrawing.ADD_PATH_BC, (id: number, zIndex: number, path: Coordinate[], brush: BrushInfo) => {
         obs.next({ id, path, brush });
       });
     });

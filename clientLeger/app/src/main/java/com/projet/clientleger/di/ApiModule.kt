@@ -71,7 +71,6 @@ object ApiModule {
     @Singleton
     fun provideDrawingSocketService(socketService: SocketService): DrawingSocketService = DrawingSocketService(socketService)
 
-
     @Provides
     @Singleton
     fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)
@@ -82,11 +81,11 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
+    fun provideRoomslistSocketService(socketService: SocketService): RoomslistSocketService = RoomslistSocketService(socketService)
 
     @Provides
     @Singleton
-    fun provideChatStorageService(): ChatStorageService = ChatStorageService()
+    fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
 
     @Provides
     @Singleton

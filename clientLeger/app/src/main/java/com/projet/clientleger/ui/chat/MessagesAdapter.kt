@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.chat.RoomMessage
 import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.enumData.MessageType
 import com.projet.clientleger.data.model.chat.*
@@ -30,6 +31,15 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
                     else -> MessageType.OTHER
                 }
             }
+
+            mMessages[position] is RoomMessage -> {
+                val msg = mMessages[position] as RoomMessage
+                type = when (msg.senderUsername) {
+                    username -> MessageType.USER
+                    else -> MessageType.OTHER
+                }
+            }
+
             mMessages[position] is GuessMessageInfo || mMessages[position] is GuessMessageSoloCoopInfo -> {
                 val msg: IGuessMessageInfo = if(mMessages[position] is GuessMessageInfo)
                     mMessages[position] as GuessMessageInfo
@@ -76,8 +86,9 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolderMessage, position: Int) {
-        if (getItemViewType(position) == MessageType.OTHER.ordinal) {
-            val msg = mMessages[position] as MessageChat
+        val msgType = getItemViewType(position)
+        if (msgType != MessageType.SYSTEM.ordinal) {
+            val msg = mMessages[position] as IMessageChat
             val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(msg.timestamp))
             viewHolder.messageUsernameTextView.text = msg.senderUsername //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
             viewHolder.messageTimeTextView.text = time

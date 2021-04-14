@@ -1,5 +1,6 @@
 import { EventEmitter } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatState } from '@models/chat/chat-state';
 import { ElectronService } from 'ngx-electron';
@@ -49,6 +50,7 @@ describe('ChatService', () => {
         { provide: APIService, useValue: MockAPIService },
         { provide: UserService, useValue: MockUserService },
         { provide: ElectronService, useValue: MockElectronService },
+        { provide: MatSnackBar, useValue: {} },
       ],
     }).compileComponents();
   }));

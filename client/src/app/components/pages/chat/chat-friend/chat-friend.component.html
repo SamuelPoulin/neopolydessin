@@ -2,6 +2,7 @@
   <app-avatar [username]="username" [avatarId]="avatarId" size="35" fontSize="20" class="chat-friend-avatar">
   </app-avatar>
   {{username}}
+  <div *ngIf="friend.isOnline" class="chat-friend-online"></div>
   <div class="chat-friend-buttons-container">
     <ng-container [ngSwitch]="friend.status">
       <ng-container *ngSwitchCase="friendStatus.PENDING">

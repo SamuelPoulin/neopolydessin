@@ -9,6 +9,7 @@ import com.projet.clientleger.data.model.*
 import com.projet.clientleger.data.model.command.DrawPathCommand
 import com.projet.clientleger.data.model.command.ErasePathCommand
 import com.projet.clientleger.data.repository.DrawboardRepository
+import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.DrawingCommandsService
 import com.projet.clientleger.data.service.TutorialService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 @HiltViewModel
-class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService,private val tutorialService: TutorialService) :
+class DrawboardViewModel @Inject constructor(private val drawboardRepository: DrawboardRepository, private val drawingCommandsService: DrawingCommandsService,private val tutorialService: TutorialService,private val audioService: AudioService) :
         ViewModel() {
     companion object {
         val DEFAULT_TOOL = DrawTool.PEN
@@ -225,5 +226,8 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
     fun isTutorialActive():Boolean{
         return tutorialService.isTutorialActive()
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

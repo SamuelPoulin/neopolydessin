@@ -1,8 +1,10 @@
 /* eslint-disable max-lines */
 import { EventEmitter, Injectable, Injector, NgZone } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Decision } from '@common/communication/friend-request';
 import { FriendsList, FriendStatus } from '@common/communication/friends';
+import { Difficulty, GameType } from '@common/communication/lobby';
 import { ChatRoomType } from '@models/chat/chat-room';
 import { ChatState } from '@models/chat/chat-state';
 import { ElectronService } from 'ngx-electron';
@@ -30,6 +32,10 @@ export class ChatService {
   friendslistAPISubscription: Subscription;
   chatRoomsSubscription: Subscription;
   canGuessChangedSubscription: Subscription;
+  invitationSubscription: Subscription;
+
+  joinedGameSubscription: Subscription;
+  leftGameSubscription: Subscription;
 
   chatRoomChanged: EventEmitter<void>;
   chatPoppedOut: boolean;
@@ -46,6 +52,7 @@ export class ChatService {
     private electronService: ElectronService,
     private injector: Injector,
     private nz: NgZone,
+    private snackBar: MatSnackBar,
   ) {
     this.chatState = {
       rooms: [],
@@ -129,10 +136,12 @@ export class ChatService {
       this.electronService.ipcRenderer.on('chat-action-reject-friend', (event, arg) => {
         this.rejectFriend(arg);
       });
+      this.electronService.ipcRenderer.on('chat-action-invite-friend', (event, arg) => {
+        this.inviteFriend(arg);
+      });
     }
 
     this.chatRoomChanged = new EventEmitter<void>();
-    this.chatState.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.chatState.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
@@ -149,6 +158,33 @@ export class ChatService {
 
       this.chatRoomChanged.emit();
       this.updatePoppedOutChat();
+    });
+
+    this.invitationSubscription = this.socketService.receiveFriendInvites().subscribe((invitation) => {
+      this.snackBar
+        .open(`${invitation.username} vous a invité.`, 'Rejoindre', {
+          duration: 15000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        })
+        .afterDismissed()
+        .subscribe(() => {
+          this.socketService.joinLobby(invitation.lobbyId);
+          this.gameService.setGameInfo(GameType.CLASSIC, Difficulty.EASY, true);
+          this.router.navigate(['/lobby']);
+        });
+    });
+
+    this.joinedGameSubscription = this.socketService.joinedGame.subscribe(() => {
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+      if (roomIndex === -1) {
+        this.chatState.rooms.unshift({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
+      }
+      this.updatePoppedOutChat();
+    });
+
+    this.leftGameSubscription = this.socketService.leftGame.subscribe(() => {
+      this.closeRoom(ChatService.GAME_ROOM_NAME);
     });
 
     this.socketService.getRoomMessageHistory('general').subscribe((chatRoomHistory) => {
@@ -399,7 +435,7 @@ export class ChatService {
   createDM(friendUsername: string, friendId: string) {
     if (this.shouldUseMainProcess) {
       this.electronService.ipcRenderer.send('chat-action-create-dm', { friendUsername, friendId });
-    } else {
+    } else if (this.chatState.rooms.findIndex((room) => room.name === friendUsername) === -1) {
       this.apiService
         .getPrivateMessageHistory(friendId)
         .then((privateMessages) => {
@@ -421,6 +457,15 @@ export class ChatService {
         .catch((error) => {
           console.log(error);
         });
+    }
+  }
+
+  inviteFriend(friendId: string) {
+    if (this.shouldUseMainProcess) {
+      this.electronService.ipcRenderer.send('chat-action-invite-friend', friendId);
+    } else {
+      this.socketService.inviteFriend(friendId);
+      this.updatePoppedOutChat();
     }
   }
 

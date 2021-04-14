@@ -154,7 +154,6 @@ describe('EditorComponent', () => {
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-
   it('should undo on ctrl z', () => {
     const undoSpy = spyOn(component.editorService.commandReceiver, 'undo');
 

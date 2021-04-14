@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.SoundEffectConstants
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.databinding.ActivityRegisterBinding
 import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
@@ -45,10 +47,12 @@ class RegisterActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val res = vm.registerAccount()
             if (res.isSucessful) {
+                vm.playSound(SoundId.CONNECTED.value)
                 vm.clearForm()
                 setUserTokens(res.accessToken, res.refreshToken)
                 gotoMainmenu()
             } else {
+                vm.playSound(SoundId.ERROR.value)
                 vm.clearPasswords()
                 showToast(res.message)
             }

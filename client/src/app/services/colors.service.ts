@@ -25,7 +25,7 @@ export class ColorsService {
   static readonly MAX_HISTORY_LENGTH: number = 10;
   private static COLOR_HISTORY: Color[] = new Array<Color>(ColorsService.MAX_HISTORY_LENGTH).fill(Color.WHITE);
 
-  private _colors: Color[] = [Color.WHITE, Color.BLACK];
+  private _colors: Color[] = [Color.BLACK, Color.WHITE];
 
   static peekHistory(): Color | undefined {
     return this.COLOR_HISTORY.length !== 0 ? this.COLOR_HISTORY[this.COLOR_HISTORY.length - 1] : undefined;
