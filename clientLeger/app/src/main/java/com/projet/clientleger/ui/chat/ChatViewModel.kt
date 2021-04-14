@@ -3,9 +3,11 @@ package com.projet.clientleger.ui.chat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
+import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +21,7 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val chatStorageService: ChatStorageService):ViewModel() {
+class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val chatStorageService: ChatStorageService,private val audioService: AudioService):ViewModel() {
     companion object {
         const val NB_MESSAGES_PER_PAGE = 20
         const val GAME_TAB_ID = "GAME"
@@ -38,12 +40,22 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         receivePlayerConnection()
         receivePlayerDisconnect()
         chatRepository.receiveGuessClassic().subscribe{
+            manageGuessSound(it.guessStatus)
             receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }
         chatRepository.receiveGuessSoloCoop().subscribe{
+            manageGuessSound(it.guessStatus)
             receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
         }
         receivePrivateMessageSubscription()
+    }
+    private fun manageGuessSound(status:GuessStatus){
+        if(status == GuessStatus.CORRECT){
+            playSound(SoundId.CORRECT.value)
+        }
+        else{
+            playSound(SoundId.ERROR.value)
+        }
     }
 
     fun fetchSavedData(){
@@ -193,5 +205,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     fun clear(){
         chatRepository.clearSocketSubscriptions()
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

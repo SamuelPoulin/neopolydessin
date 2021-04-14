@@ -6,11 +6,12 @@ import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponse
 import com.projet.clientleger.data.repository.RegisterRepository
+import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(private val registerRepository: RegisterRepository) :
+class RegisterViewModel @Inject constructor(private val registerRepository: RegisterRepository,private val audioService: AudioService) :
         ViewModel() {
     val registerFistNameLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerLastNameLiveData: MutableLiveData<String> = MutableLiveData("")
@@ -74,5 +75,8 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
                 && !(isInvalidEmail()
                 || passwordContainsNoDigit()
                 || passwordIsNotMinLength())
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }
