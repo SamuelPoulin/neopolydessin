@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
@@ -11,7 +12,7 @@ import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
-import { ChatRoomMessage } from '@common/communication/chat-room-history';
+import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
 import {
   CurrentGameState,
   Difficulty,
@@ -21,12 +22,15 @@ import {
   Player,
   TeamScore,
   TimeInfo,
-} from '../../../../common/communication/lobby';
+} from '@common/communication/lobby';
 import { UserService } from './user.service';
 
 @Injectable()
 export class SocketService {
   private static API_BASE_URL: string;
+
+  private readonly roomHistoryPage: number = 1;
+  private readonly roomHistoryMax: number = 10;
 
   socket: Socket;
   loggedOutSubscription: Subscription;
@@ -76,7 +80,6 @@ export class SocketService {
   receiveFriendslist(): Observable<FriendsList> {
     return new Observable<FriendsList>((obs) => {
       this.socket.on(SocketFriendActions.UPDATE, (friendslist: FriendsList) => {
-        console.log(friendslist);
         obs.next(friendslist);
       });
     });
@@ -109,12 +112,6 @@ export class SocketService {
   receiveChatRooms(): Observable<string[]> {
     return new Observable<string[]>((obs) => {
       this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => obs.next(chatRooms));
-    });
-  }
-
-  receiveChatRoomsImIn(): Observable<string[]> {
-    return new Observable<string[]>((obs) => {
-      this.socket.emit(SocketMessages.GET_CHAT_ROOMS_IM_IN, (chatRooms: string[]) => obs.next(chatRooms));
     });
   }
 
@@ -151,6 +148,15 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
+  async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CHANGE_PRIVACY_SETTING, privateGame);
+      this.socket.on(SocketLobby.CHANGED_PRIVACY_SETTING, (newPrivacy: boolean) => {
+        resolve(newPrivacy);
+      });
+    });
+  }
+
   async joinChatRoom(roomName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.socket.emit(SocketMessages.JOIN_CHAT_ROOM, roomName, (success: boolean) => {
@@ -179,6 +185,30 @@ export class SocketService {
     return new Observable<LobbyInfo[]>((obs) => {
       this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+    });
+  }
+
+  addBot(teamNumber: number): Observable<boolean> {
+    return new Observable<boolean>((obs) => {
+      this.socket.emit(SocketLobby.ADD_BOT, teamNumber, (successfull: boolean) => {
+        obs.next(successfull);
+      });
+    });
+  }
+
+  removeBot(username: string): void {
+    this.socket.emit(SocketLobby.REMOVE_BOT, username);
+  }
+
+  removePlayer(accountId: string): void {
+    this.socket.emit(SocketLobby.REMOVE_PLAYER, accountId);
+  }
+
+  removedFromLobby(): Observable<void> {
+    return new Observable<void>((obs) => {
+      this.socket.on(SocketLobby.PLAYER_REMOVED, () => {
+        obs.next();
+      });
     });
   }
 
@@ -226,9 +256,9 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
       resolve();
     });
   }
@@ -247,6 +277,18 @@ export class SocketService {
       this.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (players: Player[]) => {
         obs.next(players);
       });
+    });
+  }
+
+  getRoomMessageHistory(roomName: string): Observable<ChatRoomHistory> {
+    return new Observable<ChatRoomHistory>((obs) => {
+      this.socket.emit(
+        SocketMessages.GET_CHAT_ROOM_HISTORY,
+        roomName,
+        this.roomHistoryPage,
+        this.roomHistoryMax,
+        (chatRoomHistory: ChatRoomHistory) => obs.next(chatRoomHistory),
+      );
     });
   }
 

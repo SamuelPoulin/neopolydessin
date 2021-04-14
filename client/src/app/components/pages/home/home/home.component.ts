@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChatService } from '@services/chat.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 
@@ -13,7 +14,7 @@ export class HomeComponent {
   modalIsOpened: boolean;
   guideModalType: ModalType;
 
-  constructor(private router: Router, private dialogService: ModalDialogService) {
+  constructor(private router: Router, private dialogService: ModalDialogService, public chatService: ChatService) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
     this.guideModalType = ModalType.GUIDE;

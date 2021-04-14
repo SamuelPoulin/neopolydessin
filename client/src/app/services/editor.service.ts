@@ -58,8 +58,10 @@ export class EditorService {
 
     this.initListeners();
     this.gameService.roleChanged.subscribe(() => {
-      this.resetDrawing();
       this.initListeners();
+    });
+    this.gameService.drawingChanged.subscribe(() => {
+      this.resetDrawing();
     });
 
     this.shapesBuffer = new Array<BaseShape>();

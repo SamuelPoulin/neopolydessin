@@ -4,10 +4,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   width: 100%;
   height: 100vh;
-  
+
   background-color: #FBFBFB;
 }
 
@@ -20,6 +20,15 @@
   overflow-y: auto;
 
   background-color: #FBFBFB;
+}
+
+#lobby-divider {
+  display: flex;
+  height: 100%;
+}
+
+app-chat {
+  min-width: 400px;
 }
 
 #content-container {
@@ -51,8 +60,17 @@
 #start-button {
   color: white;
   background-color: #04D800;
+
+  &:disabled {
+    opacity: 50%;
+    background-color: grey;
+  }
 }
 
 #start-button-icon {
+  color: white;
+}
+
+#privacy-button {
   color: white;
 }

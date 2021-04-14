@@ -84,45 +84,46 @@ export class LobbyClassique extends Lobby {
 
     socket.on(SocketLobby.PLAYER_GUESS, (word: string) => {
       const accountId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      const guessers = this.getGuessers();
-      if (guessers) {
-        const guesser = guessers.find((player) => player.accountId === accountId);
-        if (guesser) {
-          const distance = levenshtein(word, this.wordToGuess);
-          let guessStatus: GuessResponse;
-          switch (distance) {
-            case 0: {
-              guessStatus = GuessResponse.CORRECT;
-              this.teamScores[guesser.teamNumber]++;
-              this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
-              if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
-                this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
-              }
-              this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
-              this.startRoundTimer();
-              break;
+
+      const guesser = this.players.find((player) => !player.isBot
+        && player.playerRole === PlayerRole.GUESSER
+        && (player as ServerPlayer).accountId === accountId);
+
+      if (guesser) {
+        const distance = levenshtein(word, this.wordToGuess);
+        let guessStatus: GuessResponse;
+        switch (distance) {
+          case 0: {
+            guessStatus = GuessResponse.CORRECT;
+            this.teamScores[guesser.teamNumber]++;
+            this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
+            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
+              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
             }
-            case 1:
-            case 2: {
-              guessStatus = GuessResponse.CLOSE;
-              this.startReply();
-              break;
-            }
-            default: {
-              guessStatus = GuessResponse.WRONG;
-              this.startReply();
-              break;
-            }
+            this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
+            this.startRoundTimer();
+            break;
           }
-          const guessReturn: GuessMessage = {
-            content: word,
-            timestamp: Date.now(),
-            guessStatus,
-            senderUsername: guesser.username
-          };
-          this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
-          this.botService.playerGuess(guessStatus);
+          case 1:
+          case 2: {
+            guessStatus = GuessResponse.CLOSE;
+            this.startReply();
+            break;
+          }
+          default: {
+            guessStatus = GuessResponse.WRONG;
+            this.startReply();
+            break;
+          }
         }
+        const guessReturn: GuessMessage = {
+          content: word,
+          timestamp: Date.now(),
+          guessStatus,
+          senderUsername: guesser.username
+        };
+        this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
+        this.botService.playerGuess(guessStatus);
       }
     });
   }
@@ -166,8 +167,6 @@ export class LobbyClassique extends Lobby {
   }
 
   private startReply() {
-    // SEND REPLY PHASE TO CLIENTS WITH ROLES (GUESS-GUESS / PASSIVE-PASSIVE)
-    // SEND TIME TO CLIENT (10 SECONDS)
     if (this.drawers[this.drawingTeamNumber].isBot) {
       this.botService.resetDrawing();
     }
@@ -242,9 +241,5 @@ export class LobbyClassique extends Lobby {
       }
     });
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
-  }
-
-  private getGuessers(): Player[] | undefined {
-    return this.players.filter((player) => !player.isBot && player.playerRole === PlayerRole.GUESSER) as Player[];
   }
 }

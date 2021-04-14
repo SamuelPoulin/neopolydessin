@@ -1,5 +1,5 @@
 import { EventEmitter } from '@angular/core';
-import { async, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { PlayerRole } from '../../../../common/communication/lobby';
 import { GameService } from './game.service';
@@ -14,6 +14,8 @@ export const MockGameService = jasmine.createSpyObj('GameService', {
 });
 
 MockGameService.roleChanged = new EventEmitter<PlayerRole>();
+MockGameService.canGuessChanged = new EventEmitter<void>();
+MockGameService.drawingChanged = new EventEmitter<void>();
 MockGameService.teams = [[], []];
 MockGameService.scores = [
   { teamNumber: 0, score: 0 },
@@ -23,7 +25,7 @@ MockGameService.scores = [
 describe('GameService', () => {
   let service: GameService;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       providers: [
@@ -32,7 +34,7 @@ describe('GameService', () => {
         GameService,
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     service = TestBed.inject(GameService);

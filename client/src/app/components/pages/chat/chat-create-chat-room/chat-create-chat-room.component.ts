@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
-import { SocketService } from '@services/socket-service.service';
+import { ChatService } from '@services/chat.service';
 
 @Component({
   selector: 'app-chat-create-chat-room',
@@ -11,14 +11,14 @@ import { SocketService } from '@services/socket-service.service';
 export class ChatCreateChatRoomComponent extends AbstractModalComponent {
   roomName: string;
 
-  constructor(dialogRef: MatDialogRef<AbstractModalComponent>, private socketService: SocketService) {
+  constructor(private chatService: ChatService, dialogRef: MatDialogRef<AbstractModalComponent>) {
     super(dialogRef);
 
     this.roomName = '';
   }
 
   createChatRoom() {
-    this.socketService.createChatRoom(this.roomName);
+    this.chatService.createChatRoom(this.roomName);
     this.dialogRef.close();
   }
 }
