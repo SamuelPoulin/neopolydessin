@@ -150,44 +150,46 @@ export class SocketIo {
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));
       });
 
-      socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string) => {
+      socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string, callback: (lobbyInfo: LobbyInfo | null) => void) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
           lobbyToJoin.addPlayer(playerId, socket);
+          callback(lobbyToJoin.getLobbySummary());
         } else {
-          console.error('couldn\'t add player to lobby');
+          callback(null);
         }
       });
 
-      socket.on(SocketLobby.CREATE_LOBBY,
-        async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
-          let lobby: Lobby;
-          const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-          if (playerId) {
-            switch (gametype) {
-              case GameType.CLASSIC: {
-                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
-              case GameType.SPRINT_SOLO: {
-                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
-              case GameType.SPRINT_COOP: {
-                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
+      socket.on(SocketLobby.CREATE_LOBBY, async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean,
+        callback: (lobbyInfo: LobbyInfo | null) => void) => {
+        let lobby: Lobby;
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (playerId) {
+          switch (gametype) {
+            case GameType.CLASSIC: {
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
             }
-            lobby.addPlayer(playerId, socket);
-            this.lobbyList.push(lobby);
-          } else {
-            console.error('player doesn\'t exist');
+            case GameType.SPRINT_SOLO: {
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
+            }
+            case GameType.SPRINT_COOP: {
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
+            }
           }
-        });
+          lobby.addPlayer(playerId, socket);
+          this.lobbyList.push(lobby);
+          callback(lobby.getLobbySummary());
+        } else {
+          callback(null);
+        }
+      });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessageTo) => {
         if (this.validateMessageLength(sentMsg)) {

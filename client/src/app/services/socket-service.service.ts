@@ -143,9 +143,19 @@ export class SocketService {
     });
   }
 
-  joinLobby(lobbyId: string) {
-    this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
-    this.joinedGame.emit();
+  async joinLobby(lobbyId: string): Promise<LobbyInfo> {
+    return new Promise<LobbyInfo>((resolve, reject) => {
+      this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId,
+        (lobbyInfo: LobbyInfo | null) => {
+          if (lobbyInfo) {
+            resolve(lobbyInfo);
+            this.joinedGame.emit();
+          }
+          else {
+            reject();
+          }
+        });
+    });
   }
 
   async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
@@ -256,11 +266,17 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
-      this.joinedGame.emit();
-      resolve();
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<LobbyInfo> {
+    return new Promise<LobbyInfo>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy,
+        (lobbyInfo: LobbyInfo | null) => {
+          if (lobbyInfo) {
+            resolve(lobbyInfo);
+            this.joinedGame.emit();
+          } else {
+            reject();
+          }
+        });
     });
   }
 

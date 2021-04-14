@@ -4,7 +4,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Decision } from '@common/communication/friend-request';
 import { FriendsList, FriendStatus } from '@common/communication/friends';
-import { Difficulty, GameType } from '@common/communication/lobby';
 import { ChatRoomType } from '@models/chat/chat-room';
 import { ChatState } from '@models/chat/chat-state';
 import { ElectronService } from 'ngx-electron';
@@ -169,9 +168,11 @@ export class ChatService {
         })
         .afterDismissed()
         .subscribe(() => {
-          this.socketService.joinLobby(invitation.lobbyId);
-          this.gameService.setGameInfo(GameType.CLASSIC, Difficulty.EASY, true);
-          this.router.navigate(['/lobby']);
+          this.socketService.joinLobby(invitation.lobbyId)
+            .then((lobbyInfo) => {
+              this.gameService.setGameInfo(lobbyInfo);
+              this.router.navigate([`/lobby/${lobbyInfo.lobbyId}`]);
+            });
         });
     });
 
