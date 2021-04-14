@@ -399,7 +399,7 @@ export class ChatService {
   createDM(friendUsername: string, friendId: string) {
     if (this.shouldUseMainProcess) {
       this.electronService.ipcRenderer.send('chat-action-create-dm', { friendUsername, friendId });
-    } else {
+    } else if (this.chatState.rooms.findIndex((room) => room.name === friendUsername) === -1) {
       this.apiService
         .getPrivateMessageHistory(friendId)
         .then((privateMessages) => {
