@@ -6,7 +6,7 @@ import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { FriendsList } from '../../common/communication/friends';
+import { Friend, FriendsList, FriendWithConnection } from '../../common/communication/friends';
 import { Lobby } from '../models/lobby';
 import { NotificationType, SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
@@ -117,6 +117,24 @@ export class SocketIo {
     if (socketId) {
       this.io.to(socketId).emit(endpoint, friends.documents);
     }
+  }
+
+  checkOnlineStatus(friends: Friend[]): FriendWithConnection[] {
+    return friends.map((friend) => {
+      let isOnline: boolean = false;
+      console.log(friend);
+      if (friend && friend.friendId) {
+        if (this.socketIdService.GetSocketIdOfAccountId(friend.friendId._id.toString())) {
+          isOnline = true;
+        }
+      }
+      return {
+        friendId: friend.friendId,
+        status: friend.status,
+        received: friend.received,
+        isOnline
+      } as FriendWithConnection;
+    });
   }
 
   private bindIoEvents(): void {

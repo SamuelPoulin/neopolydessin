@@ -170,59 +170,5 @@ accountSchema.statics.unfriend = (id: string, otherId: string) => {
   );
 };
 
-accountSchema.statics.getFriends = (id: string) => {
-  return accountModel
-    .aggregate([
-      {
-        $match: { _id: new ObjectId(id) }
-      },
-      {
-        $lookup: {
-          from: 'refreshes',
-          localField: 'friends.friendId',
-          foreignField: 'accountId',
-          as: 'refreshToken'
-        }
-      },
-      {
-        $unwind: { path: '$friends', preserveNullAndEmptyArrays: true }
-      },
-      {
-        $addFields: {
-          'friends.indexOfRefresh': {
-            $indexOfArray: [
-              '$refreshToken.accountId',
-              '$friends.friendId'
-            ]
-          }
-        }
-      },
-      {
-        $addFields: {
-          'friends.isOnline': {
-            $cond: {
-              if: { $eq: ['$friends.indexOfRefresh', -1] },
-              then: false,
-              else: true
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: '$_id',
-          friends: {
-            $push: {
-              status: '$friends.status',
-              received: '$friends.received',
-              friendId: '$friends.friendId',
-              isOnline: '$friends.isOnline'
-            }
-          }
-        }
-      }
-    ]);
-};
-
 const accountModel = model<Account, AccountModel>('Account', accountSchema);
 export default accountModel;
