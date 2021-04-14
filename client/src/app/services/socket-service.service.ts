@@ -191,6 +191,18 @@ export class SocketService {
     this.socket.emit(SocketLobby.REMOVE_BOT, username);
   }
 
+  removePlayer(accountId: string): void {
+    this.socket.emit(SocketLobby.REMOVE_PLAYER, accountId);
+  }
+
+  removedFromLobby(): Observable<void> {
+    return new Observable<void>((obs) => {
+      this.socket.on(SocketLobby.PLAYER_REMOVED, () => {
+        obs.next();
+      });
+    });
+  }
+
   sendMessage(message: string): void {
     this.socket.emit(SocketMessages.SEND_MESSAGE, { content: message } as Message);
   }

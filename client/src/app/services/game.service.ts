@@ -108,6 +108,9 @@ export class GameService {
         this.scores[score.teamNumber].score = score.score;
       }
     });
+    this.socketService.removedFromLobby().subscribe(() => {
+      this.router.navigate(['/']);
+    });
   }
 
   resetTeams() {
@@ -125,6 +128,10 @@ export class GameService {
         else reject();
       });
     });
+  }
+
+  removePlayer(accountId: string) {
+    this.socketService.removePlayer(accountId);
   }
 
   removeBot(username: string) {

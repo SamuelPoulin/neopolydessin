@@ -24,6 +24,10 @@ export class TeamComponent {
     this.gameService.addBot(this.teamIndex);
   }
 
+  removePlayer(accountId: string): void {
+    this.gameService.removePlayer(accountId);
+  }
+
   removeBot(username: string): void {
     this.gameService.removeBot(username);
   }
