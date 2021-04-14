@@ -166,11 +166,11 @@ describe('Socketio', () => {
             createClient(accountInfo)
                 .then((testClient) => {
                     testClient.socket.on('connect', () => {
-                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false);
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.CLASSIC, Difficulty.EASY, false,
+                            (lobbyinfo: LobbyInfo) => { });
                     })
 
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
-                        console.log('started');
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
                         expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
@@ -199,7 +199,6 @@ describe('Socketio', () => {
                     });
 
                     testClient.socket.on(SocketLobby.UPDATE_ROLES, (players: Player[]) => {
-                        console.log(players);
                         players.forEach((player) => {
                             if (player.teamNumber === 0) {
                                 if (player.isBot) {
@@ -218,7 +217,7 @@ describe('Socketio', () => {
                 .then((testClient) => {
                     testClient.socket.on('connect', () => {
                         testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, {}, (lobbies: LobbyInfo[]) => {
-                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId, (lobbyInfo: LobbyInfo) => { });
                             clients[0].emit(SocketLobby.ADD_BOT, 1, (success: boolean) => expect(success).to.be.true);
                             clients[0].emit(SocketLobby.ADD_BOT, 0, (success: boolean) => expect(success).to.be.true);
                         });
@@ -272,7 +271,8 @@ describe('Socketio', () => {
             createClient(accountInfo)
                 .then((testClient) => {
                     testClient.socket.on('connect', () => {
-                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false);
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby1', GameType.SPRINT_COOP, Difficulty.EASY, false,
+                            (lobbyInfo: LobbyInfo) => { });
                     });
 
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
@@ -287,7 +287,6 @@ describe('Socketio', () => {
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                         expect(coord).to.deep.equal({ x: 1000, y: 1000 });
-                        console.log('end path received')
                         testClient.socket.close();
                     });
 
@@ -313,7 +312,8 @@ describe('Socketio', () => {
                 })
                 .then((testClient) => {
                     testClient.socket.on('connect', () => {
-                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.SPRINT_SOLO, Difficulty.EASY, false);
+                        testClient.socket.emit(SocketLobby.CREATE_LOBBY, 'lobby2', GameType.SPRINT_SOLO, Difficulty.EASY, false,
+                            (lobbyInfo: LobbyInfo) => { });
                     })
 
                     testClient.socket.on(SocketLobby.RECEIVE_LOBBY_INFO, (lobbyInfo: LobbyInfo) => {
@@ -344,7 +344,7 @@ describe('Socketio', () => {
                 .then((testClient) => {
                     testClient.socket.on('connect', () => {
                         testClient.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType: GameType.SPRINT_COOP }, (lobbies: LobbyInfo[]) => {
-                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId);
+                            testClient.socket.emit(SocketLobby.JOIN_LOBBY, lobbies[0].lobbyId, (lobbyInfo: LobbyInfo) => { });
                         });
                     });
 
@@ -364,7 +364,6 @@ describe('Socketio', () => {
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
                         expect(coord).to.deep.equal({ x: 1000, y: 1000 });
-                        console.log('end path received')
                         testClient.socket.close();
                     });
                 });

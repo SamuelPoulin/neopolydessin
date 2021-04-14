@@ -6,7 +6,7 @@ import Types from '../types';
 import { SocketIo } from '../socketio';
 import { NotificationType, SocketFriendActions } from '../../../common/socketendpoints/socket-friend-actions';
 import messagesHistoryModel, { MessageHistory, Messages } from '../../models/schemas/messages-history';
-import { FriendsList } from '../../../common/communication/friends';
+import { Friend, FriendsList } from '../../../common/communication/friends';
 import { DatabaseService, ErrorMsg, Response } from './database.service';
 
 @injectable()
@@ -33,17 +33,14 @@ export class FriendsService {
 
   async getFriendsOfUser(id: string): Promise<Response<FriendsList>> {
     return new Promise<Response<FriendsList>>((resolve, reject) => {
-      accountModel.getFriends(id)
-        .then(async (doc: FriendsList) => {
-          if (!doc[0]) throw new Error(NOT_FOUND.toString());
+      accountModel.findById(id)
+        .then(async (doc: Account) => {
+          if (!doc) throw new Error(NOT_FOUND.toString());
           return accountModel.populate(doc, { path: 'friends.friendId', select: ['username', 'avatar'] });
         })
         .then((result) => {
-          let friendList: FriendsList = result[0];
-          if (this.emptyFriendList(result[0])) {
-            friendList = { friends: [] };
-          }
-          resolve({ statusCode: OK, documents: { friends: friendList.friends } });
+          const friendList: Friend[] = result.friends as unknown as Friend[];
+          resolve({ statusCode: OK, documents: { friends: this.socketIo.checkOnlineStatus(friendList) } });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -166,10 +163,6 @@ export class FriendsService {
           reject(DatabaseService.rejectErrorMessage(err));
         });
     });
-  }
-
-  private emptyFriendList(list: FriendsList): boolean {
-    return list.friends.length === 1 && !list.friends[0].friendId && !list.friends[0].status;
   }
 
 }

@@ -122,7 +122,8 @@ export abstract class Lobby {
       nbPlayerInLobby: this.players.length,
       gameType: this.gameType,
       difficulty: this.difficulty,
-      maxSize: gameSize ? gameSize : DEFAULT_TEAM_SIZE
+      maxSize: gameSize ? gameSize : DEFAULT_TEAM_SIZE,
+      private: this.privateLobby
     };
   }
 
