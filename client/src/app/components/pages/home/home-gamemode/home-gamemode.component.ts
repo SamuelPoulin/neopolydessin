@@ -17,10 +17,14 @@ import { UserService } from '@services/user.service';
 export class HomeGamemodeComponent extends AbstractModalComponent {
   gamemodes: string[];
   difficulties: string[];
+  privacyButtonText: string[];
+  privacyColors: string[];
   selectedGamemode: string;
   selectedDifficulty: string;
 
   lobbyName: string;
+  privateGame: number;
+  privacyText: string;
 
   constructor(
     dialogRef: MatDialogRef<AbstractModalComponent>,
@@ -39,16 +43,21 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     this.difficulties = ['Facile', 'Intermédiaire', 'Difficile'];
 
     this.selectedGamemode = this.tutorialService.tutorialActive ? 'Solo' : 'Classique';
+    this.privacyButtonText = ['Partie publique', 'Partie privée'];
+    this.privacyColors = ['#3bbf51', '#e84646'];
+    this.privateGame = 0;
+
     this.selectedDifficulty = 'Facile';
 
     this.lobbyName = 'Partie de ' + this.userService.account.username;
   }
 
   startGame(): void {
+    const privacy: boolean = this.privateGame === 0 ? false : true;
     this.socketService
-      .createLobby(this.lobbyName, this.gamemode, this.difficulty)
+      .createLobby(this.lobbyName, this.gamemode, this.difficulty, privacy)
       .then(() => {
-        this.gameService.setGameInfo(this.gamemode, this.difficulty);
+        this.gameService.setGameInfo(this.gamemode, this.difficulty, privacy);
         this.dialogRef.close();
         this.router.navigate(['lobby']);
         if (this.tutorialService.tutorialActive) {
@@ -62,6 +71,10 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
           verticalPosition: 'bottom',
         });
       });
+  }
+
+  togglePrivacy(): void {
+    this.privateGame = (this.privateGame + 1) % 2;
   }
 
   get gamemode() {

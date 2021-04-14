@@ -15,6 +15,8 @@ import { GameType, Player } from '../../../../../../../common/communication/lobb
 export class LobbyComponent {
   inviteCode: string = 'Bientôt';
   teams: Player[][];
+  privacyButtonText: string[];
+  privacyColors: string[];
 
   constructor(
     public gameService: GameService,
@@ -22,7 +24,10 @@ export class LobbyComponent {
     public chatService: ChatService,
     private editorService: EditorService,
     private tutorialService: TutorialService,
-  ) {}
+  ) {
+    this.privacyButtonText = ['Partie publique', 'Partie privée'];
+    this.privacyColors = ['#3bbf51', '#e84646'];
+  }
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
@@ -45,6 +50,10 @@ export class LobbyComponent {
       this.gameService.startGame();
     }
     this.router.navigate(['/edit']);
+  }
+
+  togglePrivacy(): void {
+    this.gameService.changePrivacySetting(this.gameService.privacy ? false : true);
   }
 
   get gamemode(): GameType {
