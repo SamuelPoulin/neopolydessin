@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Difficulty, GameType, Player, PlayerRole, TeamScore } from '../../../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, Player, PlayerRole, TeamScore } from '@common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
@@ -12,9 +12,9 @@ export class GameService {
 
   isInGame: boolean = false;
   canDraw: boolean = false;
-  drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
+  drawingChanged: EventEmitter<void> = new EventEmitter<void>();
   isHost: boolean = false;
   wordToDraw: string = '';
 
@@ -23,6 +23,7 @@ export class GameService {
 
   lobbySubscription: Subscription;
   rolesSubscription: Subscription;
+  gameStateSubscription: Subscription;
   wordSubscription: Subscription;
   scoresSubscription: Subscription;
 
@@ -66,9 +67,6 @@ export class GameService {
           this.isHost = player.isOwner;
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
         }
-        if (player.playerRole === PlayerRole.DRAWER) {
-          this.drawer = player;
-        }
         this.teams[player.teamNumber].push(player);
       }
     });
@@ -86,20 +84,22 @@ export class GameService {
     this.rolesSubscription = this.socketService.receiveRoles().subscribe((players) => {
       this.resetTeams();
       for (const player of players) {
-        if (player.playerRole === PlayerRole.DRAWER) this.drawer = player;
         if (player.username === this.userService.account.username) {
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
           this.canGuessChanged.emit();
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
-        }
-        if (player.playerRole === PlayerRole.DRAWER && this.drawer.username !== player.username) {
-          this.drawer = player;
-          this.wordToDraw = '';
-          this.roleChanged.emit(player.playerRole);
+          this.roleChanged.emit();
         }
         this.teams[player.teamNumber].push(player);
       }
     });
+
+    this.gameStateSubscription = this.socketService.receiveGameState().subscribe((state) => {
+      if (state === CurrentGameState.DRAWING) {
+        this.drawingChanged.emit();
+      }
+    });
+
     this.wordSubscription = this.socketService.receiveWord().subscribe((word) => {
       this.wordToDraw = word;
     });
