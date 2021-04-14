@@ -23,6 +23,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.TutorialService
@@ -37,18 +38,28 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.view.*
 import javax.inject.Inject
-const val WELCOME_MESSAGE = "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
-const val INTRO_CREATE_GAME_MESSAGE = "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
-const val INTRO_JOIN_GAME_MESSAGE = "Le bouton Rejoindre Une Partie sert à rejoindre une partie déjà existante pour jouer avec d'autres utilisateurs de l'application.\ntu peux également rechercher une partie selon tes préférences de difficulté et de mode de jeu"
-const val INTRO_DASHBOARD_MESSAGE = "Le tableau de bord permet de voir toutes les statistiques de ton compte, n'hésites pas à aller regarder cela suite au tutoriel !"
-const val INTRO_TOOLBAR_MESSAGE = "La barre d'outil permet de se déconnecter et d'accéder à la liste d'amis\nVous pouvez ainsi ajouter et écrire à des amis ici si vous voulez être en mesure de jouer avec eux"
-const val INTRO_CHATBOX_MESSAGE = "Vous pouvez également écrire aux autres utilisateurs connectés à l'application par le boîte de chat ici"
-const val INTRO_START_GAME_MESSAGE = "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
+
+const val WELCOME_MESSAGE =
+    "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
+const val INTRO_CREATE_GAME_MESSAGE =
+    "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
+const val INTRO_JOIN_GAME_MESSAGE =
+    "Le bouton Rejoindre Une Partie sert à rejoindre une partie déjà existante pour jouer avec d'autres utilisateurs de l'application.\ntu peux également rechercher une partie selon tes préférences de difficulté et de mode de jeu"
+const val INTRO_DASHBOARD_MESSAGE =
+    "Le tableau de bord permet de voir toutes les statistiques de ton compte, n'hésites pas à aller regarder cela suite au tutoriel !"
+const val INTRO_TOOLBAR_MESSAGE =
+    "La barre d'outil permet de se déconnecter et d'accéder à la liste d'amis\nVous pouvez ainsi ajouter et écrire à des amis ici si vous voulez être en mesure de jouer avec eux"
+const val INTRO_CHATBOX_MESSAGE =
+    "Vous pouvez également écrire aux autres utilisateurs connectés à l'application par le boîte de chat ici"
+const val INTRO_START_GAME_MESSAGE =
+    "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
+
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity() {
     var selectedGameType: GameType = GameType.CLASSIC
     var selectedDifficulty: Difficulty = Difficulty.EASY
     lateinit var binding: ActivityMainmenuBinding
+
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
     val vm: MainMenuViewModel by viewModels()
@@ -60,19 +71,18 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.activity = this
 
-        supportFragmentManager.commit{
+        binding.accountBtn.setOnClickListener {
+            val intent = Intent(this, AccountManagementActivity::class.java)
+            startActivity(intent)
+        }
+
+        supportFragmentManager.commit {
             add(R.id.friendslistContainer, friendslistFragment, "friendslist")
         }
+
+        startService(Intent(this, ChatStorageService::class.java))
         setupButtons()
-    }
-    private fun setupButtons(){
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
-                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
-            }
-            true
-        }
+
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
             vm.playSound(SoundId.ERROR.value)
@@ -88,11 +98,10 @@ class MainmenuActivity : AppCompatActivity() {
         }
         binding.createGameBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
-            if(vm.isTutorialActive()){
-                val intent = Intent(this,GameTutorialActivity::class.java)
+            if (vm.isTutorialActive()) {
+                val intent = Intent(this, GameTutorialActivity::class.java)
                 startActivity(intent)
-            }
-            else{
+            } else {
                 showGameDialog(true)
             }
         }
@@ -101,20 +110,31 @@ class MainmenuActivity : AppCompatActivity() {
             startTutorial()
         }
     }
-    private fun goToDashBoard(){
+
+    private fun setupButtons() {
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
+                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
+            }
+            true
+        }
+    }
+
+    private fun goToDashBoard() {
         val intent = Intent(this, AccountManagementActivity::class.java)
-        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
         startActivity(intent)
     }
-    private fun startTutorial(){
-        val sequence:ArrayList<SequenceModel> = ArrayList()
-        sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo,this,false))
-        sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn,this,false))
-        sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE,binding.joinGamebtn,this,false))
-        sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE,binding.accountBtn,this,false))
-        sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar,this,false))
-        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot,this,false))
-        sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE,binding.createGameBtn,this,true))
+
+    private fun startTutorial() {
+        val sequence: ArrayList<SequenceModel> = ArrayList()
+        sequence.add(SequenceModel(WELCOME_MESSAGE, binding.logo, this, false))
+        sequence.add(SequenceModel(INTRO_CREATE_GAME_MESSAGE, binding.createGameBtn, this, false))
+        sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE, binding.joinGamebtn, this, false))
+        sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE, binding.accountBtn, this, false))
+        sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar, this, false))
+        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot, this, false))
+        sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE, binding.createGameBtn, this, true))
         vm.createShowcaseSequence(sequence)
     }
 
@@ -146,20 +166,18 @@ class MainmenuActivity : AppCompatActivity() {
 
         dialogView.actionBtn.setOnClickListener {
             val intent: Intent
-            if(isCreating) {
+            if (isCreating) {
                 vm.playSound(SoundId.CONNECTED.value)
                 intent = Intent(this, LobbyActivity::class.java)
                 intent.putExtra("gameName", getGameName(dialog))
                 intent.putExtra("isPrivate", false)
-            }
-            else{
+            } else {
                 vm.playSound(SoundId.CONFIRM.value)
                 intent = Intent(this, SearchLobbyActivity::class.java)
             }
 
             intent.putExtra("gameType", selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
-            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
             dialog.dismiss()
         }
@@ -169,51 +187,62 @@ class MainmenuActivity : AppCompatActivity() {
             dialog.dismiss()
         }
     }
-    private fun getGameName(dialog: AlertDialog):String{
+
+    private fun getGameName(dialog: AlertDialog): String {
         var gameName = "Partie de ${vm.getUsername()}"
-        if(dialog.gameName.text.toString() != ""){
+        if (dialog.gameName.text.toString() != "") {
             gameName = dialog.gameName.text.toString()
         }
         return gameName
     }
-    private fun setupGamemodeSpinner(dialogView: View){
-        val adapterGamemode = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
+
+    private fun setupGamemodeSpinner(dialogView: View) {
+        val adapterGamemode =
+            ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
         adapterGamemode.setDropDownViewResource(R.layout.spinner_dropdown_item)
         val spinnerGamemode = dialogView.findViewById<Spinner>(R.id.gamemodeSpinner)
         spinnerGamemode.adapter = adapterGamemode
 
         spinnerGamemode.onItemSelectedListener = object :
-                AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>,
-                                        view: View, position: Int, id: Long) {
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View, position: Int, id: Long
+            ) {
                 vm.playSound(SoundId.SELECTED.value)
-                selectedGameType = GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
+                selectedGameType =
+                    GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
-    private fun setupDifficultySpinner(dialogView: View){
-        val adapterDifficulty = ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
+
+    private fun setupDifficultySpinner(dialogView: View) {
+        val adapterDifficulty =
+            ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
         adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
         val spinnerDifficulty = dialogView.findViewById<Spinner>(R.id.difficultySpinner)
         spinnerDifficulty.adapter = adapterDifficulty
 
         spinnerDifficulty.onItemSelectedListener = object :
-                AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>,
-                                        view: View, position: Int, id: Long) {
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View, position: Int, id: Long
+            ) {
                 vm.playSound(SoundId.SELECTED.value)
-                selectedDifficulty = Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
-                }
+                selectedDifficulty =
+                    Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
+            }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
     override fun onDestroy() {
+        stopService(Intent(this, ChatStorageService::class.java))
         vm.disconnect()
         super.onDestroy()
     }
-
 }

@@ -71,4 +71,21 @@
         <item name="android:textColor">@color/black</item>
         <item name="android:layout_margin">10dp</item>
     </style>
+
+    <style name="messageRoot">
+        <item name="android:paddingVertical">4dp</item>
+    </style>
+
+    <style name="messageUsername" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/messageInfo</item>
+        <item name="android:layout_gravity">start</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <style name="messageTime" parent="Widget.AppCompat.TextView">
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:layout_gravity">end</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/messageInfo</item>
+    </style>
 </resources>

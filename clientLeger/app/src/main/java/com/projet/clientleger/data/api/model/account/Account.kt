@@ -18,7 +18,6 @@ data class Account(val _id: String,
                    val createdDate: Long,
                    val avatar: String){
     fun toAccountInfo(avatarBitMap: Bitmap?): AccountInfo{
-
         return if(avatarBitMap == null){
             AccountInfo(_id,
                     firstName,

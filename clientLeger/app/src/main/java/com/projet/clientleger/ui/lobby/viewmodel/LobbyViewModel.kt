@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.LobbyInfo
@@ -40,7 +41,6 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
         }
-        lobbyRepository.addGameTabToStorage(TabInfo(GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID, false))
     }
 
     fun getAccountInfo(): AccountInfo{
