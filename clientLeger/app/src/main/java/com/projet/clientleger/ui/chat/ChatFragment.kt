@@ -47,6 +47,7 @@ class ChatFragment @Inject constructor() : Fragment() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             chatService = (service as ChatStorageService.LocalBinder).getService()
             (binding?.rvTabs?.adapter as TabAdapter).removeCallback = chatService!!::removeConvo
+            (binding?.rvTabs?.adapter as TabAdapter).changeTabCallback = chatService!!::changeSelectedConvo
             setupChatServiceSubscriptions()
             vm.fetchSavedData(chatService!!.getConvos(), chatService!!.currentConvo)
         }
@@ -173,7 +174,7 @@ class ChatFragment @Inject constructor() : Fragment() {
             val manager = LinearLayoutManager(activity)
             manager.orientation = LinearLayoutManager.HORIZONTAL
             it.rvTabs.layoutManager = manager
-            it.rvTabs.adapter = TabAdapter(vm.convos.value!!, vm::changeCurrentTab)
+            it.rvTabs.adapter = TabAdapter(vm.convos.value!!)
         }
     }
 
@@ -181,6 +182,9 @@ class ChatFragment @Inject constructor() : Fragment() {
         binding?.let { mBinding ->
             mBinding.toggleFriendslistBtn.setOnClickListener {
                 setFragmentResult("toggleVisibility", Bundle())
+            }
+            mBinding.toggleRoomslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibilityRooms", Bundle())
             }
             mBinding.iconsHeader.setOnClickListener {
                 toggleVisibilityChat()
@@ -199,6 +203,10 @@ class ChatFragment @Inject constructor() : Fragment() {
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             val friend = (bundle["friend"] as FriendSimplified)
             chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, TabType.FRIEND), true)
+        }
+        setFragmentResultListener("openRoom"){ requestKey, bundle ->
+            val roomName = (bundle["roomName"] as String)
+            chatService?.addNewConvo(TabInfo(roomName, roomName, TabType.ROOM), true)
         }
     }
 

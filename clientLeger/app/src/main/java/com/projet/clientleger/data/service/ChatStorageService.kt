@@ -89,35 +89,39 @@ class ChatStorageService @Inject constructor() : Service() {
         chatRepository.receiveRoomMessage().subscribe {
             val message: IMessage
             val tabInfo: TabInfo
+            val isSystem: Boolean
             if (it is RoomMessage) {
                 tabInfo = TabInfo(it.roomName, it.roomName, TabType.ROOM)
                 message = it.toMessageChat()
+                isSystem = false
             } else {
                 it as RoomSystemMessage
                 tabInfo = TabInfo(it.roomName, it.roomName, TabType.ROOM)
                 message = it.toMessageSystem()
+                isSystem = true
             }
-
-            receiveMessage(message, tabInfo)
+            receiveMessage(message, tabInfo, isSystem)
         }
     }
 
-    private fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo) {
+    private fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo, isSystem: Boolean = false) {
         val newMessageConvo = convos.find { it.tabInfo.convoId == tabInfo.convoId }
         if (newMessageConvo != null) {
             newMessageConvo.messages.add(newMessage)
         } else{
-            addNewConvo(tabInfo, false)
-            notifyUpdateTab(tabInfo.convoId)
+            if(!isSystem){
+                addNewConvo(tabInfo, false)
+                notifyUpdateTab(tabInfo.convoId)
+            }
         }
-
         emitConvosChange()
+        emitCurrentConvoChange()
 
         // If not selected tab
-        if (tabInfo.convoId != currentConvo?.tabInfo?.convoId) {
-            changeSelectedConvo(tabInfo)
-            emitCurrentConvoChange()
-        }
+//        if (tabInfo.convoId != currentConvo?.tabInfo?.convoId) {
+//            changeSelectedConvo(tabInfo)
+//            emitCurrentConvoChange()
+//        }
     }
 
     private fun messageIdToMessageChat(msg: ReceivedPrivateMessage): MessageChat {
@@ -136,8 +140,8 @@ class ChatStorageService @Inject constructor() : Service() {
     fun addNewConvo(tabInfo: TabInfo, isSelected: Boolean) {
         if (convos.find { it.tabInfo.convoId == tabInfo.convoId } == null) {
             if(tabInfo.tabType != TabType.GAME){
-                getHistory(tabInfo).subscribe {
-                    convos.add(Convo(tabInfo, it))
+                getHistory(tabInfo).subscribe { messages ->
+                    convos.add(Convo(tabInfo, messages))
                     emitConvosChange()
                     if (isSelected)
                         changeSelectedConvo(tabInfo)
@@ -199,7 +203,7 @@ class ChatStorageService @Inject constructor() : Service() {
         currentTabListeners.add(listener)
     }
 
-    private fun changeSelectedConvo(tabInfo: TabInfo?) {
+    fun changeSelectedConvo(tabInfo: TabInfo?) {
         val convo = convos.find { it.tabInfo.convoId == tabInfo?.convoId }
         if (convo != null) {
             currentConvo = convo

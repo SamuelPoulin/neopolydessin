@@ -82,6 +82,10 @@ object ApiModule {
 
     @Provides
     @Singleton
+    fun provideRoomslistSocketService(socketService: SocketService): RoomslistSocketService = RoomslistSocketService(socketService)
+
+    @Provides
+    @Singleton
     fun provideAvatarStorageService(sessionManager: SessionManager, apiAvatarInterface: ApiAvatarInterface): AvatarStorageService = AvatarStorageService(sessionManager, apiAvatarInterface)
 
     @Provides

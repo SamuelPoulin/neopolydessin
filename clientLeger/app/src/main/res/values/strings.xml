@@ -90,4 +90,8 @@
     <string name="confirm_btn">Confirmer</string>
     <string name="nb_hours_in_game">Nombre d\'heures en jeu</string>
     <string name="average_time_game">Temps moyen d\'une partie</string>
+    <string name="createRoom">Créer un salon</string>
+    <string name="destroy">Détruire</string>
+    <string name="rooms">Salons</string>
+    <string name="rooms_chat">Salons de discussion</string>
 </resources>

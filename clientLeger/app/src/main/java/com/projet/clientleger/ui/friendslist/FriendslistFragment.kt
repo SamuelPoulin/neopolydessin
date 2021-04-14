@@ -114,7 +114,6 @@ class FriendslistFragment @Inject constructor() : Fragment() {
 
     private fun setFragmentListeners(){
         setFragmentResultListener("toggleVisibility"){ requestKey, bundle ->
-            println("friendslistFrag receive result")
             toggleVisibility()
         }
 

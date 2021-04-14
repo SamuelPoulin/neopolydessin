@@ -13,10 +13,11 @@ import com.projet.clientleger.data.model.chat.Convo
 import com.projet.clientleger.data.model.chat.TabInfo
 import kotlinx.android.synthetic.main.activity_mainmenu.view.*
 
-class TabAdapter(private val convos: ArrayList<Convo>, private val clickCallback: ((TabInfo) -> Unit)): RecyclerView.Adapter<TabAdapter.ViewHolderTab>() {
+class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<TabAdapter.ViewHolderTab>() {
     private var selectedTab: TabInfo? = null
     private val items: ArrayList<Pair<String, FrameLayout>> = ArrayList()
     var removeCallback: ((String) -> Unit)? = null
+    var changeTabCallback: ((TabInfo) -> Unit)? = null
     class ViewHolderTab(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val rootView: View = itemView
         val tabTextView: TextView = itemView.findViewById(R.id.tabName)
@@ -44,7 +45,7 @@ class TabAdapter(private val convos: ArrayList<Convo>, private val clickCallback
             holder. selectedUnderline.visibility = View.VISIBLE
 
         holder.rootView.setOnClickListener {
-            clickCallback.invoke(convos[position].tabInfo)
+            changeTabCallback?.invoke(convos[position].tabInfo)
         }
         holder.closeBtn.setOnClickListener {
             removeCallback?.invoke(convos[position].tabInfo.convoId)
