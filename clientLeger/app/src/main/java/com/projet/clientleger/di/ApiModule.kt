@@ -71,7 +71,6 @@ object ApiModule {
     @Singleton
     fun provideDrawingSocketService(socketService: SocketService): DrawingSocketService = DrawingSocketService(socketService)
 
-
     @Provides
     @Singleton
     fun provideFriendslistSocketService(socketService: SocketService): FriendslistSocketService = FriendslistSocketService(socketService)

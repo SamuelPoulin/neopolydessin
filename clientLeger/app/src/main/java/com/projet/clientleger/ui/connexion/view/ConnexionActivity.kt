@@ -10,6 +10,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.RegisterResponse
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.databinding.ConnexionActivityBinding
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
@@ -28,17 +29,21 @@ class ConnexionActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.lifecycleOwner = this
         setupButtons()
+        vm.setupAudio(this)
     }
 
 
     private fun setupButtons(){
         binding.connectBtn.setOnClickListener {
+            vm.playSound(SoundId.CLICK.value)
             connectBtn()
         }
         binding.forgottenPasswordBtn.setOnClickListener{
+            vm.playSound(SoundId.CLICK.value)
             forgottenPasswordBtn()
         }
         binding.createAccountBtn.setOnClickListener {
+            vm.playSound(SoundId.CLICK.value)
             createAccountBtn()
         }
     }
@@ -49,9 +54,11 @@ class ConnexionActivity : AppCompatActivity() {
             vm.connectAccount(binding.connectionUsername.text.toString(), binding.connectionPassword.text.toString()).subscribe{ res ->
                 binding.connectionPassword.text.clear()
                 if (res.isSucessful) {
+                    vm.playSound(SoundId.CONNECTED.value)
                     binding.connectionUsername.text.clear()
                     goToMainMenu()
                 } else {
+            vm.playSound(SoundId.ERROR.value)
                     showToast(res.message)
                 }
                 binding.connectBtn.isEnabled = true

@@ -16,6 +16,7 @@ import com.google.android.material.slider.Slider
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.enumData.DrawTool
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PathData
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
@@ -107,16 +108,25 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     }
 
     private fun setupBtnClickListeners(){
-        binding!!.colorPickerBtn.setOnClickListener { pickColor() }
+        binding!!.colorPickerBtn.setOnClickListener {
+            vm.playSound(SoundId.SELECTED.value)
+            pickColor() }
         binding!!.eraserBtn.setOnClickListener {
+            vm.playSound(SoundId.SELECTED.value)
             changeTool("eraser")
             binding!!.pencilBtn.setImageResource(R.drawable.ic_pencil)
             binding!!.eraserBtn.setImageResource(R.drawable.ic_delete_green)}
-        binding!!.pencilBtn.setOnClickListener { changeTool("pencil")
+        binding!!.pencilBtn.setOnClickListener {
+            vm.playSound(SoundId.SELECTED.value)
+            changeTool("pencil")
         binding!!.eraserBtn.setImageResource(R.drawable.ic_delete)
         binding!!.pencilBtn.setImageResource(R.drawable.ic_pencil_green)}
-        binding!!.undoBtn.setOnClickListener { vm.undo() }
-        binding!!.redoBtn.setOnClickListener { vm.redo() }
+        binding!!.undoBtn.setOnClickListener {
+            vm.playSound(SoundId.SELECTED.value)
+            vm.undo() }
+        binding!!.redoBtn.setOnClickListener {
+            vm.playSound(SoundId.SELECTED.value)
+            vm.redo() }
 
         binding!!.undoBtn.isEnabled = false
         binding!!.redoBtn.isEnabled = false
@@ -186,6 +196,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         val builder = ColorPickerDialog.Builder(requireActivity())
             builder.setTitle("Choisir sa couleur")
             .setPositiveButton("Choisir"){ dialogInterface, i ->
+                vm.playSound(SoundId.CONFIRM.value)
                 binding!!.toolPreview.updatePenColor(vm.confirmColor())
             }
             .setNegativeButton("Annuler"){ dialogInterface, i ->
@@ -196,6 +207,9 @@ class DrawboardFragment @Inject constructor(): Fragment() {
             vm.bufferBrushColor = "#" + envelope.hexCode
         })
         builder.show()
+        builder.setOnDismissListener{
+            vm.playSound(SoundId.CLOSE_CHAT.value)
+        }
     }
     private fun changeTool(tool:String){
         vm.switchCurrentTool(tool)

@@ -19,6 +19,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
@@ -125,12 +126,14 @@ class FriendslistFragment @Inject constructor() : Fragment() {
 
 
     private fun acceptFriendRequest(idOfFriend: String) {
+        vm.playSound(SoundId.CONFIRM.value)
         lifecycleScope.launch {
             vm.acceptFriendRequest(idOfFriend)
         }
     }
 
     private fun refuseFriendRequest(idOfFriend: String) {
+        vm.playSound(SoundId.ERROR.value)
         lifecycleScope.launch {
             vm.refuseFriendRequest(idOfFriend)
         }
@@ -139,22 +142,37 @@ class FriendslistFragment @Inject constructor() : Fragment() {
     fun toggleVisibility(){
         view?.let {
             view?.visibility = when(it.visibility){
-                View.VISIBLE -> View.GONE
-                else -> View.VISIBLE
+                View.VISIBLE -> {
+                    vm.playSound(SoundId.CLOSE_CHAT.value)
+                    View.GONE
+                }
+                else -> {
+                    vm.playSound(SoundId.OPEN_CHAT.value)
+                    View.VISIBLE
+                }
             }
         }
     }
 
     fun showAddFriendDialog() {
         activity?.let {
+            vm.playSound(SoundId.SELECTED.value)
             val input = EditText(it)
+            var wasFriendAdded = false
             val dialog = AlertDialog.Builder(it).setTitle("Ajouter un ami").setView(input)
                 .setPositiveButton("Envoyer") { dialog, id ->
+                    wasFriendAdded = true
+                    vm.playSound(SoundId.CONFIRM.value)
                     CoroutineScope(Job() + Dispatchers.Main).launch {
                         vm.sendFriendRequest(input.text.toString())
                     }
                 }
                 .show()
+            dialog.setOnDismissListener {
+                if(!wasFriendAdded){
+                    vm.playSound(SoundId.CLOSE_CHAT.value)
+                }
+            }
         }
     }
 }

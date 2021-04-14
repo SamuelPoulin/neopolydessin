@@ -6,12 +6,13 @@ import com.projet.clientleger.data.model.Friend
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.Friendslist
 import com.projet.clientleger.data.repository.FriendslistRepository
+import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
-class FriendslistViewModel @Inject constructor(private val friendslistRepository: FriendslistRepository) : ViewModel() {
+class FriendslistViewModel @Inject constructor(private val friendslistRepository: FriendslistRepository,private val audioService: AudioService) : ViewModel() {
     var friendsLiveData: MutableLiveData<List<FriendSimplified>> = MutableLiveData(ArrayList())
 
     init {
@@ -42,5 +43,8 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
                 friendSimplifiedList.add(FriendSimplified(friend))
         }
         friendsLiveData.postValue(friendSimplifiedList.sortedWith(compareBy({it.status}, {it.friendId})))
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

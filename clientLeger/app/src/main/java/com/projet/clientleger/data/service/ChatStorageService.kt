@@ -9,6 +9,8 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.chat.ReceivedPrivateMessage
 import com.projet.clientleger.data.api.model.chat.RoomMessage
 import com.projet.clientleger.data.api.model.chat.RoomSystemMessage
+import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
@@ -34,6 +36,9 @@ class ChatStorageService @Inject constructor() : Service() {
 
     @Inject
     lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var audioService: AudioService
 
     private val convos: ArrayList<Convo> = ArrayList()
     lateinit var accountInfo: AccountInfo
@@ -83,6 +88,7 @@ class ChatStorageService @Inject constructor() : Service() {
             receiveMessage(chatVersion, tabInfo)
         }
         chatRepository.receiveGuess().subscribe {
+            manageGuessSound(it.guessStatus)
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
             receiveMessage(it, tabInfo)
         }
@@ -251,5 +257,14 @@ class ChatStorageService @Inject constructor() : Service() {
 
     fun addFriendslistUsernames(usernames: HashMap<String, String> ){
         friendslistUsernames.putAll(usernames)
+    }
+
+    private fun manageGuessSound(status: GuessStatus){
+        if(status == GuessStatus.CORRECT){
+            audioService.playSound(SoundId.CORRECT.value)
+        }
+        else{
+            audioService.playSound(SoundId.ERROR.value)
+        }
     }
 }

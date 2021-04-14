@@ -31,6 +31,7 @@ import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.enumData.ReasonEndGame
 import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.chat.TabInfo
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.ChatStorageService
@@ -148,6 +149,7 @@ class GameActivity : AppCompatActivity() {
         dialog.titleMessage.text = message
 
         dialog.quitBtn.setOnClickListener {
+            vm.playSound(SoundId.CLOSE_GAME.value)
             dialog.dismiss()
             supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
             supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
@@ -164,6 +166,7 @@ class GameActivity : AppCompatActivity() {
         }
         else{
             dialog.continueBtn.setOnClickListener {
+                vm.playSound(SoundId.SELECTED.value)
                 dialog.dismiss()
             }
         }
@@ -227,6 +230,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
         vm.reveiceBoardwipeNotice().subscribe{
+            vm.playSound(SoundId.BOARDWIPE.value)
             lifecycleScope.launch {
                 supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             }
@@ -236,19 +240,13 @@ class GameActivity : AppCompatActivity() {
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
         
     }
-    private fun getFrenchRole(role:String):String{
-        return when (role){
-            PlayerRole.DRAWER.value -> "Dessinateur"
-            PlayerRole.GUESSER.value -> "Devineur"
-            else -> "Passif"
-        }
-    }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
         timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
             @SuppressLint("SetTextI18n")
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){
+                    vm.playSound(SoundId.TICK.value)
                     binding.timer.setTextColor(Color.RED)
                     binding.timerIcon.setImageResource(R.drawable.ic_timer_red)
                 }
@@ -268,6 +266,7 @@ class GameActivity : AppCompatActivity() {
             override fun onFinish(){}
         }
         timer?.start()
+
     }
 
     override fun onDestroy() {
