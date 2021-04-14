@@ -15,7 +15,8 @@ const X3: number = 4;
 const Y3: number = 5;
 
 const ROUND_PRECISION_FACTOR: number = 100;
-const BEZIER_PRECISION: number = 6;
+const BEZIER_PRECISION_MAXIMUM: number = 20;
+const BEZIER_PRECICION_STEP: number = 25;
 
 @injectable()
 export class DrawingSequenceService {
@@ -33,11 +34,9 @@ export class DrawingSequenceService {
 
   private sequenceDrawing(drawing: PictureWord): DrawingSequence {
     const paths = (drawing.drawnPaths as Path[]).map((path) => this.toSegment(path));
-    const dimensions = this.findDrawingDimensions(paths);
-
     return this.sequenceUsingDrawMode({
-      height: dimensions.y,
-      width: dimensions.x,
+      height: VIEWPORT_DIMENSION,
+      width: VIEWPORT_DIMENSION,
       stack: paths
     }, drawing.drawMode);
   }
@@ -199,16 +198,6 @@ export class DrawingSequenceService {
     return ((coord2.x - coord1.x) * (coord2.x - coord1.x)) + ((coord2.y - coord1.y) * (coord2.y - coord1.y));
   }
 
-  private findDrawingDimensions(paths: Segment[]): Coord {
-    let allCoords: Coord[] = [];
-    paths.forEach((path: Segment) => {
-      allCoords = allCoords.concat(allCoords, path.path);
-    });
-    const maxX = this.maxOf(allCoords, true);
-    const maxY = this.maxOf(allCoords, false);
-    return { x: maxX, y: maxY };
-  }
-
   private toSegment(path: Path): Segment {
     return {
       zIndex: path.id,
@@ -232,32 +221,51 @@ export class DrawingSequenceService {
 
   // math is here https://javascript.info/bezier-curve
   private bezierToLines(controlPoints: string[]): string {
+
+    const points: number[] = controlPoints.map((point) => Number.parseFloat(point));
+
+    const precision = this.getBezierPrecision(points);
+
     let lines: string = '';
-    let t = 1 / BEZIER_PRECISION;
+    let t = 1 / precision;
     while (t < 1) {
       const x
-        = ((1 - t) * (1 - t)) * Number.parseFloat(controlPoints[X1])
-        + (2 * (1 - t)) * t * Number.parseFloat(controlPoints[X2])
-        + (t * t) * Number.parseFloat(controlPoints[X3]);
+        = ((1 - t) * (1 - t)) * points[X1]
+        + (2 * (1 - t)) * t * points[X2]
+        + (t * t) * points[X3];
 
       const y
-        = ((1 - t) * (1 - t)) * Number.parseFloat(controlPoints[Y1])
-        + 2 * (1 - t) * t * Number.parseFloat(controlPoints[Y2])
-        + (t * t) * Number.parseFloat(controlPoints[Y3]);
+        = ((1 - t) * (1 - t)) * points[Y1]
+        + 2 * (1 - t) * t * points[Y2]
+        + (t * t) * points[Y3];
 
       lines += `L ${x} ${y}, `;
-      t += 1 / BEZIER_PRECISION;
+      t += 1 / precision;
     }
     return lines;
   }
 
-  private maxOf(coords: Coord[], useX: boolean): number {
-    // tweaked from https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects
-    const coord = coords.reduce((a, b) => (useX ? a.x : a.y) > (useX ? b.x : b.y) ? a : b);
-    return useX ? coord.x : coord.y;
+  private getBezierPrecision(points: number[]): number {
+    const derivativeStart: Coord = this.derivativeAt(points, 0);
+    const derivativeEnd: Coord = this.derivativeAt(points, 1);
+    const curveDistance = this.distanceBetween(derivativeStart, derivativeEnd);
+
+    const nbOfPoints = Math.floor(curveDistance / BEZIER_PRECICION_STEP);
+    const finalPrecision = nbOfPoints <= BEZIER_PRECICION_STEP - 2 ? nbOfPoints + 2 : BEZIER_PRECISION_MAXIMUM;
+    // console.log(`intensity of curve is : ${this.distanceBetween(derivativeStart, derivativeEnd).toFixed(2)}`
+    //   + `created : ${finalPrecision - 1} segments`);
+    return finalPrecision;
+  }
+
+  private derivativeAt(points: number[], t: number): Coord {
+    return {
+      x: (2 * (1 - t) * (points[X2] - points[X1])) + (2 * t * (points[X3] - points[X2])),
+      y: (2 * (1 - t) * (points[X2] - points[X1])) + (2 * t * (points[X3] - points[X2])),
+    };
   }
 
   private minOf(coords: Coord[], useX: boolean): number {
+    // tweaked from https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects
     const coord = coords.reduce((a, b) => (useX ? a.x : a.y) < (useX ? b.x : b.y) ? a : b);
     return useX ? coord.x : coord.y;
   }
