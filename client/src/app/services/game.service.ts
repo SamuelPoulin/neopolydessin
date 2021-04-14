@@ -96,6 +96,7 @@ export class GameService {
 
     this.gameStateSubscription = this.socketService.receiveGameState().subscribe((state) => {
       if (state === CurrentGameState.DRAWING) {
+        this.wordToDraw = '';
         this.drawingChanged.emit();
       }
     });
