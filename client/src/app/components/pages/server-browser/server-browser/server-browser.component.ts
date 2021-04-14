@@ -28,7 +28,7 @@ export class ServerBrowserComponent implements OnInit {
 
   joinLobby(lobbyId: string, gameType: GameType, difficulty: Difficulty): void {
     this.socketService.joinLobby(lobbyId);
-    this.gameService.setGameInfo(gameType, difficulty);
+    this.gameService.setGameInfo(gameType, difficulty, false);
     this.router.navigate([`/lobby/${lobbyId}`]);
   }
 

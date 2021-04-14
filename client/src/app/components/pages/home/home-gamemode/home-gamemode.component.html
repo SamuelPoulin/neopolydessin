@@ -20,6 +20,11 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+    <ng-container *ngIf="gamemode !== 'sprintSolo'">
+      <button mat-flat-button id="privacy-button" [style.background]="privacyColors[privateGame]" (click)="this.togglePrivacy()">
+        {{privacyButtonText[privateGame]}}
+      </button>
+    </ng-container>
   </div>
   <div actions>
     <button mat-stroked-button (click)="startGame()">

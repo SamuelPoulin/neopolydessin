@@ -22,7 +22,7 @@ import {
   Player,
   TeamScore,
   TimeInfo,
-} from '../../../../common/communication/lobby';
+} from '@common/communication/lobby';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -148,6 +148,15 @@ export class SocketService {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
   }
 
+  async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CHANGE_PRIVACY_SETTING, privateGame);
+      this.socket.on(SocketLobby.CHANGED_PRIVACY_SETTING, (newPrivacy: boolean) => {
+        resolve(newPrivacy);
+      });
+    });
+  }
+
   async joinChatRoom(roomName: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.socket.emit(SocketMessages.JOIN_CHAT_ROOM, roomName, (success: boolean) => {
@@ -189,6 +198,18 @@ export class SocketService {
 
   removeBot(username: string): void {
     this.socket.emit(SocketLobby.REMOVE_BOT, username);
+  }
+
+  removePlayer(accountId: string): void {
+    this.socket.emit(SocketLobby.REMOVE_PLAYER, accountId);
+  }
+
+  removedFromLobby(): Observable<void> {
+    return new Observable<void>((obs) => {
+      this.socket.on(SocketLobby.PLAYER_REMOVED, () => {
+        obs.next();
+      });
+    });
   }
 
   sendMessage(message: string): void {
@@ -235,9 +256,9 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
       resolve();
     });
   }

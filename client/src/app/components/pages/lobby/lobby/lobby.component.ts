@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import randomColor from 'randomcolor';
 import { GameService } from '@services/game.service';
 import { ChatService } from '@services/chat.service';
-import { GameType, Player } from '../../../../../../../common/communication/lobby';
+import { GameType, Player } from '@common/communication/lobby';
 
 @Component({
   selector: 'app-lobby',
@@ -14,7 +14,18 @@ export class LobbyComponent {
   inviteCode: string = 'Bientôt';
   teams: Player[][];
 
-  constructor(public gameService: GameService, private router: Router, public chatService: ChatService) {}
+  privacyButtonText: string[];
+  privacyColors: string[];
+
+
+  constructor(
+    public gameService: GameService,
+    private router: Router,
+    public chatService: ChatService
+  ) {
+    this.privacyButtonText = ['Partie publique', 'Partie privée'];
+    this.privacyColors = ['#3bbf51', '#e84646'];
+  }
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');
@@ -31,6 +42,10 @@ export class LobbyComponent {
   startGame(): void {
     this.gameService.startGame();
     this.router.navigate(['edit']);
+  }
+
+  togglePrivacy(): void {
+    this.gameService.changePrivacySetting(this.gameService.privacy ? false : true);
   }
 
   get gamemode(): GameType {

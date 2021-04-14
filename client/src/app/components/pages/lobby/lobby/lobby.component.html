@@ -7,6 +7,11 @@
         <div id="options-container">
           <app-gamemode-title [gamemode]="gamemode"></app-gamemode-title>
           <ng-container *ngIf="gameService.isHost">
+            <ng-container *ngIf="gameService.gameType !== 'sprintSolo'">
+              <button id="privacy-button" [style.background]="privacyColors[gameService.privacy ? 1 : 0]" mat-flat-button (click)="this.togglePrivacy()">
+                {{privacyButtonText[gameService.privacy ? 1 : 0]}}
+              </button>
+            </ng-container>
             <button [disabled]="!gameService.canStartGame" id="start-button" color="warn" mat-flat-button
               class="menu-button menu-main-button" (click)="startGame()">
               Lancer la partie

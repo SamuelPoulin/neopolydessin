@@ -20,6 +20,7 @@ export class GameService {
 
   gameType: GameType | undefined;
   difficulty: Difficulty | undefined;
+  privacy: boolean;
 
   lobbySubscription: Subscription;
   rolesSubscription: Subscription;
@@ -108,6 +109,9 @@ export class GameService {
         this.scores[score.teamNumber].score = score.score;
       }
     });
+    this.socketService.removedFromLobby().subscribe(() => {
+      this.router.navigate(['/']);
+    });
   }
 
   resetTeams() {
@@ -118,6 +122,12 @@ export class GameService {
     this.socketService.startGame();
   }
 
+  changePrivacySetting(privateGame: boolean) {
+    this.socketService.changeLobbyPrivacy(privateGame).then((newPrivacy) => {
+      this.privacy = newPrivacy;
+    });
+  }
+
   async addBot(teamNumber: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.socketService.addBot(teamNumber).subscribe((success) => {
@@ -125,6 +135,10 @@ export class GameService {
         else reject();
       });
     });
+  }
+
+  removePlayer(accountId: string) {
+    this.socketService.removePlayer(accountId);
   }
 
   removeBot(username: string) {
@@ -153,9 +167,10 @@ export class GameService {
     }
   }
 
-  setGameInfo(gameType: GameType, difficulty: Difficulty) {
+  setGameInfo(gameType: GameType, difficulty: Difficulty, privacy: boolean) {
     this.gameType = gameType;
     this.difficulty = difficulty;
+    this.privacy = privacy;
     this.canStartGame = GameType.CLASSIC === this.gameType ? false : true;
   }
 

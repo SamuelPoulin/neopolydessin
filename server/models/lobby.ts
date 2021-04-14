@@ -330,8 +330,12 @@ export abstract class Lobby {
     });
 
     socket.on(SocketLobby.CHANGE_PRIVACY_SETTING, (privacySetting: boolean) => {
-      this.setPrivacySetting(socket.id, privacySetting);
-      this.io.in(this.lobbyId).emit(SocketLobby.CHANGED_PRIVACY_SETTING, this.privateLobby);
+      const owner = this.getLobbyOwner();
+      if (owner && owner.socket.id === socket.id) {
+        this.privateLobby = privacySetting;
+        SocketIo.UPDATE_GAME_LIST.notify();
+        this.io.in(this.lobbyId).emit(SocketLobby.CHANGED_PRIVACY_SETTING, this.privateLobby);
+      }
     });
 
     socket.on(SocketMessages.SEND_MESSAGE, (sentMsg: Message) => {
@@ -441,13 +445,6 @@ export abstract class Lobby {
       return playerInfo.playerRole === PlayerRole.DRAWER;
     } else {
       return false;
-    }
-  }
-
-  private setPrivacySetting(socketId: string, newPrivacySetting: boolean) {
-    const owner = this.getLobbyOwner();
-    if (owner && owner.socket.id === socketId) {
-      this.privateLobby = newPrivacySetting;
     }
   }
 
