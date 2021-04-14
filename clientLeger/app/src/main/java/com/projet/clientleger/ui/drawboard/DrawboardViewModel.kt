@@ -164,7 +164,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         paths.postValue(paths.value)
     }
 
-    fun deletePath(pathId: Int){
+    private fun deletePath(pathId: Int){
         for(i in 0 until paths.value!!.size){
             paths.value!!.removeIf{
                 it.data.pathId == pathId

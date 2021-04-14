@@ -78,11 +78,8 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun onLeaveGame(){
         gameRepository.onLeaveGame()
     }
-    fun isTutorialActive():Boolean{
-        return tutorialService.isTutorialActive()
-    }
     fun createSequence(models:ArrayList<SequenceModel>){
-        tutorialService.createShowcaseSequence(models)
+        tutorialService.createGameShowcaseSequence(models)
     }
     fun getUsername():String{
         return gameRepository.getUsername()
@@ -92,5 +89,8 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     }
     fun playSound(soundId:Int){
         audioService.playSound(soundId)
+    }
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
     }
 }

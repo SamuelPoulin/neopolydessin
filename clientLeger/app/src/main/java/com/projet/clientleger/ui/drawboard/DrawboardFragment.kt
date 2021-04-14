@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.slider.Slider
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
@@ -20,6 +21,9 @@ import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PathData
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
+import com.projet.clientleger.ui.game.view.GameTutorialActivity
+import com.projet.clientleger.ui.game.view.GameTutorialActivity_GeneratedInjector
+import com.projet.clientleger.ui.game.view.GameTutorialActivity_MembersInjector
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -163,6 +167,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     }
 
     private fun handlePenViewEvent(event: MotionEvent) {
+        println("Nous sommes dans le tutoriel? ${vm.isTutorialActive()}")
         if(vm.isTutorialActive()){
             when(event.action){
                 MotionEvent.ACTION_DOWN -> {
