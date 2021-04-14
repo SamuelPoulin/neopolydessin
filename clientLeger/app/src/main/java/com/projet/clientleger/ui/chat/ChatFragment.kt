@@ -48,7 +48,7 @@ class ChatFragment @Inject constructor() : Fragment() {
             chatService = (service as ChatStorageService.LocalBinder).getService()
             (binding?.rvTabs?.adapter as TabAdapter).removeCallback = chatService!!::removeConvo
             setupChatServiceSubscriptions()
-            vm.fetchSavedData(chatService!!.convos, chatService!!.currentConvo)
+            vm.fetchSavedData(chatService!!.getConvos(), chatService!!.currentConvo)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -95,7 +95,7 @@ class ChatFragment @Inject constructor() : Fragment() {
     override fun onResume() {
         super.onResume()
         chatService?.let {
-            vm.fetchSavedData(it.convos, it.currentConvo)
+            vm.fetchSavedData(it.getConvos(), it.currentConvo)
         }
     }
 
@@ -200,18 +200,6 @@ class ChatFragment @Inject constructor() : Fragment() {
             val friend = (bundle["friend"] as FriendSimplified)
             chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, TabType.FRIEND), true)
         }
-
-        setFragmentResultListener("openGameChat"){requestKey, bundle ->
-            val tabName = (bundle["tabName"] as String)
-            chatService?.addNewConvo(TabInfo(tabName, ChatViewModel.GAME_TAB_ID), true)
-        }
-        setFragmentResultListener("closeGameChat"){requestKey, bundle ->
-            val tabName = (bundle["tabName"] as String)
-            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
-        }
-        setFragmentResultListener("activityChange"){requestKey, bundle ->
-            vm.clear()
-        }
     }
 
     private fun setupChatServiceSubscriptions(){
@@ -234,6 +222,15 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         vm.currentConvo.observe(requireActivity()){
             if(it != null){
+                if(it.tabInfo.tabType == TabType.GAME){
+                    if(vm.isGuesser.value!!){
+                        updateGuessingBtnVisibility(true)
+                        vm.isGuessing.postValue(true)
+                    }
+                } else{
+                    updateGuessingBtnVisibility(false)
+                    vm.isGuessing.postValue(false)
+                }
                 binding?.let { mBinding ->
                     (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
                 }

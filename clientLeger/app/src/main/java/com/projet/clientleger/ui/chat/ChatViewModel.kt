@@ -23,11 +23,12 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository):ViewModel() {
+class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository) : ViewModel() {
     companion object {
         const val NB_MESSAGES_PER_PAGE = 20
         const val GAME_TAB_ID = "GAME"
     }
+
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
     val convos: MutableLiveData<ArrayList<Convo>> = MutableLiveData(ArrayList())
@@ -50,8 +51,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     }
 
 
-
-    fun fetchSavedData(convos: ArrayList<Convo>, newCurrentConvo: Convo?){
+    fun fetchSavedData(convos: ArrayList<Convo>, newCurrentConvo: Convo?) {
         messagesLiveData.value!!.clear()
         val nonNullCurrentConvo: Convo = newCurrentConvo ?: Convo()
         messagesLiveData.value!!.addAll(nonNullCurrentConvo.messages)
@@ -63,11 +63,11 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         this.convos.postValue(this.convos.value!!)
     }
 
-    private fun toMessagesChat(){
+    private fun toMessagesChat() {
 
     }
 
-    fun updateConvos(updatedConvos: ArrayList<Convo>){
+    fun updateConvos(updatedConvos: ArrayList<Convo>) {
         convos.value?.let { convosList ->
             convosList.clear()
             convosList.addAll(updatedConvos)
@@ -75,16 +75,15 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         }
     }
 
-    fun updateCurrentConvo(){
-        val minIndex = if(messagesLiveData.value!!.size == 0) 0 else messagesLiveData.value!!.size - 1
-        for(i in minIndex until currentConvo.value!!.messages.size)
-            messagesLiveData.value!!.add(currentConvo.value!!.messages[i])
+    fun updateCurrentConvo() {
+        messagesLiveData.value!!.clear()
+        messagesLiveData.value!!.addAll(currentConvo.value!!.messages)
         messagesLiveData.postValue(messagesLiveData.value!!)
     }
 
-    fun changeCurrentTab(newTabId: TabInfo?){
-        val newCurrentConvo = convos.value!!.find { it.tabInfo.convoId== newTabId?.convoId }
-        if(newCurrentConvo != null){
+    fun changeCurrentTab(newTabId: TabInfo?) {
+        val newCurrentConvo = convos.value!!.find { it.tabInfo.convoId == newTabId?.convoId }
+        if (newCurrentConvo != null) {
             messagesLiveData.value?.let {
                 it.clear()
                 it.addAll(newCurrentConvo.messages)
@@ -94,18 +93,20 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         currentConvo.postValue(newCurrentConvo)
     }
 
-    fun sendMessage(){
-        messageContentLiveData.value?.let{
-            when(currentConvo.value!!.tabInfo.tabType){
-                TabType.GAME -> sendGameMessage(it)
-                TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
-                else -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoId, it)
+    fun sendMessage() {
+        messageContentLiveData.value?.let {
+            if (it.isNotBlank()) {
+                when (currentConvo.value!!.tabInfo.tabType) {
+                    TabType.GAME -> sendGameMessage(it)
+                    TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
+                    else -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoId, it)
+                }
             }
         }
     }
 
-    private fun sendGameMessage(content: String){
-        if(isGuessing.value!!) {
+    private fun sendGameMessage(content: String) {
+        if (isGuessing.value!!) {
             chatRepository.sendGuess(content)
         } else {
             chatRepository.sendMessage(Message(formatMessageContent(content)))
@@ -118,11 +119,11 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         return adjustedText
     }
 
-    private fun notifyUpdateTab(convoId: String){
+    private fun notifyUpdateTab(convoId: String) {
         // TODO
     }
 
-    fun clear(){
+    fun clear() {
         chatRepository.clearSocketSubscriptions()
     }
 }

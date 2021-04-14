@@ -59,7 +59,6 @@ class MainmenuActivity : AppCompatActivity() {
 
         binding.accountBtn.setOnClickListener {
             val intent = Intent(this, AccountManagementActivity::class.java)
-            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
         }
 
@@ -85,7 +84,6 @@ class MainmenuActivity : AppCompatActivity() {
     }
     fun goToDashBoard(){
         val intent = Intent(this, AccountManagementActivity::class.java)
-        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
         startActivity(intent)
     }
     fun startTutorial(){
@@ -138,7 +136,6 @@ class MainmenuActivity : AppCompatActivity() {
 
             intent.putExtra("gameType", selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
-            supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "mainmenu"))
             startActivity(intent)
             dialog.dismiss()
         }

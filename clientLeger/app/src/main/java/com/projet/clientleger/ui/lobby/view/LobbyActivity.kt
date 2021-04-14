@@ -1,8 +1,12 @@
 package com.projet.clientleger.ui.lobby.view
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.IBinder
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -15,9 +19,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.databinding.ActivityLobbyBinding
+import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.game.view.GameActivity
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
@@ -38,7 +46,18 @@ class LobbyActivity : AppCompatActivity() {
     var loadingDialog: AlertDialog? = null
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
+    private var chatService: ChatStorageService? = null
 
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            chatService?.addNewConvo(TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME), true)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            chatService = null
+        }
+    }
 
     private fun setSubscriptions() {
         vm.receiveStartGame().subscribe{
@@ -74,6 +93,19 @@ class LobbyActivity : AppCompatActivity() {
         if(vm.isTutorialActive()){
             //vm.addShowcase("Nous sommes maintenant dans le lobby \n Maintenant que le lobby est créé, nous allons pouvoir démarrer la partie", binding.startGameButton,this)
         }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Intent(this, ChatStorageService::class.java).also { intent ->
+            bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(chatConnection)
     }
 
     private fun setupToolbar(){
@@ -104,6 +136,7 @@ class LobbyActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         loadingDialog?.let {
+            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
             leaveLobby()
         }
     }
@@ -124,8 +157,7 @@ class LobbyActivity : AppCompatActivity() {
 
     private fun leaveLobby(){
         vm.leaveLobby()
-        supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
-        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
+        chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         finish()
     }
 
@@ -169,6 +201,7 @@ class LobbyActivity : AppCompatActivity() {
                 loadingDialog?.let { dialog ->
                     if(dialog.isShowing && players.find { it.accountId.isNotEmpty() } != null)
                     {
+                        supportFragmentManager.setFragmentResult("openGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
                         dialog.dismiss()
                     }
                 }
@@ -196,7 +229,6 @@ class LobbyActivity : AppCompatActivity() {
     }
     private fun goToGame(){
         vm.unsubscribe()
-        supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
         val intent = Intent(this, GameActivity::class.java).apply {
             putExtra("gameType", vm.gameType)
         }

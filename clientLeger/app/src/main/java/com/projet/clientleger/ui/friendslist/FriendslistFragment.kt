@@ -1,7 +1,12 @@
 package com.projet.clientleger.ui.friendslist
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.os.IBinder
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +20,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.data.model.FriendSimplified
+import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FriendslistFragmentBinding
+import com.projet.clientleger.ui.chat.TabAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,6 +36,37 @@ class FriendslistFragment @Inject constructor() : Fragment() {
 
     private var friends: ArrayList<FriendSimplified> = ArrayList()
     private var binding: FriendslistFragmentBinding? = null
+    private var chatService: ChatStorageService? = null
+
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            chatService?.addFriendslistUsernames(createUsernamesMap())
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Intent(requireContext(), ChatStorageService::class.java).also { intent ->
+            activity?.bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(chatConnection)
+    }
+
+    private fun createUsernamesMap(): HashMap<String, String>{
+        val map = HashMap<String, String>()
+        for(friend in friends)
+            map[friend.friendId] = friend.username
+        return map
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +74,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
             friends.clear()
             friends.addAll(list)
             binding?.rvFriends?.adapter?.notifyDataSetChanged()
+            chatService?.addFriendslistUsernames(createUsernamesMap())
         }
         setFragmentListeners()
     }

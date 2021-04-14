@@ -86,9 +86,5 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideChatStorageService(): ChatStorageService = ChatStorageService()
-
-    @Provides
-    @Singleton
     fun provideTutorialService():TutorialService = TutorialService()
 }

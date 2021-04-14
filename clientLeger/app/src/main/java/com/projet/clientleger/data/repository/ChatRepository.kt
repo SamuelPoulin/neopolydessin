@@ -49,12 +49,8 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
         return  chatSocketService.sendGuess(guess)
     }
 
-    fun receiveGuessClassic(): Observable<GuessMessageInfo> {
-        return chatSocketService.receiveGuessClassic()
-    }
-
-    fun receiveGuessSoloCoop(): Observable<GuessMessageSoloCoopInfo>{
-        return chatSocketService.receiveGuessSoloCoop()
+    fun receiveGuess(): Observable<GuessMessageInfo> {
+        return chatSocketService.receiveGuess()
     }
 
     suspend fun getChatFriendHistory(pageNumberWanted: Int, friendId: String, messagePerPage: Int): ArrayList<MessageId> {

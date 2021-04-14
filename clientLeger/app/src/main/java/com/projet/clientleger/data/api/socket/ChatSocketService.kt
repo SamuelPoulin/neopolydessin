@@ -57,15 +57,9 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.emit(ChatSocketEndpoints.SEND_GUESS.value, guess)
     }
 
-    fun receiveGuessClassic(): Observable<GuessMessageInfo> {
-        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS_CLASSIC.value) { (guessMessage) ->
+    fun receiveGuess(): Observable<GuessMessageInfo> {
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS.value) { (guessMessage) ->
             Json.decodeFromString(GuessMessage.serializer(), guessMessage.toString()).toInfo()
-        }
-    }
-
-    fun receiveGuessSoloCoop(): Observable<GuessMessageSoloCoopInfo> {
-        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_GUESS_SOLO_COOP.value) { (guessMessage) ->
-            Json.decodeFromString(GuessMessageSoloCoop.serializer(), guessMessage.toString()).toInfo()
         }
     }
 

@@ -30,4 +30,5 @@
     <color name="tab_grey">#414141</color>
     <color name="tabs_black">#292929</color>
     <color name="hover_btn">#464646</color>
+    <color name="messageInfo">#696969</color>
 </resources>

@@ -40,7 +40,6 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
         }
-        lobbyRepository.addGameTabToStorage(TabInfo(GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID, TabType.GAME))
     }
 
     fun getAccountInfo(): AccountInfo{

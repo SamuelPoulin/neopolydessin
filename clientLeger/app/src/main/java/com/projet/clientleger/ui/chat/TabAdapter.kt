@@ -33,7 +33,7 @@ class TabAdapter(private val convos: ArrayList<Convo>, private val clickCallback
         holder.tabTextView.text = convos[position].tabInfo.convoName
         val tabId = selectedTab?.convoId ?: ""
 
-        if(convos[position].tabInfo.tabType == TabType.STATIC_ROOM)
+        if(convos[position].tabInfo.tabType == TabType.STATIC_ROOM || convos[position].tabInfo.tabType == TabType.GAME)
             holder.closeBtn.visibility = View.GONE
         else
             holder.closeBtn.visibility = View.VISIBLE

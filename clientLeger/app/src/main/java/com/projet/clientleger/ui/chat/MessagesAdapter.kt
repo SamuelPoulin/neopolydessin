@@ -88,7 +88,7 @@ class MessagesAdapter(private val mMessages: List<IMessage>, private val usernam
     override fun onBindViewHolder(viewHolder: ViewHolderMessage, position: Int) {
         val msgType = getItemViewType(position)
         if (msgType != MessageType.SYSTEM.ordinal) {
-            val msg = mMessages[position] as MessageChat
+            val msg = mMessages[position] as IMessageChat
             val time = SimpleDateFormat("HH:mm:ss", Locale.CANADA_FRENCH).format(Date(msg.timestamp))
             viewHolder.messageUsernameTextView.text = msg.senderUsername //SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CANADA_FRENCH).format(Date(mMessages[position].timestamp))
             viewHolder.messageTimeTextView.text = time

@@ -35,12 +35,12 @@ class ChatStorageService @Inject constructor() : Service() {
     @Inject
     lateinit var sessionManager: SessionManager
 
-    val convos: ArrayList<Convo> = ArrayList()
+    private val convos: ArrayList<Convo> = ArrayList()
     lateinit var accountInfo: AccountInfo
     var currentConvo: Convo? = null
-    lateinit var convosListeners: ArrayList<(ArrayList<Convo>) -> Unit>
-    private lateinit var currentConvoListeners: ArrayList<() -> Unit>
-    private lateinit var currentTabListeners: ArrayList<(TabInfo?) -> Unit>
+    var convosListeners: ArrayList<(ArrayList<Convo>) -> Unit> = ArrayList()
+    private var currentConvoListeners: ArrayList<() -> Unit> = ArrayList()
+    private var currentTabListeners: ArrayList<(TabInfo?) -> Unit> = ArrayList()
 
     //Hashmap: AccountId - username
     private val friendslistUsernames: HashMap<String, String> = HashMap()
@@ -51,10 +51,6 @@ class ChatStorageService @Inject constructor() : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        currentConvoListeners = ArrayList()
-        convosListeners = ArrayList()
-        currentTabListeners = ArrayList()
-
         accountInfo = sessionManager.getAccountInfo()
         receiveMsgSubscriptions()
         addNewConvo(TabInfo("General", GENERAL_ROOM_ID, TabType.STATIC_ROOM), true)
@@ -86,11 +82,7 @@ class ChatStorageService @Inject constructor() : Service() {
             val tabInfo = TabInfo(chatVersion.senderUsername, convoId, TabType.FRIEND)
             receiveMessage(chatVersion, tabInfo)
         }
-        chatRepository.receiveGuessSoloCoop().subscribe {
-            val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
-            receiveMessage(it, tabInfo)
-        }
-        chatRepository.receiveGuessClassic().subscribe {
+        chatRepository.receiveGuess().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
             receiveMessage(it, tabInfo)
         }
@@ -111,16 +103,16 @@ class ChatStorageService @Inject constructor() : Service() {
     }
 
     private fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo) {
-        val newMessageConvo = convos.find { it.tabInfo.convoId == currentConvo?.tabInfo?.convoId }
+        val newMessageConvo = convos.find { it.tabInfo.convoId == tabInfo.convoId }
         if (newMessageConvo != null) {
-            if (tabInfo.convoId != currentConvo?.tabInfo?.convoId) {
-                addNewConvo(tabInfo, false)
-                notifyUpdateTab(tabInfo.convoId)
-                emitConvosChange()
-            }
             newMessageConvo.messages.add(newMessage)
-            emitCurrentConvoChange()
+        } else{
+            addNewConvo(tabInfo, false)
+            notifyUpdateTab(tabInfo.convoId)
         }
+
+        emitConvosChange()
+
         // If not selected tab
         if (tabInfo.convoId != currentConvo?.tabInfo?.convoId) {
             changeSelectedConvo(tabInfo)
@@ -135,7 +127,9 @@ class ChatStorageService @Inject constructor() : Service() {
             val senderUsername = if (msg.senderAccountId == accountInfo.accountId) accountInfo.username else convoOfMsg.tabInfo.convoName
             MessageChat(msg.content, msg.timestamp, senderUsername)
         } else {
-            MessageChat(msg.content, msg.timestamp, "idk man")
+            val senderUsername = friendslistUsernames[msg.senderAccountId] ?: "idk man"
+
+            MessageChat(msg.content, msg.timestamp, senderUsername)
         }
     }
 
@@ -240,9 +234,18 @@ class ChatStorageService @Inject constructor() : Service() {
         convos.clear()
     }
 
-    fun addEmptyTab(tabInfo: TabInfo, index: Int = 0, isSelected: Boolean = false) {
+    private fun addEmptyTab(tabInfo: TabInfo, index: Int = 0, isSelected: Boolean = false) {
         convos.add(index, Convo(tabInfo, ArrayList()))
+        emitConvosChange()
         if (isSelected)
             changeSelectedConvo(tabInfo)
+    }
+
+    fun getConvos(): ArrayList<Convo> {
+        return convos
+    }
+
+    fun addFriendslistUsernames(usernames: HashMap<String, String> ){
+        friendslistUsernames.putAll(usernames)
     }
 }
