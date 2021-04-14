@@ -122,7 +122,6 @@ export class SocketIo {
   checkOnlineStatus(friends: Friend[]): FriendWithConnection[] {
     return friends.map((friend) => {
       let isOnline: boolean = false;
-      console.log(friend);
       if (friend && friend.friendId) {
         if (this.socketIdService.GetSocketIdOfAccountId(friend.friendId._id.toString())) {
           isOnline = true;
