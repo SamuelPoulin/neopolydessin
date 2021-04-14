@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -28,8 +28,14 @@ export class SocketService {
   loggedOutSubscription: Subscription;
   loggedInSubscription: Subscription;
 
+  leftGame: EventEmitter<void>;
+  joinedGame: EventEmitter<void>;
+
   constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
+
+    this.leftGame = new EventEmitter<void>();
+    this.joinedGame = new EventEmitter<void>();
 
     this.initSocket();
 
@@ -126,6 +132,7 @@ export class SocketService {
 
   leaveLobby(): void {
     this.socket.emit(SocketLobby.LEAVE_LOBBY);
+    this.leftGame.emit();
   }
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
@@ -138,6 +145,7 @@ export class SocketService {
 
   joinLobby(lobbyId: string) {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
+    this.joinedGame.emit();
   }
 
   async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
@@ -251,6 +259,7 @@ export class SocketService {
   async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
+      this.joinedGame.emit();
       resolve();
     });
   }

@@ -34,6 +34,9 @@ export class ChatService {
   canGuessChangedSubscription: Subscription;
   invitationSubscription: Subscription;
 
+  joinedGameSubscription: Subscription;
+  leftGameSubscription: Subscription;
+
   chatRoomChanged: EventEmitter<void>;
   chatPoppedOut: boolean;
 
@@ -139,7 +142,6 @@ export class ChatService {
     }
 
     this.chatRoomChanged = new EventEmitter<void>();
-    this.chatState.rooms.push({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
     this.chatState.currentRoomIndex = 0;
 
     this.apiService.getFriendsList().then((friendslist) => {
@@ -171,6 +173,18 @@ export class ChatService {
           this.gameService.setGameInfo(GameType.CLASSIC, Difficulty.EASY, true);
           this.router.navigate(['/lobby']);
         });
+    });
+
+    this.joinedGameSubscription = this.socketService.joinedGame.subscribe(() => {
+      const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+      if (roomIndex === -1) {
+        this.chatState.rooms.unshift({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
+      }
+      this.updatePoppedOutChat();
+    });
+
+    this.leftGameSubscription = this.socketService.leftGame.subscribe(() => {
+      this.closeRoom(ChatService.GAME_ROOM_NAME);
     });
 
     this.socketService.getRoomMessageHistory('general').subscribe((chatRoomHistory) => {
