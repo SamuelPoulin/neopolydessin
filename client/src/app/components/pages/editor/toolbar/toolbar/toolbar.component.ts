@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
+import { TutorialService, TutorialStep } from '@services/tutorial.service';
 
 import { Tool } from '@tools/tool';
 import { ColorPickerComponent } from 'src/app/components/shared/color-picker/color-picker.component';
@@ -47,7 +48,7 @@ export class ToolbarComponent {
   readonly toolbarIcons: Map<ToolType | string, string>;
   readonly toolbarNames: Map<ToolType | string, string>;
 
-  constructor(public editorService: EditorService) {
+  constructor(public editorService: EditorService, private tutorialService: TutorialService) {
     this.stepThickness = ToolbarComponent.SLIDER_STEP;
     this.editorBackgroundChanged = new EventEmitter<Color>();
     this.selectedColor = SelectedColorType.primary;
@@ -97,6 +98,10 @@ export class ToolbarComponent {
       this.currentToolType = type;
       this.toolbarType = ToolbarType.other;
       this.currentToolTypeChange.emit(type);
+    }
+
+    if (type === ToolType.Pen && this.tutorialService.tutorialActive) {
+      this.tutorialService.next(TutorialStep.DRAW);
     }
   }
 

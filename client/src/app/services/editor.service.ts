@@ -18,6 +18,7 @@ import { ColorsService } from 'src/app/services/colors.service';
 import { APIService } from './api.service';
 import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
+import { TutorialService, TutorialStep } from './tutorial.service';
 
 @Injectable({
   providedIn: 'root',
@@ -51,15 +52,22 @@ export class EditorService {
     return this.view ? VIEWPORT_DIMENSION / this.view.width : 1;
   }
 
-  constructor(public colorsService: ColorsService, public socketService: SocketService, public gameService: GameService) {
+  constructor(
+    public colorsService: ColorsService,
+    public socketService: SocketService,
+    public gameService: GameService,
+    private tutorialService: TutorialService,
+  ) {
     this._commandReceiver = new CommandReceiver();
 
     this.tools = new Map<ToolType, Tool>();
 
     this.initListeners();
     this.gameService.roleChanged.subscribe(() => {
-      this.resetDrawing();
       this.initListeners();
+    });
+    this.gameService.drawingChanged.subscribe(() => {
+      this.resetDrawing();
     });
 
     this.shapesBuffer = new Array<BaseShape>();
@@ -154,6 +162,12 @@ export class EditorService {
     this.previewShapes.forEach(removeShapes);
     this.shapesBuffer = [];
     this.previewShapes = [];
+  }
+
+  checkTutorial(): void {
+    if (this.tutorialService.tutorialActive) {
+      this.tutorialService.next(TutorialStep.TUTORIAL_END);
+    }
   }
 
   addPreviewShape(shape: BaseShape): void {

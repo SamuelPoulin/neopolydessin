@@ -11,6 +11,8 @@ import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
 import { SocketService } from '@services/socket-service.service';
 import { MockSocketService } from '@services/socket-service.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { ElectronService } from 'ngx-electron';
@@ -36,6 +38,7 @@ describe('HomeComponent', () => {
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
         { provide: ElectronService, useValue: MockElectronService },
+        { provide: TutorialService, useValue: MockTutorialService },
         {
           provide: ModalDialogService,
           useValue: modalDialogServiceSpy,
