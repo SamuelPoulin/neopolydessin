@@ -107,12 +107,20 @@ export class LobbyClassique extends Lobby {
           case 1:
           case 2: {
             guessStatus = GuessResponse.CLOSE;
-            this.startReply();
+            if (this.currentGameState === CurrentGameState.REPLY) {
+              this.startRoundTimer();
+            } else {
+              this.startReply();
+            }
             break;
           }
           default: {
             guessStatus = GuessResponse.WRONG;
-            this.startReply();
+            if (this.currentGameState === CurrentGameState.REPLY) {
+              this.startRoundTimer();
+            } else {
+              this.startReply();
+            }
             break;
           }
         }
