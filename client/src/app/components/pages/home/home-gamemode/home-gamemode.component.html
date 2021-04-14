@@ -20,6 +20,9 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+    <button mat-flat-button id="privacy-button" [style.background]="privacyColors[privateGame]" (click)="this.togglePrivacy()">
+      {{privacyButtonText[privateGame]}}
+    </button>
   </div>
   <div actions>
     <button mat-stroked-button (click)="startGame()">

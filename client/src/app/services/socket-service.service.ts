@@ -247,9 +247,9 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty): Promise<void> {
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, false);
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
       resolve();
     });
   }
