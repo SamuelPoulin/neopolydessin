@@ -9,7 +9,6 @@ import { UserService } from './user.service';
 export class GameService {
   static readonly SECOND: number = 1000;
   canDraw: boolean = false;
-  drawer: Player; // todo - remove
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
   drawingChanged: EventEmitter<void> = new EventEmitter<void>();
@@ -55,9 +54,6 @@ export class GameService {
         if (player.username === this.userService.account.username) {
           this.isHost = player.isOwner;
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
-        }
-        if (player.playerRole === PlayerRole.DRAWER) {
-          this.drawer = player;
         }
         this.teams[player.teamNumber].push(player);
       }
