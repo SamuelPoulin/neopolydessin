@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:clickable="true"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="@color/chat_header_black"
+    android:backgroundTint="@color/chat_header_black">
     <ImageView
         android:id="@+id/icon"
         android:layout_width="0dp"
@@ -22,7 +23,7 @@
         android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="@id/icon"
         app:layout_constraintBottom_toBottomOf="parent"/>

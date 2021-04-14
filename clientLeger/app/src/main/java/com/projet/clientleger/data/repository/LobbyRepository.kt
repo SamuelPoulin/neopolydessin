@@ -16,8 +16,7 @@ import javax.inject.Inject
 
 class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService,
                                           private val sessionManager: SessionManager,
-                                          private val avatarStorageService: AvatarStorageService,
-                                          private val chatStorageService: ChatStorageService) {
+                                          private val avatarStorageService: AvatarStorageService) {
     val accountInfo = sessionManager.getAccountInfo()
     fun receivePlayerJoin(): Observable<PlayerInfo> {
         return Observable.create { emitter ->
@@ -96,10 +95,6 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
 
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
-    }
-
-    fun addGameTabToStorage(tabInfo: TabInfo){
-        chatStorageService.addEmptyTab(tabInfo, 0, true)
     }
 
 }

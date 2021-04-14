@@ -1,11 +1,17 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.projet.clientleger.data.enumData.GuessStatus
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
+import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,147 +25,89 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val chatStorageService: ChatStorageService):ViewModel() {
+class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val audioService: AudioService) : ViewModel() {
     companion object {
         const val NB_MESSAGES_PER_PAGE = 20
         const val GAME_TAB_ID = "GAME"
     }
+
     val messageContentLiveData: MutableLiveData<String> = MutableLiveData("")
     val messagesLiveData: MutableLiveData<ArrayList<IMessage>> = MutableLiveData(ArrayList())
-    val convosData: HashMap<String, ArrayList<IMessage>> = HashMap()
-    val tabs: MutableLiveData<ArrayList<TabInfo>> = MutableLiveData(ArrayList())
+    val convos: MutableLiveData<ArrayList<Convo>> = MutableLiveData(ArrayList())
     val accountInfo: AccountInfo = chatRepository.getAccountInfo()
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
-    val currentTab: MutableLiveData<TabInfo> = MutableLiveData(TabInfo())
+    val currentConvo: MutableLiveData<Convo> = MutableLiveData(Convo())
 
-    init {
-        receiveGameMessage()
-        receivePlayerConnection()
-        receivePlayerDisconnect()
-        chatRepository.receiveGuessClassic().subscribe{
-            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
+    private fun manageGuessSound(status:GuessStatus){
+        if(status == GuessStatus.CORRECT){
+            playSound(SoundId.CORRECT.value)
         }
-        chatRepository.receiveGuessSoloCoop().subscribe{
-            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
-        }
-        receivePrivateMessageSubscription()
-    }
-
-    fun fetchSavedData(){
-
-        convosData.clear()
-        convosData.putAll(chatStorageService.getConvos())
-
-        tabs.value!!.clear()
-        tabs.value!!.addAll(chatStorageService.getTabs())
-        tabs.value?.let {
-            if(it.isNotEmpty())
-                changeSelectedTab(tabs.value!!.first())
-            tabs.postValue(it)
-        }
-
-        currentTab.postValue(chatStorageService.selectedTab)
-    }
-
-    fun addNewTab(tabInfo: TabInfo){
-        if(convosData[tabInfo.convoId] != null)
-            changeSelectedTab(tabInfo)
         else{
-            val oldMessages = ArrayList<IMessage>()
-            oldMessages.addAll(messagesLiveData.value!!)
-            convosData[currentTab.value!!.convoId] = oldMessages
-            currentTab.postValue(tabInfo)
-            val newMessages: ArrayList<IMessage> = ArrayList()
-            if(tabInfo.isDM){
-                CoroutineScope(Job() + Dispatchers.Main).launch {
-                    val res = chatRepository.getChatFriendHistory(1, tabInfo.convoId, NB_MESSAGES_PER_PAGE)
-                    if(res.code() == HttpsURLConnection.HTTP_OK){
-                        newMessages.addAll(res.body()!!)
-                    }
-                }
+            playSound(SoundId.ERROR.value)
+        }
+    }
+
+
+    fun fetchSavedData(convos: ArrayList<Convo>, newCurrentConvo: Convo?) {
+        messagesLiveData.value!!.clear()
+        val nonNullCurrentConvo: Convo = newCurrentConvo ?: Convo()
+        messagesLiveData.value!!.addAll(nonNullCurrentConvo.messages)
+        messagesLiveData.postValue(messagesLiveData.value!!)
+        this.currentConvo.postValue(nonNullCurrentConvo)
+
+        this.convos.value!!.clear()
+        this.convos.value!!.addAll(convos)
+        this.convos.postValue(this.convos.value!!)
+    }
+
+    private fun toMessagesChat() {
+
+    }
+
+    fun updateConvos(updatedConvos: ArrayList<Convo>) {
+        convos.value?.let { convosList ->
+            convosList.clear()
+            convosList.addAll(updatedConvos)
+            convos.postValue(convosList)
+        }
+    }
+
+    fun updateCurrentConvo() {
+        messagesLiveData.value!!.clear()
+        messagesLiveData.value!!.addAll(currentConvo.value!!.messages)
+        messagesLiveData.postValue(messagesLiveData.value!!)
+    }
+
+    fun changeCurrentTab(newTabId: TabInfo?) {
+        val newCurrentConvo = convos.value!!.find { it.tabInfo.convoId == newTabId?.convoId }
+        if (newCurrentConvo != null) {
+            messagesLiveData.value?.let {
+                it.clear()
+                it.addAll(newCurrentConvo.messages)
+                messagesLiveData.postValue(it)
             }
-            messagesLiveData.value!!.clear()
-            messagesLiveData.value!!.addAll(newMessages)
-            messagesLiveData.postValue(messagesLiveData.value!!)
-
-            tabs.value!!.add(tabInfo)
-            tabs.postValue(tabs.value!!)
-            currentTab.postValue(tabInfo)
         }
+        currentConvo.postValue(newCurrentConvo)
     }
 
-    fun removeTab(tabInfo: TabInfo){
-        val newSelectedTab = tabs.value!!.find { it.convoId != tabInfo.convoId }
-        if(newSelectedTab != null){
-
-        } else{
-            messagesLiveData.value!!.clear()
-            messagesLiveData.postValue(messagesLiveData.value!!)
-            tabs.value!!.clear()
-            tabs.postValue(tabs.value!!)
-            currentTab.postValue(TabInfo())
-        }
-    }
-
-    fun changeSelectedTab(tabInfo: TabInfo){
-        convosData[tabInfo.convoId]?.let{
-            val oldMessages = ArrayList<IMessage>()
-            oldMessages.addAll(messagesLiveData.value!!)
-            convosData[currentTab.value!!.convoId] = oldMessages
-
-            currentTab.postValue(tabInfo)
-
-            messagesLiveData.value!!.clear()
-            messagesLiveData.value!!.addAll(it)
-            messagesLiveData.postValue(messagesLiveData.value!!)
-        }
-    }
-
-    fun sendMessage(){
-        messageContentLiveData.value?.let{
-            if(currentTab.value!!.isDM)
-                chatRepository.sendPrivateMessage(it, currentTab.value!!.convoId)
-            else{
-                if(isGuessing.value!!) {
-                    chatRepository.sendGuess(it)
-                } else {
-                    chatRepository.sendMessage(Message(formatMessageContent(it)))
+    fun sendMessage() {
+        messageContentLiveData.value?.let {
+            if (it.isNotBlank()) {
+                when (currentConvo.value!!.tabInfo.tabType) {
+                    TabType.GAME -> sendGameMessage(it)
+                    TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
+                    else -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoId, it)
                 }
             }
         }
     }
 
-    private fun receiveGameMessage(){
-        chatRepository.receiveMessage().subscribe{
-            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
-        }
-    }
-
-    private fun receivePrivateMessageSubscription(){
-        chatRepository.receivePrivateMessage().subscribe{ msg ->
-            val convoId: String =
-                    if(msg.receiverAccountId != accountInfo.accountId)
-                        msg.receiverAccountId
-                    else
-                        msg.senderAccountId
-
-            val convoName = (tabs.value!!.find { it.convoId == convoId } as TabInfo).convoName
-            receiveMessage(msg.toMessageChat(), TabInfo(convoName, convoId, true))
-        }
-    }
-
-    private fun receivePlayerConnection(){
-        chatRepository.receivePlayerConnection().subscribe{
-            it.content = "${it.content} a rejoint la discussion"
-            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
-        }
-    }
-
-    private fun receivePlayerDisconnect(){
-        chatRepository.receivePlayerDisconnection().subscribe{
-            it.content = "${it.content} a quitté la discussion"
-            receiveMessage(it, TabInfo(LobbyViewModel.GAME_TAB_NAME, GAME_TAB_ID, false))
+    private fun sendGameMessage(content: String) {
+        if (isGuessing.value!!) {
+            chatRepository.sendGuess(content)
+        } else {
+            chatRepository.sendMessage(Message(formatMessageContent(content)))
         }
     }
 
@@ -169,29 +117,14 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         return adjustedText
     }
 
-    private fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo){
-        if(tabInfo.convoId != currentTab.value!!.convoId){
-            if(convosData.containsKey(tabInfo.convoId)){
-                convosData[tabInfo.convoId]?.add(newMessage)
-                notifyUpdateTab(tabInfo.convoId)
-            } else{
-                addNewTab(tabInfo)
-            }
-        } else {
-            messagesLiveData.value!!.add(newMessage)
-            messagesLiveData.postValue(messagesLiveData.value)
-        }
-    }
-
-    private fun notifyUpdateTab(convoId: String){
+    private fun notifyUpdateTab(convoId: String) {
         // TODO
     }
 
-    fun saveData(){
-        chatStorageService.saveData(convosData, tabs.value!!, currentTab.value!!)
-    }
-
-    fun clear(){
+    fun clear() {
         chatRepository.clearSocketSubscriptions()
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

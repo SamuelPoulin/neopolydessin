@@ -16,8 +16,7 @@ import retrofit2.Response
 
 class FriendslistRepository @Inject constructor(private val friendslistSocketService: FriendslistSocketService, private val sessionManager: SessionManager, private val apiFriendslistInterface: ApiFriendslistInterface) {
 
-    init {
-    }
+
     suspend fun getFriends(): ArrayList<Friend>{
         val friendslist = ArrayList<Friend>()
         val res = sessionManager.request(apiFriendslistInterface::getFriends)
@@ -50,19 +49,7 @@ class FriendslistRepository @Inject constructor(private val friendslistSocketSer
         return sendRequest(FriendRequestModel(friendUsername), apiFriendslistInterface::sendFriendRequest)
     }
 
-    fun friendRequestReceived(): Observable<Friendslist>{
-        return friendslistSocketService.friendRequestReceived()
-    }
-
-    fun updateFriendslist(): Observable<Friendslist>{
+    fun updateFriendslist(): Observable<ArrayList<Friend>> {
         return friendslistSocketService.updateFriendslist()
-    }
-
-    fun friendRequestAccepted(): Observable<Friendslist>{
-        return friendslistSocketService.friendRequestAccepted()
-    }
-
-    fun friendRequestRefused(): Observable<Friendslist>{
-        return friendslistSocketService.friendRequestRefused()
     }
 }

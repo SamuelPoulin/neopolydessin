@@ -14,6 +14,7 @@ import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.lobby.Lobby
 import com.projet.clientleger.data.enumData.Difficulty
 import com.projet.clientleger.data.enumData.GameType
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.databinding.ActivitySearchLobbyBinding
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
@@ -80,11 +81,13 @@ class SearchLobbyActivity : AppCompatActivity() {
 
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
+            vm.playSound(SoundId.ERROR.value)
             finish()
         }
     }
 
     private fun joinLobby(lobbyInfo: LobbyInfo){
+        vm.playSound(SoundId.CONNECTED.value)
         val intent = Intent(this, LobbyActivity::class.java).apply{
             putExtra("isJoining", true)
             putExtra("lobbyId", lobbyInfo.lobbyId)

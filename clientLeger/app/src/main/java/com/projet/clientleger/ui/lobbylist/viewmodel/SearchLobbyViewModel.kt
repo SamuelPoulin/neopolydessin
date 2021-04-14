@@ -7,12 +7,13 @@ import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.LobbyRepository
+import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import io.reactivex.rxjava3.core.Observable
 
 @HiltViewModel
-class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository):ViewModel() {
+class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository,private val audioService: AudioService):ViewModel() {
     val lobbies: MutableLiveData<ArrayList<LobbyInfo>> = MutableLiveData(ArrayList())
     lateinit var selectedGameType: GameType
     lateinit var selectedDifficulty: Difficulty
@@ -44,5 +45,8 @@ class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: Lobb
     }
     fun unsubscribe(){
         lobbyRepository.unsubscribeLobbyList()
+    }
+    fun playSound(soundId:Int){
+        audioService.playSound(soundId)
     }
 }

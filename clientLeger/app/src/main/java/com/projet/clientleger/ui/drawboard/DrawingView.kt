@@ -55,5 +55,4 @@ class DrawingView : View {
         }
         canvas.restore()
     }
-
 }

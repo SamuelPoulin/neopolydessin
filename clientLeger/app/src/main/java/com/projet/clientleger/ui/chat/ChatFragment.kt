@@ -1,7 +1,12 @@
 package com.projet.clientleger.ui.chat
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import android.os.Bundle
+import android.os.IBinder
 import android.text.Html
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -9,13 +14,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 import javax.inject.Inject
@@ -32,6 +42,21 @@ class ChatFragment @Inject constructor() : Fragment() {
     var baseHeight: Int = -1
     var screenSize: Int = -1
     var baseWidth: Int = -1
+    private var chatService: ChatStorageService? = null
+
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            (binding?.rvTabs?.adapter as TabAdapter).removeCallback = chatService!!::removeConvo
+            (binding?.rvTabs?.adapter as TabAdapter).changeTabCallback = chatService!!::changeSelectedConvo
+            setupChatServiceSubscriptions()
+            vm.fetchSavedData(chatService!!.getConvos(), chatService!!.currentConvo)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            chatService = null
+        }
+    }
 
     companion object {
         fun newInstance() = ChatFragment()
@@ -51,15 +76,29 @@ class ChatFragment @Inject constructor() : Fragment() {
         vm.isGuesser.observe(requireActivity()){
             updateGuessingBtnVisibility(it)
         }
-
         setupFragmentListeners()
         setupTabsObservers()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        Intent(requireContext(), ChatStorageService::class.java).also { intent ->
+            activity?.bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(chatConnection)
+        chatService = null
+    }
 
     override fun onResume() {
         super.onResume()
-        vm.fetchSavedData()
+        chatService?.let {
+            vm.fetchSavedData(it.getConvos(), it.currentConvo)
+        }
     }
 
     private fun toggleVisibilityChat(){
@@ -74,11 +113,13 @@ class ChatFragment @Inject constructor() : Fragment() {
 
             when(newVisibility) {
                 View.VISIBLE ->{
+                    vm.playSound(SoundId.OPEN_CHAT.value)
                     mBinding.root.setBackgroundResource(R.drawable.chat_background)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_hide_chat))
                     mBinding.headerSpaceBuffer.visibility = View.GONE
                 }
                 else -> {
+                    vm.playSound(SoundId.CLOSE_CHAT.value)
                     mBinding.root.setBackgroundColor(Color.TRANSPARENT)
                     mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
                     mBinding.headerSpaceBuffer.visibility = View.VISIBLE
@@ -98,7 +139,6 @@ class ChatFragment @Inject constructor() : Fragment() {
                 it.rvMessages.adapter?.notifyDataSetChanged()
                 it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
             }
-
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
@@ -128,18 +168,28 @@ class ChatFragment @Inject constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRvMessages()
-
         setupMessagesObserver()
 
+        setupClickListeners()
         binding?.let {
-            it.iconsHeader.setOnClickListener {
-                toggleVisibilityChat()
-            }
-
             val manager = LinearLayoutManager(activity)
             manager.orientation = LinearLayoutManager.HORIZONTAL
             it.rvTabs.layoutManager = manager
-            it.rvTabs.adapter = TabAdapter(vm.tabs.value!!, vm::changeSelectedTab)
+            it.rvTabs.adapter = TabAdapter(vm.convos.value!!)
+        }
+    }
+
+    private fun setupClickListeners(){
+        binding?.let { mBinding ->
+            mBinding.toggleFriendslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibility", Bundle())
+            }
+            mBinding.toggleRoomslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibilityRooms", Bundle())
+            }
+            mBinding.iconsHeader.setOnClickListener {
+                toggleVisibilityChat()
+            }
         }
     }
 
@@ -153,34 +203,46 @@ class ChatFragment @Inject constructor() : Fragment() {
         }
         setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
             val friend = (bundle["friend"] as FriendSimplified)
-            vm.addNewTab(TabInfo(friend.username, friend.friendId, true))
+            chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, TabType.FRIEND), true)
         }
+        setFragmentResultListener("openRoom"){ requestKey, bundle ->
+            val roomName = (bundle["roomName"] as String)
+            chatService?.addNewConvo(TabInfo(roomName, roomName, TabType.ROOM), true)
+        }
+    }
 
-        setFragmentResultListener("openGameChat"){requestKey, bundle ->
-            val tabName = (bundle["tabName"] as String)
-            vm.addNewTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
-        }
-        setFragmentResultListener("closeGameChat"){requestKey, bundle ->
-            val tabName = (bundle["tabName"] as String)
-            vm.removeTab(TabInfo(tabName, ChatViewModel.GAME_TAB_ID))
-        }
-        setFragmentResultListener("activityChange"){requestKey, bundle ->
-            vm.saveData()
-            vm.clear()
+    private fun setupChatServiceSubscriptions(){
+        chatService?.let { service ->
+            service.subscribeConvosChange(vm::updateConvos)
+            service.subscribeCurrentConvoChange(vm::updateCurrentConvo)
+            service.subscribeCurrentTabChange(vm::changeCurrentTab)
         }
     }
 
     private fun setupTabsObservers(){
-        vm.tabs.observe(requireActivity()){ newTabs ->
+        vm.convos.observe(requireActivity()){ convos ->
             binding?.let { mBinding ->
                 mBinding.rvTabs.adapter?.notifyDataSetChanged()
-                mBinding.rvTabs.scrollToPosition(0)
+                var scrollIndex = convos.indexOfFirst { it.tabInfo.convoId == vm.currentConvo.value!!.tabInfo.convoId }
+                if(scrollIndex < 0)
+                    scrollIndex = 0
+                mBinding.rvTabs.scrollToPosition(scrollIndex)
             }
         }
-
-        vm.currentTab.observe(requireActivity()){ tab ->
-            binding?.let { mBinding ->
-                (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(tab)
+        vm.currentConvo.observe(requireActivity()){
+            if(it != null){
+                if(it.tabInfo.tabType == TabType.GAME){
+                    if(vm.isGuesser.value!!){
+                        updateGuessingBtnVisibility(true)
+                        vm.isGuessing.postValue(true)
+                    }
+                } else{
+                    updateGuessingBtnVisibility(false)
+                    vm.isGuessing.postValue(false)
+                }
+                binding?.let { mBinding ->
+                    (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
+                }
             }
         }
     }

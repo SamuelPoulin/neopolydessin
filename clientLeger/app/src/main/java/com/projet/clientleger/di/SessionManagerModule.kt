@@ -24,7 +24,6 @@ object SessionManagerModule {
                               tokenInterceptor: TokenInterceptor,
                               apiSessionManagerInterface: ApiSessionManagerInterface,
                               apiAvatarInterface: ApiAvatarInterface,
-                              socketService: SocketService,
-                              chatStorageService: ChatStorageService): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface,
-            apiAvatarInterface, socketService, chatStorageService)
+                              socketService: SocketService): SessionManager = SessionManager(context, tokenInterceptor, apiSessionManagerInterface,
+            apiAvatarInterface, socketService)
 }
