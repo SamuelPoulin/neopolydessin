@@ -3,13 +3,18 @@ import { EditorService } from '@services/editor.service';
 import { Coordinate } from '@utils/math/coordinate';
 import { Color } from '@utils/color/color';
 import { take } from 'rxjs/operators';
-import { Path } from '../../../shapes/path';
+import { BrushInfo } from '@common/communication/brush-info';
+import { Path } from '@models/shapes/path';
+import { Subscription } from 'rxjs';
 import { CreatorTool } from '../creator-tool';
-import { BrushInfo } from '../../../../../../../common/communication/brush-info';
 
 export class PenTool extends CreatorTool {
   shape: Path;
   toolProperties: PenToolProperties;
+
+  startSubscription: Subscription;
+  updateSubscription: Subscription;
+  endSubscription: Subscription;
 
   constructor(editorService: EditorService) {
     super(editorService);
@@ -32,24 +37,32 @@ export class PenTool extends CreatorTool {
   }
 
   initListeners(): void {
-    // todo - move to editor?
-    this.editorService.socketService.receiveStartPath().subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
-      this.editorService.colorsService.primaryColor =
-        // eslint-disable-next-line
-        pathData.brush.color.length > 7 ? Color.ahex(pathData.brush.color) : Color.hex(pathData.brush.color);
-      this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
-      this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
-      this.shape.updateProperties();
-    });
+    this.startSubscription = this.editorService.socketService
+      .receiveStartPath()
+      .subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
+        this.editorService.colorsService.primaryColor =
+          // eslint-disable-next-line
+          pathData.brush.color.length > 7 ? Color.ahex(pathData.brush.color) : Color.hex(pathData.brush.color);
+        this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
+        this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
+        this.shape.updateProperties();
+        this.shape.serverId = pathData.id;
+      });
 
-    this.editorService.socketService.receiveUpdatePath().subscribe((coord: Coordinate) => {
+    this.updateSubscription = this.editorService.socketService.receiveUpdatePath().subscribe((coord: Coordinate) => {
       this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
     });
 
-    this.editorService.socketService.receiveEndPath().subscribe((coord: Coordinate) => {
+    this.endSubscription = this.editorService.socketService.receiveEndPath().subscribe((coord: Coordinate) => {
       this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
       this.applyShape();
     });
+  }
+
+  removeListeners(): void {
+    this.startSubscription?.unsubscribe();
+    this.updateSubscription?.unsubscribe();
+    this.endSubscription?.unsubscribe();
   }
 
   initMouseHandler(): void {
@@ -61,12 +74,12 @@ export class PenTool extends CreatorTool {
           this.editorService.colorsService.primaryColor.ahexString,
           this.toolProperties.strokeWidth.value * this.editorService.scalingToServer,
         );
+        const shape = this.shape;
         this.editorService.socketService
           .receiveStartPath()
           .pipe(take(1))
           .subscribe((pathData: { id: number; coord: Coordinate; brush: BrushInfo }) => {
-            console.log('received' + pathData.id);
-            this.shape.serverId = pathData.id;
+            shape.serverId = pathData.id;
           });
       }
     };

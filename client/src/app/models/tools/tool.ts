@@ -41,6 +41,7 @@ export abstract class Tool implements MouseHandler {
   handleMouseUp: MouseEventAction;
 
   initMouseHandler?(): void;
+  removeListeners?(): void;
   protected initListeners?(): void;
 
   handleContextMenu(): boolean {
