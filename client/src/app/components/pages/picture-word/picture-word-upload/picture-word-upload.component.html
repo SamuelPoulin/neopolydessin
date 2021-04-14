@@ -34,7 +34,7 @@
   <mat-icon id="btn-image-icon">preview</mat-icon>
     </button>
  
-    <button id="btn-image" mat-stroked-button (click)="openUpload()">
+    <button *ngIf="dialogRef.id !== 'drawing'" id="btn-image" mat-stroked-button (click)="openUpload()">
       <mat-icon id="btn-image-icon">image</mat-icon>
     </button>
     <label #uploadLabel for="upload-input" id="btn-image-label"></label>
@@ -44,7 +44,7 @@
       Enregistrer
     </button>
 
-    <button id="btn-confirm" mat-stroked-button (click)="exit()">
+    <button id="btn-confirm" mat-stroked-button (click)="exit()" [disabled]="!dataUploaded">
       Terminer
     </button>
   </div>

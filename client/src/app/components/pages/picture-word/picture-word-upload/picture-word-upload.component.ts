@@ -27,6 +27,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   dataUploaded: boolean = false;
   displayPreview: boolean = false;
   imageString: SafeResourceUrl = ImageString.WHITE;
+  sequence: DrawingSequence;
 
   word: string = '';
   hints: string[] = [];
@@ -65,13 +66,15 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   }
 
   exit(): void {
-    this.save().then(() => {
+    this.dialogRef.close();
+    /* this.save().then(() => {     // todo - use when update implemented
       this.dialogRef.close();
-    });
+    });*/
   }
 
-  update(): void {
-    //
+  async update(): Promise<void> {
+    // todo - add update method
+    return this.upload();
   }
 
   async upload(): Promise<void> {
@@ -96,10 +99,16 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
     this.editorService.shapes.forEach((shape: BaseShape) => {
       if (shape instanceof Path) {
+        const points: Coordinate[] = [];
+
+        shape.points.forEach((point) => {
+          points.push(point.scale(this.editorService.scalingToServer));
+        });
+
         paths.push({
           brushInfo: { color: shape.primaryColor.ahexString, strokeWidth: shape.strokeWidth },
           id: shape.id.toString(),
-          path: shape.points,
+          path: points,
         });
       }
     });
@@ -131,6 +140,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   togglePreview(): void {
     this.displayPreview = !this.displayPreview;
+    if (this.displayPreview && this.sequence) this.drawPreview(this.sequence);
   }
 
   openUpload(): void {
@@ -155,6 +165,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   showPreview(id: string) {
     this.api.getDrawingPreview(id).then((sequence: DrawingSequence) => {
+      this.sequence = sequence;
       this.displayPreview = true;
       this.drawPreview(sequence);
     });
