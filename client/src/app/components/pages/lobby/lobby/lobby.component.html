@@ -2,28 +2,28 @@
   [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <div id="menu-container">
     <app-status-bar quit previousPage=""></app-status-bar>
-    <div id="content-container">
-      <div id="options-container">
-        <app-gamemode-title [gamemode]="gamemode"></app-gamemode-title>
-        <button id="invite-button" mat-flat-button class="menu-button menu-main-button" (click)="copyInviteCode()"
-          disabled>
-          <mat-icon class="menu-button-icon menu-button-main-icon">link</mat-icon>
-          Lien d'invitation
-        </button>
-        <ng-container *ngIf="gameService.isHost">
-          <button id="start-button" color="warn" mat-flat-button class="menu-button menu-main-button"
-            (click)="startGame()">
-            Lancer la partie
-            <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
-          </button>
-        </ng-container>
+    <div id="lobby-divider" [style.max-height]="electronContainer ? 'calc(100vh - 90px)' : 'calc(100vh - 60px)'">
+      <div id="content-container">
+        <div id="options-container">
+          <app-gamemode-title [gamemode]="gamemode"></app-gamemode-title>
+          <ng-container *ngIf="gameService.isHost">
+            <button [disabled]="!gameService.canStartGame" id="start-button" color="warn" mat-flat-button
+              class="menu-button menu-main-button" (click)="startGame()">
+              Lancer la partie
+              <mat-icon id="start-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+        <div id="players-container">
+          <app-team [team]="gameService.teams[0]" teamIndex="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"></app-team>
+          <ng-container *ngIf="splitTeams">
+            <app-team [team]="gameService.teams[1]" teamIndex="1" name="Équipe 2" ennemy></app-team>
+          </ng-container>
+        </div>
       </div>
-      <div id="players-container">
-        <app-team [team]="gameService.teams[0]" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"></app-team>
-        <ng-container *ngIf="splitTeams">
-          <app-team [team]="gameService.teams[1]" name="Équipe 2" ennemy></app-team>
-        </ng-container>
-      </div>
+      <ng-container *ngIf="!chatService.chatPoppedOut">
+        <app-chat></app-chat>
+      </ng-container>
     </div>
   </div>
 </div>

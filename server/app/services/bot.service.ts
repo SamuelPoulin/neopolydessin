@@ -30,6 +30,7 @@ export class BotService {
   }
 
   draw(drawing: DrawingSequence, hints: string[]): void {
+    clearInterval(this.pathTimer);
     this.drawing = drawing;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
@@ -57,21 +58,23 @@ export class BotService {
   }
 
   playerGuess(guessStatus: GuessResponse, guessTries?: number, guessLeft?: number): void {
-    switch (guessStatus) {
-      case GuessResponse.CORRECT:
-        this.bots[this.currentBot].onPlayerCorrectGuess(guessTries, guessLeft);
-        break;
-      case GuessResponse.CLOSE:
-        this.bots[this.currentBot].onPlayerCloseGuess(guessTries, guessLeft);
-        break;
-      case GuessResponse.WRONG:
-        this.bots[this.currentBot].onPlayerIncorrectGuess(guessTries, guessLeft);
-        break;
+    if (this.currentBot < this.bots.length) {
+      switch (guessStatus) {
+        case GuessResponse.CORRECT:
+          this.bots[this.currentBot].onPlayerCorrectGuess(guessTries, guessLeft);
+          break;
+        case GuessResponse.CLOSE:
+          this.bots[this.currentBot].onPlayerCloseGuess(guessTries, guessLeft);
+          break;
+        case GuessResponse.WRONG:
+          this.bots[this.currentBot].onPlayerIncorrectGuess(guessTries, guessLeft);
+          break;
+      }
     }
   }
 
   requestHint(): void {
-    if (this.hintAvailable) {
+    if (this.hintAvailable && this.currentBot < this.bots.length) {
       this.hintAvailable = false;
       this.bots[this.currentBot].onPlayerRequestsHint();
       setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);

@@ -7,7 +7,7 @@
     android:background="@drawable/round_corners">
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/titleMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Placeholder"
@@ -26,7 +26,7 @@
         android:id="@+id/btnPannel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:layout_constraintTop_toBottomOf="@+id/titleMessage"
         app:layout_constraintLeft_toLeftOf="parent">
 
         <Button

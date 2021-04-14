@@ -7,5 +7,9 @@ import { ChatService } from '@services/chat.service';
   styleUrls: ['./chat-tabs.component.scss'],
 })
 export class ChatTabsComponent {
-  constructor(public chatService: ChatService) {}
+  constructor(private chatService: ChatService) {}
+
+  get rooms() {
+    return this.chatService.chatState.rooms;
+  }
 }

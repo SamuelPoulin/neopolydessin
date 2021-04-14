@@ -4,6 +4,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
@@ -11,13 +12,14 @@ import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.GameRepository
+import com.projet.clientleger.data.service.TutorialService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 const val FIRST_TEAM = 0
 const val SECOND_TEAM = 0
 @HiltViewModel
-class GameViewModel @Inject constructor(private val gameRepository: GameRepository): ViewModel() {
+class GameViewModel @Inject constructor(private val gameRepository: GameRepository,private val tutorialService: TutorialService): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
     val currentRoleLiveData: MutableLiveData<PlayerRole> = MutableLiveData()
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
@@ -74,5 +76,17 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     }
     fun onLeaveGame(){
         gameRepository.onLeaveGame()
+    }
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
+    }
+    fun createSequence(models:ArrayList<SequenceModel>){
+        tutorialService.createShowcaseSequence(models)
+    }
+    fun getUsername():String{
+        return gameRepository.getUsername()
+    }
+    fun finishTutorial(){
+        tutorialService.finishTutorial()
     }
 }

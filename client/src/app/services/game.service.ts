@@ -1,16 +1,20 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Difficulty, GameType, Player, PlayerRole, TeamScore } from '../../../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, Player, PlayerRole, TeamScore } from '@common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
 @Injectable()
 export class GameService {
   static readonly SECOND: number = 1000;
+  static readonly CLASSIC_PLAYER_NUMBER: number = 4;
+
+  isInGame: boolean = false;
   canDraw: boolean = false;
-  drawer: Player;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
+  canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
+  drawingChanged: EventEmitter<void> = new EventEmitter<void>();
   isHost: boolean = false;
   wordToDraw: string = '';
 
@@ -19,6 +23,7 @@ export class GameService {
 
   lobbySubscription: Subscription;
   rolesSubscription: Subscription;
+  gameStateSubscription: Subscription;
   wordSubscription: Subscription;
   scoresSubscription: Subscription;
 
@@ -32,12 +37,14 @@ export class GameService {
   nextTimestamp: number;
   timeRemaining: number;
   canGuess: boolean;
+  canStartGame: boolean;
 
   loggedInSubscription: Subscription;
 
   constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
     this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
+    this.canStartGame = false;
     this.scores = [
       { teamNumber: 0, score: 0 },
       { teamNumber: 1, score: 0 },
@@ -48,13 +55,17 @@ export class GameService {
   initSubscriptions() {
     this.lobbySubscription = this.socketService.getLobbyInfo().subscribe((players) => {
       this.resetTeams();
+      if (this.gameType === GameType.CLASSIC) {
+        if (players.length === GameService.CLASSIC_PLAYER_NUMBER) {
+          this.canStartGame = true;
+        } else {
+          this.canStartGame = false;
+        }
+      }
       for (const player of players) {
         if (player.username === this.userService.account.username) {
           this.isHost = player.isOwner;
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
-        }
-        if (player.playerRole === PlayerRole.DRAWER) {
-          this.drawer = player;
         }
         this.teams[player.teamNumber].push(player);
       }
@@ -67,24 +78,28 @@ export class GameService {
       this.leaveGame();
     });
     this.startClientGameSubscription = this.socketService.receiveGameStart().subscribe(() => {
+      this.isInGame = true;
       this.router.navigate(['edit']);
     });
     this.rolesSubscription = this.socketService.receiveRoles().subscribe((players) => {
       this.resetTeams();
       for (const player of players) {
-        if (player.playerRole === PlayerRole.DRAWER) this.drawer = player;
         if (player.username === this.userService.account.username) {
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
+          this.canGuessChanged.emit();
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
-        }
-        if (player.playerRole === PlayerRole.DRAWER && this.drawer.username !== player.username) {
-          this.drawer = player;
-          this.wordToDraw = '';
-          this.roleChanged.emit(player.playerRole);
+          this.roleChanged.emit();
         }
         this.teams[player.teamNumber].push(player);
       }
     });
+
+    this.gameStateSubscription = this.socketService.receiveGameState().subscribe((state) => {
+      if (state === CurrentGameState.DRAWING) {
+        this.drawingChanged.emit();
+      }
+    });
+
     this.wordSubscription = this.socketService.receiveWord().subscribe((word) => {
       this.wordToDraw = word;
     });
@@ -101,6 +116,19 @@ export class GameService {
 
   startGame() {
     this.socketService.startGame();
+  }
+
+  async addBot(teamNumber: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.socketService.addBot(teamNumber).subscribe((success) => {
+        if (success) resolve();
+        else reject();
+      });
+    });
+  }
+
+  removeBot(username: string) {
+    this.socketService.removeBot(username);
   }
 
   leaveGame() {
@@ -128,6 +156,7 @@ export class GameService {
   setGameInfo(gameType: GameType, difficulty: Difficulty) {
     this.gameType = gameType;
     this.difficulty = difficulty;
+    this.canStartGame = GameType.CLASSIC === this.gameType ? false : true;
   }
 
   clearGameInfo() {

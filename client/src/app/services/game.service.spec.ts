@@ -14,6 +14,8 @@ export const MockGameService = jasmine.createSpyObj('GameService', {
 });
 
 MockGameService.roleChanged = new EventEmitter<PlayerRole>();
+MockGameService.canGuessChanged = new EventEmitter<void>();
+MockGameService.drawingChanged = new EventEmitter<void>();
 MockGameService.teams = [[], []];
 MockGameService.scores = [
   { teamNumber: 0, score: 0 },
