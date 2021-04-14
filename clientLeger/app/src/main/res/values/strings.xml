@@ -75,6 +75,7 @@
     <string name="team2_label">Équipe 2 -</string>
     <string name="coopTeamLabel">Joueurs</string>
     <string name="tableau_de_bord">Tableau de Bord</string>
+    <string name="friends">Amis</string>
     <string name="statistiques_label">Statistiques</string>
     <string name="nb_games">Nombre de parties jouées</string>
     <string name="win_percentage">Poucentage de victoires</string>
@@ -89,4 +90,8 @@
     <string name="confirm_btn">Confirmer</string>
     <string name="nb_hours_in_game">Nombre d\'heures en jeu</string>
     <string name="average_time_game">Temps moyen d\'une partie</string>
+    <string name="createRoom">Créer un salon</string>
+    <string name="destroy">Détruire</string>
+    <string name="rooms">Salons</string>
+    <string name="rooms_chat">Salons de discussion</string>
 </resources>

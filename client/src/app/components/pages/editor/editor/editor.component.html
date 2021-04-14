@@ -1,3 +1,4 @@
+<app-tutorial></app-tutorial>
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
   <app-status-bar quit previousPage=""></app-status-bar>
   <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
@@ -10,7 +11,7 @@
     <div id="editor-game-area">
       <div id="game-area-infos">
         <app-gamemode-title gamemode="classique"></app-gamemode-title>
-        <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
+        <app-drawing-surface id="drawing-surface" #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
           (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)"
           (click)="handleMouseEvent($event)" (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
           (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">
@@ -45,7 +46,7 @@
     <div id="editor-game-area">
       <div id="game-area-infos">
         <app-gamemode-title gamemode="classique"></app-gamemode-title>
-        <app-drawing-surface #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
+        <app-drawing-surface id="drawing-surface" #drawingSurface [color]="surfaceColor" [width]="surfaceWidth" [height]="surfaceHeight"
           (dblclick)="handleMouseEvent($event)" (mousedown)="handleMouseEvent($event)"
           (click)="handleMouseEvent($event)" (wheel)="handleMouseEvent($event)" (mousemove)="handleMouseEvent($event)"
           (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">

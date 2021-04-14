@@ -13,6 +13,7 @@ import { EditorService } from '@services/editor.service';
 import { BaseShape } from '@models/shapes/base-shape';
 import { Path } from '@models/shapes/path';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ImageString } from '@utils/color/image-string';
 
 @Component({
   selector: 'app-picture-word-upload',
@@ -20,16 +21,27 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./picture-word-upload.component.scss'],
 })
 export class PictureWordUploadComponent extends AbstractModalComponent {
+  static readonly DEFAULT_THRESHOLD: number = 200;
+
+  readonly size: number = 600;
+  dataUploaded: boolean = false;
+  displayPreview: boolean = false;
+  imageString: SafeResourceUrl = ImageString.WHITE;
+  sequence: DrawingSequence;
+
   word: string = '';
   hints: string[] = [];
   difficulty: Difficulty;
   drawMode: DrawMode;
   color: Color;
-  imageString: SafeResourceUrl = '';
   imageData: string = '';
-  readonly size: number = 600;
+  threshold: number = PictureWordUploadComponent.DEFAULT_THRESHOLD;
+
+  drawModes: string[] = ['conventional', 'random', 'panlr', 'panrl', 'pantb', 'panbt', 'center'];
+  difficulties: string[] = ['easy', 'intermediate', 'hard'];
 
   @ViewChild('preview') preview: ElementRef;
+  @ViewChild('uploadLabel') uploadLabel: ElementRef;
 
   constructor(
     dialogRef: MatDialogRef<AbstractModalComponent>,
@@ -45,16 +57,40 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     }
   }
 
-  upload(): void {
+  async save(): Promise<void> {
+    if (this.dataUploaded) {
+      return this.update();
+    } else {
+      return this.upload();
+    }
+  }
+
+  exit(): void {
+    this.dialogRef.close();
+    /* this.save().then(() => {     // todo - use when update implemented
+      this.dialogRef.close();
+    });*/
+  }
+
+  async update(): Promise<void> {
+    // todo - add update method
+    return this.upload();
+  }
+
+  async upload(): Promise<void> {
     this.hints = ['1', '2', '3'];
     this.color = Color.BLACK;
-    this.difficulty = Difficulty.EASY;
-    this.drawMode = DrawMode.CONVENTIONAL;
 
     if (this.dialogRef.id === 'drawing') {
-      this.uploadDrawing().then((id) => this.showPreview(id));
+      return this.uploadDrawing().then((id) => {
+        this.dataUploaded = true;
+        this.showPreview(id);
+      });
     } else {
-      this.uploadPicture().then((id) => this.showPreview(id));
+      return this.uploadPicture().then((id) => {
+        this.dataUploaded = true;
+        this.showPreview(id);
+      });
     }
   }
 
@@ -63,10 +99,16 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
     this.editorService.shapes.forEach((shape: BaseShape) => {
       if (shape instanceof Path) {
+        const points: Coordinate[] = [];
+
+        shape.points.forEach((point) => {
+          points.push(point.scale(this.editorService.scalingToServer));
+        });
+
         paths.push({
           brushInfo: { color: shape.primaryColor.ahexString, strokeWidth: shape.strokeWidth },
           id: shape.id.toString(),
-          path: shape.points,
+          path: points,
         });
       }
     });
@@ -89,10 +131,20 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       difficulty: this.difficulty,
       drawMode: this.drawMode,
       color: this.color.hexString,
+      threshold: this.threshold,
       picture: this.imageData,
     };
 
     return this.api.uploadPicture(data);
+  }
+
+  togglePreview(): void {
+    this.displayPreview = !this.displayPreview;
+    if (this.displayPreview && this.sequence) this.drawPreview(this.sequence);
+  }
+
+  openUpload(): void {
+    this.uploadLabel.nativeElement.click();
   }
 
   acceptFile(fileList: FileList): void {
@@ -113,6 +165,8 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   showPreview(id: string) {
     this.api.getDrawingPreview(id).then((sequence: DrawingSequence) => {
+      this.sequence = sequence;
+      this.displayPreview = true;
       this.drawPreview(sequence);
     });
   }

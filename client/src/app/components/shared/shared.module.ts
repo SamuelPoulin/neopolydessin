@@ -45,6 +45,7 @@ import { PasswordInputComponent } from './inputs/password-input/password-input.c
 import { GamemodeTitleComponent } from './gamemode-title/gamemode-title.component';
 import { AvatarComponent } from './avatar/avatar.component';
 import { TeamComponent } from './team/team.component';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 @NgModule({
   imports: [
@@ -96,6 +97,7 @@ import { TeamComponent } from './team/team.component';
     GamemodeTitleComponent,
     AvatarComponent,
     TeamComponent,
+    TutorialComponent,
   ],
   exports: [
     AbstractModalComponent,
@@ -135,6 +137,7 @@ import { TeamComponent } from './team/team.component';
     GamemodeTitleComponent,
     AvatarComponent,
     TeamComponent,
+    TutorialComponent,
   ],
 })
 export class SharedModule {}

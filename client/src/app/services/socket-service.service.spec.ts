@@ -1,3 +1,4 @@
+import { EventEmitter } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
@@ -36,6 +37,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   receivePrivateMessage: of(),
   receiveChatRoomMessage: of(),
   receiveChatRoomsImIn: of(),
+  receiveFriendInvites: of(),
   receiveChatRooms: of(),
   removedFromLobby: of(),
   getRoomMessageHistory: of(),
@@ -45,6 +47,9 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   sendAddPath: null,
   sendRemovePath: null,
 });
+
+MockSocketService.joinedGame = new EventEmitter<void>();
+MockSocketService.leftGame = new EventEmitter<void>();
 
 describe('SocketService', () => {
   let service: SocketService;

@@ -17,5 +17,5 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object ViewModelLobbyModule {
     @Provides
     @ViewModelScoped
-    fun provideRepo(lobbySocketService: LobbySocketService, sessionManager: SessionManager, avatarStorageService: AvatarStorageService, chatStorageService: ChatStorageService) = LobbyRepository(lobbySocketService, sessionManager, avatarStorageService, chatStorageService)
+    fun provideRepo(lobbySocketService: LobbySocketService, sessionManager: SessionManager, avatarStorageService: AvatarStorageService) = LobbyRepository(lobbySocketService, sessionManager, avatarStorageService)
 }

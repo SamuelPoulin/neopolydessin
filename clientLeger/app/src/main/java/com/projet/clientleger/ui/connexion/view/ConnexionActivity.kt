@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.RegisterResponse
 import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.databinding.ConnexionActivityBinding
 import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
@@ -16,6 +17,7 @@ import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class ConnexionActivity : AppCompatActivity() {
@@ -49,17 +51,18 @@ class ConnexionActivity : AppCompatActivity() {
     private fun connectBtn(){
         binding.connectBtn.isEnabled = false
         lifecycleScope.launch {
-            val res = vm.connectAccount(binding.connectionUsername.text.toString(),binding.connectionPassword.text.toString())
-            binding.connectionPassword.text.clear()
-            if (res.isSucessful) {
-                vm.playSound(SoundId.CONNECTED.value)
-                binding.connectionUsername.text.clear()
-                goToMainMenu()
-            } else {
-                vm.playSound(SoundId.ERROR.value)
-                showToast(res.message)
+            vm.connectAccount(binding.connectionUsername.text.toString(), binding.connectionPassword.text.toString()).subscribe{ res ->
+                binding.connectionPassword.text.clear()
+                if (res.isSucessful) {
+                    vm.playSound(SoundId.CONNECTED.value)
+                    binding.connectionUsername.text.clear()
+                    goToMainMenu()
+                } else {
+            vm.playSound(SoundId.ERROR.value)
+                    showToast(res.message)
+                }
+                binding.connectBtn.isEnabled = true
             }
-            binding.connectBtn.isEnabled = true
         }
     }
 
