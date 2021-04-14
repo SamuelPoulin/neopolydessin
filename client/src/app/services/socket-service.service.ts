@@ -14,6 +14,7 @@ import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actio
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
 import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
+import { FriendInvitation } from '@models/chat/friend-invitation';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -251,6 +252,16 @@ export class SocketService {
     return new Promise<void>((resolve, reject) => {
       this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
       resolve();
+    });
+  }
+
+  inviteFriend(friendId: string) {
+    this.socket.emit(SocketLobby.SEND_INVITE, friendId);
+  }
+
+  receiveFriendInvites(): Observable<FriendInvitation> {
+    return new Observable<FriendInvitation>((obs) => {
+      this.socket.on(SocketLobby.RECEIVE_INVITE, (username: string, lobbyId: string) => obs.next({ username, lobbyId }));
     });
   }
 

@@ -209,3 +209,9 @@ ipcMain.on('chat-action-reject-friend', (event, arg) => {
     appWindow.webContents.send('chat-action-reject-friend', arg);
   }
 });
+
+ipcMain.on('chat-action-invite-friend', (event, arg) => {
+  if(appWindow) {
+    appWindow.webContents.send('chat-action-invite-friend', arg);
+  }
+});
