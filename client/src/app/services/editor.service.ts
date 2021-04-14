@@ -104,6 +104,10 @@ export class EditorService {
   }
 
   private initTools(): void {
+    this.tools.forEach((tool) => {
+      if (tool.removeListeners) tool.removeListeners();
+    });
+
     this.tools.set(ToolType.Pen, new PenTool(this));
     this.tools.set(ToolType.Eraser, new EraserTool(this));
   }
@@ -111,11 +115,9 @@ export class EditorService {
   initListeners(): void {
     this.initTools();
 
-    if (this.removePathSubscription) {
-      this.removePathSubscription.unsubscribe();
-      this.addPathSubscription.unsubscribe();
-      this.clearSubscription.unsubscribe();
-    }
+    this.removePathSubscription?.unsubscribe();
+    this.addPathSubscription?.unsubscribe();
+    this.clearSubscription?.unsubscribe();
 
     this.clearSubscription = this.socketService.receiveScores().subscribe(() => this.resetDrawing());
 
@@ -130,6 +132,7 @@ export class EditorService {
         const shape = new Path();
         shape.primaryColor = Color.ahex(data.brush.color);
         shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
+        shape.serverId = data.id;
         data.path.forEach((coord: Coordinate) => {
           shape.addPoint(Coordinate.copy(coord).scale(this.scalingToClient));
         });

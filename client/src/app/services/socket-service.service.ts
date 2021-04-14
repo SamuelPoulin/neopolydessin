@@ -317,7 +317,7 @@ export class SocketService {
 
   receiveAddPath(): Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }> {
     return new Observable<{ id: number; path: Coordinate[]; brush: BrushInfo }>((obs) => {
-      this.socket.on(SocketDrawing.ADD_PATH_BC, (id: number, path: Coordinate[], brush: BrushInfo) => {
+      this.socket.on(SocketDrawing.ADD_PATH_BC, (id: number, zIndex: number, path: Coordinate[], brush: BrushInfo) => {
         obs.next({ id, path, brush });
       });
     });
