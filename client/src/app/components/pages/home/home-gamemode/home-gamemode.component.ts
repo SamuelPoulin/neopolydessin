@@ -50,10 +50,11 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
   }
 
   startGame(): void {
+    const privacy: boolean = this.privateGame === 0 ? false : true;
     this.socketService
-      .createLobby(this.lobbyName, this.gamemode, this.difficulty, this.privateGame === 0 ? false : true)
+      .createLobby(this.lobbyName, this.gamemode, this.difficulty, privacy)
       .then(() => {
-        this.gameService.setGameInfo(this.gamemode, this.difficulty);
+        this.gameService.setGameInfo(this.gamemode, this.difficulty, privacy);
         this.dialogRef.close();
         this.router.navigate(['lobby']);
       })

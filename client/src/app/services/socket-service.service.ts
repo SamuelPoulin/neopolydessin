@@ -22,7 +22,7 @@ import {
   Player,
   TeamScore,
   TimeInfo,
-} from '../../../../common/communication/lobby';
+} from '@common/communication/lobby';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -146,6 +146,15 @@ export class SocketService {
 
   joinLobby(lobbyId: string) {
     this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
+  }
+
+  async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CHANGE_PRIVACY_SETTING, privateGame);
+      this.socket.on(SocketLobby.CHANGED_PRIVACY_SETTING, (newPrivacy: boolean) => {
+        resolve(newPrivacy);
+      });
+    });
   }
 
   async joinChatRoom(roomName: string): Promise<void> {
