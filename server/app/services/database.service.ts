@@ -247,11 +247,9 @@ export class DatabaseService {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
-      let friends: AccountFriend[];
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
-          friends = account.friends;
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
@@ -269,7 +267,6 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({ accountId: account.id, friends, type: NotificationType.userConnected });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -314,14 +311,6 @@ export class DatabaseService {
         .findOneAndDelete({ token: refreshToken })
         .then(async (doc: Refresh) => {
           if (!doc) throw Error(NOT_FOUND.toString());
-          return this.getAccountById(doc.accountId);
-        })
-        .then((account) => {
-          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
-            accountId: account.documents._id,
-            friends: account.documents.friends,
-            type: NotificationType.userDisconnected,
-          });
           resolve(true);
         })
         .catch((err: Error) => {

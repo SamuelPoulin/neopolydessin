@@ -250,6 +250,15 @@ export class SocketIo {
       loginsModel.addLogin(accountId)
         .then(() => { SocketIo.CLIENT_CONNECTED.notify(socket); })
         .catch((err) => { throw Error(err); });
+
+      this.databaseService.getAccountById(accountId)
+        .then((account) => {
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId,
+            friends: account.documents.friends,
+            type: NotificationType.userConnected
+          });
+        });
     } catch (err) {
       console.error(err.message);
       socket.disconnect();
@@ -271,6 +280,14 @@ export class SocketIo {
   private onDisconnect(socket: Socket) {
     const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
     if (accountIdOfSocket) {
+      this.databaseService.getAccountById(accountIdOfSocket)
+        .then((account) => {
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: accountIdOfSocket,
+            friends: account.documents.friends,
+            type: NotificationType.userDisconnected
+          });
+        });
       this.socketIdService.DisconnectAccountIdSocketId(socket.id);
       loginsModel.addLogout(accountIdOfSocket)
         .then(() => { SocketIo.CLIENT_DISCONNECTED.notify(socket); })
