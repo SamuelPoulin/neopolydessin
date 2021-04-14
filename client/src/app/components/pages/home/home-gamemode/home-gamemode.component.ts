@@ -6,6 +6,7 @@ import { Difficulty, GameType } from '@common/communication/lobby';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { GameService } from '@services/game.service';
 import { SocketService } from '@services/socket-service.service';
+import { TutorialService, TutorialStep } from '@services/tutorial.service';
 import { UserService } from '@services/user.service';
 
 @Component({
@@ -28,13 +29,16 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     private gameService: GameService,
     private router: Router,
     private snackBar: MatSnackBar,
+    private tutorialService: TutorialService,
   ) {
     super(dialogRef);
 
-    this.gamemodes = ['Classique', 'Co-op', 'Solo'];
+    this.dialogRef.disableClose = true;
+
+    this.gamemodes = this.tutorialService.tutorialActive ? ['Solo'] : ['Classique', 'Co-op', 'Solo'];
     this.difficulties = ['Facile', 'Intermédiaire', 'Difficile'];
 
-    this.selectedGamemode = 'Classique';
+    this.selectedGamemode = this.tutorialService.tutorialActive ? 'Solo' : 'Classique';
     this.selectedDifficulty = 'Facile';
 
     this.lobbyName = 'Partie de ' + this.userService.account.username;
@@ -47,6 +51,9 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
         this.gameService.setGameInfo(this.gamemode, this.difficulty);
         this.dialogRef.close();
         this.router.navigate(['lobby']);
+        if (this.tutorialService.tutorialActive) {
+          this.tutorialService.next(TutorialStep.START_GAME);
+        }
       })
       .catch(() => {
         this.snackBar.open('Erreur lors de la création de la partie.', 'Ok', {

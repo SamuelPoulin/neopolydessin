@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
+export interface AbstractModalOptions {
+  disableCloseButton?: boolean;
+}
+
 @Component({
   selector: 'app-abstract-modal',
   templateUrl: './abstract-modal.component.html',
