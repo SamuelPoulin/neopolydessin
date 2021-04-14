@@ -252,8 +252,6 @@ export class DrawingSequenceService {
 
     const nbOfPoints = Math.floor(curveDistance / BEZIER_PRECICION_STEP);
     const finalPrecision = nbOfPoints <= BEZIER_PRECICION_STEP - 2 ? nbOfPoints + 2 : BEZIER_PRECISION_MAXIMUM;
-    // console.log(`intensity of curve is : ${this.distanceBetween(derivativeStart, derivativeEnd).toFixed(2)}`
-    //   + `created : ${finalPrecision - 1} segments`);
     return finalPrecision;
   }
 
