@@ -1,0 +1,7 @@
+<div id="tutorial-container" [style.background-color]="tutorialService.showingHelp ? 'rgba(0, 0, 0, 0.60)' : 'transparent'" [style.width]="tutorialService.showingHelp ? '100%' : '0px'" [style.height]="tutorialService.showingHelp ? '100%' : '0px'">
+  <ng-container *ngIf="tutorialService.showingHelp">
+    <div id="tutorial-hint-container">
+      {{hint}}
+    </div>
+  </ng-container>
+</div>

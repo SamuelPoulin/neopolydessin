@@ -13,16 +13,7 @@ import { FriendsList } from '@common/communication/friends';
 import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
-import {
-  CurrentGameState,
-  Difficulty,
-  GameType,
-  GuessMessage,
-  LobbyInfo,
-  Player,
-  TeamScore,
-  TimeInfo,
-} from '@common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
 import { UserService } from './user.service';
 
 @Injectable()

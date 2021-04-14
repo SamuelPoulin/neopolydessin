@@ -82,6 +82,7 @@ export class PenTool extends CreatorTool {
       if (this.isActive) {
         this.applyShape();
         this.editorService.socketService.sendEndPath(this.mousePosition.scale(this.editorService.scalingToServer));
+        this.editorService.checkTutorial();
       }
     };
 

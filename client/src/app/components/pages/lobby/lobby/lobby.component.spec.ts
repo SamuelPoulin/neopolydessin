@@ -12,6 +12,10 @@ import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
 import { ElectronService } from 'ngx-electron';
 import { MockElectronService } from '@services/electron.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
+import { MockEditorService } from '@services/editor.service.spec';
+import { EditorService } from '@services/editor.service';
 
 describe('LobbyComponent', () => {
   let component: LobbyComponent;
@@ -26,6 +30,8 @@ describe('LobbyComponent', () => {
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
         { provide: ElectronService, useValue: MockElectronService },
+        { provide: EditorService, useValue: MockEditorService },
+        { provide: TutorialService, useValue: MockTutorialService },
       ],
     }).compileComponents();
   });
