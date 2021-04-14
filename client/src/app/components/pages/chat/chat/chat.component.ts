@@ -73,7 +73,11 @@ export class ChatComponent {
 
   scrollToBottom(): void {
     setTimeout(() => {
-      document.querySelector('#chat-messages')?.scrollTo(0, document.body.scrollHeight);
+      const chatMessages = document.querySelector('#chat-messages');
+
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
     });
   }
 

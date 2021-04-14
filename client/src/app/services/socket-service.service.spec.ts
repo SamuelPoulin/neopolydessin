@@ -36,6 +36,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   receiveChatRoomMessage: of(),
   receiveChatRoomsImIn: of(),
   receiveChatRooms: of(),
+  getRoomMessageHistory: of(),
   sendStartPath: null,
   sendUpdatePath: null,
   sendEndPath: null,

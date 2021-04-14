@@ -35,11 +35,14 @@ chatRoomHistorySchema.statics.addMessageToHistory = (roomName: string, msg: Chat
   return chatRoomHistoryModel.updateOne({ roomName }, {
     $push: {
       messages: {
-        senderAccountId: msg.senderAccountId,
-        senderUsername: msg.senderUsername,
-        content: msg.content,
-        timestamp: msg.timestamp,
-        roomName: msg.roomName
+        $each: [{
+          senderAccountId: msg.senderAccountId,
+          senderUsername: msg.senderUsername,
+          content: msg.content,
+          timestamp: msg.timestamp,
+          roomName: msg.roomName
+        }],
+        $position: 0
       }
     }
   });

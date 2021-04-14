@@ -8,7 +8,7 @@ data class AccountDashboard(val _id: String,
                             val lastName: String,
                             val username: String,
                             val email: String,
-                            val logins:Logins,
+                            val logins:ArrayList<Login>,
                             val gameHistory: GameHistory,
                             val createdDate: Long,
                             val avatar: String)

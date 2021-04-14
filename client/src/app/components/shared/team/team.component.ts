@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { GameService } from '@services/game.service';
-import { Player, PlayerRole } from '../../../../../../common/communication/lobby';
+import { Player, PlayerRole } from '@common/communication/lobby';
 
 @Component({
   selector: 'app-team',
@@ -10,13 +10,26 @@ import { Player, PlayerRole } from '../../../../../../common/communication/lobby
 export class TeamComponent {
   @Input() team: Player[];
   @Input() scoreIndex: number;
+  @Input() teamIndex: number;
   @Input() name: string;
   @Input() hideScore: boolean;
   @Input() ennemy: boolean;
 
-  constructor(private gameService: GameService) {
+  constructor(public gameService: GameService) {
     this.team = [];
     this.name = '';
+  }
+
+  addBot(): void {
+    this.gameService.addBot(this.teamIndex);
+  }
+
+  removeBot(username: string): void {
+    this.gameService.removeBot(username);
+  }
+
+  teamDoesntHaveBot(): boolean {
+    return !this.team.find((player) => player.isBot);
   }
 
   get playerRole() {

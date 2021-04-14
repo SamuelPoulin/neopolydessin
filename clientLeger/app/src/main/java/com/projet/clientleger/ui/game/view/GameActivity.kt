@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
@@ -30,6 +31,7 @@ import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
@@ -38,6 +40,7 @@ import kotlinx.android.synthetic.main.dialog_gamemode.*
 import kotlinx.android.synthetic.main.dialog_gamemode.title
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 const val MILLIS_IN_SEC:Long = 1000
@@ -48,6 +51,9 @@ const val QUIT_GAME_MESSAGE:String = "Voulez vous vraiment quitter?"
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var drawboardFragment: DrawboardFragment
 
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
@@ -76,6 +82,10 @@ class GameActivity : AppCompatActivity() {
         binding.team2Rv.layoutManager = LinearLayoutManager(this)
         binding.team2Rv.adapter = PlayersAdapter(team2)
 
+        supportFragmentManager.commit{
+            add(R.id.drawboardContainer, drawboardFragment)
+        }
+
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
@@ -98,7 +108,7 @@ class GameActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.title.text = message
+        dialog.titleMessage.text = message
 
         dialog.quitBtn.setOnClickListener {
             dialog.dismiss()
