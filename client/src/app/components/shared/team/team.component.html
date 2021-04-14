@@ -23,7 +23,7 @@
       </div>
     </ng-container>
   </div>
-  <ng-container *ngIf="gameService.isHost && gameService.gameType === 'classic' && this.teamDoesntHaveBot()">
+  <ng-container *ngIf="gameService.isHost && gameService.gameType === 'classic' && this.canAddBot()">
     <button mat-flat-button class="menu-button" (click)="this.addBot()">
       <mat-icon class="menu-button-icon add-button">add</mat-icon>
       Joueur virtuel

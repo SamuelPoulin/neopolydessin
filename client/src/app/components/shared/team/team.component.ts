@@ -32,8 +32,8 @@ export class TeamComponent {
     this.gameService.removeBot(username);
   }
 
-  teamDoesntHaveBot(): boolean {
-    return !this.team.find((player) => player.isBot);
+  canAddBot(): boolean {
+    return this.team.length < 2 && !this.team.find((player) => player.isBot);
   }
 
   get playerRole() {
