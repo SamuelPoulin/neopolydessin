@@ -107,9 +107,15 @@ export class SocketService {
     });
   }
 
-  receiveChatRooms(): Observable<string[]> {
+  async getChatRooms(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => resolve(chatRooms));
+    });
+  }
+
+  chatRoomsUpdated(): Observable<string[]> {
     return new Observable<string[]>((obs) => {
-      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => obs.next(chatRooms));
+      this.socket.on(SocketMessages.CHAT_ROOMS_UPDATED, (chatRooms: string[]) => obs.next(chatRooms));
     });
   }
 
