@@ -267,4 +267,11 @@ class ChatStorageService @Inject constructor() : Service() {
             audioService.playSound(SoundId.ERROR.value)
         }
     }
+
+    fun updateRooms(rooms: ArrayList<String>){
+        for(convo in convos){
+            if(convo.tabInfo.tabType == TabType.ROOM && rooms.find { it == convo.tabInfo.convoId } == null)
+                removeConvo(convo.tabInfo.convoId)
+        }
+    }
 }

@@ -35,4 +35,24 @@ class RoomslistSocketService @Inject constructor(val socketService: SocketServic
             })
         }
     }
+
+    fun receiveUpdateRooms(): Observable<ArrayList<String>> {
+        return socketService.receiveFromSocket(RoomslistSocketEndpoints.RECEIVE_UPDATED_ROOMS.value){ (rooms) ->
+            val list = ArrayList<String>()
+            val jsonList = rooms as JSONArray
+            for (i in 0 until jsonList.length()){
+                if(jsonList[i] as String != GENERAL_ROOM_ID)
+                    list.add(jsonList[i] as String)
+            }
+            list
+        }
+    }
+
+    fun deleteRoom(roomName: String){
+        socketService.socket.emit(RoomslistSocketEndpoints.DELETE_ROOM.value, roomName, Ack{(isSuccess) -> println("isSuccess: $isSuccess")})
+    }
+
+    fun createRoom(roomName: String){
+        socketService.socket.emit(RoomslistSocketEndpoints.CREATE_ROOM.value, roomName, Ack{})
+    }
 }

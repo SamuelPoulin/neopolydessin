@@ -12,4 +12,16 @@ class RoomslistRepository @Inject constructor(private val roomsListSocketService
     fun joinRooms(roomName: String): Observable<Boolean>{
         return roomsListSocketService.joinRoom(roomName)
     }
+
+    fun receiveUpdateRooms(): Observable<ArrayList<String>> {
+        return roomsListSocketService.receiveUpdateRooms()
+    }
+
+    fun deleteRoom(roomName: String){
+        roomsListSocketService.deleteRoom(roomName)
+    }
+
+    fun createRoom(roomName: String){
+        roomsListSocketService.createRoom(roomName)
+    }
 }
