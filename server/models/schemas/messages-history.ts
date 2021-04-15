@@ -9,8 +9,8 @@ export interface MessageHistory {
 
 export interface Messages extends Document {
   _id: ObjectId;
-  accountId: ObjectId;
-  otherAccountId: ObjectId;
+  accountId: string;
+  otherAccountId: string;
   messages: [PrivateMessage];
 }
 
@@ -23,8 +23,8 @@ interface MessagesModel extends Model<Messages> {
 }
 
 const findMessagesQuery = (id: string, otherId: string) => {
-  const objId = new ObjectId(id);
-  const otherObjId = new ObjectId(otherId);
+  const objId = id;
+  const otherObjId = otherId;
   return {
     $or: [
       { accountId: objId, otherAccountId: otherObjId },
@@ -35,14 +35,12 @@ const findMessagesQuery = (id: string, otherId: string) => {
 
 export const messagesSchema = new Schema<Messages, MessagesModel>({
   accountId: {
-    type: ObjectId,
+    type: String,
     required: true,
-    ref: 'Account'
   },
   otherAccountId: {
-    type: ObjectId,
+    type: String,
     required: true,
-    ref: 'Account'
   },
   messages: [
     {

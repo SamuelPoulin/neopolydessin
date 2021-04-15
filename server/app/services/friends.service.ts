@@ -22,7 +22,6 @@ export class FriendsService {
         .findHistory(id, otherId, page, limit)
         .then((messages: Messages | null) => {
           if (!messages) throw new Error(NOT_FOUND.toString());
-          console.log(messages.messages);
           resolve({ statusCode: OK, documents: { messages: messages.messages.reverse() } });
         })
         .catch((err) => {
