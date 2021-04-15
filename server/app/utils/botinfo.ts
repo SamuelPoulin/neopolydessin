@@ -113,7 +113,7 @@ export class BotPersonnality {
   constructor(
     private io: Server,
     private lobbyId: string,
-    difficulty: Difficulty,
+    private difficulty: Difficulty,
   ) {
     this.baseDrawDelay = DIFFICULTY_SPEEDS.get(difficulty) as number;
     this.drawDelay = this.baseDrawDelay;
@@ -125,18 +125,18 @@ export class BotPersonnality {
     if (Math.random() < PERCENT_20) {
       this.sendBotMessage(this.sentences.onStartDraw);
       const newSpeed = (this.baseDrawDelay + SPEED_MOD);
-      this.drawDelay = newSpeed < 0 ? 1 : newSpeed;
+      this.drawDelay = newSpeed < 0 ? HARD_DELAY : newSpeed;
     }
   }
 
   onStartSegment() {
-    if (Math.random() < PERCENT_1 && this.drawDelay !== this.baseDrawDelay) {
+    if (Math.random() < PERCENT_1 && this.drawDelay !== this.baseDrawDelay && this.difficulty !== Difficulty.HARD) {
       this.sendBotMessage(this.sentences.onSlowDown);
       this.drawDelay = this.baseDrawDelay;
     } else if (Math.random() < PERCENT_1 && this.drawDelay === this.baseDrawDelay) {
       this.sendBotMessage(this.sentences.onSpeedUp);
       const newSpeed = (this.baseDrawDelay + SPEED_MOD);
-      this.drawDelay = newSpeed < 0 ? 1 : newSpeed;
+      this.drawDelay = newSpeed < 0 ? HARD_DELAY : newSpeed;
     }
   }
 
