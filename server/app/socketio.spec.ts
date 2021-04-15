@@ -173,16 +173,16 @@ describe('Socketio', () => {
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
-                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(coord).to.deep.equal({ x: 1, y: 1 });
                         expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
                     });
 
                     testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
-                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                        expect(coords).to.deep.equal({ x: 2, y: 2 });
                     });
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        expect(coord).to.deep.equal({ x: 3, y: 3 });
                         testClient.socket.close();
                     });
 
@@ -230,17 +230,17 @@ describe('Socketio', () => {
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
-                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(coord).to.deep.equal({ x: 1, y: 1 });
                         expect(brushInfo).to.be.deep.equal({ color: "#000000", strokeWidth: 1 });
 
                     });
 
                     testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
-                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                        expect(coords).to.deep.equal({ x: 2, y: 2 });
                     });
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        expect(coord).to.deep.equal({ x: 3, y: 3 });
                         testClient.socket.emit(SocketLobby.END_GAME, ReasonEndGame.WINNING_SCORE_REACHED);
                         testClient.socket.close();
                     });
@@ -278,15 +278,15 @@ describe('Socketio', () => {
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
-                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(coord).to.deep.equal({ x: 1, y: 1 });
                     });
 
                     testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
-                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                        expect(coords).to.deep.equal({ x: 2, y: 2 });
                     });
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        expect(coord).to.deep.equal({ x: 3, y: 3 });
                         testClient.socket.close();
                     });
 
@@ -327,15 +327,15 @@ describe('Socketio', () => {
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
-                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(coord).to.deep.equal({ x: 1, y: 1 });
                     })
 
                     testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
-                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                        expect(coords).to.deep.equal({ x: 2, y: 2 });
                     });
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        expect(coord).to.deep.equal({ x: 3, y: 3 });
                         testClient.socket.close();
                     });
 
@@ -355,15 +355,15 @@ describe('Socketio', () => {
                     testClient.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coord, brushInfo: BrushInfo) => {
                         expect(id).to.be.equal(0);
                         expect(zIndex).to.be.equal(0);
-                        expect(coord).to.deep.equal({ x: 333.33, y: 333.33 });
+                        expect(coord).to.deep.equal({ x: 1, y: 1 });
                     })
 
                     testClient.socket.on(SocketDrawing.UPDATE_PATH_BC, (coords: Coord) => {
-                        expect(coords).to.deep.equal({ x: 666.67, y: 666.67 });
+                        expect(coords).to.deep.equal({ x: 2, y: 2 });
                     });
 
                     testClient.socket.on(SocketDrawing.END_PATH_BC, (coord: Coord) => {
-                        expect(coord).to.deep.equal({ x: 1000, y: 1000 });
+                        expect(coord).to.deep.equal({ x: 3, y: 3 });
                         testClient.socket.close();
                     });
                 });

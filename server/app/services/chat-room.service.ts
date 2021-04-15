@@ -91,15 +91,20 @@ export class ChatRoomService {
       if (this.chatRoomExists(roomName) && roomName !== GENERAL_CHAT_ROOM) {
         const roomIndex = this.rooms.findIndex((room) => room === roomName);
         if (roomIndex > -1) {
-          this.io.of('/').in(roomName).sockets.forEach((socketOfClient) => {
-            socketOfClient.leave(roomName);
+          this.io.allSockets().then((sockets) => {
+            sockets.forEach((socketId) => {
+              const clientSocket = this.io.sockets.sockets.get(socketId);
+              if (clientSocket) {
+                socket.leave(roomName);
+              }
+            });
           });
           this.rooms.splice(roomIndex, 1);
           this.deleteChatHistory(roomName)
             .then((result) => {
+              this.io.emit(SocketMessages.CHAT_ROOMS_UPDATED, this.rooms);
               callback(true);
             });
-          this.io.emit(SocketMessages.CHAT_ROOMS_UPDATED, this.rooms);
         }
       } else {
         callback(false);

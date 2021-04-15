@@ -16,7 +16,6 @@ import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
-  // private static GENERAL_ROOM_NAME: string = 'Général';
   private static GAME_ROOM_NAME: string = 'Partie';
   private static GENERAL_ROOM_NAME: string = 'Général';
 
@@ -75,6 +74,14 @@ export class ChatService {
     } else {
       this.socketService = this.injector.get(SocketService) as SocketService;
       this.gameService = this.injector.get(GameService) as GameService;
+      this.socketService.getChatRooms()
+        .then((rooms) => {
+          for (const chatRoom of rooms) {
+            if (chatRoom !== 'general') {
+              this.chatState.joinableRooms.push(chatRoom);
+            }
+          }
+        });
       this.initSubscriptions();
     }
 
@@ -311,12 +318,8 @@ export class ChatService {
       this.updatePoppedOutChat();
     });
 
-    this.chatRoomsSubscription = this.socketService.receiveChatRooms().subscribe((chatRooms) => {
-      for (const chatRoom of chatRooms) {
-        if (chatRoom !== 'general') {
-          this.chatState.joinableRooms.push(chatRoom);
-        }
-      }
+    this.socketService.chatRoomsUpdated().subscribe((chatRooms) => {
+      this.chatState.joinableRooms = chatRooms.filter((room) => room !== 'general');
       this.updatePoppedOutChat();
     });
 
