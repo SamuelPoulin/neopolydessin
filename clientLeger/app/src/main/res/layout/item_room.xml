@@ -6,7 +6,8 @@
     android:layout_height="60dp"
     android:background="@color/chat_header_black"
     android:backgroundTint="@color/chat_header_black"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:layout_marginVertical="3dp">
     <TextView
         android:id="@+id/roomName"
         android:layout_width="wrap_content"

@@ -32,7 +32,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 android:textAllCaps="false"
-                android:text="@string/createRoom"/>
+                android:text="@string/createRoom"
+                android:textStyle="bold"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView

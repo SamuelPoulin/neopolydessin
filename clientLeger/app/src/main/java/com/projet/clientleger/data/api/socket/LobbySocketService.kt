@@ -19,7 +19,7 @@ import javax.inject.Singleton
 class LobbySocketService @Inject constructor(private val socketService: SocketService) {
 
     fun createGame(lobbyName: String, gameType: GameType, difficulty: Difficulty, isPrivate:Boolean) {
-        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, lobbyName, gameType.value, difficulty.value, isPrivate)
+        socketService.socket.emit(LobbySocketEndpoints.CREATE_LOBBY.value, lobbyName, gameType.value, difficulty.value, isPrivate, Ack{})
     }
     //deja dans le lobby, un joueur rejoins le lobby
     fun receivePlayerJoin(): Observable<Player> {
@@ -79,7 +79,7 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     }
 
     fun joinLobby(lobbyId: String){
-        socketService.socket.emit(LobbySocketEndpoints.JOIN_LOBBY.value, lobbyId)
+        socketService.socket.emit(LobbySocketEndpoints.JOIN_LOBBY.value, lobbyId, Ack{})
     }
 
     fun startGame(){
