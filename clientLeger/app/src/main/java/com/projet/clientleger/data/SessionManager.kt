@@ -72,10 +72,10 @@ open class SessionManager @Inject constructor(
                 apply()
             }
             tokenInterceptor.setAccessToken(accessToken)
+            socketService.connect(accessToken)
+            println("--------------------------- socket connected")
             scope.launch {
                 val res = apiSessionManagerInterface.getAccountInfo()
-
-                socketService.connect(accessToken)
                 when (res.code()) {
                     HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body()).subscribe {
                         emiter.onNext(true)

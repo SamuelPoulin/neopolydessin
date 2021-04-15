@@ -3,8 +3,7 @@ package com.projet.clientleger.data.api.http
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
 import com.projet.clientleger.data.api.model.chat.MessageHistory
-import com.projet.clientleger.data.model.Friendslist
-import com.projet.clientleger.data.model.chat.MessageChat
+import com.projet.clientleger.data.model.friendslist.Friendslist
 import retrofit2.Response
 import retrofit2.http.*
 

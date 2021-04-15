@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.IBinder
 import androidx.fragment.app.Fragment
@@ -13,19 +12,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.SoundId
-import com.projet.clientleger.data.model.FriendSimplified
+import com.projet.clientleger.data.model.friendslist.FriendSimplified
 import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FriendslistFragmentBinding
-import com.projet.clientleger.ui.chat.TabAdapter
+import com.projet.clientleger.utils.BitmapConversion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -92,7 +93,9 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.rvFriends?.layoutManager = LinearLayoutManager(activity)
         binding?.rvFriends?.adapter =
-            FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest)
+            FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest,
+                    ContextCompat.getColor(requireContext(), R.color.lightGreen), ContextCompat.getColor(requireContext(), R.color.red),
+                    BitmapConversion.vectorDrawableToBitmap(requireContext(), R.drawable.ic_missing_player))
         view.visibility = View.GONE
         setupClickListeners()
     }
@@ -122,6 +125,7 @@ class FriendslistFragment @Inject constructor() : Fragment() {
 
     private fun openFriendChat(friendSimplified: FriendSimplified) {
         setFragmentResult("openFriendChat", bundleOf("friend" to friendSimplified))
+        view?.visibility = View.GONE
     }
 
 

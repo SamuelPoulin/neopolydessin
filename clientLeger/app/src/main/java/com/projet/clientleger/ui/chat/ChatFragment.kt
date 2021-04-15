@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
@@ -23,7 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.enumData.SoundId
-import com.projet.clientleger.data.model.FriendSimplified
+import com.projet.clientleger.data.model.friendslist.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
