@@ -373,6 +373,7 @@ export class APIService {
           )
           .subscribe(
             (friendslist: FriendsList) => {
+              console.log(friendslist);
               this.friendslistUpdated.emit(friendslist);
               resolve();
             },
