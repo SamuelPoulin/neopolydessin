@@ -24,4 +24,8 @@ class RoomslistRepository @Inject constructor(private val roomsListSocketService
     fun createRoom(roomName: String){
         roomsListSocketService.createRoom(roomName)
     }
+
+    fun leaveRoom(roomName: String){
+        roomsListSocketService.leaveRoom(roomName)
+    }
 }

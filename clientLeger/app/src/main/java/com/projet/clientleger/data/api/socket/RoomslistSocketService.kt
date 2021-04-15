@@ -55,4 +55,8 @@ class RoomslistSocketService @Inject constructor(val socketService: SocketServic
     fun createRoom(roomName: String){
         socketService.socket.emit(RoomslistSocketEndpoints.CREATE_ROOM.value, roomName, Ack{})
     }
+
+    fun leaveRoom(roomName: String){
+        socketService.socket.emit(RoomslistSocketEndpoints.LEAVE_ROOM.value, roomName, Ack{})
+    }
 }
