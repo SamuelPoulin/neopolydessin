@@ -11,10 +11,10 @@ import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
 import {
+  FriendNotification,
   NotificationType,
   SocketFriendActions,
   SocketFriendListNotifications,
-  FriendNotification,
 } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
