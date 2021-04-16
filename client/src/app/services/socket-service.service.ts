@@ -10,7 +10,12 @@ import { BrushInfo } from '@common/communication/brush-info';
 import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-message';
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
-import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
+import {
+  FriendNotification,
+  NotificationType,
+  SocketFriendActions,
+  SocketFriendListNotifications,
+} from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
 import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
@@ -125,6 +130,14 @@ export class SocketService {
     });
   }
 
+  receiveNotifications(): Observable<FriendNotification> {
+    return new Observable<FriendNotification>((obs) => {
+      this.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (type: NotificationType, friendId: string) => {
+        obs.next({ type, friendId });
+      });
+    });
+  }
+
   receivePlayerConnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (playerInfo: Player, timeStamp: number) =>
@@ -151,16 +164,14 @@ export class SocketService {
 
   async joinLobby(lobbyId: string): Promise<LobbyInfo> {
     return new Promise<LobbyInfo>((resolve, reject) => {
-      this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId,
-        (lobbyInfo: LobbyInfo | null) => {
-          if (lobbyInfo) {
-            resolve(lobbyInfo);
-            this.joinedGame.emit();
-          }
-          else {
-            reject();
-          }
-        });
+      this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId, (lobbyInfo: LobbyInfo | null) => {
+        if (lobbyInfo) {
+          resolve(lobbyInfo);
+          this.joinedGame.emit();
+        } else {
+          reject();
+        }
+      });
     });
   }
 
@@ -274,15 +285,14 @@ export class SocketService {
 
   async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<LobbyInfo> {
     return new Promise<LobbyInfo>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy,
-        (lobbyInfo: LobbyInfo | null) => {
-          if (lobbyInfo) {
-            resolve(lobbyInfo);
-            this.joinedGame.emit();
-          } else {
-            reject();
-          }
-        });
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy, (lobbyInfo: LobbyInfo | null) => {
+        if (lobbyInfo) {
+          resolve(lobbyInfo);
+          this.joinedGame.emit();
+        } else {
+          reject();
+        }
+      });
     });
   }
 

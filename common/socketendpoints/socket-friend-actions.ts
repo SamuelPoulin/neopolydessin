@@ -17,3 +17,8 @@ export enum NotificationType {
     requestRefused = 'requestRefused',
     unfriended = 'unfriended'
 }
+
+export interface FriendNotification {
+  type: NotificationType;
+  friendId: string;
+}
