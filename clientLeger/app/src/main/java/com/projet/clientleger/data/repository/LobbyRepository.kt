@@ -89,6 +89,14 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         avatarStorageService.clear()
     }
 
+    fun addBot(teamNumber: Int){
+        lobbySocketService.addBot(teamNumber)
+    }
+
+    fun removeBot(username: String){
+        lobbySocketService.removeBot(username)
+    }
+
     fun kickPlayer(playerId: String){
         lobbySocketService.kickPlayer(playerId)
     }

@@ -68,7 +68,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             goToGame()
         }
 
-        vm.receiveKick().subscribe{
+        vm.receiveKick().subscribe {
             leaveLobby(false)
         }
     }
@@ -169,7 +169,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     private fun leaveLobby(requestNeeded: Boolean = true) {
         vm.playSound(SoundId.ERROR.value)
-        if(requestNeeded)
+        if (requestNeeded)
             vm.leaveLobby()
         chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         finish()
@@ -190,7 +190,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 }
             }
 
-            rvTeams[i].adapter = TeamAdapter(teams[i], vm::kickPlayer,
+            rvTeams[i].adapter = TeamAdapter(teams[i], vm::addBot, vm::kickPlayer, vm::removeBot,
                     vm.getAccountInfo(),
                     ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
                     ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
@@ -199,6 +199,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.teams[i].observe(this) { players ->
                 val owner = players.find { it.isOwner }
                 if (owner != null) {
+                    vm.updateOwner(owner)
                     for (team in rvTeams) {
                         team.adapter?.let { teamAdapter ->
                             (teamAdapter as TeamAdapter).updateGameOwner(owner)
@@ -259,6 +260,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.clearAvatarStorage()
         super.onDestroy()
     }
+
     override fun acceptInvite(info: Pair<String, String>) {
         intent = Intent(this, LobbyActivity::class.java)
         intent.putExtra("lobbyId", info.second)
