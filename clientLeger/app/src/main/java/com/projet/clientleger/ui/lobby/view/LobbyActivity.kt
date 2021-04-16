@@ -181,8 +181,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for (i in rvTeams.indices) {
             rvTeams[i].layoutManager = LinearLayoutManager(this)
-            val teamBackground: Drawable? = if (vm.gameType != GameType.CLASSIC)
-                null
+            val teamBackground: Drawable = if (vm.gameType != GameType.CLASSIC)
+                ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
             else {
                 when (i) {
                     0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
@@ -194,7 +194,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
                     vm.getAccountInfo(),
                     ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
                     ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
-                    teamBackground)
+                    teamBackground, vm.gameType == GameType.CLASSIC)
 
             vm.teams[i].observe(this) { players ->
                 val owner = players.find { it.isOwner }

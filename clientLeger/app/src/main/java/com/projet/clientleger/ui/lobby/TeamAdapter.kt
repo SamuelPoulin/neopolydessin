@@ -18,7 +18,8 @@ class TeamAdapter(private val players: List<PlayerInfo>,
                   private val userInfo: AccountInfo,
                   private val isOwnerIcon: Drawable,
                   private val isBotIcon: Drawable,
-                  private val teamColor: Drawable?) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>() {
+                  private val teamColor: Drawable?,
+                  private val canRemoveBot: Boolean) : RecyclerView.Adapter<TeamAdapter.ViewHolderPlayer>() {
     var userIsOwner = false
 
     class ViewHolderPlayer(view: View) : RecyclerView.ViewHolder(view) {
@@ -37,26 +38,21 @@ class TeamAdapter(private val players: List<PlayerInfo>,
         holder.itemView.background = teamColor
         holder.usernameTextView.text = players[position].username
         holder.avatarView.setImageBitmap(players[position].avatar)
-        if (players[position].isBot) {
-            holder.removePlayerBtn.visibility = View.INVISIBLE
-            holder.attributeIcon.setImageDrawable(isBotIcon)
-            holder.attributeIcon.visibility = View.VISIBLE
-        } else {
-            if (userIsOwner) {
-                if (players[position].accountId == userInfo.accountId){
-                    holder.attributeIcon.setImageDrawable(isOwnerIcon)
-                    holder.removePlayerBtn.visibility = View.INVISIBLE
-                    holder.attributeIcon.visibility = View.VISIBLE
-                }
-                else {
-                    holder.attributeIcon.visibility = View.INVISIBLE
-                    holder.removePlayerBtn.visibility = View.VISIBLE
-                    holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(players[position].accountId) }
-                }
-            } else {
-                holder.attributeIcon.visibility = View.INVISIBLE
-                holder.removePlayerBtn.visibility = View.INVISIBLE
-            }
+        val player = players[position]
+        val attributeIcon = when {
+            player.isBot -> isBotIcon
+            player.isOwner -> isOwnerIcon
+            else -> null
+        }
+        holder.attributeIcon.setImageDrawable(attributeIcon)
+        holder.removePlayerBtn.visibility = View.INVISIBLE
+        if (userIsOwner && player.accountId != userInfo.accountId && !player.isBot) {
+                holder.removePlayerBtn.visibility = View.VISIBLE
+                holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(player.accountId) }
+        }
+        if(player.isBot && canRemoveBot){
+            holder.removePlayerBtn.visibility = View.VISIBLE
+            holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(player.accountId) }
         }
     }
 

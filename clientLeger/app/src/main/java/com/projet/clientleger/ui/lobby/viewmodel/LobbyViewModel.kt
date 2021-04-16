@@ -73,11 +73,9 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
         for(i in 0 until list.size){
             val player = list[i]
-            if(!(gameType != GameType.CLASSIC && player.isBot)){
                 if(player.avatar == null)
                     player.avatar = defaultImage
                 teams[player.teamNumber].value!!.add(player)
-            }
         }
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)
