@@ -11,6 +11,7 @@ import { ElectronService } from 'ngx-electron';
 import { Subscription } from 'rxjs';
 import { ChatMessage, Message, SystemMessage } from '../../../../common/communication/chat-message';
 import { APIService } from './api.service';
+import { AudiovisualService, GameSound } from './audiovisual.service';
 import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
@@ -53,6 +54,7 @@ export class ChatService {
     private injector: Injector,
     private nz: NgZone,
     private snackBar: MatSnackBar,
+    private audiovisualService: AudiovisualService,
   ) {
     this.chatState = {
       rooms: [],
@@ -183,6 +185,7 @@ export class ChatService {
             });
           }
         });
+      this.audiovisualService.playSound(GameSound.INVITATION_RECEIVED);
     });
 
     this.notificationSubscription = this.socketService.receiveNotifications().subscribe((notification: FriendNotification) => {
@@ -220,7 +223,13 @@ export class ChatService {
     this.joinedGameSubscription = this.socketService.joinedGame.subscribe(() => {
       const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
       if (roomIndex === -1) {
-        this.chatState.rooms.unshift({ name: ChatService.GAME_ROOM_NAME, id: '', type: ChatRoomType.GAME, messages: [] });
+        this.chatState.rooms.unshift({
+          name: ChatService.GAME_ROOM_NAME,
+          id: '',
+          type: ChatRoomType.GAME,
+          messages: [],
+          newMessage: false,
+        });
       }
       this.updatePoppedOutChat();
     });
@@ -234,7 +243,7 @@ export class ChatService {
       for (const message of chatRoomHistory.messages) {
         messages.push({ timestamp: message.timestamp, senderUsername: message.senderUsername, content: message.content } as ChatMessage);
       }
-      this.chatState.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages });
+      this.chatState.rooms.push({ name: ChatService.GENERAL_ROOM_NAME, id: '', type: ChatRoomType.GENERAL, messages, newMessage: false });
     });
 
     this.guessSubscription = this.socketService.receiveGuess().subscribe((message) => {
@@ -264,6 +273,7 @@ export class ChatService {
               id: privateMessage.senderAccountId,
               type: ChatRoomType.PRIVATE,
               messages: [],
+              newMessage: true,
             });
             roomIndex = this.chatState.rooms.length - 1;
 
@@ -272,6 +282,7 @@ export class ChatService {
               content: privateMessage.content,
               timestamp: privateMessage.timestamp,
             } as ChatMessage);
+            this.audiovisualService.playSound(GameSound.CHAT_NOTIFICATION);
           })
           .catch();
       } else {
@@ -280,6 +291,10 @@ export class ChatService {
           content: privateMessage.content,
           timestamp: privateMessage.timestamp,
         } as ChatMessage);
+        if (this.chatState.currentRoomIndex !== roomIndex) {
+          this.chatState.rooms[roomIndex].newMessage = true;
+          this.audiovisualService.playSound(GameSound.CHAT_NOTIFICATION);
+        }
       }
 
       this.chatRoomChanged.emit();
@@ -294,6 +309,10 @@ export class ChatService {
           timestamp: chatRoomMessage.timestamp,
           content: chatRoomMessage.content,
         } as ChatMessage);
+        if (this.chatState.currentRoomIndex !== roomIndex) {
+          this.chatState.rooms[roomIndex].newMessage = true;
+          this.audiovisualService.playSound(GameSound.CHAT_NOTIFICATION);
+        }
       } else {
         let roomIndex = this.chatState.rooms.findIndex((room) => room.name === chatRoomMessage.roomName);
 
@@ -307,7 +326,7 @@ export class ChatService {
                 timestamp: message.timestamp,
               } as ChatMessage);
             }
-            this.chatState.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages });
+            this.chatState.rooms.push({ name: chatRoomMessage.roomName, id: '', type: ChatRoomType.GROUP, messages, newMessage: true });
             this.focusRoom(chatRoomMessage.roomName);
           });
         } else {
@@ -319,6 +338,10 @@ export class ChatService {
               senderUsername: chatRoomMessage.senderUsername,
               timestamp: chatRoomMessage.timestamp,
             } as ChatMessage);
+            if (this.chatState.currentRoomIndex !== roomIndex) {
+              this.chatState.rooms[roomIndex].newMessage = true;
+              this.audiovisualService.playSound(GameSound.CHAT_NOTIFICATION);
+            }
           } else {
             this.chatState.rooms[roomIndex].messages.push({
               content: chatRoomMessage.content,
@@ -458,6 +481,7 @@ export class ChatService {
       if (roomIndex > -1) {
         this.chatState.currentRoomIndex = roomIndex;
         this.chatRoomChanged.emit();
+        this.chatState.rooms[roomIndex].newMessage = false;
         this.updatePoppedOutChat();
       }
     }
@@ -486,7 +510,13 @@ export class ChatService {
               timestamp: privateMessage.timestamp,
             });
           }
-          this.chatState.rooms.push({ type: ChatRoomType.PRIVATE, name: friendUsername, id: friendId, messages: chatMessages });
+          this.chatState.rooms.push({
+            type: ChatRoomType.PRIVATE,
+            name: friendUsername,
+            id: friendId,
+            messages: chatMessages,
+            newMessage: false,
+          });
           this.focusRoom(friendUsername);
           this.chatState.friendslistOpened = false;
           this.chatRoomChanged.emit();
@@ -503,6 +533,11 @@ export class ChatService {
       this.electronService.ipcRenderer.send('chat-action-invite-friend', friendId);
     } else {
       this.socketService.inviteFriend(friendId);
+      this.snackBar.open("L'invitation a été envoyée!", 'Ok', {
+        duration: 15000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
       this.updatePoppedOutChat();
     }
   }

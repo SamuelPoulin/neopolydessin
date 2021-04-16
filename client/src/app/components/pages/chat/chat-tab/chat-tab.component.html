@@ -1,7 +1,8 @@
 <div class="chat-tab-container">
   <div class="chat-tab-content" (click)="focusRoom()">
     {{room.name}}
-    <div class="chat-tab-icon-container" *ngIf="closable" (click)="closeRoom($event)">
+    <div class="chat-tab-new-message" *ngIf="room.newMessage"></div>
+    <div class="chat-tab-icon-container" *ngIf="closable" [style.margin-left]="room.newMessage ? '0px' : '10px'" (click)="closeRoom($event)">
       <mat-icon inline="true">close</mat-icon>
     </div>
   </div>
