@@ -1,4 +1,4 @@
-package com.projet.clientleger.data.model
+package com.projet.clientleger.data.model.friendslist
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

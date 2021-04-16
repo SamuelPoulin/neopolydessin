@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.os.IBinder
 import androidx.fragment.app.Fragment
@@ -13,19 +12,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import com.projet.clientleger.R
 import com.projet.clientleger.data.enumData.SoundId
-import com.projet.clientleger.data.model.FriendSimplified
+import com.projet.clientleger.data.model.friendslist.FriendSimplified
 import com.projet.clientleger.data.service.ChatStorageService
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FriendslistFragmentBinding
-import com.projet.clientleger.ui.chat.TabAdapter
+import com.projet.clientleger.ui.IAcceptGameInviteListener
+import com.projet.clientleger.utils.BitmapConversion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -62,9 +65,9 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         activity?.unbindService(chatConnection)
     }
 
-    private fun createUsernamesMap(): HashMap<String, String>{
+    private fun createUsernamesMap(): HashMap<String, String> {
         val map = HashMap<String, String>()
-        for(friend in friends)
+        for (friend in friends)
             map[friend.friendId] = friend.username
         return map
     }
@@ -78,11 +81,14 @@ class FriendslistFragment @Inject constructor() : Fragment() {
             chatService?.addFriendslistUsernames(createUsernamesMap())
         }
         setFragmentListeners()
+        vm.receiveInvite().subscribe{
+            showInviteSnackbar(it)
+        }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         binding = FriendslistFragmentBinding.inflate(inflater, container, false)
         return binding!!.root
@@ -92,12 +98,14 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.rvFriends?.layoutManager = LinearLayoutManager(activity)
         binding?.rvFriends?.adapter =
-            FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest)
+                FriendsAdapter(friends, ::openFriendChat, ::acceptFriendRequest, ::refuseFriendRequest, ::deleteFriend, vm::inviteFriend,
+                        ContextCompat.getColor(requireContext(), R.color.lightGreen), ContextCompat.getColor(requireContext(), R.color.red),
+                        BitmapConversion.vectorDrawableToBitmap(requireContext(), R.drawable.ic_missing_player))
         view.visibility = View.GONE
         setupClickListeners()
     }
 
-    private fun setupClickListeners(){
+    private fun setupClickListeners() {
         binding?.let { mBinding ->
             mBinding.closeBtn.setOnClickListener {
                 toggleVisibility()
@@ -113,15 +121,28 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         binding = null
     }
 
-    private fun setFragmentListeners(){
-        setFragmentResultListener("toggleVisibility"){ requestKey, bundle ->
+    private fun showInviteSnackbar(info: Pair<String, String>){
+        view?.let {
+            Snackbar.make(it, "${info.first} vous a inviter", Snackbar.LENGTH_LONG)
+                    .setAction("Rejoindre"){
+                        (activity as IAcceptGameInviteListener?)?.acceptInvite(info)
+                    }.show()
+        }
+    }
+
+    private fun setFragmentListeners() {
+        setFragmentResultListener("toggleVisibility") { requestKey, bundle ->
             toggleVisibility()
         }
-
+        setFragmentResultListener("canInvite") { requestKey, bundle ->
+            (binding?.rvFriends?.adapter as FriendsAdapter?)?.canInvite = bundle["boolean"] as Boolean
+            binding?.rvFriends?.adapter?.notifyDataSetChanged()
+        }
     }
 
     private fun openFriendChat(friendSimplified: FriendSimplified) {
         setFragmentResult("openFriendChat", bundleOf("friend" to friendSimplified))
+        view?.visibility = View.GONE
     }
 
 
@@ -139,9 +160,16 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         }
     }
 
-    fun toggleVisibility(){
+    private fun deleteFriend(friendId: String) {
+        lifecycleScope.launchWhenCreated {
+            vm.deleteFriend(friendId)
+        }
+    }
+
+
+    fun toggleVisibility() {
         view?.let {
-            view?.visibility = when(it.visibility){
+            view?.visibility = when (it.visibility) {
                 View.VISIBLE -> {
                     vm.playSound(SoundId.CLOSE_CHAT.value)
                     View.GONE
@@ -160,16 +188,16 @@ class FriendslistFragment @Inject constructor() : Fragment() {
             val input = EditText(it)
             var wasFriendAdded = false
             val dialog = AlertDialog.Builder(it).setTitle("Ajouter un ami").setView(input)
-                .setPositiveButton("Envoyer") { dialog, id ->
-                    wasFriendAdded = true
-                    vm.playSound(SoundId.CONFIRM.value)
-                    CoroutineScope(Job() + Dispatchers.Main).launch {
-                        vm.sendFriendRequest(input.text.toString())
+                    .setPositiveButton("Envoyer") { dialog, id ->
+                        wasFriendAdded = true
+                        vm.playSound(SoundId.CONFIRM.value)
+                        CoroutineScope(Job() + Dispatchers.Main).launch {
+                            vm.sendFriendRequest(input.text.toString())
+                        }
                     }
-                }
-                .show()
+                    .show()
             dialog.setOnDismissListener {
-                if(!wasFriendAdded){
+                if (!wasFriendAdded) {
                     vm.playSound(SoundId.CLOSE_CHAT.value)
                 }
             }

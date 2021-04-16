@@ -10,20 +10,22 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class Lobby(val lobbyId:String,
-                 val lobbyName:String,
-                 val ownerUsername:String,
-                 val nbPlayerInLobby:Int,
-                 val gameType:String,
+data class Lobby(val lobbyId: String,
+                 val lobbyName: String,
+                 val ownerUsername: String,
+                 val nbPlayerInLobby: Int,
+                 val gameType: String,
                  val difficulty: String,
-                 val maxSize: Int) : Parcelable{
-                     fun toInfo(): LobbyInfo{
-                         return LobbyInfo(lobbyId,
-                         lobbyName,
-                         ownerUsername,
-                         nbPlayerInLobby,
-                         GameType.stringToEnum(gameType),
-                         Difficulty.stringToEnum(difficulty),
-                         maxSize)
-                     }
-                 }
+                 val maxSize: Int,
+                 val private: Boolean) : Parcelable {
+    fun toInfo(): LobbyInfo {
+        return LobbyInfo(lobbyId,
+                lobbyName,
+                ownerUsername,
+                nbPlayerInLobby,
+                GameType.stringToEnum(gameType),
+                Difficulty.stringToEnum(difficulty),
+                maxSize,
+                private)
+    }
+}

@@ -42,6 +42,7 @@
                     android:text="bob"
                     android:textAlignment="center"
                     android:textSize="20sp" />
+
                 <TextView
                     android:id="@+id/email"
                     android:layout_width="match_parent"
@@ -56,13 +57,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:orientation="vertical"
+                app:checkedButton="@+id/dashboardBtn"
                 app:layout_constraintHeight_percent="0.6"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/userContainer"
-                app:singleSelection="true"
                 app:selectionRequired="true"
-                app:checkedButton="@+id/dashboardBtn">
+                app:singleSelection="true">
 
                 <Button
                     android:id="@+id/dashboardBtn"
@@ -72,7 +73,7 @@
                     android:text="@string/dashboard"
                     app:icon="@drawable/ic_leaderboard"
                     app:iconGravity="start"
-                    app:iconPadding="10dp"/>
+                    app:iconPadding="10dp" />
 
                 <Button
                     android:id="@+id/userProfileBtn"
@@ -83,6 +84,7 @@
                     app:icon="@drawable/ic_profile"
                     app:iconGravity="start"
                     app:iconPadding="10dp" />
+
                 <Button
                     android:id="@+id/accountSettings"
                     style="@style/ManagementToggleBtn"
@@ -93,19 +95,51 @@
                     app:iconGravity="start"
                     app:iconPadding="10dp" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
+
             <Button
                 android:id="@+id/logoutBtn"
+                style="@style/ManagementToggleBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/returnbutton"
+                android:textColor="@color/black"
                 app:icon="@drawable/ic_round_logout_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
                 app:iconGravity="start"
                 app:iconPadding="10dp"
-                style="@style/ManagementToggleBtn"
-                android:textColor="@color/black"
-                app:iconTint="@color/black" />
+                app:iconTint="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/chat_root"
+                android:name="com.projet.clientleger.ui.chat.ChatFragment"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.5"
+                app:layout_constraintWidth_percent="0.25" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/friendslistContainer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:name="com.projet.clientleger.ui.friendslist.FriendslistFragment"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.25" />
+
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/roomslistContainer"
+                android:name="com.projet.clientleger.ui.roomslist.RoomslistFragment"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.25" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <FrameLayout

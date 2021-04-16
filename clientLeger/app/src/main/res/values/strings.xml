@@ -94,4 +94,5 @@
     <string name="destroy">Détruire</string>
     <string name="rooms">Salons</string>
     <string name="rooms_chat">Salons de discussion</string>
+    <string name="pending">En attente...</string>
 </resources>

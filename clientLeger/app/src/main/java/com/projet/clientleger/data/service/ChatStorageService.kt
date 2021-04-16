@@ -74,11 +74,11 @@ class ChatStorageService @Inject constructor() : Service() {
     private fun receiveMsgSubscriptions() {
         chatRepository.receivePlayerConnection().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
-            receiveMessage(it, tabInfo)
+            receiveMessage(it, tabInfo, isSystem = true)
         }
         chatRepository.receivePlayerDisconnection().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
-            receiveMessage(it, tabInfo)
+            receiveMessage(it, tabInfo, isSystem = true)
         }
         chatRepository.receiveMessage().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)

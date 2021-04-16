@@ -1,6 +1,7 @@
 package com.projet.clientleger.ui.accountmanagement.view
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.viewModels
@@ -14,11 +15,13 @@ import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.databinding.ActivityAccountManagementBinding
+import com.projet.clientleger.ui.IAcceptGameInviteListener
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DOUBLE_DIGIT
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DashboardFragment
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.SECONDS_IN_MIN
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
 import com.projet.clientleger.ui.accountmanagement.settings.SettingsFragment
+import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -26,7 +29,7 @@ import javax.inject.Inject
 import kotlin.math.floor
 
 @AndroidEntryPoint
-class AccountManagementActivity : AppCompatActivity() {
+class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener {
     private val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityAccountManagementBinding
     private val vm:AccountManagementViewModel by viewModels()
@@ -100,5 +103,12 @@ class AccountManagementActivity : AppCompatActivity() {
             result = "$min:0$sec"
         }
         return result
+    }
+    override fun acceptInvite(info: Pair<String, String>) {
+        intent = Intent(this, LobbyActivity::class.java)
+        intent.putExtra("lobbyId", info.second)
+        intent.putExtra("isJoining", true)
+        startActivity(intent)
+        finish()
     }
 }

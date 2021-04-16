@@ -72,10 +72,9 @@ open class SessionManager @Inject constructor(
                 apply()
             }
             tokenInterceptor.setAccessToken(accessToken)
+            socketService.connect(accessToken)
             scope.launch {
                 val res = apiSessionManagerInterface.getAccountInfo()
-
-                socketService.connect(accessToken)
                 when (res.code()) {
                     HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body()).subscribe {
                         emiter.onNext(true)
@@ -206,9 +205,7 @@ open class SessionManager @Inject constructor(
     }
 
     fun logoutAndRestart(errorMessage: String?) {
-        tokenInterceptor.clearToken()
-        clearCred()
-        socketService.disconnect()
+        logout()
         val intent = Intent(context, ConnexionActivity::class.java)
         val bundle = Bundle()
         errorMessage.let {
