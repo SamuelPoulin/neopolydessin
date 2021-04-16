@@ -175,11 +175,13 @@ export class ChatService {
           verticalPosition: 'bottom',
         })
         .afterDismissed()
-        .subscribe(() => {
-          this.socketService.joinLobby(invitation.lobbyId).then((lobbyInfo) => {
-            this.gameService.setGameInfo(lobbyInfo);
-            this.router.navigate([`/lobby/${lobbyInfo.lobbyId}`]);
-          });
+        .subscribe((action) => {
+          if (action.dismissedByAction) {
+            this.socketService.joinLobby(invitation.lobbyId).then((lobbyInfo) => {
+              this.gameService.setGameInfo(lobbyInfo);
+              this.router.navigate([`/lobby/${lobbyInfo.lobbyId}`]);
+            });
+          }
         });
     });
 
