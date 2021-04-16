@@ -78,4 +78,8 @@ class ChatRepository @Inject constructor(private val sessionManager: SessionMana
     fun sendRoomMessage(roomName: String, content: String){
         chatSocketService.sendRoomMessage(roomName, content)
     }
+
+    fun leaveRoom(roomName: String){
+
+    }
 }

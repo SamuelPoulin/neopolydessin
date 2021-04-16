@@ -20,9 +20,24 @@ class RoomslistViewModel @Inject constructor(private val roomslistRepository: Ro
             }
             rooms.postValue(rooms.value!!)
         }
+        roomslistRepository.receiveUpdateRooms().subscribe{ newRooms ->
+            rooms.value?.let {
+                it.clear()
+                it.addAll(newRooms)
+            }
+            rooms.postValue(rooms.value!!)
+        }
     }
 
     fun joinRoom(roomName: String): Observable<Boolean> {
         return roomslistRepository.joinRooms(roomName)
+    }
+
+    fun deleteRoom(roomName: String){
+        roomslistRepository.deleteRoom(roomName)
+    }
+
+    fun createRoom(roomName: String){
+        roomslistRepository.createRoom(roomName)
     }
 }
