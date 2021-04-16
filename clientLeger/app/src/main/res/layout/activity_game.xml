@@ -201,5 +201,23 @@
             app:layout_constraintLeft_toRightOf="@id/team"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/drawboardContainer" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/friendslistContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:name="com.projet.clientleger.ui.friendslist.FriendslistFragment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.5" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/roomslistContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:name="com.projet.clientleger.ui.roomslist.RoomslistFragment"
+            app:layout_constraintWidth_percent="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

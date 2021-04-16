@@ -164,14 +164,25 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.4"
+            app:layout_constraintWidth_percent="0.25"
             app:layout_constraintHeight_percent="0.5"/>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/friendslistContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.2"
+            android:name="com.projet.clientleger.ui.friendslist.FriendslistFragment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintWidth_percent="0.25" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/roomslistContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:name="com.projet.clientleger.ui.roomslist.RoomslistFragment"
+            app:layout_constraintWidth_percent="0.25"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>

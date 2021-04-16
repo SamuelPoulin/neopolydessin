@@ -38,9 +38,11 @@ import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.IAcceptGameInviteListener
 import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
+import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import kotlinx.android.synthetic.main.dialog_button_quit_game.*
@@ -58,7 +60,7 @@ const val SEC_IN_MIN:Int = 60
 const val QUIT_GAME_MESSAGE:String = "Voulez vous vraiment quitter?"
 
 @AndroidEntryPoint
-class GameActivity : AppCompatActivity() {
+class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     @Inject
     lateinit var drawboardFragment: DrawboardFragment
@@ -124,7 +126,6 @@ class GameActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         chatService?.let {
-            it.removeConvo(ChatViewModel.GAME_TAB_ID)
             unbindService(chatConnection)
         }
 
@@ -149,6 +150,7 @@ class GameActivity : AppCompatActivity() {
         dialog.titleMessage.text = message
 
         dialog.quitBtn.setOnClickListener {
+            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
             vm.playSound(SoundId.CLOSE_GAME.value)
             dialog.dismiss()
             supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
@@ -159,6 +161,7 @@ class GameActivity : AppCompatActivity() {
         if(isMessageFromServer){
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
+                chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
                 dialog.dismiss()
                 supportFragmentManager.setFragmentResult("closeGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
                 supportFragmentManager.setFragmentResult("activityChange", bundleOf("currentActivity" to "lobby"))
@@ -273,5 +276,16 @@ class GameActivity : AppCompatActivity() {
         vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
+    }
+    override fun acceptInvite(info: Pair<String, String>) {
+        intent = Intent(this, LobbyActivity::class.java)
+        intent.putExtra("lobbyId", info.second)
+        intent.putExtra("isJoining", true)
+        startActivity(intent)
+        finish()
+    }
+
+    override fun onBackPressed() {
+        showQuitGameDialog(QUIT_GAME_MESSAGE, false)
     }
 }

@@ -46,8 +46,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         lobbySocketService.leaveLobby()
     }
 
-    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean) {
-        lobbySocketService.createGame(gameName, gameType, difficulty, isPrivate)
+    fun createGame(gameName: String, gameType: GameType, difficulty: Difficulty, isPrivate: Boolean): Observable<LobbyInfo> {
+        return lobbySocketService.createGame(gameName, gameType, difficulty, isPrivate)
     }
 
     fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
@@ -66,8 +66,8 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         }
     }
 
-    fun joinLobby(lobbyId: String){
-        lobbySocketService.joinLobby(lobbyId)
+    fun joinLobby(lobbyId: String): Observable<LobbyInfo> {
+        return lobbySocketService.joinLobby(lobbyId)
     }
 
     fun startGame(){
@@ -96,5 +96,4 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
     }
-
 }

@@ -26,6 +26,7 @@ import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.databinding.ActivityLobbyBinding
+import com.projet.clientleger.ui.IAcceptGameInviteListener
 import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.game.view.GameActivity
@@ -38,13 +39,14 @@ import java.io.Serializable
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LobbyActivity : AppCompatActivity() {
+class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
     private val vm: LobbyViewModel by viewModels()
     lateinit var binding: ActivityLobbyBinding
     private val teams: Array<ArrayList<PlayerInfo>> = arrayOf(ArrayList(), ArrayList())
     private lateinit var rvTeams: Array<RecyclerView>
     var nextActivityIntent: Intent? = null
     var loadingDialog: AlertDialog? = null
+
     @Inject
     lateinit var friendslistFragment: FriendslistFragment
     private var chatService: ChatStorageService? = null
@@ -61,7 +63,7 @@ class LobbyActivity : AppCompatActivity() {
     }
 
     private fun setSubscriptions() {
-        vm.receiveStartGame().subscribe{
+        vm.receiveStartGame().subscribe {
             vm.playSound(SoundId.START_GAME.value)
             goToGame()
         }
@@ -79,22 +81,25 @@ class LobbyActivity : AppCompatActivity() {
         setupButtons()
         setSubscriptions()
 
-        if(intent.getBooleanExtra("isJoining", false)){
-            vm.joinGame()
-        } else{
-            vm.createGame()
+        if (intent.getBooleanExtra("isJoining", false)) {
+            vm.joinLobby().subscribe {
+                updateUiInfo(it)
+                if (it.gameType != GameType.SPRINT_SOLO)
+                    supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to true))
+            }
+        } else {
+            vm.createGame().subscribe {
+                updateUiInfo(it)
+                if (it.gameType != GameType.SPRINT_SOLO)
+                    supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to true))
+            }
         }
         setupToolbar()
         setupTeamsRv()
         setupUiMode()
-
-        supportFragmentManager.commit{
-            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        }
 //        if(vm.isTutorialActive()){
 //            //vm.addShowcase("Nous sommes maintenant dans le lobby \n Maintenant que le lobby est créé, nous allons pouvoir démarrer la partie", binding.startGameButton,this)
 //        }
-
     }
 
     override fun onStart() {
@@ -109,17 +114,9 @@ class LobbyActivity : AppCompatActivity() {
         unbindService(chatConnection)
     }
 
-    private fun setupToolbar(){
+    private fun setupToolbar() {
         binding.toolbar.title = vm.gameName
         binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
-
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
-                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
-            }
-            true
-        }
 
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
@@ -128,11 +125,21 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchIntentData(){
+    private fun updateUiInfo(lobbyInfo: LobbyInfo) {
+        vm.lobbyId = lobbyInfo.lobbyId
+        vm.gameName = lobbyInfo.lobbyName
+        binding.toolbar.title = vm.gameName
+        vm.gameType = lobbyInfo.gameType
+        vm.difficulty = lobbyInfo.difficulty
+        vm.isPrivate = lobbyInfo.isPrivate
+    }
+
+    private fun fetchIntentData() {
         vm.lobbyId = intent.getStringExtra("lobbyId") ?: ""
         vm.gameName = intent.getStringExtra("gameName") ?: "partie inconnue"
         vm.gameType = (intent.getSerializableExtra("gameType") as GameType?) ?: GameType.CLASSIC
-        vm.difficulty = (intent.getSerializableExtra("difficulty") as Difficulty?) ?: Difficulty.EASY
+        vm.difficulty = (intent.getSerializableExtra("difficulty") as Difficulty?)
+                ?: Difficulty.EASY
         vm.isPrivate = intent.getBooleanExtra("isPrivate", false)
     }
 
@@ -143,8 +150,8 @@ class LobbyActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupUiMode(){
-        if(vm.gameType != GameType.CLASSIC){
+    private fun setupUiMode() {
+        if (vm.gameType != GameType.CLASSIC) {
             binding.leftPeopleIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_coop_group))
             binding.rightPeopleIcon.visibility = View.GONE
             binding.teamLabel.text = getString(R.string.coopTeamLabel)
@@ -157,23 +164,23 @@ class LobbyActivity : AppCompatActivity() {
         binding.startGameButton.visibility = View.INVISIBLE
     }
 
-    private fun leaveLobby(){
+    private fun leaveLobby() {
         vm.playSound(SoundId.ERROR.value)
         vm.leaveLobby()
         chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         finish()
     }
 
-    private fun setupTeamsRv(){
+    private fun setupTeamsRv() {
         loadingDialog = setupLoadingDialog()
 
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
-        for(i in rvTeams.indices){
+        for (i in rvTeams.indices) {
             rvTeams[i].layoutManager = LinearLayoutManager(this)
-            val teamBackground: Drawable? = if(vm.gameType != GameType.CLASSIC)
+            val teamBackground: Drawable? = if (vm.gameType != GameType.CLASSIC)
                 null
-            else{
-                when(i){
+            else {
+                when (i) {
                     0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
                     else -> ContextCompat.getDrawable(this, R.drawable.red_team_playerinfo_background)!!
                 }
@@ -185,13 +192,13 @@ class LobbyActivity : AppCompatActivity() {
                     ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
                     teamBackground)
 
-            vm.teams[i].observe(this){ players ->
+            vm.teams[i].observe(this) { players ->
                 val owner = players.find { it.isOwner }
-                if(owner != null) {
+                if (owner != null) {
                     for (team in rvTeams) {
                         team.adapter?.let { teamAdapter ->
                             (teamAdapter as TeamAdapter).updateGameOwner(owner)
-                            binding.startGameButton.visibility = when(owner.accountId == vm.getAccountInfo().accountId) {
+                            binding.startGameButton.visibility = when (owner.accountId == vm.getAccountInfo().accountId) {
                                 true -> View.VISIBLE
                                 false -> View.INVISIBLE
                             }
@@ -202,9 +209,7 @@ class LobbyActivity : AppCompatActivity() {
                 teams[i].addAll(players)
                 rvTeams[i].adapter?.notifyDataSetChanged()
                 loadingDialog?.let { dialog ->
-                    if(dialog.isShowing && players.find { it.accountId.isNotEmpty() } != null)
-                    {
-                        supportFragmentManager.setFragmentResult("openGameChat", bundleOf("tabName" to LobbyViewModel.GAME_TAB_NAME))
+                    if (dialog.isShowing && players.find { it.accountId.isNotEmpty() } != null) {
                         dialog.dismiss()
                     }
                 }
@@ -221,17 +226,19 @@ class LobbyActivity : AppCompatActivity() {
         return dialog
     }
 
-    private fun setupButtons(){
+    private fun setupButtons() {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
 
     }
-    private fun startGame(){
+
+    private fun startGame() {
         vm.playSound(SoundId.CLICK.value)
         vm.startGame()
     }
-    private fun goToGame(){
+
+    private fun goToGame() {
         vm.unsubscribe()
         val intent = Intent(this, GameActivity::class.java).apply {
             putExtra("gameType", vm.gameType)
@@ -240,14 +247,23 @@ class LobbyActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    private fun kickPlayer(player:PlayerInfo){
+
+    private fun kickPlayer(player: PlayerInfo) {
         println("kic: ${player.username}")
     }
 
     override fun onDestroy() {
+        supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to false))
         vm.unsubscribe()
-        if(nextActivityIntent == null)
+        if (nextActivityIntent == null)
             vm.clearAvatarStorage()
         super.onDestroy()
+    }
+    override fun acceptInvite(info: Pair<String, String>) {
+        intent = Intent(this, LobbyActivity::class.java)
+        intent.putExtra("lobbyId", info.second)
+        intent.putExtra("isJoining", true)
+        startActivity(intent)
+        finish()
     }
 }

@@ -34,6 +34,14 @@ class AvatarStorageService @Inject constructor(val sessionManager: SessionManage
         return !friendsAvatars.containsKey(friend.friendId?._id) && friend.friendId != null && friend.friendId?._id != null
     }
 
+    fun updateFriendAvatar(friendId: String, avatarId: String){
+        val resAvatar = sessionManager.request(avatarId, apiAvatarInterface::getAvatar)
+        if (resAvatar.code() == HttpsURLConnection.HTTP_OK) {
+            val avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
+            friendsAvatars[friendId] = BitmapConversion.toRoundedBitmap(avatar)
+        }
+    }
+
     fun addPlayer(player: Player) {
         if (gameAvatars.containsKey(player.accountId))
             return

@@ -57,7 +57,7 @@
         android:id="@+id/dmBtn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_send_message"
+        android:src="@drawable/ic_sent"
         android:backgroundTint="@color/tab_grey"
         app:layout_constraintRight_toLeftOf="@id/deleteBtn"
         app:layout_constraintTop_toTopOf="parent"

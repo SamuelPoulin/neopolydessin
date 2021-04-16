@@ -17,9 +17,13 @@ class FriendsAdapter(private val friends: List<FriendSimplified>,
                      private val clickFriendCallback: (FriendSimplified) -> Unit,
                      private val acceptFriendRequestCallback: (String) -> Unit,
                      private val refuseFriendRequestCallback: (String) -> Unit,
+                     private val deleteFriendCallback: (String) -> Unit,
+                     private val inviteCallback: (String) -> Unit,
                      private val connectedColor: Int,
                      private val disconnectedColor: Int,
                      private val defaultAvatar: Bitmap) : RecyclerView.Adapter<FriendsAdapter.ViewHolderFriend>() {
+
+    var canInvite: Boolean = false
 
     class ViewHolderFriend(listItemView: View) : RecyclerView.ViewHolder(listItemView) {
         val iconView: ImageView? = itemView.findViewById(R.id.icon)
@@ -58,7 +62,15 @@ class FriendsAdapter(private val friends: List<FriendSimplified>,
                     holder.statusView!!.backgroundTintList = ColorStateList.valueOf(connectedColor)
                 else
                     holder.statusView!!.backgroundTintList = ColorStateList.valueOf(disconnectedColor)
+                val inviteBtn = holder.itemView.findViewById<ImageButton>(R.id.inviteBtn)
+                if (canInvite) {
+                    inviteBtn.visibility = View.VISIBLE
+                    inviteBtn.setOnClickListener { inviteCallback(friend.friendId) }
+                } else
+                    inviteBtn.visibility = View.INVISIBLE
+
                 holder.dmBtn!!.setOnClickListener { clickFriendCallback(friend) }
+                holder.itemView.findViewById<ImageButton>(R.id.deleteBtn).setOnClickListener { deleteFriendCallback(friend.friendId) }
             }
             FriendStatus.PENDING_RECEIVED.ordinal -> {
                 holder.itemView.findViewById<ImageButton>(R.id.acceptBtn).setOnClickListener { acceptFriendRequestCallback(friend.friendId) }

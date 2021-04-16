@@ -1,7 +1,9 @@
 package com.projet.clientleger.ui.friendslist
 
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.material.snackbar.Snackbar
 import com.projet.clientleger.data.enumData.FriendStatus
 import com.projet.clientleger.data.enumData.FriendsAction
 import com.projet.clientleger.data.model.friendslist.Friend
@@ -11,6 +13,7 @@ import com.projet.clientleger.data.repository.FriendslistRepository
 import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.AvatarStorageService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -31,6 +34,20 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
                 }
             }
         }
+        friendslistRepository.receiveAvatarNotificatino().subscribe{ pair ->
+            CoroutineScope(Job() + Dispatchers.IO).launch {
+                avatarStorageService.updateFriendAvatar(pair.first, pair.second)
+                friendsLiveData.value?.let { friends ->
+                    (friends.find { it.friendId == pair.first } as FriendSimplified).avatar = avatarStorageService.getFriendAvatar(pair.first)
+                    friendsLiveData.postValue(friends)
+                }
+            }
+        }
+
+    }
+
+    fun receiveInvite(): Observable<Pair<String, String>> {
+        return friendslistRepository.receiveInvite()
     }
 
     private fun getFriendslist() {
@@ -41,6 +58,10 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
     private fun showNotification(notification: FriendNotification) {
 
+    }
+
+    suspend fun deleteFriend(friendId: String){
+        updateFriends(friendslistRepository.deleteFriend(friendId))
     }
 
     suspend fun sendFriendRequest(friendUsername: String) {
@@ -82,5 +103,9 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
     fun playSound(soundId: Int) {
         audioService.playSound(soundId)
+    }
+
+    fun inviteFriend(friendId: String){
+        friendslistRepository.inviteFriend(friendId)
     }
 }

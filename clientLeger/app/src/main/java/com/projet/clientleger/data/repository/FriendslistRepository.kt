@@ -58,4 +58,20 @@ class FriendslistRepository @Inject constructor(private val friendslistSocketSer
     fun receiveNotification(): Observable<FriendNotification>{
         return friendslistSocketService.receiveNotification()
     }
+
+    fun receiveAvatarNotificatino(): Observable<Pair<String, String>> {
+        return friendslistSocketService.receiveAvatarNotification()
+    }
+
+    suspend fun deleteFriend(friendId: String): ArrayList<Friend> {
+        return sendRequest(friendId, apiFriendslistInterface::deleteFriend)
+    }
+
+    fun inviteFriend(friendId: String){
+        friendslistSocketService.inviteFriend(friendId)
+    }
+
+    fun receiveInvite(): Observable<Pair<String, String>> {
+        return friendslistSocketService.receiveInvite()
+    }
 }

@@ -28,6 +28,7 @@ import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.databinding.ActivityMainmenuBinding
+import com.projet.clientleger.ui.IAcceptGameInviteListener
 import com.projet.clientleger.ui.accountmanagement.view.AccountManagementActivity
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.game.view.GameTutorialActivity
@@ -55,13 +56,10 @@ const val INTRO_START_GAME_MESSAGE =
     "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
 
 @AndroidEntryPoint
-class MainmenuActivity : AppCompatActivity() {
+class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
     var selectedGameType: GameType = GameType.CLASSIC
     var selectedDifficulty: Difficulty = Difficulty.EASY
     lateinit var binding: ActivityMainmenuBinding
-
-    @Inject
-    lateinit var friendslistFragment: FriendslistFragment
     val vm: MainMenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,12 +74,7 @@ class MainmenuActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        supportFragmentManager.commit {
-            add(R.id.friendslistContainer, friendslistFragment, "friendslist")
-        }
-
         startService(Intent(this, ChatStorageService::class.java))
-        setupButtons()
 
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
@@ -108,16 +101,6 @@ class MainmenuActivity : AppCompatActivity() {
         binding.userGuideBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
             startTutorial()
-        }
-    }
-
-    private fun setupButtons() {
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.friendslistBtn -> friendslistFragment.toggleVisibility()
-                R.id.addFriendBtn -> friendslistFragment.showAddFriendDialog()
-            }
-            true
         }
     }
 
@@ -244,5 +227,12 @@ class MainmenuActivity : AppCompatActivity() {
         stopService(Intent(this, ChatStorageService::class.java))
         vm.disconnect()
         super.onDestroy()
+    }
+
+    override fun acceptInvite(info: Pair<String, String>) {
+        intent = Intent(this, LobbyActivity::class.java)
+        intent.putExtra("lobbyId", info.second)
+        intent.putExtra("isJoining", true)
+        startActivity(intent)
     }
 }
