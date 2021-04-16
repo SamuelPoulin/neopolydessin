@@ -28,10 +28,13 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageButton
+                    android:id="@+id/avatar"
                     android:layout_width="match_parent"
                     android:layout_height="126dp"
                     android:backgroundTint="@color/white"
-                    android:src="@drawable/ic_missing_player" />
+                    android:src="@drawable/ic_missing_player"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"/>
                 <TextView
                     android:id="@+id/username"
                     android:layout_width="match_parent"

@@ -2,6 +2,7 @@ package com.projet.clientleger.ui.accountmanagement.view
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.viewModels
@@ -23,6 +24,7 @@ import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
 import com.projet.clientleger.ui.accountmanagement.settings.SettingsFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_account_management.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -65,6 +67,7 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
         }
         lifecycleScope.launch{
             vm.getAccountInfos()
+            binding.avatar.setImageBitmap(vm.getAvatarBitmap())
             binding.username.text = vm.accountInfos.username
             binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
             binding.email.text = vm.accountInfos.email
@@ -73,6 +76,18 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
         binding.logoutBtn.setOnClickListener {
             finish()
         }
+        binding.avatar.setOnClickListener {
+            val photoPickerIntent = Intent(Intent.ACTION_PICK)
+            photoPickerIntent.type = "image/*"
+            startActivityForResult(photoPickerIntent, RESULT_OK)
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val imageUri = data!!.data
+        val imageStream = contentResolver.openInputStream(imageUri!!)
+        val selectedImage = BitmapFactory.decodeStream(imageStream)
+        binding.avatar.setImageBitmap(selectedImage)
     }
     fun fetchAccountInfos(){
         lifecycleScope.launch{
