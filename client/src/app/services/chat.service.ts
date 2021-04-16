@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Decision } from '@common/communication/friend-request';
 import { FriendsList, FriendStatus } from '@common/communication/friends';
+import { FriendNotification, NotificationType } from '@common/socketendpoints/socket-friend-actions';
 import { ChatRoomType } from '@models/chat/chat-room';
 import { ChatState } from '@models/chat/chat-state';
 import { ElectronService } from 'ngx-electron';
@@ -32,6 +33,7 @@ export class ChatService {
   chatRoomsSubscription: Subscription;
   canGuessChangedSubscription: Subscription;
   invitationSubscription: Subscription;
+  notificationSubscription: Subscription;
 
   joinedGameSubscription: Subscription;
   leftGameSubscription: Subscription;
@@ -175,13 +177,47 @@ export class ChatService {
           verticalPosition: 'bottom',
         })
         .afterDismissed()
-        .subscribe(() => {
-          this.socketService.joinLobby(invitation.lobbyId).then((lobbyInfo) => {
-            this.gameService.setGameInfo(lobbyInfo);
-            this.router.navigate([`/lobby/${lobbyInfo.lobbyId}`]);
-          });
+        .subscribe((action) => {
+          if (action.dismissedByAction) {
+            this.socketService.joinLobby(invitation.lobbyId).then((lobbyInfo) => {
+              this.gameService.setGameInfo(lobbyInfo);
+              this.router.navigate([`/lobby/${lobbyInfo.lobbyId}`]);
+            });
+          }
         });
       this.audiovisualService.playSound(GameSound.INVITATION_RECEIVED);
+    });
+
+    this.notificationSubscription = this.socketService.receiveNotifications().subscribe((notification: FriendNotification) => {
+      switch (notification.type) {
+        case NotificationType.userConnected:
+        case NotificationType.userDisconnected: {
+          this.apiService.getFriendsList().then((friendslist) => {
+            this.updateFriendsList(friendslist);
+          });
+          break;
+        }
+        case NotificationType.requestReceived: {
+          this.apiService.getPublicAccount(notification.friendId).then((account) => {
+            this.snackBar.open(`${account.username} vous a envoyé une requête d'amitié.`, 'Ok', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
+          });
+          break;
+        }
+        case NotificationType.requestAccepted: {
+          this.apiService.getPublicAccount(notification.friendId).then((account) => {
+            this.snackBar.open(`${account.username} a accepté votre demande d'amitié.`, 'Ok', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
+          });
+          break;
+        }
+      }
     });
 
     this.joinedGameSubscription = this.socketService.joinedGame.subscribe(() => {
