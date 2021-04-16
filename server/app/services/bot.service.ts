@@ -41,11 +41,7 @@ export class BotService {
   }
 
   resetDrawing(): void {
-    clearInterval(this.pathTimer);
-    this.currentCoordIndex = -1;
-    this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hints = [];
-    this.bots[this.currentBot].hintIndex = 0;
+    this.resetDrawingWithoutBotQuote();
     this.bots[this.currentBot].onResetDrawing();
   }
 
@@ -112,11 +108,19 @@ export class BotService {
           if (this.currentSegmentIndex < this.drawing.stack.length) {
             this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
           } else {
-            this.resetDrawing();
+            this.resetDrawingWithoutBotQuote();
           }
         }
       };
     }, this.bots[this.currentBot].drawDelay);
+  }
+
+  private resetDrawingWithoutBotQuote(): void {
+    clearInterval(this.pathTimer);
+    this.currentCoordIndex = -1;
+    this.currentSegmentIndex = 0;
+    this.bots[this.currentBot].hints = [];
+    this.bots[this.currentBot].hintIndex = 0;
   }
 
 }

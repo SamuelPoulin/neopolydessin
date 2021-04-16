@@ -12,7 +12,6 @@ export class TeamComponent {
   @Input() scoreIndex: number;
   @Input() teamIndex: number;
   @Input() name: string;
-  @Input() hideScore: boolean;
   @Input() ennemy: boolean;
 
   constructor(public gameService: GameService) {
@@ -44,7 +43,4 @@ export class TeamComponent {
     return this.gameService.scores[this.scoreIndex].score;
   }
 
-  get showScore() {
-    return this.hideScore !== undefined && !this.hideScore;
-  }
 }

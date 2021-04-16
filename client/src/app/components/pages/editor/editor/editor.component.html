@@ -28,10 +28,9 @@
       </div>
       <div id="game-area-teams-container">
         <div id="game-area-teams">
-          <app-team [team]="gameService.teams[0]" [scoreIndex]="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"
-            [hideScore]="!splitTeams"></app-team>
+          <app-team [team]="gameService.teams[0]" [scoreIndex]="0" [name]="splitTeams ? 'Équipe 1' : 'Joueurs'"></app-team>
           <ng-container *ngIf="splitTeams">
-            <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy [hideScore]="false">
+            <app-team [team]="gameService.teams[1]" [scoreIndex]="1" name="Équipe 2" ennemy>
             </app-team>
           </ng-container>
         </div>
