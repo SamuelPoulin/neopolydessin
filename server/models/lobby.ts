@@ -362,7 +362,7 @@ export abstract class Lobby {
     socket.on(SocketLobby.SEND_INVITE, async (friendId: string) => {
       const friendSocket = this.socketIdService.GetSocketIdOfAccountId(friendId);
       const playerId = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-      if (friendSocket && playerId) {
+      if (friendSocket && playerId && this.gameType !== GameType.SPRINT_SOLO) {
         const playerInviting = this.findPlayerById(playerId);
         if (playerInviting) {
           socket.to(friendSocket).emit(SocketLobby.RECEIVE_INVITE, playerInviting.username, this.lobbyId);

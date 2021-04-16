@@ -43,7 +43,6 @@ export class ChatFriendComponent {
   }
 
   invite() {
-    console.log('Inviting');
     if (this.friend.friendId?._id) {
       this.chatService.inviteFriend(this.friend.friendId._id);
     }
