@@ -4,6 +4,8 @@ import confetti, { Options } from 'canvas-confetti';
 export enum GameSound {
   CLAP = 'clap.mp3',
   AWW = 'aww.mp3',
+  CHAT_NOTIFICATION = 'chat-message.ogg',
+  INVITATION_RECEIVED = 'invite-received.ogg',
 }
 
 interface ConfettiXRange {

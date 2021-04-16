@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from '@components/shared/shared.module';
 import { APIService } from '@services/api.service';
 import { MockAPIService } from '@services/api.service.spec';
@@ -15,7 +16,7 @@ describe('ChatFriendComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedModule],
+      imports: [SharedModule, MatTooltipModule],
       declarations: [ChatFriendComponent],
       providers: [
         { provide: APIService, useValue: MockAPIService },

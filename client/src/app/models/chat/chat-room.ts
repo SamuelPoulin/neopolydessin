@@ -5,6 +5,7 @@ export interface ChatRoom {
   id: string;
   type: ChatRoomType;
   messages: Message[];
+  newMessage: boolean;
 }
 
 export interface PrivateChatRoom {
