@@ -59,11 +59,14 @@ class DashboardFragment @Inject constructor(): Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity = context as AccountManagementActivity
+        if(isAccountDefined){
+            setupEntries()
+        }
     }
 
     override fun onStart() {
         if(isAccountDefined){
-            setBarChart()
+            applyAccountValues(accountDashboard)
         }
         super.onStart()
     }
@@ -128,7 +131,6 @@ class DashboardFragment @Inject constructor(): Fragment() {
         binding!!.averageGameTime.text = activity.formatTimeMinSecFormat(account.gameHistory.averageGameTime)
         setBarChart()
         isAccountDefined = true
-        //setupConnectionAdapter()
         showHistoryDialog.setOnClickListener {
             showHistoryDialog()
         }
