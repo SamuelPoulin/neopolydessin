@@ -55,6 +55,22 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         socketService.socket.emit(LobbySocketEndpoints.LEAVE_LOBBY.value)
     }
 
+    fun addBot(teamNumber: Int){
+        socketService.socket.emit(LobbySocketEndpoints.ADD_BOT.value, teamNumber, Ack{})
+    }
+
+    fun removeBot(username: String){
+        socketService.socket.emit(LobbySocketEndpoints.REMOVE_BOT.value, username)
+    }
+
+    fun kickPlayer(playerId: String){
+        socketService.socket.emit(LobbySocketEndpoints.KICK_PLAYER.value, playerId)
+    }
+
+    fun receiveKick(): Observable<Unit> {
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_KICK.value){}
+    }
+
     fun receiveAllLobbies(gameType: GameType?, difficulty: Difficulty?): Observable<ArrayList<LobbyInfo>> {
         return Observable.create { emitter ->
             val obj = JSONObject()
