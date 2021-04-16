@@ -67,6 +67,10 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.playSound(SoundId.START_GAME.value)
             goToGame()
         }
+
+        vm.receiveKick().subscribe{
+            leaveLobby(false)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +125,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
             vm.playSound(SoundId.ERROR.value)
-            leaveLobby()
+            leaveLobby(true)
         }
     }
 
@@ -145,8 +149,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onBackPressed() {
         loadingDialog?.let {
-            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
-            leaveLobby()
+            leaveLobby(true)
         }
     }
 
@@ -164,9 +167,10 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.startGameButton.visibility = View.INVISIBLE
     }
 
-    private fun leaveLobby() {
+    private fun leaveLobby(requestNeeded: Boolean = true) {
         vm.playSound(SoundId.ERROR.value)
-        vm.leaveLobby()
+        if(requestNeeded)
+            vm.leaveLobby()
         chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         finish()
     }
@@ -186,7 +190,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 }
             }
 
-            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer,
+            rvTeams[i].adapter = TeamAdapter(teams[i], vm::kickPlayer,
                     vm.getAccountInfo(),
                     ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
                     ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
@@ -246,10 +250,6 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         nextActivityIntent = intent
         startActivity(intent)
         finish()
-    }
-
-    private fun kickPlayer(player: PlayerInfo) {
-        println("kic: ${player.username}")
     }
 
     override fun onDestroy() {

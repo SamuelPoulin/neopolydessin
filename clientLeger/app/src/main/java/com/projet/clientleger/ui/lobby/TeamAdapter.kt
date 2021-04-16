@@ -14,7 +14,7 @@ import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 
 class TeamAdapter(private val players: List<PlayerInfo>,
-                  private val removePlayerCallback: (PlayerInfo) -> Unit,
+                  private val removePlayerCallback: (String) -> Unit,
                   private val userInfo: AccountInfo,
                   private val isOwnerIcon: Drawable,
                   private val isBotIcon: Drawable,
@@ -51,7 +51,7 @@ class TeamAdapter(private val players: List<PlayerInfo>,
                 else {
                     holder.attributeIcon.visibility = View.INVISIBLE
                     holder.removePlayerBtn.visibility = View.VISIBLE
-                    holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(players[position]) }
+                    holder.removePlayerBtn.setOnClickListener { removePlayerCallback.invoke(players[position].accountId) }
                 }
             } else {
                 holder.attributeIcon.visibility = View.INVISIBLE

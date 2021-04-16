@@ -96,10 +96,14 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         lobbyRepository.clearAvatarStorage()
     }
 
-    fun kickPlayer(){
-        lobbyRepository.kickPlayer()
+    fun kickPlayer(playerId: String){
+        lobbyRepository.kickPlayer(playerId)
     }
     fun playSound(soundId:Int){
         audioService.playSound(soundId)
+    }
+
+    fun receiveKick(): Observable<Unit> {
+        return lobbyRepository.receiveKick()
     }
 }
