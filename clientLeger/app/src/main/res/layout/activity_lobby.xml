@@ -79,6 +79,14 @@
                 </LinearLayout>
 
                 <Button
+                    android:id="@+id/privacyBtn"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="partie public"/>
+
+                <Button
                     android:id="@+id/startGameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -92,7 +100,8 @@
                     android:id="@+id/difficulty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/difficulty" />
+                    android:text="@string/difficulty"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 

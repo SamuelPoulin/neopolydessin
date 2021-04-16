@@ -128,4 +128,13 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
         }
     }
 
+    fun sendPrivacySetting(isPrivate: Boolean){
+        socketService.socket.emit(LobbySocketEndpoints.SEND_PRIVACY_SETTING.value, isPrivate)
+    }
+
+    fun receivePrivacySetting(): Observable<Boolean> {
+        return socketService.receiveFromSocket(LobbySocketEndpoints.RECEIVE_PRIVACY_SETTING.value){ (isPrivate) ->
+            isPrivate as Boolean
+        }
+    }
 }
