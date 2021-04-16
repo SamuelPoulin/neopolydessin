@@ -108,4 +108,12 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
     }
+
+    fun sendPrivacySetting(isPrivate: Boolean){
+        lobbySocketService.sendPrivacySetting(isPrivate)
+    }
+
+    fun receivePrivacySetting(): Observable<Boolean> {
+        return lobbySocketService.receivePrivacySetting()
+    }
 }

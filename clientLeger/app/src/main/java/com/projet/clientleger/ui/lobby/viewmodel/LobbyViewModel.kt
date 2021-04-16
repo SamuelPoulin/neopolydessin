@@ -34,13 +34,16 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     lateinit var gameType: GameType
     lateinit var difficulty: Difficulty
     lateinit var gameName: String
-    var isPrivate: Boolean = false
+    val isPrivate: MutableLiveData<Boolean> = MutableLiveData()
     lateinit var lobbyId: String
-    private var userIsOwner: Boolean = false
+    val userIsOwner: MutableLiveData<Boolean> = MutableLiveData(false)
 
     init {
         lobbyRepository.receiveJoinedLobbyInfo().subscribe{
             updatePlayers(it)
+        }
+        lobbyRepository.receivePrivacySetting().subscribe{
+            isPrivate.postValue(it)
         }
     }
 
@@ -49,7 +52,7 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     }
 
     fun createGame(): Observable<LobbyInfo> {
-        return lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
+        return lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate.value!!)
     }
 
     fun unsubscribe(){
@@ -85,13 +88,13 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun updateOwner(owner: PlayerInfo){
         val oldValue = userIsOwner
-        userIsOwner = owner.accountId == getAccountInfo().accountId
+        userIsOwner.postValue(owner.accountId == getAccountInfo().accountId)
         if(oldValue != userIsOwner)
             addBotAddBtn(false)
     }
 
     private fun addBotAddBtn(isInUpdate: Boolean){
-        if(userIsOwner){
+        if(userIsOwner.value!!){
             for((index, team) in teams.withIndex()) {
                 val teamArray = team.value!!
                 if(teamArray.size < 2 && teamArray.find { it.isBot } == null && teamArray.find { it.username.isEmpty() && it.accountId.isEmpty()} == null)
@@ -131,5 +134,9 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
 
     fun removeBot(username: String){
         lobbyRepository.removeBot(username)
+    }
+
+    fun togglePrivacySetting(){
+        lobbyRepository.sendPrivacySetting(!isPrivate.value!!)
     }
 }

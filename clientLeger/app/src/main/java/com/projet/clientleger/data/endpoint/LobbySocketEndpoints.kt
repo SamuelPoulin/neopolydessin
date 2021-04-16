@@ -14,5 +14,7 @@ enum class LobbySocketEndpoints(val value: String) {
     KICK_PLAYER("removePlayer"),
     RECEIVE_KICK("playerRemoved"),
     ADD_BOT("addBot"),
-    REMOVE_BOT("removeBot")
+    REMOVE_BOT("removeBot"),
+    SEND_PRIVACY_SETTING("privacySetting"),
+    RECEIVE_PRIVACY_SETTING("changedPrivacy")
 }
