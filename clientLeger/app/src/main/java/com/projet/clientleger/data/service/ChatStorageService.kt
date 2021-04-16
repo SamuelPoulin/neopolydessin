@@ -86,7 +86,6 @@ class ChatStorageService @Inject constructor() : Service() {
         }
         chatRepository.receivePrivateMessage().subscribe {
             val chatVersion = messageIdToMessageChat(it)
-            // TODO
             val convoId: String = if (it.senderAccountId != accountInfo.accountId) it.senderAccountId else it.receiverAccountId
             val tabInfo = TabInfo(chatVersion.senderUsername, convoId, TabType.FRIEND)
             receiveMessage(chatVersion, tabInfo)
@@ -118,12 +117,14 @@ class ChatStorageService @Inject constructor() : Service() {
         val newMessageConvo = convos.find { it.tabInfo.convoId == tabInfo.convoId }
         if (newMessageConvo != null) {
             newMessageConvo.messages.add(newMessage)
+            if(currentConvo?.tabInfo?.convoId != newMessageConvo.tabInfo.convoId)
+                newMessageConvo.tabInfo.hasNotif = true
         } else{
             if(!isSystem){
                 addNewConvo(tabInfo, false)
-                notifyUpdateTab(tabInfo.convoId)
             }
         }
+
         emitConvosChange()
         emitCurrentConvoChange()
 
@@ -151,6 +152,7 @@ class ChatStorageService @Inject constructor() : Service() {
         if (convos.find { it.tabInfo.convoId == tabInfo.convoId } == null) {
             if(tabInfo.tabType != TabType.GAME){
                 getHistory(tabInfo).subscribe { messages ->
+                    tabInfo.hasNotif = true
                     convos.add(Convo(tabInfo, messages))
                     emitConvosChange()
                     if (isSelected)
@@ -218,8 +220,10 @@ class ChatStorageService @Inject constructor() : Service() {
     fun changeSelectedConvo(tabInfo: TabInfo?) {
         val convo = convos.find { it.tabInfo.convoId == tabInfo?.convoId }
         if (convo != null) {
+            convo.tabInfo.hasNotif = false
             currentConvo = convo
             emitCurrentTabChange()
+            emitConvosChange()
         }
     }
 
@@ -236,14 +240,6 @@ class ChatStorageService @Inject constructor() : Service() {
     private fun emitCurrentTabChange() {
         for (listener in currentTabListeners)
             listener.invoke(currentConvo?.tabInfo)
-    }
-
-    private fun notifyUpdateTab(convoId: String) {
-        // TODO
-    }
-
-    private fun addMessageIdToList(messageId: MessageId, list: ArrayList<IMessage>) {
-        list.add(MessageChat(messageId.content, messageId.timestamp, messageId.senderAccountId))
     }
 
     fun clear() {
