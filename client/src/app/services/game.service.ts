@@ -46,10 +46,7 @@ export class GameService {
     this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
     this.canStartGame = false;
-    this.scores = [
-      { teamNumber: 0, score: 0 },
-      { teamNumber: 1, score: 0 },
-    ];
+    this.resetScores();
     this.initSubscriptions();
   }
 
@@ -119,6 +116,13 @@ export class GameService {
     this.teams = [[], []];
   }
 
+  resetScores() {
+    this.scores = [
+      { teamNumber: 0, score: 0 },
+      { teamNumber: 1, score: 0 },
+    ];
+  }
+
   startGame() {
     this.socketService.startGame();
   }
@@ -169,6 +173,7 @@ export class GameService {
   }
 
   setGameInfo(lobbyInfo: LobbyInfo) {
+    this.resetScores();
     this.gameType = lobbyInfo.gameType;
     this.difficulty = lobbyInfo.difficulty;
     this.privacy = lobbyInfo.private;

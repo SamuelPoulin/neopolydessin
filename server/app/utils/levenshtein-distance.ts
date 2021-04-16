@@ -16,6 +16,8 @@ Code taken here : https://gist.github.com/andrei-m/982927 submitted by user milo
 */
 
 export const levenshtein = (a: string, b: string) => {
+  a = a.toLowerCase();
+  b = b.toLowerCase();
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
 
