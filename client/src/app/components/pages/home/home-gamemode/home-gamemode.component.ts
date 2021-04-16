@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Difficulty, GameType } from '@common/communication/lobby';
+import { Difficulty, GameType, LobbyInfo } from '@common/communication/lobby';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { GameService } from '@services/game.service';
 import { SocketService } from '@services/socket-service.service';
@@ -56,8 +56,8 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
     const privacy: boolean = this.privateGame === 0 ? false : true;
     this.socketService
       .createLobby(this.lobbyName, this.gamemode, this.difficulty, privacy)
-      .then(() => {
-        this.gameService.setGameInfo(this.gamemode, this.difficulty, privacy);
+      .then((lobbyInfo: LobbyInfo) => {
+        this.gameService.setGameInfo(lobbyInfo);
         this.dialogRef.close();
         this.router.navigate(['lobby']);
         if (this.tutorialService.tutorialActive) {

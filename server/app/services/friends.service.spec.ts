@@ -183,21 +183,18 @@ describe('Friends Service', () => {
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends[0].isOnline).to.be.true;
                 expect(friendList.documents.friends[0].status).to.equal(FriendStatus.PENDING);
                 expect(sendFriendListToStub.calledOnce).to.be.true;
                 return friendsService.acceptFriendship(otherId, myId);
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends[0].isOnline).to.be.true;
                 expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
                 expect(sendFriendListToStub.calledTwice).to.be.true;
                 return friendsService.getFriendsOfUser(myId);
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends[0].isOnline).to.be.true;
                 expect(friendList.documents.friends[0].status).to.equal(FriendStatus.FRIEND);
                 expect(sendFriendListToStub.calledTwice).to.be.true;
                 done();
@@ -244,7 +241,6 @@ describe('Friends Service', () => {
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends[0].isOnline).to.be.true;
                 expect(friendList.documents.friends[0].received).to.be.false;
                 expect(friendList.documents.friends[0].friendId).to.not.be.null;
                 expect(sendFriendListToStub.calledOnce).to.be.true;
@@ -252,7 +248,6 @@ describe('Friends Service', () => {
             })
             .then((friendList: Response<FriendsList>) => {
                 expect(friendList.statusCode).to.equal(OK);
-                expect(friendList.documents.friends[0].isOnline).to.be.true;
                 expect(friendList.documents.friends[0].received).to.be.true;
                 expect(friendList.documents.friends[0].friendId).to.not.be.null;
                 expect(sendFriendListToStub.calledOnce).to.be.true;

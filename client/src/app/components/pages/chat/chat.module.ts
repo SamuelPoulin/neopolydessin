@@ -1,5 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from '../../shared/shared.module';
 import { ChatMessageComponent } from './chat-message/chat-message.component';
 import { ChatComponent } from './chat/chat.component';
@@ -14,7 +15,7 @@ import { ChatCreateChatRoomComponent } from './chat-create-chat-room/chat-create
 import { ChatRoomComponent } from './chat-room/chat-room.component';
 
 @NgModule({
-  imports: [SharedModule, PickerModule],
+  imports: [SharedModule, PickerModule, MatTooltipModule],
   declarations: [
     ChatComponent,
     ChatMessageComponent,

@@ -47,8 +47,8 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
         return lobbyRepository.accountInfo
     }
 
-    fun createGame() {
-        lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
+    fun createGame(): Observable<LobbyInfo> {
+        return lobbyRepository.createGame(gameName, gameType, difficulty, isPrivate)
     }
 
     fun unsubscribe(){
@@ -84,8 +84,8 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
     }
 
 
-    fun joinGame(){
-        lobbyRepository.joinLobby(lobbyId)
+    fun joinLobby(): Observable<LobbyInfo> {
+        return lobbyRepository.joinLobby(lobbyId)
     }
 
     fun receiveJoinedLobbyInfo(): Observable<ArrayList<PlayerInfo>> {

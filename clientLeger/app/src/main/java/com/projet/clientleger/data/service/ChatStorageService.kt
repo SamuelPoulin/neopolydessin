@@ -15,6 +15,7 @@ import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
+import com.projet.clientleger.data.repository.RoomslistRepository
 import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
@@ -39,6 +40,9 @@ class ChatStorageService @Inject constructor() : Service() {
 
     @Inject
     lateinit var audioService: AudioService
+
+    @Inject
+    lateinit var roomslistRepository: RoomslistRepository
 
     private val convos: ArrayList<Convo> = ArrayList()
     lateinit var accountInfo: AccountInfo
@@ -70,11 +74,11 @@ class ChatStorageService @Inject constructor() : Service() {
     private fun receiveMsgSubscriptions() {
         chatRepository.receivePlayerConnection().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
-            receiveMessage(it, tabInfo)
+            receiveMessage(it, tabInfo, isSystem = true)
         }
         chatRepository.receivePlayerDisconnection().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
-            receiveMessage(it, tabInfo)
+            receiveMessage(it, tabInfo, isSystem = true)
         }
         chatRepository.receiveMessage().subscribe {
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
@@ -192,6 +196,8 @@ class ChatStorageService @Inject constructor() : Service() {
         if (convoToRemove != null) {
             if (convoToRemove.tabInfo.convoId == currentConvo?.tabInfo?.convoId)
                 changeSelectedConvo(convos.find { it.tabInfo.convoId != convoId }?.tabInfo)
+            if(convoToRemove.tabInfo.tabType == TabType.ROOM)
+                roomslistRepository.leaveRoom(convoId)
             convos.removeIf { it.tabInfo.convoId == convoId }
             emitConvosChange()
         }
@@ -265,6 +271,13 @@ class ChatStorageService @Inject constructor() : Service() {
         }
         else{
             audioService.playSound(SoundId.ERROR.value)
+        }
+    }
+
+    fun updateRooms(rooms: ArrayList<String>){
+        for(convo in convos){
+            if(convo.tabInfo.tabType == TabType.ROOM && rooms.find { it == convo.tabInfo.convoId } == null)
+                removeConvo(convo.tabInfo.convoId)
         }
     }
 }

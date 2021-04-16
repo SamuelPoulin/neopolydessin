@@ -6,7 +6,7 @@ import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { FriendsList } from '../../common/communication/friends';
+import { Friend, FriendsList, FriendWithConnection } from '../../common/communication/friends';
 import { Lobby } from '../models/lobby';
 import { NotificationType, SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
@@ -119,6 +119,23 @@ export class SocketIo {
     }
   }
 
+  checkOnlineStatus(friends: Friend[]): FriendWithConnection[] {
+    return friends.map((friend) => {
+      let isOnline: boolean = false;
+      if (friend && friend.friendId) {
+        if (this.socketIdService.GetSocketIdOfAccountId(friend.friendId._id.toString())) {
+          isOnline = true;
+        }
+      }
+      return {
+        friendId: friend.friendId,
+        status: friend.status,
+        received: friend.received,
+        isOnline
+      } as FriendWithConnection;
+    });
+  }
+
   private bindIoEvents(): void {
     this.io.on(SocketConnection.CONNECTION, (socket: Socket) => {
 
@@ -132,44 +149,46 @@ export class SocketIo {
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));
       });
 
-      socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string) => {
+      socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string, callback: (lobbyInfo: LobbyInfo | null) => void) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
         if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
           lobbyToJoin.addPlayer(playerId, socket);
+          callback(lobbyToJoin.getLobbySummary());
         } else {
-          console.error('couldn\'t add player to lobby');
+          callback(null);
         }
       });
 
-      socket.on(SocketLobby.CREATE_LOBBY,
-        async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean) => {
-          let lobby: Lobby;
-          const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-          if (playerId) {
-            switch (gametype) {
-              case GameType.CLASSIC: {
-                lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
-              case GameType.SPRINT_SOLO: {
-                lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
-              case GameType.SPRINT_COOP: {
-                lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
-                  difficulty, privacySetting, lobbyName);
-                break;
-              }
+      socket.on(SocketLobby.CREATE_LOBBY, async (lobbyName: string, gametype: GameType, difficulty: Difficulty, privacySetting: boolean,
+        callback: (lobbyInfo: LobbyInfo | null) => void) => {
+        let lobby: Lobby;
+        const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
+        if (playerId) {
+          switch (gametype) {
+            case GameType.CLASSIC: {
+              lobby = new LobbyClassique(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
             }
-            lobby.addPlayer(playerId, socket);
-            this.lobbyList.push(lobby);
-          } else {
-            console.error('player doesn\'t exist');
+            case GameType.SPRINT_SOLO: {
+              lobby = new LobbySolo(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
+            }
+            case GameType.SPRINT_COOP: {
+              lobby = new LobbyCoop(this.socketIdService, this.databaseService, this.pictureWordService, this.io,
+                difficulty, privacySetting, lobbyName);
+              break;
+            }
           }
-        });
+          lobby.addPlayer(playerId, socket);
+          this.lobbyList.push(lobby);
+          callback(lobby.getLobbySummary());
+        } else {
+          callback(null);
+        }
+      });
 
       socket.on(SocketMessages.SEND_PRIVATE_MESSAGE, (sentMsg: PrivateMessageTo) => {
         if (this.validateMessageLength(sentMsg)) {
@@ -230,6 +249,15 @@ export class SocketIo {
       loginsModel.addLogin(accountId)
         .then(() => { SocketIo.CLIENT_CONNECTED.notify(socket); })
         .catch((err) => { throw Error(err); });
+
+      this.databaseService.getAccountById(accountId)
+        .then((account) => {
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId,
+            friends: account.documents.friends,
+            type: NotificationType.userConnected
+          });
+        });
     } catch (err) {
       console.error(err.message);
       socket.disconnect();
@@ -251,6 +279,14 @@ export class SocketIo {
   private onDisconnect(socket: Socket) {
     const accountIdOfSocket = this.socketIdService.GetAccountIdOfSocketId(socket.id);
     if (accountIdOfSocket) {
+      this.databaseService.getAccountById(accountIdOfSocket)
+        .then((account) => {
+          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
+            accountId: accountIdOfSocket,
+            friends: account.documents.friends,
+            type: NotificationType.userDisconnected
+          });
+        });
       this.socketIdService.DisconnectAccountIdSocketId(socket.id);
       loginsModel.addLogout(accountIdOfSocket)
         .then(() => { SocketIo.CLIENT_DISCONNECTED.notify(socket); })

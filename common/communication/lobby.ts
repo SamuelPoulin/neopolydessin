@@ -8,6 +8,7 @@ export interface LobbyInfo {
   gameType: GameType;
   difficulty: Difficulty;
   maxSize: number;
+  private: boolean;
 }
 
 export interface Player extends Entity {

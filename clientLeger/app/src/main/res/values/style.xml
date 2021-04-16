@@ -88,4 +88,10 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/messageInfo</item>
     </style>
+
+    <style name="friendRoot">
+        <item name="android:layout_marginVertical">5dp</item>
+        <item name="android:background">@color/chat_header_black</item>
+        <item name="android:backgroundTint">@color/chat_header_black</item>
+    </style>
 </resources>

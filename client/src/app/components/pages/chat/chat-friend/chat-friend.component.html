@@ -19,13 +19,13 @@
         </ng-container>
       </ng-container>
       <ng-container *ngSwitchCase="friendStatus.FRIEND">
-        <button mat-icon-button class="chat-friend-button" (click)="invite()">
+        <button mat-icon-button class="chat-friend-button" matTooltip="Inviter" matTooltipPosition="below" (click)="invite()">
           <mat-icon>sports_esports</mat-icon>
         </button>
-        <button mat-icon-button class="chat-friend-button" (click)="chat()">
+        <button mat-icon-button class="chat-friend-button" matTooltip="Discuter" matTooltipPosition="below" (click)="chat()">
           <mat-icon>send</mat-icon>
         </button>
-        <button mat-icon-button class="chat-friend-button" (click)="unfriend()">
+        <button mat-icon-button class="chat-friend-button" matTooltip="Enlever" matTooltipPosition="below"  (click)="unfriend()">
           <mat-icon>person_remove</mat-icon>
         </button>
       </ng-container>

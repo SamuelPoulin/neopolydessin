@@ -29,6 +29,9 @@ export class LobbyClassique extends Lobby {
   private drawingTeamNumber: number;
   private drawers: Entity[];
 
+  private guessTries: number;
+  private guessLeft: number;
+
   private drawPhaseTime: number;
   private replyPhaseTime: number;
 
@@ -45,6 +48,8 @@ export class LobbyClassique extends Lobby {
     this.gameType = GameType.CLASSIC;
     this.size = this.GAME_SIZE_MAP.get(this.gameType) as number;
     const diffMods = this.DIFFICULTY_MODIFIERS.get(difficulty) as DifficultyModifiers;
+    this.guessTries = diffMods.guessTries;
+    this.guessLeft = this.guessTries;
     this.drawPhaseTime = diffMods.classicTime;
     this.replyPhaseTime = diffMods.replyTime;
     this.timeLeftSeconds = this.drawPhaseTime;
@@ -107,19 +112,25 @@ export class LobbyClassique extends Lobby {
           case 1:
           case 2: {
             guessStatus = GuessResponse.CLOSE;
+            this.guessLeft--;
             if (this.currentGameState === CurrentGameState.REPLY) {
               this.startRoundTimer();
             } else {
-              this.startReply();
+              if (this.guessLeft <= 0) {
+                this.startReply();
+              }
             }
             break;
           }
           default: {
             guessStatus = GuessResponse.WRONG;
+            this.guessLeft--;
             if (this.currentGameState === CurrentGameState.REPLY) {
               this.startRoundTimer();
             } else {
-              this.startReply();
+              if (this.guessLeft <= 0) {
+                this.startReply();
+              }
             }
             break;
           }
@@ -131,7 +142,7 @@ export class LobbyClassique extends Lobby {
           senderUsername: guesser.username
         };
         this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
-        this.botService.playerGuess(guessStatus);
+        this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
       }
     });
   }
@@ -142,6 +153,7 @@ export class LobbyClassique extends Lobby {
   }
 
   protected startRoundTimer() {
+    this.guessLeft = this.guessTries;
     this.setRoles();
     this.drawingCommands.resetDrawing();
     this.pictureWordService.getRandomWord(this.difficulty).then((pictureWord) => {

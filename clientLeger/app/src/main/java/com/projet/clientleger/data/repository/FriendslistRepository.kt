@@ -7,8 +7,10 @@ import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
 import com.projet.clientleger.data.api.socket.FriendslistSocketService
 import com.projet.clientleger.data.enumData.FriendRequestDecision
-import com.projet.clientleger.data.model.Friend
-import com.projet.clientleger.data.model.Friendslist
+import com.projet.clientleger.data.model.friendslist.Friend
+import com.projet.clientleger.data.model.friendslist.FriendNotification
+import com.projet.clientleger.data.model.friendslist.FriendSimplified
+import com.projet.clientleger.data.model.friendslist.Friendslist
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 import kotlin.reflect.KSuspendFunction1
@@ -51,5 +53,25 @@ class FriendslistRepository @Inject constructor(private val friendslistSocketSer
 
     fun updateFriendslist(): Observable<ArrayList<Friend>> {
         return friendslistSocketService.updateFriendslist()
+    }
+
+    fun receiveNotification(): Observable<FriendNotification>{
+        return friendslistSocketService.receiveNotification()
+    }
+
+    fun receiveAvatarNotificatino(): Observable<Pair<String, String>> {
+        return friendslistSocketService.receiveAvatarNotification()
+    }
+
+    suspend fun deleteFriend(friendId: String): ArrayList<Friend> {
+        return sendRequest(friendId, apiFriendslistInterface::deleteFriend)
+    }
+
+    fun inviteFriend(friendId: String){
+        friendslistSocketService.inviteFriend(friendId)
+    }
+
+    fun receiveInvite(): Observable<Pair<String, String>> {
+        return friendslistSocketService.receiveInvite()
     }
 }

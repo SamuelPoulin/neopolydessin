@@ -20,7 +20,7 @@ export class ChatTabComponent implements OnInit {
     if (this.room) {
       this.closable = this.room.type === ChatRoomType.PRIVATE || this.room.type === ChatRoomType.GROUP;
     } else {
-      this.room = { name: '', id: '', type: ChatRoomType.GENERAL, messages: [] };
+      this.room = { name: '', id: '', type: ChatRoomType.GENERAL, messages: [], newMessage: false };
     }
   }
 

@@ -1,8 +1,9 @@
 package com.projet.clientleger.data.endpoint
 
-enum class FriendslistSocketEndpoint(val endpoint: String) {
-    FRIEND_REQUEST_RECEIVED("friendRequestReceived"),
-    FRIEND_REQUEST_ACCEPTED("friendRequestAccept"),
-    FRIEND_REQUEST_REFUSED("friendRequestRefused"),
-    UPDATE("updateFriendList")
+enum class FriendslistSocketEndpoint(val value: String) {
+    UPDATE("updateFriendList"),
+    RECEIVE_NOTIFICATION("notification"),
+    RECEIVE_AVATAR_NOTIFICATION("invalidateAvatar"),
+    INVITE_FRIEND("sendInviteToFriend"),
+    RECEIVE_INVITE("receiveInviteFromFriend")
 }

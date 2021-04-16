@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { CurrentGameState, Difficulty, GameType, Player, PlayerRole, TeamScore } from '@common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole, TeamScore } from '@common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
@@ -46,10 +46,7 @@ export class GameService {
     this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
     this.canStartGame = false;
-    this.scores = [
-      { teamNumber: 0, score: 0 },
-      { teamNumber: 1, score: 0 },
-    ];
+    this.resetScores();
     this.initSubscriptions();
   }
 
@@ -119,6 +116,13 @@ export class GameService {
     this.teams = [[], []];
   }
 
+  resetScores() {
+    this.scores = [
+      { teamNumber: 0, score: 0 },
+      { teamNumber: 1, score: 0 },
+    ];
+  }
+
   startGame() {
     this.socketService.startGame();
   }
@@ -168,10 +172,11 @@ export class GameService {
     }
   }
 
-  setGameInfo(gameType: GameType, difficulty: Difficulty, privacy: boolean) {
-    this.gameType = gameType;
-    this.difficulty = difficulty;
-    this.privacy = privacy;
+  setGameInfo(lobbyInfo: LobbyInfo) {
+    this.resetScores();
+    this.gameType = lobbyInfo.gameType;
+    this.difficulty = lobbyInfo.difficulty;
+    this.privacy = lobbyInfo.private;
     this.canStartGame = GameType.CLASSIC === this.gameType ? false : true;
   }
 

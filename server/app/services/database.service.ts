@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import gameHistoryModel, { GameHistory } from '../../models/schemas/game-history';
@@ -18,7 +18,8 @@ import * as jwtUtils from '../utils/jwt-util';
 import { DashBoardInfo, Game, GameHistoryDashBoard, GameResult } from '../../../common/communication/dashboard';
 import { GameType } from '../../../common/communication/lobby';
 import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
-
+import Types from '../types';
+import { SocketIdService } from './socket-id.service';
 export interface Response<T> {
   statusCode: number;
   documents: T;
@@ -41,7 +42,9 @@ export class DatabaseService {
 
   readonly SALT_ROUNDS: number = 10;
 
-  constructor() {
+  constructor(
+    @inject(Types.SocketIdService) private socketIdService: SocketIdService,
+  ) {
     if (process.env.NODE_ENV !== 'test') {
       this.connectDB();
     }
@@ -247,11 +250,10 @@ export class DatabaseService {
       let account: Account;
       let jwtToken: string;
       let jwtRefreshToken: string;
-      let friends: AccountFriend[];
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
-          friends = account.friends;
+          if (this.socketIdService.GetSocketIdOfAccountId(account.id)) throw Error(UNAUTHORIZED.toString());
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
@@ -269,7 +271,6 @@ export class DatabaseService {
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({ accountId: account.id, friends, type: NotificationType.userConnected });
           resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
@@ -314,14 +315,6 @@ export class DatabaseService {
         .findOneAndDelete({ token: refreshToken })
         .then(async (doc: Refresh) => {
           if (!doc) throw Error(NOT_FOUND.toString());
-          return this.getAccountById(doc.accountId);
-        })
-        .then((account) => {
-          DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
-            accountId: account.documents._id,
-            friends: account.documents.friends,
-            type: NotificationType.userDisconnected,
-          });
           resolve(true);
         })
         .catch((err: Error) => {

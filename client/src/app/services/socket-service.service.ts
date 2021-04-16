@@ -10,7 +10,12 @@ import { BrushInfo } from '@common/communication/brush-info';
 import { ChatMessage, Message, SystemMessage } from '@common/communication/chat-message';
 import { SocketLobby } from '@common/socketendpoints/socket-lobby';
 import { FriendsList } from '@common/communication/friends';
-import { SocketFriendActions } from '@common/socketendpoints/socket-friend-actions';
+import {
+  FriendNotification,
+  NotificationType,
+  SocketFriendActions,
+  SocketFriendListNotifications,
+} from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
 import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
@@ -107,15 +112,29 @@ export class SocketService {
     });
   }
 
-  receiveChatRooms(): Observable<string[]> {
+  async getChatRooms(): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => resolve(chatRooms));
+    });
+  }
+
+  chatRoomsUpdated(): Observable<string[]> {
     return new Observable<string[]>((obs) => {
-      this.socket.emit(SocketMessages.GET_CHAT_ROOMS, (chatRooms: string[]) => obs.next(chatRooms));
+      this.socket.on(SocketMessages.CHAT_ROOMS_UPDATED, (chatRooms: string[]) => obs.next(chatRooms));
     });
   }
 
   receiveNextTimestamp(): Observable<TimeInfo> {
     return new Observable<TimeInfo>((obs) => {
       this.socket.on(SocketLobby.SET_TIME, (timeInfo: TimeInfo) => obs.next(timeInfo));
+    });
+  }
+
+  receiveNotifications(): Observable<FriendNotification> {
+    return new Observable<FriendNotification>((obs) => {
+      this.socket.on(SocketFriendListNotifications.NOTIFICATION_RECEIVED, (type: NotificationType, friendId: string) => {
+        obs.next({ type, friendId });
+      });
     });
   }
 
@@ -143,9 +162,17 @@ export class SocketService {
     });
   }
 
-  joinLobby(lobbyId: string) {
-    this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId);
-    this.joinedGame.emit();
+  async joinLobby(lobbyId: string): Promise<LobbyInfo> {
+    return new Promise<LobbyInfo>((resolve, reject) => {
+      this.socket.emit(SocketLobby.JOIN_LOBBY, lobbyId, (lobbyInfo: LobbyInfo | null) => {
+        if (lobbyInfo) {
+          resolve(lobbyInfo);
+          this.joinedGame.emit();
+        } else {
+          reject();
+        }
+      });
+    });
   }
 
   async changeLobbyPrivacy(privateGame: boolean): Promise<boolean> {
@@ -256,11 +283,16 @@ export class SocketService {
     this.socket.emit(SocketLobby.LOADING_OVER);
   }
 
-  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy);
-      this.joinedGame.emit();
-      resolve();
+  async createLobby(name: string, gameMode: GameType, difficulty: Difficulty, privacy: boolean): Promise<LobbyInfo> {
+    return new Promise<LobbyInfo>((resolve, reject) => {
+      this.socket.emit(SocketLobby.CREATE_LOBBY, name, gameMode, difficulty, privacy, (lobbyInfo: LobbyInfo | null) => {
+        if (lobbyInfo) {
+          resolve(lobbyInfo);
+          this.joinedGame.emit();
+        } else {
+          reject();
+        }
+      });
     });
   }
 

@@ -17,6 +17,7 @@ import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.lobby.LobbyInfo
 import com.projet.clientleger.databinding.ActivitySearchLobbyBinding
+import com.projet.clientleger.ui.IAcceptGameInviteListener
 import com.projet.clientleger.ui.friendslist.FriendslistFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import com.projet.clientleger.ui.lobbylist.viewmodel.SearchLobbyViewModel
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SearchLobbyActivity : AppCompatActivity() {
+class SearchLobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     private val vm: SearchLobbyViewModel by viewModels()
     private var lobbyList = ArrayList<LobbyInfo>()
@@ -102,5 +103,12 @@ class SearchLobbyActivity : AppCompatActivity() {
     override fun onDestroy() {
         vm.unsubscribe()
         super.onDestroy()
+    }
+    override fun acceptInvite(info: Pair<String, String>) {
+        intent = Intent(this, LobbyActivity::class.java)
+        intent.putExtra("lobbyId", info.second)
+        intent.putExtra("isJoining", true)
+        startActivity(intent)
+        finish()
     }
 }

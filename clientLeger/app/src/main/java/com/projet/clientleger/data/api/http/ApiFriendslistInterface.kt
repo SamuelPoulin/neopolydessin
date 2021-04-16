@@ -3,8 +3,9 @@ package com.projet.clientleger.data.api.http
 import com.projet.clientleger.data.api.model.FriendRequestDecisionModel
 import com.projet.clientleger.data.api.model.FriendRequestModel
 import com.projet.clientleger.data.api.model.chat.MessageHistory
-import com.projet.clientleger.data.model.Friendslist
-import com.projet.clientleger.data.model.chat.MessageChat
+import com.projet.clientleger.data.model.friendslist.Friendslist
+import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -22,4 +23,7 @@ interface ApiFriendslistInterface {
     suspend fun getFriendChatHistory(@Query("page") pageNumber: Int,
                                      @Query("otherId") friendId: String,
                                      @Query("limit") messagePerPage: Int): Response<MessageHistory>
+
+    @DELETE("api/database/friends/{id}")
+    suspend fun deleteFriend(@Path("id") id: String): Response<Friendslist>
 }
