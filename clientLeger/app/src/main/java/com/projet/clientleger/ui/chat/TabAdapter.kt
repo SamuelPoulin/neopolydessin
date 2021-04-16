@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
@@ -19,6 +20,7 @@ class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<Tab
     var removeCallback: ((String) -> Unit)? = null
     var changeTabCallback: ((TabInfo) -> Unit)? = null
     class ViewHolderTab(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val notifIcon: ImageView = itemView.findViewById(R.id.notificationIcon)
         val rootView: View = itemView
         val tabTextView: TextView = itemView.findViewById(R.id.tabName)
         val selectedUnderline: FrameLayout = itemView.findViewById(R.id.selectedUnderline)
@@ -32,25 +34,31 @@ class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<Tab
 
     override fun onBindViewHolder(holder: ViewHolderTab, position: Int) {
         holder.tabTextView.text = convos[position].tabInfo.convoName
+        val convo = convos[position]
         val tabId = selectedTab?.convoId ?: ""
 
-        if(convos[position].tabInfo.tabType == TabType.STATIC_ROOM || convos[position].tabInfo.tabType == TabType.GAME)
+        if(convo.tabInfo.tabType == TabType.STATIC_ROOM || convo.tabInfo.tabType == TabType.GAME)
             holder.closeBtn.visibility = View.GONE
         else
             holder.closeBtn.visibility = View.VISIBLE
 
-        if(convos[position].tabInfo.convoId != tabId)
-            holder.selectedUnderline.visibility = View.INVISIBLE
+        if(convo.tabInfo.convoId != tabId)
+            holder.selectedUnderline.visibility = View.GONE
         else
-            holder. selectedUnderline.visibility = View.VISIBLE
+            holder.selectedUnderline.visibility = View.VISIBLE
+
+        if(convo.tabInfo.hasNotif)
+            holder.notifIcon.visibility = View.VISIBLE
+        else
+            holder.notifIcon.visibility = View.GONE
 
         holder.rootView.setOnClickListener {
-            changeTabCallback?.invoke(convos[position].tabInfo)
+            changeTabCallback?.invoke(convo.tabInfo)
         }
         holder.closeBtn.setOnClickListener {
-            removeCallback?.invoke(convos[position].tabInfo.convoId)
+            removeCallback?.invoke(convo.tabInfo.convoId)
         }
-        items.add(Pair(convos[position].tabInfo.convoId, holder.selectedUnderline))
+        items.add(Pair(convo.tabInfo.convoId, holder.selectedUnderline))
     }
 
     override fun getItemCount(): Int {
@@ -59,10 +67,10 @@ class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<Tab
 
     fun setSelectedTabIndex(tabInfo: TabInfo){
         selectedTab = tabInfo
-
         for(item in items){
-            if(item.first == tabInfo.convoId)
+            if(item.first == tabInfo.convoId){
                 item.second.visibility = View.VISIBLE
+            }
             else
                 item.second.visibility = View.GONE
         }
