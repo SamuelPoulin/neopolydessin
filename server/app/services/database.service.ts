@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import bcrypt from 'bcrypt';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import gameHistoryModel, { GameHistory } from '../../models/schemas/game-history';
@@ -18,7 +18,8 @@ import * as jwtUtils from '../utils/jwt-util';
 import { DashBoardInfo, Game, GameHistoryDashBoard, GameResult } from '../../../common/communication/dashboard';
 import { GameType } from '../../../common/communication/lobby';
 import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
-
+import Types from '../types';
+import { SocketIdService } from './socket-id.service';
 export interface Response<T> {
   statusCode: number;
   documents: T;
@@ -41,7 +42,9 @@ export class DatabaseService {
 
   readonly SALT_ROUNDS: number = 10;
 
-  constructor() {
+  constructor(
+    @inject(Types.SocketIdService) private socketIdService: SocketIdService,
+  ) {
     if (process.env.NODE_ENV !== 'test') {
       this.connectDB();
     }
@@ -250,6 +253,7 @@ export class DatabaseService {
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
+          if (this.socketIdService.GetSocketIdOfAccountId(account.id)) throw Error(UNAUTHORIZED.toString());
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
