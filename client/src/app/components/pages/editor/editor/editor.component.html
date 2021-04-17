@@ -1,6 +1,6 @@
 <app-tutorial></app-tutorial>
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
-  <app-status-bar quit previousPage=""></app-status-bar>
+  <app-status-bar quit previousPage="" disableDashboard></app-status-bar>
 
   <ng-container *ngIf="gameService.canDraw || editorService.isFreeEdit">
     <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType

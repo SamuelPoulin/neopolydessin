@@ -95,15 +95,12 @@ export class APIService {
   }
 
   async refreshAccessToken(refreshToken: string | undefined): Promise<string> {
-    console.log('Refreshing...');
     return new Promise<string>((resolve, reject) => {
       this.http.post(APIService.API_REFRESH_ROUTE, { refreshToken }).subscribe(
         (response: { accessToken: string }) => {
-          console.log('Refreshed!');
           resolve(response.accessToken);
         },
         (e) => {
-          console.log('Could not refresh!');
           reject(e);
         },
       );

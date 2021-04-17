@@ -11,6 +11,7 @@ import { UserService } from '@services/user.service';
 })
 export class StatusBarComponent {
   @Input() quit: boolean;
+  @Input() disableDashboard: boolean;
   @Input() back: boolean;
   @Input() previousPage: string;
 

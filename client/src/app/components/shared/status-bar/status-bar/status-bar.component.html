@@ -16,8 +16,10 @@
     <div id="account-username">{{username}}</div>
   </div>
   <div id="status-bar-filler"></div>
-  <button mat-flat-button id="dashboard-button" class="menu-button" [routerLink]="'/account'">
-    <mat-icon class="menu-button-icon">manage_accounts</mat-icon>
-    Tableau de bord
-  </button>
+  <ng-container *ngIf="disableDashboard === undefined">
+    <button mat-flat-button id="dashboard-button" class="menu-button" [routerLink]="'/account'">
+      <mat-icon class="menu-button-icon">manage_accounts</mat-icon>
+      Tableau de bord
+    </button>
+  </ng-container>
 </div>
