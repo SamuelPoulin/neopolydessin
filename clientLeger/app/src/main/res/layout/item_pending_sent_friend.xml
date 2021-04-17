@@ -22,7 +22,7 @@
         android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        style="@style/friendUsername"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent" />
