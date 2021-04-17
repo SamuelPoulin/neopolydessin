@@ -30,10 +30,12 @@ export abstract class CreatorTool extends Tool {
     this.addShape();
   }
 
-  applyShape(): void {
+  applyShape(undoRedoAble: boolean = true): void {
     this.updateProperties();
     if (this.shape) {
-      this.editorService.commandReceiver.push(new AddShapesCommand(this.shape, this.editorService));
+      if (undoRedoAble) {
+        this.editorService.commandReceiver.push(new AddShapesCommand(this.shape, this.editorService));
+      }
       this.editorService.applyShapesBuffer();
     }
     this.shape = undefined;
@@ -46,8 +48,4 @@ export abstract class CreatorTool extends Tool {
     }
   }
 
-  cancelShape(): void {
-    this.editorService.clearShapesBuffer();
-    this.isActive = false;
-  }
 }

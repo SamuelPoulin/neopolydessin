@@ -56,9 +56,9 @@ export abstract class Lobby {
   ]);
 
   readonly DIFFICULTY_MODIFIERS: Map<Difficulty, DifficultyModifiers> = new Map<Difficulty, DifficultyModifiers>([
-    [Difficulty.EASY, { timeAddedOnCorrectGuess: 30, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
-    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 20, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
-    [Difficulty.HARD, { timeAddedOnCorrectGuess: 10, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
+    [Difficulty.EASY, { timeAddedOnCorrectGuess: 10, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
+    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 10, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
+    [Difficulty.HARD, { timeAddedOnCorrectGuess: 5, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
   ]);
 
   lobbyId: string;
@@ -66,13 +66,13 @@ export abstract class Lobby {
   difficulty: Difficulty;
   privateLobby: boolean;
   lobbyName: string;
+  currentGameState: CurrentGameState;
 
   protected io: Server;
   protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
   protected wordToGuess: string;
-  protected currentGameState: CurrentGameState;
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
   protected gameStartTime: number;
@@ -265,6 +265,7 @@ export abstract class Lobby {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id) {
         this.currentGameState = CurrentGameState.IN_GAME;
+        SocketIo.UPDATE_GAME_LIST.notify();
         this.gameStartTime = Date.now();
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
       }
