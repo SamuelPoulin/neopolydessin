@@ -50,6 +50,9 @@ export class PenTool extends CreatorTool {
       });
 
     this.updateSubscription = this.editorService.socketService.receiveUpdatePath().subscribe((coord: Coordinate) => {
+      if (!this.shape) {
+        this.startShape(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
+      }
       this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
     });
 
