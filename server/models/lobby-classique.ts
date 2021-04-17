@@ -147,11 +147,6 @@ export class LobbyClassique extends Lobby {
     });
   }
 
-  protected unbindLobbyEndPoints(socket: Socket) {
-    super.unbindLobbyEndPoints(socket);
-    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-  }
-
   protected startRoundTimer() {
     this.guessLeft = this.guessTries;
     this.setRoles();
