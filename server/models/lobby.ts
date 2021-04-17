@@ -35,6 +35,7 @@ export interface ServerPlayer extends Player {
 
 const DEFAULT_TEAM_SIZE: number = 4;
 const SOLO_TEAM_SIZE: number = 2;
+const COOP_TEAM_SIZE: number = 5;
 
 export interface DifficultyModifiers {
   timeAddedOnCorrectGuess: number;
@@ -52,7 +53,7 @@ export abstract class Lobby {
   readonly GAME_SIZE_MAP: Map<GameType, number> = new Map<GameType, number>([
     [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
     [GameType.SPRINT_SOLO, SOLO_TEAM_SIZE],
-    [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
+    [GameType.SPRINT_COOP, COOP_TEAM_SIZE]
   ]);
 
   readonly DIFFICULTY_MODIFIERS: Map<Difficulty, DifficultyModifiers> = new Map<Difficulty, DifficultyModifiers>([
@@ -395,9 +396,7 @@ export abstract class Lobby {
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
     socket.removeAllListeners(SocketDrawing.ERASE_ID);
-    socket.removeAllListeners(SocketDrawing.ERASE_ID_BC);
     socket.removeAllListeners(SocketDrawing.ADD_PATH);
-    socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
     socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
     socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
