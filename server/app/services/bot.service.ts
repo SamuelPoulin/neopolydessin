@@ -45,6 +45,14 @@ export class BotService {
     this.bots[this.currentBot].onResetDrawing();
   }
 
+  resetDrawingWithoutBotQuote(): void {
+    clearInterval(this.pathTimer);
+    this.currentCoordIndex = -1;
+    this.currentSegmentIndex = 0;
+    this.bots[this.currentBot].hints.length = 0;
+    this.bots[this.currentBot].hintIndex = 0;
+  }
+
   pause(): void {
     clearInterval(this.pathTimer);
   }
@@ -113,14 +121,6 @@ export class BotService {
         }
       };
     }, this.bots[this.currentBot].drawDelay);
-  }
-
-  private resetDrawingWithoutBotQuote(): void {
-    clearInterval(this.pathTimer);
-    this.currentCoordIndex = -1;
-    this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hints = [];
-    this.bots[this.currentBot].hintIndex = 0;
   }
 
 }
