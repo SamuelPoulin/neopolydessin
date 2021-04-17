@@ -135,7 +135,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         } else {
             visibility = View.GONE
             action = resources.getString(R.string.join)
-            title = resources.getString(R.string.joinGame)
+            title = resources.getString(R.string.lobbyList)
         }
         val dialogView = layoutInflater.inflate(R.layout.dialog_gamemode, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()

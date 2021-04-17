@@ -87,7 +87,7 @@
                 style="@style/MenuBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/joinGame"
+                android:text="@string/lobbyList"
                 android:drawableLeft="@drawable/ic_list_white"
                 app:layout_constraintBottom_toTopOf="@+id/userGuideBtn"
                 app:layout_constraintLeft_toLeftOf="parent"

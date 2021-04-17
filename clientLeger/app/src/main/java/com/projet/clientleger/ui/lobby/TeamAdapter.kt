@@ -71,13 +71,6 @@ class TeamAdapter(private val players: List<PlayerInfo>,
         }
     }
 
-    fun updateGameOwner(owner: PlayerInfo?) {
-        userIsOwner = if (owner == null)
-            false
-        else
-            owner.accountId == userInfo.accountId
-    }
-
     override fun getItemCount(): Int {
         return players.size
     }
