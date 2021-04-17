@@ -144,7 +144,7 @@ export class SocketIo {
       this.chatRoomService.bindIoEvents(socket);
 
       socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbiesCallback: LobbyInfo[]) => void) => {
-        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby || lobby.currentGameState === CurrentGameState.LOBBY);
+        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby && lobby.currentGameState === CurrentGameState.LOBBY);
         lobbies = lobbyOpts.gameType ? lobbies.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
         lobbies = lobbyOpts.difficulty ? lobbies.filter((lobby) => lobby.difficulty === lobbyOpts.difficulty) : lobbies;
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));
