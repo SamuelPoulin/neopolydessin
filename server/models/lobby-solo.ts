@@ -117,11 +117,6 @@ export class LobbySolo extends Lobby {
     });
   }
 
-  protected unbindLobbyEndPoints(socket: Socket) {
-    super.unbindLobbyEndPoints(socket);
-    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-  }
-
   protected startRoundTimer() {
     this.pictureWordService.getRandomWord(this.difficulty)
       .then((pictureWord) => {

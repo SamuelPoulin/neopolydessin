@@ -54,7 +54,7 @@ export class LobbyClassique extends Lobby {
     this.replyPhaseTime = diffMods.replyTime;
     this.timeLeftSeconds = this.drawPhaseTime;
     this.teamScores = [0, 0];
-    this.drawingTeamNumber = 0;
+    this.drawingTeamNumber = -1;
     this.drawers = [];
   }
 
@@ -105,7 +105,6 @@ export class LobbyClassique extends Lobby {
             if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
               this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
             }
-            this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
             this.startRoundTimer();
             break;
           }
@@ -147,12 +146,8 @@ export class LobbyClassique extends Lobby {
     });
   }
 
-  protected unbindLobbyEndPoints(socket: Socket) {
-    super.unbindLobbyEndPoints(socket);
-    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-  }
-
   protected startRoundTimer() {
+    this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.guessLeft = this.guessTries;
     this.setRoles();
     this.drawingCommands.resetDrawing();
@@ -209,7 +204,6 @@ export class LobbyClassique extends Lobby {
 
   private endReplyTimer() {
     clearInterval(this.clockTimeout);
-    this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.startRoundTimer();
   }
 
