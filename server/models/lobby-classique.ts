@@ -146,11 +146,6 @@ export class LobbyClassique extends Lobby {
     });
   }
 
-  protected unbindLobbyEndPoints(socket: Socket) {
-    super.unbindLobbyEndPoints(socket);
-    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
-  }
-
   protected startRoundTimer() {
     this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.guessLeft = this.guessTries;

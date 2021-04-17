@@ -151,7 +151,7 @@ export class EditorService {
 
   applyShapesBuffer(): void {
     this.shapes.push(...this.shapesBuffer);
-    this.shapesBuffer = [];
+    this.shapesBuffer.length = 0;
     this.clearShapesBuffer();
   }
 
@@ -163,8 +163,8 @@ export class EditorService {
     };
     this.shapesBuffer.forEach(removeShapes);
     this.previewShapes.forEach(removeShapes);
-    this.shapesBuffer = [];
-    this.previewShapes = [];
+    this.shapesBuffer.length = 0;
+    this.previewShapes.length = 0;
   }
 
   checkTutorial(): void {

@@ -392,16 +392,21 @@ export abstract class Lobby {
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
+    socket.removeAllListeners(SocketLobby.ADD_BOT);
+    socket.removeAllListeners(SocketLobby.REMOVE_BOT);
+    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
+    socket.removeAllListeners(SocketLobby.REMOVE_PLAYER);
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
     socket.removeAllListeners(SocketDrawing.ERASE_ID);
     socket.removeAllListeners(SocketDrawing.ADD_PATH);
-    socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
-    socket.removeAllListeners(SocketLobby.LOADING_OVER);
+    socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.SEND_INVITE);
+    socket.removeAllListeners(SocketLobby.LOADING_OVER);
+    socket.removeAllListeners(SocketLobby.LEAVE_LOBBY);
+    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {
@@ -410,9 +415,14 @@ export abstract class Lobby {
 
   protected endGame(reason: ReasonEndGame): void {
     this.updatePlayersGameHistory(reason).then(() => {
-      this.currentGameState = CurrentGameState.GAME_OVER;
       clearInterval(this.clockTimeout);
+      this.currentGameState = CurrentGameState.GAME_OVER;
       this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
+      this.players.forEach((player) => {
+        if (!player.isBot) {
+          this.unbindLobbyEndPoints((player as ServerPlayer).socket);
+        }
+      });
       SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
     });
   }

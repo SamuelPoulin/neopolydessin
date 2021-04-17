@@ -119,7 +119,7 @@ export class BotService {
     clearInterval(this.pathTimer);
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hints = [];
+    this.bots[this.currentBot].hints.length = 0;
     this.bots[this.currentBot].hintIndex = 0;
   }
 
