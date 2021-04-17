@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
 import { APIService } from '@services/api.service';
-import { PictureWordDrawing, PictureWordPath, PictureWordPicture } from '@common/communication/picture-word';
+import { PictureWordDrawing, PictureWordPath, PictureWordPicture, UpdatePictureWord } from '@common/communication/picture-word';
 import { Difficulty } from '@common/communication/lobby';
 import { DrawMode } from '@common/communication/draw-mode';
 import { Color } from '@utils/color/color';
@@ -23,8 +23,8 @@ import { ImageString } from '@utils/color/image-string';
 export class PictureWordUploadComponent extends AbstractModalComponent {
   static readonly DEFAULT_THRESHOLD: number = 200;
 
-  readonly size: number = 600;
-  dataUploaded: boolean = false;
+  readonly size: number = 500;
+  drawingId: string = '';
   displayPreview: boolean = false;
   imageString: SafeResourceUrl = ImageString.WHITE;
   sequence: DrawingSequence;
@@ -55,43 +55,60 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       const blob = new Blob([this.editorService.view.svg.outerHTML], { type: 'image/svg+xml' });
       this.imageString = sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
     }
+
+    this.dialogRef
+      .beforeClosed()
+      .toPromise()
+      .then(() => {
+        this.cancel();
+      });
   }
 
   async save(): Promise<void> {
-    if (this.dataUploaded) {
-      return this.update();
+    if (this.drawingId) {
+      return this.update(this.drawingId);
     } else {
       return this.upload();
     }
   }
 
-  exit(): void {
-    this.dialogRef.close();
-    /* this.save().then(() => {     // todo - use when update implemented
-      this.dialogRef.close();
-    });*/
+  cancel(): void {
+    if (this.drawingId) {
+      this.api.deleteDrawing(this.drawingId);
+    }
   }
 
-  async update(): Promise<void> {
-    // todo - add update method
-    return this.upload();
+  exit(): void {
+    this.save().then(() => {
+      this.dialogRef.close();
+    });
+  }
+
+  async update(id: string): Promise<void> {
+    const data: UpdatePictureWord = {
+      word: this.word,
+      hints: this.hints,
+      difficulty: this.difficulty,
+      drawMode: this.drawMode,
+      color: this.color.hexString,
+    };
+
+    return this.api.updateDrawing(id, data).then((sequence) => {
+      this.displayPreview = true;
+      this.drawPreview(sequence);
+    });
   }
 
   async upload(): Promise<void> {
     this.hints = ['1', '2', '3'];
     this.color = Color.BLACK;
 
-    if (this.dialogRef.id === 'drawing') {
-      return this.uploadDrawing().then((id) => {
-        this.dataUploaded = true;
-        this.showPreview(id);
-      });
-    } else {
-      return this.uploadPicture().then((id) => {
-        this.dataUploaded = true;
-        this.showPreview(id);
-      });
-    }
+    const upload = this.dialogRef.id === 'drawing' ? this.uploadDrawing() : this.uploadPicture();
+
+    return upload.then((id) => {
+      this.drawingId = id;
+      this.showPreview(id);
+    });
   }
 
   private async uploadDrawing(): Promise<string> {

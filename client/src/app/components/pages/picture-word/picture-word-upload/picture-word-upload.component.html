@@ -31,7 +31,7 @@
   </div>
   <div actions id="actions">
     <button id="btn-preview" mat-stroked-button (click)="togglePreview()">
-  <mat-icon id="btn-image-icon">preview</mat-icon>
+      <mat-icon id="btn-image-icon">preview</mat-icon>
     </button>
  
     <button *ngIf="dialogRef.id !== 'drawing'" id="btn-image" mat-stroked-button (click)="openUpload()">
@@ -44,7 +44,7 @@
       Enregistrer
     </button>
 
-    <button id="btn-confirm" mat-stroked-button (click)="exit()" [disabled]="!dataUploaded">
+    <button id="btn-confirm" mat-stroked-button (click)="exit()" [disabled]="!drawingId">
       Terminer
     </button>
   </div>
