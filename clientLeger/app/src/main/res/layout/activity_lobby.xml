@@ -24,8 +24,7 @@
             android:elevation="4dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:menu="@menu/friendslist_menu"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <FrameLayout
             android:id="@+id/buttonPanel"
@@ -80,6 +79,14 @@
                 </LinearLayout>
 
                 <Button
+                    android:id="@+id/privacyBtn"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="partie public"/>
+
+                <Button
                     android:id="@+id/startGameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -93,7 +100,8 @@
                     android:id="@+id/difficulty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/difficulty" />
+                    android:text="@string/difficulty"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 

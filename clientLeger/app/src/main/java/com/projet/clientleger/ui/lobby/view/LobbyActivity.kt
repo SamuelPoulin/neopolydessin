@@ -67,6 +67,30 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.playSound(SoundId.START_GAME.value)
             goToGame()
         }
+
+        vm.receiveKick().subscribe {
+            leaveLobby(false)
+        }
+
+        vm.isPrivate.observe(this){
+            if(it){
+                binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
+                binding.privacyBtn.text = "Partie privée"
+            } else{
+                binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
+                binding.privacyBtn.text = "Partie publique"
+            }
+        }
+
+        vm.userIsOwner.observe(this){ isOwner ->
+            if(isOwner){
+                binding.startGameButton.visibility = View.VISIBLE
+                binding.privacyBtn.visibility = View.VISIBLE
+            } else{
+                binding.startGameButton.visibility = View.INVISIBLE
+                binding.privacyBtn.visibility = View.INVISIBLE
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,7 +145,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
         binding.toolbar.setNavigationOnClickListener {
             vm.playSound(SoundId.ERROR.value)
-            leaveLobby()
+            leaveLobby(true)
         }
     }
 
@@ -131,7 +155,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.toolbar.title = vm.gameName
         vm.gameType = lobbyInfo.gameType
         vm.difficulty = lobbyInfo.difficulty
-        vm.isPrivate = lobbyInfo.isPrivate
+        vm.isPrivate.postValue(lobbyInfo.isPrivate)
     }
 
     private fun fetchIntentData() {
@@ -140,13 +164,12 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         vm.gameType = (intent.getSerializableExtra("gameType") as GameType?) ?: GameType.CLASSIC
         vm.difficulty = (intent.getSerializableExtra("difficulty") as Difficulty?)
                 ?: Difficulty.EASY
-        vm.isPrivate = intent.getBooleanExtra("isPrivate", false)
+        vm.isPrivate.value = intent.getBooleanExtra("isPrivate", false)
     }
 
     override fun onBackPressed() {
         loadingDialog?.let {
-            chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
-            leaveLobby()
+            leaveLobby(true)
         }
     }
 
@@ -164,9 +187,10 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.startGameButton.visibility = View.INVISIBLE
     }
 
-    private fun leaveLobby() {
+    private fun leaveLobby(requestNeeded: Boolean = true) {
         vm.playSound(SoundId.ERROR.value)
-        vm.leaveLobby()
+        if (requestNeeded)
+            vm.leaveLobby()
         chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
         finish()
     }
@@ -177,8 +201,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         rvTeams = arrayOf(binding.teamContent1, binding.teamContent2)
         for (i in rvTeams.indices) {
             rvTeams[i].layoutManager = LinearLayoutManager(this)
-            val teamBackground: Drawable? = if (vm.gameType != GameType.CLASSIC)
-                null
+            val teamBackground: Drawable = if (vm.gameType != GameType.CLASSIC)
+                ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
             else {
                 when (i) {
                     0 -> ContextCompat.getDrawable(this, R.drawable.blue_team_playerinfo_background)!!
@@ -186,24 +210,16 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 }
             }
 
-            rvTeams[i].adapter = TeamAdapter(teams[i], ::kickPlayer,
+            rvTeams[i].adapter = TeamAdapter(teams[i], vm::addBot, vm::kickPlayer, vm::removeBot,
                     vm.getAccountInfo(),
                     ContextCompat.getDrawable(this, R.drawable.ic_is_owner)!!,
                     ContextCompat.getDrawable(this, R.drawable.ic_bot_player)!!,
-                    teamBackground)
+                    teamBackground, vm.gameType == GameType.CLASSIC)
 
             vm.teams[i].observe(this) { players ->
                 val owner = players.find { it.isOwner }
                 if (owner != null) {
-                    for (team in rvTeams) {
-                        team.adapter?.let { teamAdapter ->
-                            (teamAdapter as TeamAdapter).updateGameOwner(owner)
-                            binding.startGameButton.visibility = when (owner.accountId == vm.getAccountInfo().accountId) {
-                                true -> View.VISIBLE
-                                false -> View.INVISIBLE
-                            }
-                        }
-                    }
+                    vm.updateOwner(owner)
                 }
                 teams[i].clear()
                 teams[i].addAll(players)
@@ -230,7 +246,9 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
-
+        binding.privacyBtn.setOnClickListener {
+            vm.togglePrivacySetting()
+        }
     }
 
     private fun startGame() {
@@ -248,10 +266,6 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         finish()
     }
 
-    private fun kickPlayer(player: PlayerInfo) {
-        println("kic: ${player.username}")
-    }
-
     override fun onDestroy() {
         supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to false))
         vm.unsubscribe()
@@ -259,6 +273,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.clearAvatarStorage()
         super.onDestroy()
     }
+
     override fun acceptInvite(info: Pair<String, String>) {
         intent = Intent(this, LobbyActivity::class.java)
         intent.putExtra("lobbyId", info.second)
