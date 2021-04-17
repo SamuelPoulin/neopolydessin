@@ -11,7 +11,7 @@ import com.projet.clientleger.R
 class RoomsAdatper(private val rooms: ArrayList<String>,
                    private val joinCallback: (String) -> Unit,
                    private val deleteCallback: (String) -> Unit) : RecyclerView.Adapter<RoomsAdatper.ViewHolderRoom>() {
-    class ViewHolderRoom(itemView: View) : RecyclerView.ViewHolder(itemView){
+    class ViewHolderRoom(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val roomName: TextView = itemView.findViewById(R.id.roomName)
         val joinBtn: Button = itemView.findViewById(R.id.joinBtn)
         val deleteBtn: Button = itemView.findViewById(R.id.deleteBtn)
@@ -23,12 +23,17 @@ class RoomsAdatper(private val rooms: ArrayList<String>,
     }
 
     override fun onBindViewHolder(holder: ViewHolderRoom, position: Int) {
-        holder.roomName.text = rooms[position]
+        val room = rooms[position]
+        if (room.length > 12)
+            holder.roomName.text = room.subSequence(0, 10).toString() + "..."
+        else
+            holder.roomName.text = room
+
         holder.joinBtn.setOnClickListener {
-            joinCallback.invoke(rooms[position])
+            joinCallback.invoke(room)
         }
         holder.deleteBtn.setOnClickListener {
-            deleteCallback.invoke(rooms[position])
+            deleteCallback.invoke(room)
         }
     }
 

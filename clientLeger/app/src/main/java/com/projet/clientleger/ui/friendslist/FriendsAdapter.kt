@@ -51,19 +51,29 @@ class FriendsAdapter(private val friends: List<FriendSimplified>,
 
     override fun onBindViewHolder(holder: FriendsAdapter.ViewHolderFriend, position: Int) {
         val friend = friends[position]
-        holder.usernameTextView.text = friend.username
+        if(friend.username.length > 12)
+            holder.usernameTextView.text = friend.username.subSequence(0, 12).toString() + "..."
+        else
+            holder.usernameTextView.text = friend.username
+
         if (friend.avatar != null)
             holder.iconView?.setImageBitmap(friend.avatar)
         else
             holder.iconView?.setImageBitmap(defaultAvatar)
         when (getItemViewType(position)) {
             FriendStatus.ACCEPTED.ordinal -> {
-                if (friend.isOnline)
-                    holder.statusView!!.backgroundTintList = ColorStateList.valueOf(connectedColor)
-                else
-                    holder.statusView!!.backgroundTintList = ColorStateList.valueOf(disconnectedColor)
+
+                if (friend.isOnline) {
+                    holder.statusView!!.visibility= View.VISIBLE
+                    holder.dmBtn?.visibility = View.VISIBLE
+                }
+                else {
+                    holder.statusView!!.visibility = View.INVISIBLE
+                    holder.dmBtn?.visibility = View.INVISIBLE
+                }
+
                 val inviteBtn = holder.itemView.findViewById<ImageButton>(R.id.inviteBtn)
-                if (canInvite) {
+                if (canInvite && friend.isOnline) {
                     inviteBtn.visibility = View.VISIBLE
                     inviteBtn.setOnClickListener { inviteCallback(friend.friendId) }
                 } else
@@ -79,6 +89,24 @@ class FriendsAdapter(private val friends: List<FriendSimplified>,
                     holder.iconView?.setImageBitmap(friend.avatar)
                 else
                     holder.iconView?.setImageBitmap(defaultAvatar)
+            }
+            FriendStatus.HEADER.ordinal ->{
+                val msg = holder.itemView.findViewById<TextView>(R.id.emptyListMsg)
+                if(friend.username == "Amis"){
+                    if(friends.find { it.status == FriendStatus.ACCEPTED } == null) {
+                        msg.visibility = View.VISIBLE
+                        msg.text = "Vous n'avez pas encore ajouté d'amis"
+                    } else
+                        msg.visibility = View.GONE
+                } else if(friend.username == "Requêtes") {
+                    if(friends.find { it.status == FriendStatus.PENDING_SENT || it.status == FriendStatus.PENDING_RECEIVED } == null){
+                        msg.visibility = View.VISIBLE
+                        msg.text = "Vous n'avez pas de requête d'amitié"
+                    } else
+                        msg.visibility = View.GONE
+                } else {
+                    msg.visibility = View.GONE
+                }
             }
         }
     }

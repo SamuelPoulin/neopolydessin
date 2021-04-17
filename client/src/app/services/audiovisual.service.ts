@@ -40,6 +40,10 @@ export class AudiovisualService {
     this.throwConfetti();
   }
 
+  cry() {
+    this.playSound(GameSound.AWW);
+  }
+
   throwConfetti() {
     const animationEnd = Date.now() + this.confettiDuration;
 
