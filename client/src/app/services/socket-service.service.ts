@@ -18,7 +18,17 @@ import {
 } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
-import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  GuessMessage,
+  LobbyInfo,
+  Player,
+  ReasonEndGame,
+  TeamScore,
+  TimeInfo,
+} from '@common/communication/lobby';
 import { FriendInvitation } from '@models/chat/friend-invitation';
 import { UserService } from './user.service';
 
@@ -73,9 +83,9 @@ export class SocketService {
     });
   }
 
-  receiveGameEnd(): Observable<boolean> {
-    return new Observable<boolean>((obs) => {
-      this.socket.on(SocketLobby.END_GAME, () => obs.next(true));
+  receiveGameEnd(): Observable<ReasonEndGame> {
+    return new Observable<ReasonEndGame>((obs) => {
+      this.socket.on(SocketLobby.END_GAME, (reason: ReasonEndGame) => obs.next(reason));
     });
   }
 

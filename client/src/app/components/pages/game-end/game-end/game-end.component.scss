@@ -58,11 +58,18 @@ app-chat {
   color: #2F2F2F;
 }
 
-#game-outcome-text {
-  color: #04D800;
+.game-outcome-text {
   font-size: 48px;
   font-weight: 900;
   margin-top: 50px;
+}
+
+#game-won-outcome-text {
+  color: #04D800;
+}
+
+#game-lost-outcome-text {
+  color: red;
 }
 
 #game-outcome-score {
