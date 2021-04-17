@@ -30,8 +30,10 @@ export interface BotSentences {
   onPlayerCorrectGuess: string;
   onPlayerCloseGuess: string;
   onPlayerIncorrectGuess: string;
-  guessLeftMessage: (guessTries: number, guessLeft: number) => string;
   onPlayerRequestsHint: string;
+  requestHintOnCooldown: string;
+  noMoreHints: string;
+  guessLeftMessage: (guessTries: number, guessLeft: number) => string;
 }
 
 const PERSONNALITIES: Map<number, BotSentences> = new Map([
@@ -45,6 +47,8 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCloseGuess: 'Wow! Comment vous faites pour être aussi médiocre?',
       onPlayerIncorrectGuess: 'Vous êtes pas très bon... Pourtant mon dessin est clair.',
       onPlayerRequestsHint: 'Un indice... pour vrai?',
+      requestHintOnCooldown: 'Je viens de vous en donner un...',
+      noMoreHints: 'J\'ai rien d\'autre à vous doner',
       guessLeftMessage: (guessTries: number, guessLeft: number) => {
         return `Il reste ${guessLeft} essai sur ${guessTries}`;
       }
@@ -60,6 +64,8 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCloseGuess: 'Dommage, vous étiez si proche de la bonne réponse...',
       onPlayerIncorrectGuess: 'Ce n\'est pas exactement ce qu\'on recherche, malheureusement.',
       onPlayerRequestsHint: 'Il me fait plaisir de vous donner un indice, nous sommes dans la même équipe!',
+      requestHintOnCooldown: 'Malheureusement, cela fait peu de temps que je vous ai donné un indice.',
+      noMoreHints: 'Je vous ai aidé au maximum des mes capacités',
       guessLeftMessage: (guessTries: number, guessLeft: number) => {
         return `Faites attention, il vous reste ${guessLeft} essai sur ${guessTries}`;
       }
@@ -76,6 +82,8 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerCloseGuess: 'C\'était proche! (> _ <) ',
       onPlayerIncorrectGuess: '(╯°□°）╯︵ ┻━┻',
       onPlayerRequestsHint: '*Donne un indice*',
+      requestHintOnCooldown: '🙈 Attend le temps de rechargement!!',
+      noMoreHints: '(Ｔ▽Ｔ) J\'ai aucun autre indice',
       guessLeftMessage: (guessTries: number, guessLeft: number) => {
         return `Haaaaaaaaaaaa il reste ${guessLeft} essai sur ${guessTries}!!!`;
       }
@@ -171,10 +179,22 @@ export class BotPersonnality {
   }
 
   onPlayerRequestsHint() {
-    if (this.hintIndex < this.hints.length) {
+    if (this.hintsLeft()) {
       this.sendBotMessage(this.sentences.onPlayerRequestsHint + ` ${this.hints[this.hintIndex]}`);
       this.hintIndex++;
     }
+  }
+
+  requestHintOnCooldown() {
+    this.sendBotMessage(this.sentences.requestHintOnCooldown);
+  }
+
+  noMoreHints() {
+    this.sendBotMessage(this.sentences.noMoreHints);
+  }
+
+  hintsLeft() {
+    return this.hintIndex < this.hints.length;
   }
 
   private sendBotMessage(content: string): void {
