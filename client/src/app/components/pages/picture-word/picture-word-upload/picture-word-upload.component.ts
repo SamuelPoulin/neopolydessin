@@ -28,6 +28,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   displayPreview: boolean = false;
   imageString: SafeResourceUrl = ImageString.WHITE;
   sequence: DrawingSequence;
+  previewTimeout: NodeJS.Timeout;
 
   word: string = '';
   hints: string[] = [];
@@ -189,6 +190,8 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   }
 
   async drawPreview(sequence: DrawingSequence) {
+    if (this.previewTimeout) clearTimeout(this.previewTimeout);
+
     const ratio = this.size / VIEWPORT_DIMENSION;
     const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
     if (ctx) {
@@ -219,7 +222,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
           const now = Date.now();
           if (now < segmentStart + (timePerPoint - timeoutOffset) * index) {
             await new Promise((resolve) => {
-              setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
+              this.previewTimeout = setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
             });
             ctx.stroke();
           }
