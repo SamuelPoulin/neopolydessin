@@ -1,0 +1,20 @@
+<div id="game-end-container" [style.top]="electronContainer && '30px'"
+  [style.height]="electronContainer && 'calc(100vh - 30px)'">
+  <div id="menu-container">
+    <app-status-bar quit previousPage=""></app-status-bar>
+    <div id="game-end-divider" [style.max-height]="electronContainer ? 'calc(100vh - 90px)' : 'calc(100vh - 60px)'">
+      <div id="content-container">
+        <div id="game-ended-text">Partie terminée!</div>
+        <div id="game-outcome-text">Victoire</div>
+        <div id="game-outcome-score">Vous avez accumulé 6pts</div>
+        <button id="download-button" mat-flat-button class="menu-button menu-main-button">
+          Exporter les dessins
+          <mat-icon id="download-button-icon" class="menu-button-icon menu-button-main-icon">file_download</mat-icon>
+        </button>
+      </div>
+      <ng-container *ngIf="!chatService.chatPoppedOut">
+        <app-chat></app-chat>
+      </ng-container>
+    </div>
+  </div>
+</div>
