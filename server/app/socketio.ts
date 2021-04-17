@@ -14,7 +14,7 @@ import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
-import { Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { AccountFriend } from '../../common/communication/account';
 import * as jwtUtils from './utils/jwt-util';
@@ -152,7 +152,7 @@ export class SocketIo {
       socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string, callback: (lobbyInfo: LobbyInfo | null) => void) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
+        if (lobbyToJoin && playerId && this.canJoinLobby(lobbyToJoin, playerId)) {
           lobbyToJoin.addPlayer(playerId, socket);
           callback(lobbyToJoin.getLobbySummary());
         } else {
@@ -296,6 +296,10 @@ export class SocketIo {
 
   private findLobby(lobbyId: string): Lobby | undefined {
     return this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
+  }
+
+  private canJoinLobby(lobby: Lobby, playerId: string): boolean {
+    return !lobby.findPlayerById(playerId) && lobby.lobbyHasRoom() && lobby.currentGameState === CurrentGameState.LOBBY;
   }
 
   private validateMessageLength(msg: Message): boolean {

@@ -24,7 +24,6 @@ export class ToolbarComponent {
   @Output() currentToolTypeChange: EventEmitter<ToolType> = new EventEmitter<ToolType>();
 
   @Output() editorBackgroundChanged: EventEmitter<Color>;
-  @Output() guideButtonClicked: EventEmitter<boolean>;
   @Output() chooseExportSaveButtonClicked: EventEmitter<boolean>;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -52,7 +51,6 @@ export class ToolbarComponent {
     this.stepThickness = ToolbarComponent.SLIDER_STEP;
     this.editorBackgroundChanged = new EventEmitter<Color>();
     this.selectedColor = SelectedColorType.primary;
-    this.guideButtonClicked = new EventEmitter<boolean>();
     this.chooseExportSaveButtonClicked = new EventEmitter<boolean>();
     this.toolbarType = ToolbarType.other;
 
@@ -86,10 +84,6 @@ export class ToolbarComponent {
 
   openChooseExportSave(): void {
     this.chooseExportSaveButtonClicked.emit(true);
-  }
-
-  openGuide(): void {
-    this.guideButtonClicked.emit(true);
   }
 
   selectTool(selection: string): void {

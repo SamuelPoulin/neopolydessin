@@ -1,10 +1,13 @@
 <app-tutorial></app-tutorial>
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
   <app-status-bar quit previousPage=""></app-status-bar>
-  <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
-    (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)" 
-    (mouseenter)='setToolbarState(true)'>
-  </app-toolbar>
+
+  <ng-container *ngIf="gameService.canDraw || editorService.isFreeEdit">
+    <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
+      (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)" 
+      (mouseenter)='setToolbarState(true)'>
+    </app-toolbar>
+  </ng-container>
 
   <div *ngIf="editorService.isFreeEdit; then freeEditor else gameEditor"></div>
   <ng-template #gameEditor>

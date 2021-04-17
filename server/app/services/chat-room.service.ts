@@ -112,7 +112,7 @@ export class ChatRoomService {
     });
 
     socket.on(SocketMessages.JOIN_CHAT_ROOM, async (roomName: string, callback: (joined: boolean) => void) => {
-      if (this.chatRoomExists(roomName)) {
+      if (this.chatRoomExists(roomName) && !socket.rooms.has(roomName)) {
         const accountInfo = await this.getAccountOfUser(socket);
         if (accountInfo) {
           socket.join(roomName);
