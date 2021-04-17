@@ -63,7 +63,8 @@ export class SocketIo {
     SocketIo.UPDATE_GAME_LIST.subscribe(() => {
       const updatedLobbies = this.lobbyList
         .filter((lobby) => {
-          return !lobby.privateLobby && lobby.gameType !== GameType.SPRINT_SOLO && lobby.lobbyHasRoom();
+          return !lobby.privateLobby && lobby.gameType !== GameType.SPRINT_SOLO
+            && lobby.currentGameState === CurrentGameState.LOBBY && lobby.lobbyHasRoom();
         }).map((lobby) => {
           return lobby.getLobbySummary();
         });
@@ -143,7 +144,7 @@ export class SocketIo {
       this.chatRoomService.bindIoEvents(socket);
 
       socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbiesCallback: LobbyInfo[]) => void) => {
-        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby);
+        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby || lobby.currentGameState === CurrentGameState.LOBBY);
         lobbies = lobbyOpts.gameType ? lobbies.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
         lobbies = lobbyOpts.difficulty ? lobbies.filter((lobby) => lobby.difficulty === lobbyOpts.difficulty) : lobbies;
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));

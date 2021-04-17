@@ -265,6 +265,7 @@ export abstract class Lobby {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id) {
         this.currentGameState = CurrentGameState.IN_GAME;
+        SocketIo.UPDATE_GAME_LIST.notify();
         this.gameStartTime = Date.now();
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
       }
