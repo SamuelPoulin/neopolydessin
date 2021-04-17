@@ -150,6 +150,7 @@
             android:layout_weight="0.5"
             android:background="@android:color/transparent"
             android:text="@={vm.messageContentLiveData}"
+            android:singleLine="true"
             app:layout_constraintLeft_toRightOf="@id/guessingToggleBtn"
             app:layout_constraintRight_toLeftOf="@id/sendButton"
             app:layout_constraintTop_toTopOf="parent"

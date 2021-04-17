@@ -2,7 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:baselineAligned="false"
@@ -10,10 +10,15 @@
         tools:context=".ui.accountmanagement.view.AccountManagementActivity">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/navigationContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.15"
-            android:orientation="vertical">
+            app:layout_constraintWidth_percent="0.25"
+            android:orientation="vertical"
+            app:layout_constraintRight_toLeftOf="@id/fragmentContainer"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <LinearLayout
                 android:id="@+id/userContainer"
@@ -109,43 +114,47 @@
                 app:iconTint="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent" />
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/chat_root"
-                android:name="com.projet.clientleger.ui.chat.ChatFragment"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.5"
-                app:layout_constraintWidth_percent="0.25" />
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/friendslistContainer"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:name="com.projet.clientleger.ui.friendslist.FriendslistFragment"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.25" />
-
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/roomslistContainer"
-                android:name="com.projet.clientleger.ui.roomslist.RoomslistFragment"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_percent="0.25" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.75" />
-    </LinearLayout>
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/navigationContainer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintWidth_percent="0.75"/>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/chat_root"
+            android:name="com.projet.clientleger.ui.chat.ChatFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.5"
+            app:layout_constraintWidth_percent="0.25" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/friendslistContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:name="com.projet.clientleger.ui.friendslist.FriendslistFragment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.25" />
+
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/roomslistContainer"
+            android:name="com.projet.clientleger.ui.roomslist.RoomslistFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.25" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

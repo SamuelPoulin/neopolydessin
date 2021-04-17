@@ -83,6 +83,12 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
 
         vm.userIsOwner.observe(this){ isOwner ->
+            for(rv in rvTeams) {
+                (rv.adapter as TeamAdapter?)?.let{
+                    it.userIsOwner = isOwner
+                    it.notifyDataSetChanged()
+                }
+            }
             if(isOwner){
                 binding.startGameButton.visibility = View.VISIBLE
                 binding.privacyBtn.visibility = View.VISIBLE

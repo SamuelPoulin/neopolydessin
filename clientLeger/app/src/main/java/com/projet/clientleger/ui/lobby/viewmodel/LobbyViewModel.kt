@@ -81,20 +81,21 @@ class LobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepos
                     player.avatar = defaultImage
                 teams[player.teamNumber].value!!.add(player)
         }
-        addBotAddBtn(true)
+        addBotAddBtn(userIsOwner.value!!, true)
         teams[0].postValue(teams[0].value!!)
         teams[1].postValue(teams[1].value!!)
     }
 
     fun updateOwner(owner: PlayerInfo){
-        val oldValue = userIsOwner
-        userIsOwner.postValue(owner.accountId == getAccountInfo().accountId)
-        if(oldValue != userIsOwner)
-            addBotAddBtn(false)
+        val oldValue = userIsOwner.value
+        val newValue = owner.accountId == getAccountInfo().accountId
+        userIsOwner.postValue(newValue)
+        if(oldValue != newValue)
+            addBotAddBtn(newValue, false)
     }
 
-    private fun addBotAddBtn(isInUpdate: Boolean){
-        if(userIsOwner.value!!){
+    private fun addBotAddBtn(isOwner: Boolean, isInUpdate: Boolean){
+        if(isOwner){
             for((index, team) in teams.withIndex()) {
                 val teamArray = team.value!!
                 if(teamArray.size < 2 && teamArray.find { it.isBot } == null && teamArray.find { it.username.isEmpty() && it.accountId.isEmpty()} == null)

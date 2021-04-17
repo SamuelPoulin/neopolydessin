@@ -33,8 +33,12 @@ class TabAdapter(private val convos: ArrayList<Convo>): RecyclerView.Adapter<Tab
     }
 
     override fun onBindViewHolder(holder: ViewHolderTab, position: Int) {
-        holder.tabTextView.text = convos[position].tabInfo.convoName
         val convo = convos[position]
+        if(convo.tabInfo.convoName.length > 12)
+            holder.tabTextView.text = convo.tabInfo.convoName.subSequence(0, 12).toString() + "..."
+        else
+            holder.tabTextView.text = convos[position].tabInfo.convoName
+
         val tabId = selectedTab?.convoId ?: ""
 
         if(convo.tabInfo.tabType == TabType.STATIC_ROOM || convo.tabInfo.tabType == TabType.GAME)
