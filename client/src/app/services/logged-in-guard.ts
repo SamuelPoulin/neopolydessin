@@ -17,6 +17,7 @@ export class LoggedInGuard implements CanActivate {
           resolve(false);
         })
         .catch(() => {
+          this.userService.clearData();
           resolve(true);
         });
     });
