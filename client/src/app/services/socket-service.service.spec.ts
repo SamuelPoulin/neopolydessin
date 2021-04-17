@@ -52,6 +52,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
 
 MockSocketService.joinedGame = new EventEmitter<void>();
 MockSocketService.leftGame = new EventEmitter<void>();
+MockSocketService.socketInitiated = new EventEmitter<void>();
 
 describe('SocketService', () => {
   let service: SocketService;

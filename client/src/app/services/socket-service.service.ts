@@ -35,17 +35,21 @@ export class SocketService {
 
   leftGame: EventEmitter<void>;
   joinedGame: EventEmitter<void>;
+  socketInitiated: EventEmitter<void>;
 
   constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.leftGame = new EventEmitter<void>();
     this.joinedGame = new EventEmitter<void>();
+    this.socketInitiated = new EventEmitter<void>();
 
     this.initSocket();
 
     this.loggedOutSubscription = this.userService.loggedOut.subscribe(() => this.socket.disconnect());
-    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSocket());
+    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => {
+      this.initSocket();
+    });
   }
 
   initSocket() {
@@ -54,6 +58,7 @@ export class SocketService {
       transports: ['websocket'],
       auth: { token: this.userService.accessToken },
     });
+    this.socketInitiated.emit();
   }
 
   receiveMessage(): Observable<ChatMessage> {
