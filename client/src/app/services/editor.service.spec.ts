@@ -16,12 +16,11 @@ import { SocketService } from './socket-service.service';
 import { MockSocketService } from './socket-service.service.spec';
 import { MockGameService } from './game.service.spec';
 import { GameService } from './game.service';
-import { MockTutorialService } from './tutorial.service.spec';
 
 @Injectable()
 export class MockEditorService extends EditorService {
   constructor() {
-    super(new ColorsService(), MockSocketService, MockGameService, MockTutorialService);
+    super(new ColorsService(), MockSocketService, MockGameService);
   }
 }
 

@@ -6,6 +6,8 @@ import { GridToolbarComponent } from '@components/pages/editor/toolbar/grid-tool
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
 import { PenToolbarComponent } from 'src/app/components/pages/editor/toolbar/pen-toolbar/pen-toolbar.component';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { SharedModule } from 'src/app/components/shared/shared.module';
@@ -21,7 +23,10 @@ describe('ToolbarComponent', () => {
     TestBed.configureTestingModule({
       imports: [SharedModule],
       declarations: [ToolbarComponent, PenToolbarComponent, EraserToolbarComponent, GridToolbarComponent],
-      providers: [{ provide: EditorService, useClass: MockEditorService }],
+      providers: [
+        { provide: EditorService, useClass: MockEditorService },
+        { provide: TutorialService, useValue: MockTutorialService },
+      ],
     }).compileComponents();
   }));
 

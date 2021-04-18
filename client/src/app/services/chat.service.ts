@@ -14,6 +14,7 @@ import { APIService } from './api.service';
 import { AudiovisualService, GameSound } from './audiovisual.service';
 import { GameService } from './game.service';
 import { SocketService } from './socket-service.service';
+import { TutorialService, TutorialStep } from './tutorial.service';
 import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
@@ -44,6 +45,7 @@ export class ChatService {
     private nz: NgZone,
     private snackBar: MatSnackBar,
     private audiovisualService: AudiovisualService,
+    private tutorialService: TutorialService,
   ) {
     this.initChatState();
 
@@ -394,6 +396,13 @@ export class ChatService {
         this.updatePoppedOutChat();
       }),
     );
+
+    this.subscriptions.push(
+      this.tutorialService.tutorialStarted.subscribe(() => {
+        this.chatState.friendslistOpened = false;
+        this.chatState.chatRoomsOpened = false;
+      }),
+    );
   }
 
   initChatState() {
@@ -509,6 +518,9 @@ export class ChatService {
       this.socketService.sendGuess(text);
       this.chatState.guessing = false;
       this.updatePoppedOutChat();
+      if (this.tutorialService.tutorialActive && this.tutorialService.currentStep === TutorialStep.GUESS_DRAWING) {
+        this.tutorialService.next(TutorialStep.SEE_GUESS);
+      }
     }
   }
 
