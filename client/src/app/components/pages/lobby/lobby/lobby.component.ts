@@ -4,7 +4,6 @@ import randomColor from 'randomcolor';
 import { GameService } from '@services/game.service';
 import { ChatService } from '@services/chat.service';
 import { TutorialService, TutorialStep } from '@services/tutorial.service';
-import { EditorService } from '@services/editor.service';
 import { GameType, Player } from '../../../../../../../common/communication/lobby';
 
 @Component({
@@ -22,7 +21,6 @@ export class LobbyComponent {
     public gameService: GameService,
     private router: Router,
     public chatService: ChatService,
-    private editorService: EditorService,
     private tutorialService: TutorialService,
   ) {
     this.privacyButtonText = ['Partie publique', 'Partie privée'];
@@ -43,9 +41,7 @@ export class LobbyComponent {
 
   startGame(): void {
     if (this.tutorialService.tutorialActive) {
-      this.gameService.leaveGame();
-      this.editorService.isFreeEdit = true;
-      this.tutorialService.next(TutorialStep.SELECT_TOOL);
+      this.tutorialService.next(TutorialStep.CHAT);
     } else {
       this.gameService.startGame();
     }

@@ -94,7 +94,7 @@ export class ToolbarComponent {
       this.currentToolTypeChange.emit(type);
     }
 
-    if (type === ToolType.Pen && this.tutorialService.tutorialActive) {
+    if (type === ToolType.Pen && this.tutorialService.tutorialActive && this.tutorialService.currentStep === TutorialStep.SELECT_TOOL) {
       this.tutorialService.next(TutorialStep.DRAW);
     }
   }

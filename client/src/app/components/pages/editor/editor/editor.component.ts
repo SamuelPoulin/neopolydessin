@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { GameType } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
-import { APIService } from '@services/api.service';
 import { ChatService } from '@services/chat.service';
 import { GameService } from '@services/game.service';
 import { format } from 'date-fns';
@@ -43,7 +42,6 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     public editorService: EditorService,
     public gameService: GameService,
     public dialog: ModalDialogService,
-    private apiService: APIService,
     public chatService: ChatService,
   ) {
     this.chatService.resetGameMessages();
@@ -64,7 +62,6 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
       this.surfaceWidth = params.width ? +params.width : this.surfaceWidth;
       this.surfaceHeight = params.height ? +params.height : this.surfaceHeight;
       this.surfaceColor = params.color ? Color.hex(params.color) : this.surfaceColor;
-      this.drawingId = params.id;
     });
     this.editorService.setReady();
   }
@@ -73,9 +70,6 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorService.resetDrawing();
     this.editorService.initListeners();
     this.editorService.view = this.drawingSurface;
-    if (this.drawingId) {
-      this.editorService.importDrawingById(this.drawingId, this.apiService);
-    }
   }
 
   ngOnDestroy(): void {

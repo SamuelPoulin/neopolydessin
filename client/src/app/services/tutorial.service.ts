@@ -1,12 +1,22 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { EditorService } from './editor.service';
+import { GameService } from './game.service';
 
 export enum TutorialStep {
   START,
   CREATE_GAME,
   CHOOSE_SETTINGS,
   START_GAME,
+  CHAT,
+  GUESS_BUTTON,
+  SEE_DRAWING,
+  GUESS_DRAWING,
+  SEE_GUESS,
   SELECT_TOOL,
   DRAW,
+  DRAW_EXPLAIN,
+  GAMEMODES_EXPLAIN,
   TUTORIAL_END,
   END,
 }
@@ -19,15 +29,17 @@ export class TutorialService {
 
   tutorialActive: boolean;
   showingHelp: boolean;
+  showContinue: boolean;
   highlightedElement: HTMLElement | null;
   oldZIndex: string;
   oldBorder: string;
   currentStep: TutorialStep;
   currentHint: string;
 
-  constructor() {
+  constructor(private gameService: GameService, private editorService: EditorService, private router: Router) {
     this.tutorialActive = false;
     this.showingHelp = false;
+    this.showContinue = false;
     this.highlightedElement = null;
     this.oldZIndex = '0';
     this.oldBorder = 'none';
@@ -46,9 +58,12 @@ export class TutorialService {
     this.currentStep = TutorialStep.START;
   }
 
+  continue() {
+    this.next(this.currentStep + 1);
+  }
+
   next(step: TutorialStep) {
     this.currentStep = step;
-    console.log(step);
     switch (this.currentStep) {
       case TutorialStep.CREATE_GAME: {
         this.highlightElement('#create-game-button');
@@ -67,14 +82,69 @@ export class TutorialService {
         this.currentHint = 'En mode solo, un joueur virtuel rejoint votre équipe. Cliquez sur ce bouton pour commencer la partie.';
         break;
       }
+
+      case TutorialStep.CHAT: {
+        this.highlightElement('#chat-writer');
+        this.showContinue = true;
+        this.currentHint = 'Lorsque votre coéquipier vous fait un dessin, vous devez deviner le mot associé à ce dessin à travers le chat.';
+        break;
+      }
+      case TutorialStep.GUESS_BUTTON: {
+        this.highlightElement('#guess-button');
+        this.showContinue = true;
+        this.currentHint = 'Ce bouton permet de se mettre en mode devin.';
+        break;
+      }
+      case TutorialStep.SEE_DRAWING: {
+        this.highlightElement('#drawing-surface');
+        this.showContinue = true;
+        this.currentHint = 'Votre coéquipier vous a fait un dessin!';
+        break;
+      }
+      case TutorialStep.GUESS_DRAWING: {
+        this.highlightElement('#chat-writer');
+        this.currentHint = "Activez le mode devin et essayez d'envoyer le mot associé.";
+        break;
+      }
+      case TutorialStep.SEE_GUESS: {
+        this.highlightElement('#chat-messages');
+        this.showContinue = true;
+        this.currentHint =
+          'Votre essai a été envoyé! Une icône rouge annonce un essai erroné, ' +
+          'une icône jaune annonce un essai près du but et une verte annonce que vous avez réussi à deviner le mot.';
+        break;
+      }
       case TutorialStep.SELECT_TOOL: {
-        this.highlightElement('#btn-pen-tool');
-        this.currentHint = "La partie est commencée! Cliquez l'outil crayon pour commencer à dessiner.";
+        this.gameService.leaveGame();
+        setTimeout(() => {
+          this.editorService.isFreeEdit = true;
+          this.router.navigate(['/edit']);
+          this.highlightElement('#btn-pen-tool');
+          this.currentHint = "C'est à votre tour de dessiner. Choisissez l'outil crayon.";
+        });
         break;
       }
       case TutorialStep.DRAW: {
         this.highlightElement('#drawing-surface');
-        this.currentHint = 'Vous pouvez maintenant dessiner! Faites votre premier trait sur la surface de dessin.';
+        this.showContinue = true;
+        this.currentHint = 'Vous pouvez maintenant dessiner! Dessinez une pomme sur la surface de dessin.';
+        break;
+      }
+      case TutorialStep.DRAW_EXPLAIN: {
+        this.highlightElement('');
+        this.showContinue = true;
+        this.currentHint =
+          'Lorsque vous jouez en mode classique avec un coéquipier humain, ' +
+          "ce dernier devra deviner le mot associé à votre dessin. Il sera important de s'appliquer!";
+        break;
+      }
+      case TutorialStep.GAMEMODES_EXPLAIN: {
+        this.highlightElement('');
+        this.showContinue = true;
+        this.currentHint =
+          'Le mode classique est un mode 2v2 où les joueurs de chaque équipe accumulent des points' +
+          ' en espérant atteindre 5pts. Finalement, le mode Co-op est un mode à 5 joueurs où tous font partie de la ' +
+          'même équipe et doivent deviner un dessin.';
         break;
       }
       case TutorialStep.TUTORIAL_END: {
@@ -107,6 +177,7 @@ export class TutorialService {
 
   clearHighlight() {
     this.showingHelp = false;
+    this.showContinue = false;
     this.currentHint = '';
     if (this.highlightedElement) {
       this.highlightedElement.style.zIndex = this.oldZIndex;
