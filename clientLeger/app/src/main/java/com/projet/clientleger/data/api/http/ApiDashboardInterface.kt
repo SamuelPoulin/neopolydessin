@@ -6,6 +6,7 @@ import com.projet.clientleger.data.api.model.RegisterDataResponse
 import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.data.model.account.UpdateAccountModel
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -22,6 +23,6 @@ interface ApiDashboardInterface {
     @Multipart
     @POST(avatarPath + "upload")
     fun uploadAvatar(
-        @Part("file") file:RequestBody
+        @Part file:MultipartBody.Part
     ):Call<ResponseBody>
 }

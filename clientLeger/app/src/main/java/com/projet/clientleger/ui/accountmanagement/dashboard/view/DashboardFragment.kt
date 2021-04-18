@@ -52,7 +52,7 @@ class DashboardFragment @Inject constructor(private val sessionManager: SessionM
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DashboardFragmentBinding.inflate(inflater, container, false)
         return binding!!.root
     }
