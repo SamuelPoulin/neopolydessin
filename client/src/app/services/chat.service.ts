@@ -396,6 +396,13 @@ export class ChatService {
         this.updatePoppedOutChat();
       }),
     );
+
+    this.subscriptions.push(
+      this.tutorialService.tutorialStarted.subscribe(() => {
+        this.chatState.friendslistOpened = false;
+        this.chatState.chatRoomsOpened = false;
+      }),
+    );
   }
 
   initChatState() {

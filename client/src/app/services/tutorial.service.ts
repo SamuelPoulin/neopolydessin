@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { EditorService } from './editor.service';
 import { GameService } from './game.service';
@@ -36,6 +36,8 @@ export class TutorialService {
   currentStep: TutorialStep;
   currentHint: string;
 
+  tutorialStarted: EventEmitter<void>;
+
   constructor(private gameService: GameService, private editorService: EditorService, private router: Router) {
     this.tutorialActive = false;
     this.showingHelp = false;
@@ -45,11 +47,14 @@ export class TutorialService {
     this.oldBorder = 'none';
     this.currentStep = TutorialStep.START;
     this.currentHint = '';
+
+    this.tutorialStarted = new EventEmitter<void>();
   }
 
   startTutorial() {
     this.tutorialActive = true;
     this.next(TutorialStep.CREATE_GAME);
+    this.tutorialStarted.emit();
   }
 
   completeTutorial() {
