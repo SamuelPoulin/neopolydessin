@@ -7,8 +7,6 @@ import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 const HINT_COOLDOWN: number = 15000;
 export class BotService {
 
-  currentBot: number;
-
   private drawing: DrawingSequence;
 
   private hintAvailable: boolean;
@@ -18,6 +16,7 @@ export class BotService {
   private pathTimer: NodeJS.Timeout;
   private hintCooldown: NodeJS.Timeout;
 
+  private currentBot: number;
   private bots: BotPersonnality[] = [];
 
   constructor(
@@ -41,6 +40,14 @@ export class BotService {
     this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
   }
 
+  switchBot(drawingTeamNumber: number): void {
+    if (drawingTeamNumber >= this.bots.length) {
+      this.currentBot = this.bots.length - 1;
+    } else {
+      this.currentBot = drawingTeamNumber;
+    }
+  }
+
   resetDrawing(): void {
     this.resetDrawingWithoutBotQuote();
     this.bots[this.currentBot].onResetDrawing();
@@ -52,7 +59,9 @@ export class BotService {
     this.hintAvailable = true;
     this.currentCoordIndex = -1;
     this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hints.length = 0;
+    if (this.bots[this.currentBot].hints) {
+      this.bots[this.currentBot].hints.length = 0;
+    }
     this.bots[this.currentBot].hintIndex = 0;
   }
 
