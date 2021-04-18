@@ -12,7 +12,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   receivePlayerConnections: of(),
   receivePlayerDisconnections: of(),
   joinLobby: null,
-  getLobbyList: of(),
+  getLobbyList: Promise.resolve([]),
   sendMessage: null,
   sendGuess: null,
   sendReady: null,
@@ -39,6 +39,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
   receiveChatRoomsImIn: of(),
   receiveFriendInvites: of(),
   getChatRooms: Promise.resolve([]),
+  receiveUpdateLobbies: of(),
   chatRoomsUpdated: of(),
   removedFromLobby: of(),
   getRoomMessageHistory: of(),
@@ -52,6 +53,7 @@ export const MockSocketService = jasmine.createSpyObj('SocketService', {
 
 MockSocketService.joinedGame = new EventEmitter<void>();
 MockSocketService.leftGame = new EventEmitter<void>();
+MockSocketService.socketInitiated = new EventEmitter<void>();
 
 describe('SocketService', () => {
   let service: SocketService;

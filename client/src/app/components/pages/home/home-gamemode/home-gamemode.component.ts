@@ -37,7 +37,7 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
   ) {
     super(dialogRef);
 
-    this.dialogRef.disableClose = true;
+    this.dialogRef.disableClose = this.tutorialService.tutorialActive ? true : false;
 
     this.gamemodes = this.tutorialService.tutorialActive ? ['Solo'] : ['Classique', 'Co-op', 'Solo'];
     this.difficulties = ['Facile', 'Intermédiaire', 'Difficile'];

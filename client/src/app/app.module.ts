@@ -24,6 +24,8 @@ import { ServerBrowserModule } from '@components/pages/server-browser/server-bro
 import { ServerBrowserComponent } from '@components/pages/server-browser/server-browser/server-browser.component';
 import { PictureWordBrowserComponent } from '@components/pages/picture-word/picture-word-browser/picture-word-browser.component';
 import { PictureWordModule } from '@components/pages/picture-word/picture-word.module';
+import { GameEndModule } from '@components/pages/game-end/game-end.module';
+import { GameEndComponent } from '@components/pages/game-end/game-end/game-end.component';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -35,6 +37,7 @@ import { AppComponent } from './app.component';
     EditorModule,
     LoginModule,
     LobbyModule,
+    GameEndModule,
     ServerBrowserModule,
     PictureWordModule,
     RouterModule.forRoot(
@@ -45,6 +48,7 @@ import { AppComponent } from './app.component';
         { path: 'lobby', redirectTo: 'lobby/', pathMatch: 'full', canActivate: [AuthGuard] },
         { path: 'lobby/:id', component: LobbyComponent, canActivate: [AuthGuard] },
         { path: 'browser', component: ServerBrowserComponent, canActivate: [AuthGuard] },
+        { path: 'gameend', component: GameEndComponent, canActivate: [AuthGuard] },
         { path: 'picture-word', component: PictureWordBrowserComponent, canActivate: [AuthGuard] },
         { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
         { path: 'register', component: RegisterComponent, canActivate: [LoggedInGuard] },

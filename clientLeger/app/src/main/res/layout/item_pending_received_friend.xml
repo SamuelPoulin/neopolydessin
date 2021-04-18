@@ -22,7 +22,7 @@
         android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        style="@style/friendUsername"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,12 +31,12 @@
         android:id="@+id/acceptBtn"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:backgroundTint="@color/lightGreen"
+        android:backgroundTint="@color/tabs_black"
         android:src="@drawable/ic_accept"
-        app:layout_constraintHeight_percent="0.7"
+        android:layout_marginEnd="6dp"
+        app:layout_constraintHeight_percent="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="2:1"
-        app:layout_constraintLeft_toRightOf="@id/username"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintRight_toLeftOf="@id/refuseBtn"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -44,12 +44,12 @@
         android:id="@+id/refuseBtn"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:backgroundTint="@color/register_error"
+        android:backgroundTint="@color/tabs_black"
         android:src="@drawable/ic_reject"
-        app:layout_constraintHeight_percent="0.7"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintHeight_percent="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="2:1"
-        app:layout_constraintLeft_toRightOf="@id/acceptBtn"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

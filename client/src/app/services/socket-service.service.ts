@@ -18,7 +18,17 @@ import {
 } from '@common/socketendpoints/socket-friend-actions';
 import { PrivateMessage, PrivateMessageTo } from '@common/communication/private-message';
 import { ChatRoomHistory, ChatRoomMessage } from '@common/communication/chat-room-history';
-import { CurrentGameState, Difficulty, GameType, GuessMessage, LobbyInfo, Player, TeamScore, TimeInfo } from '@common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  GuessMessage,
+  LobbyInfo,
+  Player,
+  ReasonEndGame,
+  TeamScore,
+  TimeInfo,
+} from '@common/communication/lobby';
 import { FriendInvitation } from '@models/chat/friend-invitation';
 import { UserService } from './user.service';
 
@@ -35,17 +45,21 @@ export class SocketService {
 
   leftGame: EventEmitter<void>;
   joinedGame: EventEmitter<void>;
+  socketInitiated: EventEmitter<void>;
 
   constructor(private userService: UserService) {
     SocketService.API_BASE_URL = environment.socketUrl;
 
     this.leftGame = new EventEmitter<void>();
     this.joinedGame = new EventEmitter<void>();
+    this.socketInitiated = new EventEmitter<void>();
 
     this.initSocket();
 
     this.loggedOutSubscription = this.userService.loggedOut.subscribe(() => this.socket.disconnect());
-    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSocket());
+    this.loggedInSubscription = this.userService.loggedIn.subscribe(() => {
+      this.initSocket();
+    });
   }
 
   initSocket() {
@@ -54,6 +68,7 @@ export class SocketService {
       transports: ['websocket'],
       auth: { token: this.userService.accessToken },
     });
+    this.socketInitiated.emit();
   }
 
   receiveMessage(): Observable<ChatMessage> {
@@ -68,9 +83,9 @@ export class SocketService {
     });
   }
 
-  receiveGameEnd(): Observable<boolean> {
-    return new Observable<boolean>((obs) => {
-      this.socket.on(SocketLobby.END_GAME, () => obs.next(true));
+  receiveGameEnd(): Observable<ReasonEndGame> {
+    return new Observable<ReasonEndGame>((obs) => {
+      this.socket.on(SocketLobby.END_GAME, (reason: ReasonEndGame) => obs.next(reason));
     });
   }
 
@@ -208,10 +223,15 @@ export class SocketService {
     });
   }
 
-  getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
+  receiveUpdateLobbies(): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+    });
+  }
+
+  async getLobbyList(gameType?: GameType, difficulty?: Difficulty): Promise<LobbyInfo[]> {
+    return new Promise<LobbyInfo[]>((resolve, reject) => {
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => resolve(lobbies));
     });
   }
 

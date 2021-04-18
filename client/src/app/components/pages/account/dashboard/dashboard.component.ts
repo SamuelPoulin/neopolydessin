@@ -19,6 +19,8 @@ export type ChartOptions = {
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+  private static NB_DAYS_PER_WEEK: number = 7; //eslint-disable-line
+  private static MS_PER_DAY: number = 86400000; //eslint-disable-line
   private static MS_TO_MINS: number = 60000; // eslint-disable-line
   private static MS_TO_HOURS: number = 3600000; // eslint-disable-line
   private static MONTHS: string[] = [
@@ -49,10 +51,7 @@ export class DashboardComponent {
   games: Game[];
   logins: { start: number; end?: number }[];
 
-  constructor(
-    private apiService: APIService
-  ) {
-
+  constructor(private apiService: APIService) {
     this.apiService.getDashBoardInfo().then((info) => {
       this.playTime = this.toHours(info.gameHistory.totalTimePlayed);
       this.gamesPlayed = info.gameHistory.nbGamePlayed;
@@ -105,7 +104,7 @@ export class DashboardComponent {
             name: 'Parties solo et coop',
             color: '#ebc634',
             data: soloCoopGames,
-          }
+          },
         ],
         chart: {
           height: 350,
@@ -150,7 +149,6 @@ export class DashboardComponent {
       case GameResult.NEUTRAL:
         return 'Neutre';
     }
-
   }
 
   getGameTime(game: Game): string {
@@ -163,9 +161,11 @@ export class DashboardComponent {
 
   getDate(timestamp: number): string {
     const date = new Date(timestamp);
-    return this.getDateMonth(timestamp)
-      + ` à ${this.formatTime(date.getHours())}:${this.formatTime(date.getMinutes())}`
-      + `:${this.formatTime(date.getSeconds())}`;
+    return (
+      this.getDateMonth(timestamp) +
+      ` à ${this.formatTime(date.getHours())}:${this.formatTime(date.getMinutes())}` +
+      `:${this.formatTime(date.getSeconds())}`
+    );
   }
 
   private getDateMonth(timestamp: number): string {
@@ -193,18 +193,15 @@ export class DashboardComponent {
     return (milliseconds / DashboardComponent.MS_TO_HOURS).toFixed(2);
   }
 
-  private unique(value: string, index: number, array: string[]) {
-    return array.indexOf(value) === index;
-  }
-
   private getChartXAxis(): string[] {
-    const gameDates = this.games.slice(0)
-      .sort((a: Game, b: Game) => a.startDate - b.startDate)
-      .map((game) => {
-        return this.getDateMonth(game.startDate);
-      })
-      .filter(this.unique);
-    return gameDates;
+    let day = Date.now();
+    const lastWeek: string[] = [];
+    lastWeek.unshift(this.getDateMonth(day));
+    for (let i = 0; i < DashboardComponent.NB_DAYS_PER_WEEK - 1; i++) {
+      day -= DashboardComponent.MS_PER_DAY;
+      const dateMonth = this.getDateMonth(day);
+      lastWeek.unshift(dateMonth);
+    }
+    return lastWeek;
   }
-
 }

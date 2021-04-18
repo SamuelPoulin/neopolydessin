@@ -4,7 +4,7 @@ import { DrawingSequence, Segment } from '../../../common/communication/drawing-
 import { Difficulty, Entity, GuessResponse, PlayerRole } from '../../../common/communication/lobby';
 import { SocketDrawing } from '../../../common/socketendpoints/socket-drawing';
 
-const HINT_COOLDOWN: number = 30000;
+const HINT_COOLDOWN: number = 15000;
 export class BotService {
 
   currentBot: number;
@@ -16,6 +16,7 @@ export class BotService {
   private currentCoordIndex: number;
 
   private pathTimer: NodeJS.Timeout;
+  private hintCooldown: NodeJS.Timeout;
 
   private bots: BotPersonnality[] = [];
 
@@ -45,6 +46,16 @@ export class BotService {
     this.bots[this.currentBot].onResetDrawing();
   }
 
+  resetDrawingWithoutBotQuote(): void {
+    clearInterval(this.pathTimer);
+    clearInterval(this.hintCooldown);
+    this.hintAvailable = true;
+    this.currentCoordIndex = -1;
+    this.currentSegmentIndex = 0;
+    this.bots[this.currentBot].hints.length = 0;
+    this.bots[this.currentBot].hintIndex = 0;
+  }
+
   pause(): void {
     clearInterval(this.pathTimer);
   }
@@ -70,10 +81,16 @@ export class BotService {
   }
 
   requestHint(): void {
-    if (this.hintAvailable && this.currentBot < this.bots.length) {
-      this.hintAvailable = false;
-      this.bots[this.currentBot].onPlayerRequestsHint();
-      setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);
+    if (this.currentBot < this.bots.length && this.bots[this.currentBot].hintsLeft()) {
+      if (this.hintAvailable) {
+        this.hintAvailable = false;
+        this.bots[this.currentBot].onPlayerRequestsHint();
+        this.hintCooldown = setTimeout(() => this.hintAvailable = true, HINT_COOLDOWN);
+      } else {
+        this.bots[this.currentBot].requestHintOnCooldown();
+      }
+    } else {
+      this.bots[this.currentBot].noMoreHints();
     }
   }
 
@@ -113,14 +130,6 @@ export class BotService {
         }
       };
     }, this.bots[this.currentBot].drawDelay);
-  }
-
-  private resetDrawingWithoutBotQuote(): void {
-    clearInterval(this.pathTimer);
-    this.currentCoordIndex = -1;
-    this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hints = [];
-    this.bots[this.currentBot].hintIndex = 0;
   }
 
 }

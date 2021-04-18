@@ -29,13 +29,15 @@ class RegisterActivity : AppCompatActivity() {
     lateinit var binding: ActivityRegisterBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) //ViewModelProvider(this).get(RegisterViewModel::class.java)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.lifecycleOwner = this
         loadingBtn(false)
         setupInputsObservable()
+        binding.toolbar.setNavigationIcon(R.drawable.ic_logout)
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
+        }
         binding.btnSubmit.setOnClickListener {
             registerAccount()
         }

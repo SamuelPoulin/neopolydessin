@@ -98,4 +98,5 @@
     <string name="modify_image">Cliquez pour modifier l\'image</string>
     <string name="score_sprint_solo">Meilleur Score Sprint Solo</string>
     <string name="score_sprint_coop">Meilleur Score Sprint Coop</string>
+    <string name="bot_player">Joueur virtuel</string>
 </resources>

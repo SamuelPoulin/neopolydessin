@@ -87,6 +87,20 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/privacyBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="Partie publique"
+        android:backgroundTint="@color/green"
+        android:textStyle="bold"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintTop_toBottomOf="@id/difficultySpinnerContainer"
+        app:layout_constraintBottom_toTopOf="@id/actionBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <Button
         android:id="@+id/actionBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -10,5 +10,11 @@ enum class LobbySocketEndpoints(val value: String) {
     RECEIVE_PLAYER_JOIN("PlayerConnected"),
     RECEIVE_PLAYER_LEAVE("PlayerDisconnected"),
     RECEIVE_UPDATE_LOBBY_LIST("updateLobbies"),
-    RECEIVE_ALL_LOBBIES("getListLobby")
+    RECEIVE_ALL_LOBBIES("getListLobby"),
+    KICK_PLAYER("removePlayer"),
+    RECEIVE_KICK("playerRemoved"),
+    ADD_BOT("addBot"),
+    REMOVE_BOT("removeBot"),
+    SEND_PRIVACY_SETTING("privacySetting"),
+    RECEIVE_PRIVACY_SETTING("changedPrivacy")
 }

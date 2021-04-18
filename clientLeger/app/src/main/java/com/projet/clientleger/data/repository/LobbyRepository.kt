@@ -89,11 +89,31 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         avatarStorageService.clear()
     }
 
-    fun kickPlayer(){
+    fun addBot(teamNumber: Int){
+        lobbySocketService.addBot(teamNumber)
+    }
 
+    fun removeBot(username: String){
+        lobbySocketService.removeBot(username)
+    }
+
+    fun kickPlayer(playerId: String){
+        lobbySocketService.kickPlayer(playerId)
+    }
+
+    fun receiveKick(): Observable<Unit> {
+        return lobbySocketService.receiveKick()
     }
 
     fun receiveUpdateLobbyList(): Observable<ArrayList<LobbyInfo>> {
         return lobbySocketService.receiveUpdateLobbyList()
+    }
+
+    fun sendPrivacySetting(isPrivate: Boolean){
+        lobbySocketService.sendPrivacySetting(isPrivate)
+    }
+
+    fun receivePrivacySetting(): Observable<Boolean> {
+        return lobbySocketService.receivePrivacySetting()
     }
 }
