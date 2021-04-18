@@ -116,6 +116,7 @@ class TutorialService @Inject constructor() {
 
                     override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
                         isTutorialActive = true
+
                     }
 
                 })

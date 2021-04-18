@@ -96,4 +96,5 @@
     <string name="rooms_chat">Salons de discussion</string>
     <string name="pending">En attente...</string>
     <string name="bot_player">Joueur virtuel</string>
+    <string name="continue_tutorial">Continuer Le tutoriel</string>
 </resources>

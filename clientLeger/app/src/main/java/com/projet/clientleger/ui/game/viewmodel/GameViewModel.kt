@@ -96,7 +96,4 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun playSound(soundId:Int){
         audioService.playSound(soundId)
     }
-    fun isTutorialActive():Boolean{
-        return tutorialService.isTutorialActive()
-    }
 }
