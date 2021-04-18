@@ -123,6 +123,7 @@
     "emoji-mart": "^3.0.0",
     "form-data": "^3.0.1",
     "ng-apexcharts": "^1.5.8",
+    "ngx-color-picker": "^10.1.0",
     "ngx-electron": "^2.2.0",
     "randomcolor": "^0.6.2",
     "rxjs": "~6.6.3",

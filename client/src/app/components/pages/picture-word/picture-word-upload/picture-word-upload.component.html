@@ -3,26 +3,46 @@
       Ajouter une paire mot-image en fournissant un mot et une photo
   </div>
   <div content id="content">
-    <app-custom-input id="word-input" [(value)]="word">Mot à deviner</app-custom-input>
-    <mat-form-field class="input" appearance="fill">
-      <mat-label>Mode de dessin</mat-label>
-      <mat-select [(value)]="drawMode">
-        <mat-option *ngFor="let drawMode of drawModes" [value]="drawMode">
-          {{drawMode}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field class="input" appearance="fill">
-      <mat-label>Difficulté</mat-label>
-      <mat-select [(value)]="difficulty">
-        <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty">
-          {{difficulty}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <app-number-input class="input" min="1" max="255" [(numberValue)]="threshold">Threshold</app-number-input>
 
+    <div id="content-left">
 
+      <div id="top-inputs">
+        <app-custom-input id="word-input" [class]="dialogRef.id !== 'drawing' ? 'before-color' : ''" [(value)]="word">Mot à deviner</app-custom-input>
+
+        <div *ngIf="dialogRef.id !== 'drawing'" id="color-input">
+          <div>Couleur</div>
+          <input id="color-btn" cpAlphaChannel="disabled" [(colorPicker)]="color" [style.background]="color"/>
+        </div>
+      </div>
+
+      <div id="bottom-inputs">
+        <mat-form-field class="bottom-input" appearance="fill">
+          <mat-label>Mode de dessin</mat-label>
+          <mat-select [(value)]="drawMode">
+            <mat-option *ngFor="let drawMode of drawModes" [value]="drawMode.value">
+              {{drawMode.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="bottom-input" appearance="fill">
+          <mat-label>Difficulté</mat-label>
+          <mat-select [(value)]="difficulty">
+            <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty.value">
+              {{difficulty.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <app-number-input class="bottom-input" min="1" max="255" [(numberValue)]="threshold">Threshold</app-number-input>
+      </div>
+
+    </div>
+    <div id="content-right">
+      <div class="hint-wrapper" *ngFor="let hint of displayedHints; let i = index">
+        <app-custom-input class="hint-input" [(value)]="displayedHints[i].value">Indice {{i + 1}}</app-custom-input>
+        <mat-icon *ngIf="i >= minimumHints" class="remove-hint" (click)="removeHint(i)">clear</mat-icon>
+      </div>
+      <button id="add-hint" (click)="addHint()">Ajouter un indice</button>
+    </div>
 
     <img [src]="imageString" [style.height.px]="size" [style.width.px]="size" [style.display]="displayPreview ? 'none' : 'block'" id="uploaded-image">
 
@@ -31,7 +51,7 @@
   </div>
   <div actions id="actions">
     <button id="btn-preview" mat-stroked-button (click)="togglePreview()">
-  <mat-icon id="btn-image-icon">preview</mat-icon>
+      <mat-icon id="btn-image-icon">preview</mat-icon>
     </button>
  
     <button *ngIf="dialogRef.id !== 'drawing'" id="btn-image" mat-stroked-button (click)="openUpload()">
@@ -44,7 +64,7 @@
       Enregistrer
     </button>
 
-    <button id="btn-confirm" mat-stroked-button (click)="exit()" [disabled]="!dataUploaded">
+    <button id="btn-confirm" mat-stroked-button (click)="exit()" [disabled]="!drawingId">
       Terminer
     </button>
   </div>
