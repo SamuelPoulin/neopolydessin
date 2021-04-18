@@ -14,11 +14,12 @@ enum class Difficulty(val value: String) {
     }
 
     companion object{
-        fun fromFrenchToEnum(difficulty: String): Difficulty{
+        fun fromFrenchToEnum(difficulty: String): Difficulty?{
             return when(difficulty){
                 "Facile" -> EASY
                 "Intermediaire" -> INTERMEDIATE
-                else -> HARD
+                "Difficile" -> HARD
+                else -> null
             }
         }
 
