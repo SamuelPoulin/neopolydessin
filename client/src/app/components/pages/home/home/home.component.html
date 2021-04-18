@@ -1,21 +1,40 @@
-<div id="main-container">
+<app-tutorial></app-tutorial>
+<div id="home-container" [style.top]="electronContainer && '30px'"
+  [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <div id="menu-container">
-    <div id="menu-container-title">
-      <h1>Polydessin</h1>
-    </div>
-    
-    <div id="menu-container-buttons">
-      <button id="btn-create" mat-raised-button (click)="openModal()">Nouveau dessin</button>
-      <button id="btn-gallery" mat-raised-button (click)="openGallery()">Galerie</button>
-      <button id="btn-guide" mat-raised-button (click)="openModal(guideModalType)">Guide utilisateur</button>
-
-      <button mat-raised-button *ngIf="previousDrawings; else noPreviousDrawings">
-        Continuer mon dessin
-      </button>
-      <ng-template #noPreviousDrawings>
-        <button mat-raised-button [disabled]="isDrawingNull" (click)="continueDrawing()">Continuer mon
-          dessin</button>
-        </ng-template>
+    <app-status-bar></app-status-bar>
+    <div id="home-divider" [style.max-height]="electronContainer ? 'calc(100vh - 90px)' : 'calc(100vh - 60px)'">
+      <div id="home-menu">
+        <div id="menu-container-title">
+          <img src="assets/icon.png">
+          <div>PolyDessin</div>
+        </div>
+        <div id="menu-container-buttons">
+          <button mat-flat-button id="create-game-button" class="menu-button menu-main-button" (click)="openGamemode()">
+            <mat-icon class="menu-button-icon menu-button-main-icon">palette</mat-icon>
+            Créer une partie
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" disabled>
+            <mat-icon class="menu-button-icon menu-button-main-icon">group</mat-icon>
+            Rejoindre une partie
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" routerLink="browser">
+            <mat-icon class="menu-button-icon menu-button-main-icon">format_list_bulleted</mat-icon>
+            Liste des parties
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" routerLink="picture-word">
+            <mat-icon class="menu-button-icon menu-button-main-icon">insert_photo</mat-icon>
+            Mot-image
+          </button>
+          <button mat-flat-button class="menu-button menu-main-button" (click)="tutorialService.startTutorial()">
+          <mat-icon class="menu-button-icon menu-button-main-icon">help_outline</mat-icon>
+            Tutoriel
+          </button>
+        </div>
       </div>
+      <ng-container *ngIf="!chatService.chatPoppedOut">
+        <app-chat></app-chat>
+      </ng-container>
     </div>
   </div>
+</div>

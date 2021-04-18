@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { SocketService } from '@services/socket-service.service';
 import { UserService } from '@services/user.service';
 
 @Component({
@@ -10,28 +9,28 @@ import { UserService } from '@services/user.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  inputValue: string = '';
+  username: string = '';
+  password: string = '';
   currentError: string = '';
 
-  constructor(
-    private socketService: SocketService,
-    private router: Router,
-    private userService: UserService,
-    private snackBar: MatSnackBar,
-  ) {}
+  constructor(private userService: UserService, private snackBar: MatSnackBar, private router: Router) {}
 
   login() {
-    this.socketService.newPlayer(this.inputValue).then((valid) => {
-      if (valid) {
-        this.userService.username = this.inputValue;
-        this.router.navigate(['chat']);
-      } else {
-        this.snackBar.open("Ce nom d'utilisateur est non disponible.", 'Ok', {
+    this.userService
+      .login(this.username, this.password)
+      .then(() => {
+        this.router.navigate(['']);
+      })
+      .catch(() => {
+        this.snackBar.open("Erreur lors de l'authentification", 'Ok', {
           duration: 2000,
           horizontalPosition: 'center',
           verticalPosition: 'bottom',
         });
-      }
-    });
+      });
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }

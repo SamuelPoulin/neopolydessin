@@ -1,0 +1,13 @@
+<app-abstract-modal>
+  <div header id="chat-add-friend-header">
+    Ajouter un ami
+  </div>
+  <div content>
+    <app-username-input [(value)]="username">Nom d'utilisateur</app-username-input>
+  </div>
+  <div actions>
+    <button mat-stroked-button (click)="addFriend()">
+      Ajouter
+    </button>
+  </div>
+</app-abstract-modal>

@@ -1,8 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { EditorParams } from '@components/pages/editor/editor/editor-params';
-import { HomeKeyboardListener } from '@components/pages/home/home/home-keyboard-listener';
-import { LocalSaveService } from '@services/localsave.service';
+import { ChatService } from '@services/chat.service';
+import { TutorialService, TutorialStep } from '@services/tutorial.service';
 import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service';
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 
@@ -15,43 +14,30 @@ export class HomeComponent {
   previousDrawings: boolean;
   modalIsOpened: boolean;
   guideModalType: ModalType;
-  private readonly keyboardListener: HomeKeyboardListener;
 
-  constructor(private router: Router, private dialog: ModalDialogService, private localSaveService: LocalSaveService) {
+  constructor(
+    private router: Router,
+    private dialogService: ModalDialogService,
+    public chatService: ChatService,
+    public tutorialService: TutorialService,
+  ) {
     this.previousDrawings = false;
     this.modalIsOpened = false;
     this.guideModalType = ModalType.GUIDE;
-    this.keyboardListener = new HomeKeyboardListener(this);
   }
 
-  openModal(link: ModalType = ModalType.CREATE): void {
-    this.dialog.openByName(link);
+  openPage(link: string): void {
+    this.router.navigate([link]);
   }
 
-  openPage(nextLink: string): void {
-    this.router.navigate([nextLink]);
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 
-  openGallery(): void {
-    this.dialog.openByName(ModalType.GALLERY);
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  keyEvent(event: KeyboardEvent): void {
-    this.keyboardListener.handle(event);
-  }
-
-  continueDrawing(): void {
-    const params: EditorParams = {
-      width: this.localSaveService.drawing.width.toString(),
-      height: this.localSaveService.drawing.height.toString(),
-      color: this.localSaveService.drawing.color,
-      id: LocalSaveService.LOCAL_DRAWING_ID,
-    };
-    this.router.navigate(['/'], { skipLocationChange: true }).then(async () => this.router.navigate(['edit', params]));
-  }
-
-  get isDrawingNull(): boolean {
-    return this.localSaveService.drawing == null;
+  openGamemode() {
+    this.dialogService.openByName(ModalType.CHOOSE_GAMEMODE);
+    if (this.tutorialService.tutorialActive) {
+      this.tutorialService.next(TutorialStep.CHOOSE_SETTINGS);
+    }
   }
 }

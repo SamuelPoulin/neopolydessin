@@ -1,0 +1,1 @@
+export const VIEWPORT_DIMENSION: number = 1000;

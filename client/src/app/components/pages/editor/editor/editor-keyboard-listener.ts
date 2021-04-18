@@ -1,7 +1,6 @@
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
-import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
 import { ToolType } from '@tools/tool-type.enum';
 
 export class EditorKeyboardListener extends KeyboardListenerService {
@@ -33,26 +32,10 @@ export class EditorKeyboardListener extends KeyboardListenerService {
         },
       ],
       [
-        KeyboardListenerService.getIdentifier('g', false),
-        () => {
-          editorComponent.editorService.gridProperties.visibility.value =
-            editorComponent.editorService.gridProperties.visibility.value === GridVisibility.visible
-              ? GridVisibility.hidden
-              : GridVisibility.visible;
-        },
-      ],
-      [
         KeyboardListenerService.getIdentifier('e'),
         () => {
           editorComponent.currentToolType = ToolType.Eraser;
           return false;
-        },
-      ],
-      [
-        KeyboardListenerService.getIdentifier('o', true),
-        () => {
-          editorComponent.openCreateModal();
-          return true;
         },
       ],
       [
@@ -74,7 +57,7 @@ export class EditorKeyboardListener extends KeyboardListenerService {
           }
           return true;
         },
-      ]
+      ],
     ]);
 
     this.defaultEventAction = (e) => {

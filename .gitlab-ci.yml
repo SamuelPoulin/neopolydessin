@@ -1,6 +1,8 @@
 workflow:
     rules:
-        - when: always
+        - if: '$CI_COMMIT_BRANCH == "master"'
+        - if: '$CI_COMMIT_BRANCH == "develop"'
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 stages:
     - build
@@ -30,26 +32,46 @@ build_server:
     script:
         - echo "Build serveur"
         - ./pipeline/build_server.sh
-    allow_failure: true     #until compile errors removed
     artifacts:
-        when: always        #until compile errors removed
+        expire_in: 1 day
         paths:
             - server/node_modules/
             - server/out/
 
-build_electron:
+build_electron_dev:
     stage: build
     <<: *electron_cache
+    except:
+        - master
     script:
         - echo "Build electron"
-        - ./pipeline/build_electron.sh
+        - cd client
+        - npm i
+        - npm run build
     artifacts:
+        expire_in: 1 day
+        paths:
+            - client/node_modules/
+
+build_electron_prod:
+    stage: build
+    <<: *electron_cache
+    only:
+        - master
+    script:
+        - echo "Build electron"
+        - cd client
+        - npm i
+        - npm run build:prod
+    artifacts:
+        expire_in: 1 day
         paths:
             - client/node_modules/
 
 test_server:
     stage: test
-    allow_failure: true
+    except:
+        - develop
     needs:
         - build_server
     dependencies:
@@ -59,17 +81,30 @@ test_server:
         - ./pipeline/test_server.sh
     
 
-test_electron:
+test_electron_dev:
     stage: test
-    allow_failure: true
+    except:
+        - develop
+        - master
     needs:
-        - build_electron
+        - build_electron_dev
     dependencies:
-        - build_electron
+        - build_electron_dev
     script:
         - echo "Test electron"
         - ./pipeline/test_electron.sh
 
+test_electron_prod:
+    stage: test
+    only:
+        - master
+    needs:
+        - build_electron_prod
+    dependencies:
+        - build_electron_prod
+    script:
+        - echo "Test electron"
+        - ./pipeline/test_electron.sh
 
 deploy_dev:
     stage: deploy
@@ -78,6 +113,9 @@ deploy_dev:
     script:
         - echo "Deploy dev"
         - ./pipeline/deploy_dev.sh
+    artifacts:
+        paths:
+            - client/build/PolyDessin_Setup_*.exe
 
 deploy_prod:
     stage: deploy
@@ -86,3 +124,6 @@ deploy_prod:
     script:
         - echo "Deploy prod"
         - ./pipeline/deploy_prod.sh
+    artifacts:
+        paths:
+            - client/build/PolyDessin_Setup_*.exe

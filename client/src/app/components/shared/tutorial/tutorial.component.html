@@ -1,0 +1,15 @@
+<div id="tutorial-container" [style.background-color]="tutorialService.showingHelp ? 'rgba(0, 0, 0, 0.60)' : 'transparent'" [style.width]="tutorialService.showingHelp ? '100%' : '0px'" [style.height]="tutorialService.showingHelp ? '100%' : '0px'">
+  <ng-container *ngIf="tutorialService.showingHelp">
+    <div id="tutorial-content-container">
+      <div id="tutorial-hint-container">
+        {{hint}}
+      </div>
+      <ng-container *ngIf="tutorialService.showContinue">
+        <button id="continue-button" mat-flat-button class="menu-button menu-main-button" (click)="continue()">
+          Continuer
+          <mat-icon id="continue-button-icon" class="menu-button-icon menu-button-main-icon">arrow_forward</mat-icon>
+        </button>
+      </ng-container>
+      </div>
+  </ng-container>
+</div>

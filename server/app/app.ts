@@ -1,10 +1,10 @@
-import * as fs from 'fs';
-import * as bodyParser from 'body-parser';
-import * as cookieParser from 'cookie-parser';
-import * as cors from 'cors';
-import * as express from 'express';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
 import { inject, injectable } from 'inversify';
-import * as logger from 'morgan';
+import logger from 'morgan';
+import { ContentType } from '../models/schemas/avatar';
 import { APIController } from './controllers/api.controller';
 import Types from './types';
 
@@ -24,12 +24,13 @@ export class Application {
 
   private config(): void {
     // Middlewares configuration
-    fs.readFile('emailAPI.env', (err, data) => {
-      process.env.API_KEY = data.toString().split('@')[0];
-    });
     this.app.use(logger('dev'));
     this.app.use(bodyParser.json({ limit: '25mb' }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: '25mb' }));
+    this.app.use(bodyParser.raw({
+      type: [ContentType.png, ContentType.jpeg],
+      limit: '3mb',
+    }));
     this.app.use(cookieParser());
     this.app.use(cors({ optionsSuccessStatus: 200 }));
   }

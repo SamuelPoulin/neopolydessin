@@ -10,6 +10,7 @@
     "module": "es2020",
     "moduleResolution": "node",
     "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
@@ -25,6 +26,9 @@
       "dom"
     ],
     "paths": {
+      "@common/*": [
+        "../common/*"
+      ],
       "@services/*": [
         "src/app/services/*"
       ],

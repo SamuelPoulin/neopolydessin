@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="deep_blue">#3282B8</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +8,29 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="register_error">#FF0000</color>
+    <color name="register_valid">#00FF66</color>
+    <color name="light_grey">#E5E5E5</color>
+    <color name="grey">#676262</color>
+    <color name="lightblue">#2196f3</color>
+    <color name="lightGreen">#35E605</color>
+    <color name="backgroundGrey">#f0f2f5</color>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
+    <color name="green">#FF38B000</color>
+    <color name="red">#FF0000</color>
+    <color name="mustard_yellow">#FFB703</color>
+    <color name="milk_white">#FBFBFB</color>
+    <color name="shadow_grey">#EEEEEE</color>
+    <color name="team_blue">#0000FF</color>
+    <color name="dark_green">#25be4f</color>
+    <color name="light_red">#C04C45</color>
+    <color name="chat_header_black">#2F2F2F</color>
+    <color name="tab_grey">#414141</color>
+    <color name="tabs_black">#292929</color>
+    <color name="hover_btn">#464646</color>
+    <color name="messageInfo">#696969</color>
+    <color name="inputTint">#F5F5F5</color>
 </resources>

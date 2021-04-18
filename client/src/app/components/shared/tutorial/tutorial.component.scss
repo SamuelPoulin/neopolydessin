@@ -1,0 +1,39 @@
+@use 'src/assets/menuButtons';
+
+#tutorial-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  transition: background-color 0.5s;
+}
+
+#tutorial-hint-container {
+  display: flex;
+  align-self: center;
+  font-size: 18px;
+  color: white;
+  margin-bottom: 25px;
+}
+
+#continue-button {
+  color: white;
+  background-color: #04d800;
+  align-self: flex-end;
+}
+
+#continue-button-icon {
+  color: white;
+}
+
+#tutorial-content-container {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin-bottom: 100px;
+}

@@ -1,28 +1,58 @@
 import { Injectable } from '@angular/core';
-import { Drawing } from '@models/drawing';
+import { AccountInfo } from '@common/communication/account';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocalSaveService {
-  static readonly LOCAL_DRAWING_ID: string = 'localsave';
-  static readonly NEW_DRAWING_ID: string = 'newdrawing';
+  private static STORAGE_ACCOUNT_KEY: string = 'account';
+  private static STORAGE_REFRESH_TOKEN_KEY: string = 'refreshToken';
+  private static STORAGE_ACCESS_TOKEN_KEY: string = 'accessToken';
 
-  private _drawing: Drawing;
-
-  takeSnapshot(drawing: Drawing): void {
-    localStorage.setItem(LocalSaveService.LOCAL_DRAWING_ID, JSON.stringify(drawing));
+  clearData() {
+    localStorage.clear();
   }
 
-  loadDrawing(): void {
-    const localsave: string | null = localStorage.getItem(LocalSaveService.LOCAL_DRAWING_ID);
-    if (localsave) {
-      this._drawing = JSON.parse(localsave) as Drawing;
+  set account(account: AccountInfo | undefined) {
+    if (account) {
+      localStorage.setItem(LocalSaveService.STORAGE_ACCOUNT_KEY, JSON.stringify(account));
+    } else {
+      localStorage.removeItem(LocalSaveService.STORAGE_ACCOUNT_KEY);
     }
   }
 
-  get drawing(): Drawing {
-    this.loadDrawing();
-    return this._drawing;
+  get account(): AccountInfo | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_ACCOUNT_KEY);
+    if (value) {
+      return JSON.parse(value) as AccountInfo;
+    } else {
+      return undefined;
+    }
+  }
+
+  get accessToken(): string | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY);
+    return value ? value : undefined;
+  }
+
+  set accessToken(accessToken: string | undefined) {
+    if (accessToken) {
+      localStorage.setItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY, accessToken);
+    } else {
+      localStorage.removeItem(LocalSaveService.STORAGE_ACCESS_TOKEN_KEY);
+    }
+  }
+
+  get refreshToken(): string | undefined {
+    const value = localStorage.getItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY);
+    return value ? value : undefined;
+  }
+
+  set refreshToken(refreshToken: string | undefined) {
+    if (refreshToken) {
+      localStorage.setItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY, refreshToken);
+    } else {
+      localStorage.removeItem(LocalSaveService.STORAGE_REFRESH_TOKEN_KEY);
+    }
   }
 }

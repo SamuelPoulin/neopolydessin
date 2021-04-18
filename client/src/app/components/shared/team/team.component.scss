@@ -1,0 +1,62 @@
+@use 'src/assets/menuButtons';
+
+.players-title {
+  color: #2F2F2F;
+  font-size: 32px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.team-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+}
+
+.player-role-icon {
+  margin: 0px 5px;
+  color: #2F2F2F;
+}
+
+.player-owner-role {
+  color: orange
+}
+
+.player-avatar {
+  margin: 0px 5px;
+}
+
+.player-username {
+  color: #2F2F2F;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.ennemy-container {
+  border-left: 2px solid red;
+}
+
+.player-container {
+  display: flex;
+  align-items: center;
+
+  padding: 5px 0px;
+
+  border-left: 2px solid blue;
+}
+
+.add-button {
+  color: green;
+}
+
+.remove-button-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+}
+
+.remove-button {
+  color: red;
+  margin-right: 25px;
+}

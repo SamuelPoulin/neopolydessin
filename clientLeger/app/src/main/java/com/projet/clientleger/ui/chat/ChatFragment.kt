@@ -4,175 +4,296 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.text.Html
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.service.SocketService
-import com.projet.clientleger.data.model.IMessage
-import com.projet.clientleger.data.model.MessageChat
-import kotlinx.android.synthetic.main.fragment_chat.*
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.enumData.SoundId
+import com.projet.clientleger.data.model.friendslist.FriendSimplified
+import com.projet.clientleger.data.model.chat.TabInfo
+import com.projet.clientleger.data.service.ChatStorageService
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
+import javax.inject.Inject
+import com.projet.clientleger.databinding.FragmentChatBinding
 
-private const val USERNAME_FORMAT_ERROR: String = "Doit contenir seulement 10 lettres ou chiffres."
-private const val USERNAME_UNICITY_ERROR: String = "Pseudonyme déjà utilisé, choisir un autre !"
 private const val MESSAGE_CONTENT_ERROR: String =
     "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
-private const val CHOOSING_USERNAME_TITLE: String = "Choisir son pseudonyme"
-private const val CONNECT_BUTTON_TITLE: String = "Connect"
-private const val USERNAME_INPUT_HINT: String = "Nom d'utilisateur"
 
-class ChatFragment() : Fragment() {
-    private lateinit var connexionDialog: AlertDialog
-    private var messages: ArrayList<IMessage> = ArrayList()
-    private lateinit var username: String
+@AndroidEntryPoint
+class ChatFragment @Inject constructor() : Fragment() {
 
-    var socketService: SocketService? = null
-    var isBound = false
+    val vm: ChatViewModel by viewModels()
+    private var binding: FragmentChatBinding? = null
+    var baseHeight: Int = -1
+    var screenSize: Int = -1
+    var baseWidth: Int = -1
+    private var chatService: ChatStorageService? = null
 
-    private val serviceConnection = object : ServiceConnection {
+    private val chatConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as SocketService.LocalBinder
-            socketService = binder.getService()
-            isBound = true
-            setSubscriptions()
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            (binding?.rvTabs?.adapter as TabAdapter).removeCallback = chatService!!::removeConvo
+            (binding?.rvTabs?.adapter as TabAdapter).changeTabCallback = chatService!!::changeSelectedConvo
+            setupChatServiceSubscriptions()
+            vm.fetchSavedData(chatService!!.getConvos(), chatService!!.currentConvo)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            isBound = false
+            chatService = null
         }
     }
 
-    fun setSubscriptions() {
-        socketService?.receiveMessage()
-            ?.subscribe { message ->
-                addMessage(message)
-            }
-        socketService?.receivePlayerConnection()?.subscribe { message ->
-            message.content = "${message.content} a rejoint la discussion"
-            addMessage(message)
-        }
-        socketService?.receivePlayerDisconnection()?.subscribe { message ->
-            message.content = "${message.content} a quitté la discussion"
-            addMessage(message)
-        }
-
-        val connexionDialogBuilder = activity?.let { AlertDialog.Builder(it) }
-        val input = EditText(activity)
-        input.hint = USERNAME_INPUT_HINT
-        connexionDialogBuilder
-            ?.setTitle(CHOOSING_USERNAME_TITLE)
-            ?.setView(input)
-            ?.setPositiveButton(CONNECT_BUTTON_TITLE, null)
-
-        if (connexionDialogBuilder != null) {
-            connexionDialog = connexionDialogBuilder.create()
-            connexionDialog.setCanceledOnTouchOutside(false)
-            connexionDialog.setCancelable(false)
-            connexionDialog.show()
-            connexionDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener {
-                    username = input.text.toString()
-                    chooseUsername(username);
-                    input.text.clear()
-                }
-        }
-    }
-
-    private fun chooseUsername(username: String) {
-        if (!isUsernameValidFormat(username)) {
-            showErrorToast(USERNAME_FORMAT_ERROR)
-            return
-        }
-        socketService?.usernameConnexion(username)
-            ?.doOnError { error -> println(error) }
-            ?.subscribe { valid ->
-                if (valid) {
-                    connexionDialog.dismiss();
-                    (rvMessages.adapter as MessagesAdapter).setUsername(username)
-                } else {
-                    showErrorToast(USERNAME_UNICITY_ERROR)
-                }
-            }
+    companion object {
+        fun newInstance() = ChatFragment()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intent = Intent(activity, SocketService::class.java)
-        activity?.bindService(intent, serviceConnection, Context.BIND_IMPORTANT)
-        username = arguments?.getString("username") ?: "unknowned_user"
+
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        screenSize = displayMetrics.widthPixels
+        baseWidth = screenSize/2
+
+        vm.isGuessing.observe(requireActivity()){
+            updateTheme(it)
+        }
+        vm.isGuesser.observe(requireActivity()){
+            updateGuessingBtnVisibility(it)
+        }
+        setupFragmentListeners()
+        setupTabsObservers()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Intent(requireContext(), ChatStorageService::class.java).also { intent ->
+            activity?.bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activity?.unbindService(chatConnection)
+        chatService = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        chatService?.let {
+            vm.fetchSavedData(it.getConvos(), it.currentConvo)
+        }
+    }
+
+    private fun toggleVisibilityChat(){
+        binding?.let { mBinding ->
+            val newVisibility = when(mBinding.chatSendBox.visibility){
+                View.VISIBLE -> View.GONE
+                else -> View.VISIBLE
+            }
+            mBinding.rvTabs.visibility = newVisibility
+            mBinding.messageContainer.visibility = newVisibility
+            mBinding.chatSendBox.visibility = newVisibility
+
+            when(newVisibility) {
+                View.VISIBLE ->{
+                    vm.playSound(SoundId.OPEN_CHAT.value)
+                    mBinding.root.setBackgroundResource(R.drawable.chat_background)
+                    mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_hide_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.GONE
+                }
+                else -> {
+                    vm.playSound(SoundId.CLOSE_CHAT.value)
+                    mBinding.root.setBackgroundColor(Color.TRANSPARENT)
+                    mBinding.hideIcon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_open_chat))
+                    mBinding.headerSpaceBuffer.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun resize(height: Int){
+        if(baseHeight < 0)
+            baseHeight = binding!!.root.height
+        if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
+            val params = binding!!.root.layoutParams
+            params.height = baseHeight - height
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            }
+        } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
+            val params = binding!!.root.layoutParams
+            params.height = baseHeight
+            binding?.let {
+                it.root.requestLayout()
+                it.rvMessages.adapter?.notifyDataSetChanged()
+                it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
+            }
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false)
+    ): View {
+        binding = FragmentChatBinding.inflate(inflater, container, false)
+
+        binding!!.sendButton.setOnClickListener { sendMessage() }
+        binding!!.guessingToggleBtn.setOnClickListener { toggleSendMode() }
+
+        binding!!.vm = vm
+        return binding!!.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sendButton.setOnClickListener {
-            sendButton()
+
+        setupRvMessages()
+        setupMessagesObserver()
+
+        setupClickListeners()
+        binding?.let {
+            val manager = LinearLayoutManager(activity)
+            manager.orientation = LinearLayoutManager.HORIZONTAL
+            it.rvTabs.layoutManager = manager
+            it.rvTabs.adapter = TabAdapter(vm.convos.value!!)
         }
-        val rvMessages = activity?.findViewById<View>(R.id.rvMessages) as RecyclerView
-        val adapter = MessagesAdapter(messages)
+    }
+
+    private fun setupClickListeners(){
+        binding?.let { mBinding ->
+            mBinding.toggleFriendslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibility", Bundle())
+            }
+            mBinding.toggleRoomslistBtn.setOnClickListener {
+                setFragmentResult("toggleVisibilityRooms", Bundle())
+            }
+            mBinding.iconsHeader.setOnClickListener {
+                toggleVisibilityChat()
+            }
+        }
+    }
+
+    private fun setupFragmentListeners(){
+        setFragmentResultListener("isGuessing"){ requestKey, bundle ->
+            vm.isGuesser.postValue(bundle["boolean"] as Boolean)
+            vm.isGuessing.postValue(bundle["boolean"] as Boolean)
+        }
+        setFragmentResultListener("keyboardEvent"){ requestKey, bundle ->
+            resize(bundle["height"] as Int)
+        }
+        setFragmentResultListener("openFriendChat"){ requestKey, bundle ->
+            val friend = (bundle["friend"] as FriendSimplified)
+            chatService?.addNewConvo(TabInfo(friend.username, friend.friendId, TabType.FRIEND), true)
+        }
+        setFragmentResultListener("openRoom"){ requestKey, bundle ->
+            val roomName = (bundle["roomName"] as String)
+            chatService?.addNewConvo(TabInfo(roomName, roomName, TabType.ROOM), true)
+        }
+    }
+
+    private fun setupChatServiceSubscriptions(){
+        chatService?.let { service ->
+            service.subscribeConvosChange(vm::updateConvos)
+            service.subscribeCurrentConvoChange(vm::updateCurrentConvo)
+            service.subscribeCurrentTabChange(vm::changeCurrentTab)
+        }
+    }
+
+    private fun setupTabsObservers(){
+        vm.convos.observe(requireActivity()){ convos ->
+            binding?.let { mBinding ->
+                mBinding.rvTabs.adapter?.notifyDataSetChanged()
+                var scrollIndex = convos.indexOfFirst { it.tabInfo.convoId == vm.currentConvo.value!!.tabInfo.convoId }
+                if(scrollIndex < 0)
+                    scrollIndex = 0
+                mBinding.rvTabs.scrollToPosition(scrollIndex)
+            }
+        }
+        vm.currentConvo.observe(requireActivity()){
+            if(it != null){
+                if(it.tabInfo.tabType == TabType.GAME){
+                    if(vm.isGuesser.value!!){
+                        updateGuessingBtnVisibility(true)
+                        vm.isGuessing.postValue(true)
+                    }
+                } else{
+                    updateGuessingBtnVisibility(false)
+                    vm.isGuessing.postValue(false)
+                }
+                binding?.let { mBinding ->
+                    (mBinding.rvTabs.adapter as TabAdapter?)?.setSelectedTabIndex(it.tabInfo)
+                }
+            }
+        }
+    }
+
+    private fun setupMessagesObserver(){
+        vm.messagesLiveData.observe(requireActivity()){
+            binding?.let { mBinding ->
+                if(it.isEmpty()) {
+                    mBinding.noMessagesView.visibility = View.VISIBLE
+                    mBinding.rvMessages.visibility = View.GONE
+                } else {
+                    mBinding.noMessagesView.visibility = View.GONE
+                    mBinding.rvMessages.visibility = View.VISIBLE
+                }
+                mBinding.rvMessages.adapter?.notifyDataSetChanged()
+                mBinding.rvMessages.scrollToPosition(it.size - 1)
+            }
+        }
+    }
+
+    private fun setupRvMessages(){
         val mLinearLayoutManager = LinearLayoutManager(activity)
         mLinearLayoutManager.stackFromEnd = true
-        rvMessages.layoutManager = LinearLayoutManager(activity)
-        rvMessages.adapter = adapter
+        binding!!.rvMessages.layoutManager = mLinearLayoutManager
+        binding!!.rvMessages.adapter = MessagesAdapter(vm.messagesLiveData.value!!, vm.accountInfo.username)
     }
 
-    private fun sendButton() {
-        val text: String = (chatBox.text).toString()
-        val adjustedText: String = formatMessageContent(text)
-        if (isMessageValidFormat(adjustedText)) {
-            addMessage(MessageChat(username, adjustedText, System.currentTimeMillis()))
-            socketService?.sendMessage(
-                MessageChat(
-                    username,
-                    adjustedText,
-                    System.currentTimeMillis()
-                )
-            )
-        } else {
-            showErrorToast(MESSAGE_CONTENT_ERROR)
-        }
-        chatBox.text?.clear()
-    }
+    private fun sendMessage() {
+        vm.sendMessage()
 
-    private fun addMessage(message: IMessage) {
-        message.content = formatMessageContent(message.content)
-        messages.add(message)
-        activity?.runOnUiThread {
-            //rvMessages.adapter?.notifyItemInserted(messages.size - 1)
-            rvMessages.adapter?.notifyDataSetChanged()
-            rvMessages.scrollToPosition(messages.size - 1)
-        }
-    }
+        //TODO show loading message
 
-    private fun isUsernameValidFormat(username: String): Boolean {
-        return Pattern.matches("^[A-Za-z0-9. ]+(?:[_&%$*#@!-][A-Za-z0-9. ]+)*$", username)
+        binding?.chatBox?.text?.clear()
     }
-
     private fun isMessageValidFormat(message: String): Boolean {
         return Pattern.matches(".*\\S.*", message) && message.length <= 200 && message.isNotEmpty()
     }
 
-    private fun formatMessageContent(messageContent: String): String {
-        var adjustedText: String = messageContent.replace("\\s+".toRegex(), " ")
-        adjustedText = adjustedText.trimStart()
-        return adjustedText
+    private fun toggleSendMode(){
+        vm.isGuessing.postValue(!vm.isGuessing.value!!)
+    }
+
+    private fun updateTheme(isGuessing: Boolean){
+        if(isGuessing){
+            binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_guessing_input_background)
+            binding!!.guessingToggleBtn.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_lightbulb_white)
+            binding!!.sendButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_sent)
+        } else{
+            binding!!.chatSendBox.background = ContextCompat.getDrawable(requireContext(), R.drawable.chat_input_background)
+            binding!!.guessingToggleBtn.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_lightbulb)
+            binding!!.sendButton.background = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_send_24)
+        }
     }
 
     private fun showErrorToast(errorMessage: String) {
@@ -188,17 +309,17 @@ class ChatFragment() : Fragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (isBound) {
-            activity?.unbindService(serviceConnection)
-            isBound = false
+    private fun updateGuessingBtnVisibility(isGuesser: Boolean){
+        if(isGuesser){
+            binding!!.guessingToggleBtn.visibility = View.VISIBLE
+        }
+        else{
+            binding!!.guessingToggleBtn.visibility = View.INVISIBLE
         }
     }
 
     override fun onDestroy() {
-        if (this::connexionDialog.isInitialized)
-            connexionDialog.dismiss()
+        binding = null
         super.onDestroy()
     }
 }

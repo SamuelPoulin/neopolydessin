@@ -1,0 +1,14 @@
+<div id="gamemode-container">
+  <div id="gamemode">{{gamemodeName}}</div>
+  <ng-container [ngSwitch]="gamemode">
+    <ng-container *ngSwitchCase="gameType.CLASSIC">
+      <mat-icon class="gamemode-icon gamemode-icon-flipped">group</mat-icon>
+      <mat-icon class="gamemode-icon">palette</mat-icon>
+      <mat-icon class="gamemode-icon">group</mat-icon>
+    </ng-container>
+    <ng-container *ngSwitchCase="gameType.SPRINT_COOP">
+      <mat-icon class="gamemode-icon gamemode-icon-flipped">groups</mat-icon>
+      <mat-icon class="gamemode-icon">palette</mat-icon>
+    </ng-container>
+  </ng-container>
+</div>

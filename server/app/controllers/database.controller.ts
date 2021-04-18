@@ -1,8 +1,10 @@
-import * as express from 'express';
-import { body, validationResult } from 'express-validator';
-import * as httpStatus from 'http-status-codes';
+import express from 'express';
+import { body } from 'express-validator';
+import httpStatus from 'http-status-codes';
 import { inject, injectable } from 'inversify';
 import { jwtVerify } from '../middlewares/jwt-verify';
+import { LoggedIn } from '../middlewares/logged-in';
+import { validationCheck } from '../middlewares/validation-check';
 import { DatabaseService, ErrorMsg } from '../services/database.service';
 import Types from '../types';
 
@@ -10,129 +12,140 @@ import Types from '../types';
 export class DatabaseController {
   router: express.Router;
 
-  constructor(@inject(Types.DatabaseService) private databaseService: DatabaseService) {
+  constructor(
+    @inject(Types.DatabaseService) private databaseService: DatabaseService,
+    @inject(Types.LoggedIn) private loggedIn: LoggedIn,
+  ) {
     this.configureRouter();
-  }
-
-  private badRequestIfValidationFailed(req: express.Request, res: express.Response, func: () => void): void {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.status(httpStatus.BAD_REQUEST).json({ errors: errors.array() });
-    } else {
-      func();
-    }
-  }
-
-  private unauthorizedIfLoggedOut(req: express.Request, res: express.Response, func: () => void): void {
-    const accountId = req.params._id;
-    if (accountId) {
-      this.databaseService.checkIfLoggedIn(accountId).then((isLoggedIn) => {
-        if (isLoggedIn) {
-          func();
-        }
-      }).catch((error: ErrorMsg) => {
-        res.status(error.statusCode).json(error.message);
-      });
-    } else {
-      res.status(httpStatus.UNAUTHORIZED).json('Access denied');
-    }
   }
 
   private configureRouter(): void {
     this.router = express.Router();
 
-    this.router.post('/auth/register', [
-      body('email').isEmail(),
-      body('password').isLength({ min: 6 }),
-      // eslint-disable-next-line @typescript-eslint/typedef
-      body('passwordConfirm').custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new Error('Passwords do not match');
-        } else {
-          return true;
-        }
-      })
+    this.router.post('/auth/register',
+      [
+        body('email').isEmail(),
+        body('password').isLength({ min: 6 }),
+        // eslint-disable-next-line @typescript-eslint/typedef
+        body('passwordConfirm').custom((value, { req }) => {
+          if (value !== req.body.password) {
+            throw new Error('Passwords do not match');
+          } else {
+            return true;
+          }
+        })
+      ],
+      validationCheck,
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.createAccount(req.body).then((result) => {
+          res.header('authorization', result.documents.accessToken).status(result.statusCode).json(result.documents);
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
+      });
+
+    this.router.post('/auth/login',
+      [
+        body('username').exists(),
+        body('password').exists()
+      ],
+      validationCheck,
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.login(req.body).then((result) => {
+          res.header('authorization', result.documents.accessToken).status(result.statusCode).json(result.documents);
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
+      });
+
+    this.router.post('/auth/refresh',
+      [body('refreshToken').exists()],
+      validationCheck,
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.refreshToken(req.body.refreshToken).then((newAccesToken) => {
+          res.status(httpStatus.OK).json({ accessToken: newAccesToken });
+        }).catch((error: ErrorMsg) => {
+          res.status(error.statusCode).json(error.message);
+        });
+      });
+
+    this.router.delete('/auth/logout',
+      [body('refreshToken').exists()],
+      validationCheck,
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.logout(req.body.refreshToken)
+          .then((successfull) => {
+            res.status(httpStatus.OK).json({ success: 'User logged out' });
+          }).catch((error: ErrorMsg) => {
+            res.status(error.statusCode).json(error.message);
+          });
+      });
+
+    this.router.get('/account',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.getAccountById(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.get('/dashboard',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.getDashboardById(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.get('/account/:id',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.getPublicAccount(req.params.id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+
+      });
+
+    this.router.delete('/account',
+      jwtVerify,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
+      async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.databaseService.deleteAccount(req.params._id)
+          .then((results) => {
+            res.status(results.statusCode).json(results.documents);
+          }).catch((err: ErrorMsg) => {
+            res.status(err.statusCode).json(err.message);
+          });
+      });
+
+    this.router.post('/account', jwtVerify, [
+      body('_id').isEmpty(),
+      body('firstName').isString().optional(),
+      body('lastName').isString().optional(),
+      body('username').isString().optional(),
+      body('email').isEmail().optional(),
+      body('password').isEmpty(),
+      validationCheck,
+      this.loggedIn.checkLoggedIn.bind(this.loggedIn),
     ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.badRequestIfValidationFailed(req, res, () => {
-        this.databaseService.createAccount(req.body).then((results) => {
+      this.databaseService.updateAccount(req.params._id, req.body)
+        .then((results) => {
           res.status(results.statusCode).json(results.documents);
         }).catch((error: ErrorMsg) => {
           res.status(error.statusCode).json(error.message);
         });
-      });
-    });
-
-    this.router.post('/auth/login', [
-      body('username').exists(),
-      body('password').exists()
-    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.badRequestIfValidationFailed(req, res, () => {
-        this.databaseService.login(req.body).then((tokens: string[]) => {
-          res.header('authorization', tokens[0]).json({ data: { accessToken: tokens[0], refreshToken: tokens[1] } });
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
-        });
-      });
-    });
-
-    this.router.post('/auth/refresh', [
-      body('refreshToken').exists()
-    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.badRequestIfValidationFailed(req, res, () => {
-        this.databaseService.refreshToken(req.body.refreshToken).then((newAccesToken) => {
-          res.status(httpStatus.OK).json({ data: { accessToken: newAccesToken } });
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
-        });
-      });
-    });
-
-    this.router.delete('/auth/logout', [
-      body('refreshToken').exists()
-    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.badRequestIfValidationFailed(req, res, () => {
-        this.databaseService.logout(req.body.refreshToken).then((successfull) => {
-          if (successfull) {
-            res.status(httpStatus.OK).json({ success: 'User logged out' });
-          }
-        }).catch((error: ErrorMsg) => {
-          res.status(error.statusCode).json(error.message);
-        });
-      });
-    });
-
-    this.router.get('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.unauthorizedIfLoggedOut(req, res, () => {
-        this.databaseService.getAccountById(req.params._id).then((results) => {
-          DatabaseService.handleResults(res, results);
-        });
-      });
-    });
-
-    this.router.delete('/account', jwtVerify, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.unauthorizedIfLoggedOut(req, res, () => {
-        this.databaseService.deleteAccount(req.params._id).then((results) => {
-          DatabaseService.handleResults(res, results);
-        });
-      });
-    });
-
-    this.router.post('/account', jwtVerify, [
-      body('_id').isEmpty(),
-      body('name').optional(),
-      body('username').optional(),
-      body('email').optional(),
-      body('password').isEmpty(),
-    ], async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.badRequestIfValidationFailed(req, res, () => {
-        this.unauthorizedIfLoggedOut(req, res, () => {
-          this.databaseService.updateAccount(req.params._id, req.body).then((results) => {
-            DatabaseService.handleResults(res, results);
-          }).catch((error: ErrorMsg) => {
-            res.status(error.statusCode).json(error.message);
-          });
-        });
-      });
     });
   }
 }

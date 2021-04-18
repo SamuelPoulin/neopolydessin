@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { EmojiEvent } from '@ctrl/ngx-emoji-mart/ngx-emoji';
-import { SocketService } from '@services/socket-service.service';
+import { ChatService } from '@services/chat.service';
 import { UserService } from '@services/user.service';
+import { ElectronService } from 'ngx-electron';
 import { Subscription } from 'rxjs';
 import { ChatMessage, Message } from '../../../../../../../common/communication/chat-message';
 
@@ -13,84 +14,75 @@ import { ChatMessage, Message } from '../../../../../../../common/communication/
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent {
   private static MAX_CHARACTER_COUNT: number;
-  messageSubscription: Subscription;
-  playerConnectionSubscription: Subscription;
-  playerDisconnectionSubscription: Subscription;
 
-  messages: Message[] = [];
+  readonly correctColor: string = '#38B000';
+  readonly iconColor: string = '#2196f3';
+
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
+  chatRoomChangedSubscription: Subscription;
+  isElectronApp: boolean;
+
   constructor(
-    private socketService: SocketService,
-    private router: Router,
     private snackBar: MatSnackBar,
+    private electronService: ElectronService,
+    private chatService: ChatService,
     public userService: UserService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public router: Router,
   ) {
-    if (!this.userService.username) this.router.navigate(['login']);
-
     ChatComponent.MAX_CHARACTER_COUNT = 200;
-  }
 
-  ngOnInit(): void {
-    this.subscribe();
-  }
-
-  subscribe(): void {
-    this.messageSubscription = this.socketService.receiveMessage().subscribe((message) => {
-      this.messages.push(message);
+    this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
       this.scrollToBottom();
     });
 
-    this.playerConnectionSubscription = this.socketService.receivePlayerConnections().subscribe((message) => {
-      this.messages.push(message);
-      this.scrollToBottom();
-    });
-
-    this.playerDisconnectionSubscription = this.socketService.receivePlayerDisconnections().subscribe((message) => {
-      this.messages.push(message);
-      this.scrollToBottom();
-    });
+    if (this.electronService.isElectronApp) {
+      this.isElectronApp = true;
+    }
   }
 
   sendMessage(): void {
+    if (this.inputValid) {
+      if (this.chatService.chatState.guessing) {
+        this.chatService.sendGuess(this.inputValue);
+      } else {
+        this.chatService.sendMessage(this.inputValue);
+      }
+      this.inputValue = '';
+      this.scrollToBottom();
+    }
+  }
+
+  get inputValid(): boolean {
     if (this.inputValue.replace(/ /g, '')) {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
-        this.socketService.sendMessage({
-          user: this.userService.username,
-          content: this.inputValue,
-          timestamp: Date.now(),
-        });
-        this.messages.push({
-          user: this.userService.username,
-          content: this.inputValue,
-          timestamp: Date.now(),
-        } as ChatMessage);
-        this.inputValue = '';
-        this.scrollToBottom();
+        return true;
       } else {
         this.sendNotification('Le message ne doit pas dépasser 200 caractères.');
       }
     } else {
       this.sendNotification('Le message est vide.');
     }
+
+    return false;
   }
 
   scrollToBottom(): void {
     setTimeout(() => {
-      if (this.electronContainer) {
-        this.electronContainer.scrollTop = this.electronContainer.scrollHeight;
-      } else {
-        window.scrollTo(0, document.body.scrollHeight);
+      const chatMessages = document.querySelector('#chat-messages');
+
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     });
   }
 
   isSystem(message: Message): message is ChatMessage {
-    return !(message as ChatMessage).user;
+    return !(message as ChatMessage).senderUsername;
   }
 
   get electronContainer(): Element | null {
@@ -99,6 +91,18 @@ export class ChatComponent implements OnInit {
 
   toggleEmojiMart(): void {
     this.emojiMartOpen = !this.emojiMartOpen;
+  }
+
+  toggleGuessMode(): void {
+    this.chatService.toggleGuessMode();
+  }
+
+  toggleFriendslist() {
+    this.chatService.toggleFriendslist();
+  }
+
+  toggleChatRooms() {
+    this.chatService.toggleChatRooms();
   }
 
   addEmoji(e: EmojiEvent) {
@@ -114,11 +118,39 @@ export class ChatComponent implements OnInit {
     return ChatComponent.MAX_CHARACTER_COUNT;
   }
 
+  get standalone(): boolean {
+    return this.chatService.standalone;
+  }
+
+  get guessing(): boolean {
+    return this.chatService.chatState.guessing;
+  }
+
+  get messages(): Message[] {
+    return this.chatService.messages;
+  }
+
+  get friendslistOpened(): boolean {
+    return this.chatService.chatState.friendslistOpened;
+  }
+
+  get chatRoomsOpened(): boolean {
+    return this.chatService.chatState.chatRoomsOpened;
+  }
+
+  get canGuess(): boolean {
+    return this.chatService.canGuess;
+  }
+
   sendNotification(message: string) {
     this.snackBar.open(message, 'Ok', {
       duration: 2000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
     });
+  }
+
+  popout() {
+    this.chatService.popOut();
   }
 }

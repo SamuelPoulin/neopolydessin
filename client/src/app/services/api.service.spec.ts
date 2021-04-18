@@ -9,6 +9,22 @@ import { Drawing } from '@models/drawing';
 import { of } from 'rxjs';
 import { APIService } from './api.service';
 
+export const MockAPIService = jasmine.createSpyObj('APIService', {
+  login: Promise.resolve(),
+  refreshToken: Promise.resolve(),
+  register: Promise.resolve(),
+  handleResponse: null,
+  handleError: null,
+  getAccount: Promise.resolve(),
+  getFriendsList: Promise.resolve({ friends: [] }),
+  getDashBoardInfo: Promise.resolve({
+    gameHistory: { games: [] },
+    logins: []
+  }),
+});
+
+MockAPIService.friendslistUpdated = of();
+
 describe('APIService', () => {
   let apiService: APIService;
   let httpTestingController: HttpTestingController;
@@ -36,16 +52,6 @@ describe('APIService', () => {
 
     apiService.getAllDrawings().then(() => {
       expect(getSpy).toHaveBeenCalled();
-    });
-  });
-
-  it('should get call http post on uploadDrawing', async () => {
-    const postSpy = spyOn(apiService['http'], 'post').and.returnValue(of(Drawing));
-
-    const drawing = new Drawing('test drawing', [], '', '', 0, 0, 'www');
-
-    apiService.uploadDrawing(drawing).then(() => {
-      expect(postSpy).toHaveBeenCalled();
     });
   });
 

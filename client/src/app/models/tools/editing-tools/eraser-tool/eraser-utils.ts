@@ -36,6 +36,8 @@ export class EraserUtils {
     if (style.stroke !== BaseShape.CSS_NONE) {
       style.stroke = color.rgbString;
     }
+    style.strokeOpacity = '1';
+    style.fillOpacity = '1';
   }
 
   static sanitizeSvgNode(node: SVGElement): void {

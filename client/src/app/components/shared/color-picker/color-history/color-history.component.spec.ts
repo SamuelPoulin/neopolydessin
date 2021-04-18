@@ -1,6 +1,8 @@
 import { DebugElement } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { ColorsService } from 'src/app/services/colors.service';
 import { Color } from 'src/app/utils/color/color';
 
@@ -9,18 +11,16 @@ import { ColorHistoryComponent } from './color-history.component';
 describe('ColorHistoryComponent', () => {
   let component: ColorHistoryComponent;
   let fixture: ComponentFixture<ColorHistoryComponent>;
-  let selectedColors: ColorsService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ColorHistoryComponent],
-      providers: [ColorsService],
+      providers: [{ provide: EditorService, useClass: MockEditorService }],
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorHistoryComponent);
-    selectedColors = TestBed.inject(ColorsService);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -54,11 +54,11 @@ describe('ColorHistoryComponent', () => {
 
   it('sets secondary color on right click', () => {
     ColorsService.getColorHistory().fill(Color.WHITE);
-    selectedColors.secondaryColor = Color.BLACK;
+    component.editorService.colorsService.secondaryColor = Color.BLACK;
     fixture.detectChanges();
     const button: DebugElement = fixture.debugElement.query(By.css('.color-history-button'));
-    expect(selectedColors.secondaryColor).toEqual(Color.BLACK);
+    expect(component.editorService.colorsService.secondaryColor).toEqual(Color.BLACK);
     button.triggerEventHandler('contextmenu', {});
-    expect(selectedColors.secondaryColor).toEqual(Color.WHITE);
+    expect(component.editorService.colorsService.secondaryColor).toEqual(Color.WHITE);
   });
 });

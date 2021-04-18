@@ -24,13 +24,43 @@
 
 .chat-message-content {
   display: flex;
+
+  flex-grow: 1;
+  padding: 12px 15px;
+
   background-color: white;
   box-shadow: 0px 5px 10px 2px rgba(0, 0, 0, 0.05);
   border-radius: 0 10px 10px 10px;
-  padding: 12px 15px;
-
   color: #03071e;
   word-break: break-word;
+}
+
+.chat-message-guess {
+  display: flex;
+  justify-content: flex-end;
+
+  border-radius: 10px;
+}
+
+.chat-message-correct-guess {
+  background-color: #38B000;
+}
+
+.chat-message-close-guess {
+  background-color: #FFB703 ;
+}
+
+.chat-message-wrong-guess {
+  background-color: #FF4848;
+}
+
+.chat-message-guess-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0px 5px;
+
+  color: white;
 }
 
 .chat-message-content-user {

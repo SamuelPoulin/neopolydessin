@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:constraint="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    style="@style/messageRoot">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:layout_weight="0.5"
+        android:paddingHorizontal="10dp">
+
+        <TextView
+            android:id="@+id/message_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/messageUsername"
+            android:paddingHorizontal="8dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp"
+            android:clipToPadding="false">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:background="@drawable/guess_wrong_message_background"
+                android:elevation="2dp"
+                android:outlineProvider="background">
+
+                <TextView
+                    android:id="@+id/message_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:layout_marginRight="20dp"
+                    android:textColor="@color/black"/>
+            </FrameLayout>
+            <TextView
+                android:id="@+id/message_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/messageTime"
+                android:paddingHorizontal="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"/>
+
+</LinearLayout>

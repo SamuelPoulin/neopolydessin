@@ -1,33 +1,42 @@
-/* tslint:disable:no-string-literal no-magic-numbers */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { DrawingSurfaceComponent } from '@components/pages/editor/drawing-surface/drawing-surface.component';
-import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { keyDown } from '@components/pages/editor/editor/editor.component.spec';
-import { ToolbarModule } from '@components/pages/editor/toolbar/toolbar.module';
-import { CreateDrawingModalComponent } from '@components/pages/home/create-drawing-modal/create-drawing-modal.component';
-import { UserGuideModalComponent } from '@components/pages/user-guide/user-guide/user-guide-modal.component';
 import { SharedModule } from '@components/shared/shared.module';
+import { APIService } from '@services/api.service';
+import { MockAPIService } from '@services/api.service.spec';
+import { ChatService } from '@services/chat.service';
+import { MockChatService } from '@services/chat.service.spec';
 import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { KeyboardListenerService } from '@services/event-listeners/keyboard-listener/keyboard-listener.service';
-import { GridVisibility } from '@tool-properties/grid-properties/grid-visibility.enum';
+import { GameService } from '@services/game.service';
+import { MockGameService } from '@services/game.service.spec';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
+import { UserService } from '@services/user.service';
+import { MockUserService } from '@services/user.service.spec';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
+import { EditorModule } from '../editor.module';
 
 describe('EditorKeyboardListener', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   let keyboardListener: KeyboardListenerService;
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule, SharedModule, ToolbarModule],
-      declarations: [DrawingSurfaceComponent, UserGuideModalComponent, EditorComponent, GridComponent, CreateDrawingModalComponent],
-      providers: [EditorService],
-    })
-      .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [CreateDrawingModalComponent, UserGuideModalComponent] } })
-      .compileComponents();
+      imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
+      providers: [
+        { provide: EditorService, useClass: MockEditorService },
+        { provide: APIService, useValue: MockAPIService },
+        { provide: UserService, useValue: MockUserService },
+        { provide: GameService, useValue: MockGameService },
+        { provide: ChatService, useValue: MockChatService },
+        { provide: SocketService, useValue: MockSocketService },
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -99,11 +108,4 @@ describe('EditorKeyboardListener', () => {
     keyboardListener.handle(keyDown('+', false, false));
     expect(component.editorService.gridProperties.size.value).toEqual(30);
   });
-
-  it('should set grid visible when typing g', () => {
-    component.editorService.gridProperties.visibility.value = GridVisibility.hidden;
-    keyboardListener.handle(keyDown('g', false, false));
-    expect(component.editorService.gridProperties.visibility.value).toEqual(GridVisibility.visible);
-  });
-
 });

@@ -1,0 +1,35 @@
+<div class="chat-friend-container">
+  <app-avatar [username]="username" [avatarId]="avatarId" size="35" fontSize="20" class="chat-friend-avatar">
+  </app-avatar>
+  {{username}}
+  <div *ngIf="friend.isOnline" class="chat-friend-online"></div>
+  <div class="chat-friend-buttons-container">
+    <ng-container [ngSwitch]="friend.status">
+      <ng-container *ngSwitchCase="friendStatus.PENDING">
+        <ng-container *ngIf="canConfirm">
+          <button mat-icon-button class="chat-friend-button" (click)="confirm()">
+            <mat-icon>done</mat-icon>
+          </button>
+          <button mat-icon-button class="chat-friend-button" (click)="reject()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </ng-container>
+        <ng-container *ngIf="!canConfirm">
+          <div class="chat-friend-pending-message">Pending...</div>
+        </ng-container>
+      </ng-container>
+      <ng-container *ngSwitchCase="friendStatus.FRIEND">
+        <button mat-icon-button class="chat-friend-button" matTooltip="Inviter" matTooltipPosition="below" (click)="invite()">
+          <mat-icon>sports_esports</mat-icon>
+        </button>
+        <button mat-icon-button class="chat-friend-button" matTooltip="Discuter" matTooltipPosition="below" (click)="chat()">
+          <mat-icon>send</mat-icon>
+        </button>
+        <button mat-icon-button class="chat-friend-button" matTooltip="Enlever" matTooltipPosition="below"  (click)="unfriend()">
+          <mat-icon>person_remove</mat-icon>
+        </button>
+      </ng-container>
+      <div class="chat-friend-end-padding"></div>
+    </ng-container>
+  </div>
+</div>

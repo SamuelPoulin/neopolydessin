@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
-import { Router } from '@angular/router';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
+import { TutorialService, TutorialStep } from '@services/tutorial.service';
 
 import { Tool } from '@tools/tool';
 import { ColorPickerComponent } from 'src/app/components/shared/color-picker/color-picker.component';
@@ -24,7 +24,6 @@ export class ToolbarComponent {
   @Output() currentToolTypeChange: EventEmitter<ToolType> = new EventEmitter<ToolType>();
 
   @Output() editorBackgroundChanged: EventEmitter<Color>;
-  @Output() guideButtonClicked: EventEmitter<boolean>;
   @Output() chooseExportSaveButtonClicked: EventEmitter<boolean>;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -48,11 +47,10 @@ export class ToolbarComponent {
   readonly toolbarIcons: Map<ToolType | string, string>;
   readonly toolbarNames: Map<ToolType | string, string>;
 
-  constructor(private router: Router, public editorService: EditorService) {
+  constructor(public editorService: EditorService, private tutorialService: TutorialService) {
     this.stepThickness = ToolbarComponent.SLIDER_STEP;
     this.editorBackgroundChanged = new EventEmitter<Color>();
     this.selectedColor = SelectedColorType.primary;
-    this.guideButtonClicked = new EventEmitter<boolean>();
     this.chooseExportSaveButtonClicked = new EventEmitter<boolean>();
     this.toolbarType = ToolbarType.other;
 
@@ -88,16 +86,16 @@ export class ToolbarComponent {
     this.chooseExportSaveButtonClicked.emit(true);
   }
 
-  openGuide(): void {
-    this.guideButtonClicked.emit(true);
-  }
-
   selectTool(selection: string): void {
     const type = selection as ToolType;
     if (type) {
       this.currentToolType = type;
       this.toolbarType = ToolbarType.other;
       this.currentToolTypeChange.emit(type);
+    }
+
+    if (type === ToolType.Pen && this.tutorialService.tutorialActive && this.tutorialService.currentStep === TutorialStep.SELECT_TOOL) {
+      this.tutorialService.next(TutorialStep.DRAW);
     }
   }
 
@@ -110,10 +108,6 @@ export class ToolbarComponent {
   editGrid(): void {
     this.toolbarType = ToolbarType.grid;
     this.open();
-  }
-
-  navigate(path: string): void {
-    this.router.navigate([path]);
   }
 
   updateBackground(color: Color): void {
@@ -152,5 +146,9 @@ export class ToolbarComponent {
 
   get color(): Color {
     return this.editorService.colorsService.getColor(this.selectedColor);
+  }
+
+  get electronContainer(): Element | null {
+    return document.querySelector('.container-after-titlebar');
   }
 }

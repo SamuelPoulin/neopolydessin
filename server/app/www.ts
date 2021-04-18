@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import { Container } from 'inversify';
 import 'reflect-metadata';
 import { containerBootstrapper } from './inversify.config';
@@ -7,6 +7,7 @@ import Types from './types';
 
 void (async () => {
   try {
+    process.env.API_KEY = fs.readFileSync('emailAPI.env').toString().split('@')[0];
     process.env.MONGODB_KEY = fs.readFileSync('mongo.env').toString();
     const jwtkeys = fs.readFileSync('jwtsecret.env').toString().split('\n');
     process.env.JWT_KEY = jwtkeys[0];

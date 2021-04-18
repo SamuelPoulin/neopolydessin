@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, HostListener, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { GameType, PlayerRole } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
-import { APIService } from '@services/api.service';
-import { LocalSaveService } from '@services/localsave.service';
+import { ChatService } from '@services/chat.service';
+import { GameService } from '@services/game.service';
+import { format } from 'date-fns';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
 import { Tool } from 'src/app/models/tools/tool';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
@@ -12,14 +14,13 @@ import { ModalDialogService } from 'src/app/services/modal/modal-dialog.service'
 import { ModalType } from 'src/app/services/modal/modal-type.enum';
 import { Color } from 'src/app/utils/color/color';
 import { DrawingSurfaceComponent } from '../drawing-surface/drawing-surface.component';
-import { EditorParams } from './editor-params';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('drawingSurface')
   drawingSurface: DrawingSurfaceComponent;
 
@@ -34,14 +35,17 @@ export class EditorComponent implements OnInit, AfterViewInit {
   drawingId: string;
   drawing: Drawing;
   modalTypes: typeof ModalType;
+  timeLeft: string;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     public editorService: EditorService,
+    public gameService: GameService,
     public dialog: ModalDialogService,
-    private apiService: APIService,
+    public chatService: ChatService,
   ) {
+    this.chatService.resetGameMessages();
+
     this.surfaceColor = DrawingSurfaceComponent.DEFAULT_COLOR;
     this.surfaceWidth = DrawingSurfaceComponent.DEFAULT_WIDTH;
     this.surfaceHeight = DrawingSurfaceComponent.DEFAULT_HEIGHT;
@@ -49,6 +53,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.keyboardListener = new EditorKeyboardListener(this);
 
     this.currentToolType = ToolType.Pen;
+
+    setInterval(() => this.updateTimeLeft(), GameService.SECOND);
   }
 
   ngOnInit(): void {
@@ -56,30 +62,18 @@ export class EditorComponent implements OnInit, AfterViewInit {
       this.surfaceWidth = params.width ? +params.width : this.surfaceWidth;
       this.surfaceHeight = params.height ? +params.height : this.surfaceHeight;
       this.surfaceColor = params.color ? Color.hex(params.color) : this.surfaceColor;
-      this.drawingId = params.id;
     });
+    this.editorService.setReady();
   }
 
   ngAfterViewInit(): void {
     this.editorService.resetDrawing();
+    this.editorService.initListeners();
     this.editorService.view = this.drawingSurface;
-    if (this.drawingId === LocalSaveService.NEW_DRAWING_ID) {
-      this.editorService.saveLocally();
-      const params: EditorParams = {
-        width: this.editorService.view.width.toString(),
-        height: this.editorService.view.height.toString(),
-        color: this.editorService.view.color.hex,
-        id: LocalSaveService.LOCAL_DRAWING_ID,
-      };
-      this.router.navigate(['edit', params]);
-    } else if (this.drawingId === LocalSaveService.LOCAL_DRAWING_ID) {
-      this.editorService.importLocalDrawing();
-      this.editorService.saveLocally();
-    } else if (this.drawingId) {
-      this.editorService.importDrawingById(this.drawingId, this.apiService).then(() => {
-        this.editorService.saveLocally();
-      });
-    }
+  }
+
+  ngOnDestroy(): void {
+    this.editorService.isFreeEdit = false;
   }
 
   handleMouseEvent(e: MouseEvent): void {
@@ -95,24 +89,13 @@ export class EditorComponent implements OnInit, AfterViewInit {
   @HostListener('window:keydown', ['$event'])
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent): void {
-    if (!this.dialog.modalIsOpened) {
+    if (this.gameService.canDraw || this.editorService.isFreeEdit) {
       this.keyboardListener.handle(event);
     }
   }
 
-  openGuide(): void {
-    this.dialog.openByName(ModalType.GUIDE);
-  }
-
-  openCreateModal(): void {
-    const confirmDialog = this.dialog.openByName(ModalType.CONFIRM);
-    if (confirmDialog) {
-      confirmDialog.afterClosed().subscribe((result) => {
-        if (result) {
-          this.dialog.openByName(ModalType.CREATE);
-        }
-      });
-    }
+  saveDrawing(): void {
+    this.dialog.openByName(ModalType.UPLOAD, { id: 'drawing' });
   }
 
   setToolbarState(opened: boolean): void {
@@ -121,7 +104,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     } else {
       this.toolbar.close();
     }
-    this.keyboardListener.listening = !(opened || this.dialog.modalIsOpened);
+    this.keyboardListener.listening = !opened;
   }
 
   get currentTool(): Tool | undefined {
@@ -142,7 +125,34 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updateTimeLeft(): void {
+    this.timeLeft = format(new Date(this.gameService.getTimeLeft()), 'mm:ss');
+  }
+
+  get hint(): string {
+    return this.gameService.wordToDraw ? 'Le mot à dessiner est' : '';
+  }
+
   get loading(): boolean {
     return this.editorService.loading;
+  }
+
+  get splitTeams(): boolean {
+    return this.gameService.gameType === GameType.CLASSIC;
+  }
+
+  playerRoleMessage(): string {
+    switch (this.gameService.currentRole) {
+      case PlayerRole.DRAWER:
+        return 'À vous de dessiner';
+      case PlayerRole.GUESSER:
+        return 'À vous de deviner';
+      case PlayerRole.PASSIVE:
+        return 'Attendez votre tour';
+    }
+  }
+
+  get playerRole() {
+    return PlayerRole;
   }
 }

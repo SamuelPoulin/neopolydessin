@@ -1,0 +1,80 @@
+#content {
+  margin-top: 30px;
+}
+
+#content-left {
+  float: left;
+  width: 600px;
+}
+
+#content-right {
+  float: right;
+  width: 500px;
+  margin-bottom: 300px;
+}
+
+#word-input {
+  display: inline-block;
+  width: 100%;
+}
+
+.before-color {
+  width: calc(100% - 100px) !important;
+}
+
+#color-input {
+  float: right;
+  margin-bottom: 20px;
+}
+
+#color-btn {
+  width: 60px;
+  height: 30px;
+  border: 0;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+#bottom-inputs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.bottom-input {
+  width: 32%;
+  display: inline-block;
+}
+
+#uploaded-image {
+  object-fit: contain;
+  object-position: top;
+}
+
+#actions > button {
+  margin-left: 10px;
+}
+
+#upload-input {
+  display: none;
+}
+
+.hint-wrapper {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.hint-input {
+  width: calc(100% - 30px);
+}
+
+.remove-hint {
+  margin-top: 20px;
+  color: red;
+  cursor: pointer;
+}
+
+#add-hint {
+  margin-top: 20px;
+  cursor: pointer;
+}

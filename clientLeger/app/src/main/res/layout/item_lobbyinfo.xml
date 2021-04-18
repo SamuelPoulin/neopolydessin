@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/item_lobbyinfo_background"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/emptyListMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="@string/emptyLobbylistMsg"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:paddingVertical="5dp"/>
+
+    <LinearLayout
+        android:id="@+id/infoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/lobbyName"
+            style="@style/lobbyinfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.20"
+            android:text="@string/lobby_name" />
+
+        <TextView
+            android:id="@+id/gameCapacity"
+            style="@style/lobbyinfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.20"
+            android:text="@string/game_capacity" />
+
+        <TextView
+            android:id="@+id/gameMode"
+            style="@style/lobbyinfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.20"
+            android:text="@string/game_mode"
+            android:paddingLeft="15dp"
+            android:textAlignment="viewStart"/>
+
+        <TextView
+            android:id="@+id/difficulty"
+            style="@style/lobbyinfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.20"
+            android:text="@string/difficulty"
+            android:paddingLeft="15dp"
+            android:textAlignment="viewStart"/>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.20">
+
+            <Button
+                android:id="@+id/joinGamebtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/lightGreen"
+                android:drawableRight="@drawable/ic_right_arrow"
+                android:text="@string/join_game"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:layout_gravity="center_horizontal"/>
+        </FrameLayout>
+
+    </LinearLayout>
+</LinearLayout>

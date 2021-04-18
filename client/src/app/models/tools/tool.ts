@@ -14,9 +14,13 @@ export abstract class Tool implements MouseHandler {
     this.editorService = editorService;
     this._mousePosition = new Coordinate();
     this.keyboardListener = new KeyboardListenerService();
-    if (this.initMouseHandler) {
+
+    if (this.initMouseHandler && (editorService.gameService.canDraw || editorService.isFreeEdit)) {
       this.initMouseHandler();
+    } else if (this.initListeners && !editorService.gameService.canDraw && !editorService.isFreeEdit) {
+      this.initListeners();
     }
+
     this.mouseListener = MouseListenerService.defaultMouseListener(this);
   }
   readonly toolProperties: ToolProperties;
@@ -37,6 +41,8 @@ export abstract class Tool implements MouseHandler {
   handleMouseUp: MouseEventAction;
 
   initMouseHandler?(): void;
+  removeListeners?(): void;
+  protected initListeners?(): void;
 
   handleContextMenu(): boolean {
     return true;

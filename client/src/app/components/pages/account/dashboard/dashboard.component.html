@@ -1,0 +1,108 @@
+<app-account-section title="Statistiques">
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Nombre de parties jouées</div>
+    <div class="dashboard-statistic-value">{{gamesPlayed}}</div>
+  </div>
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Pourcentage de victoires</div>
+    <div class="dashboard-statistic-value">{{(winRatio * 100).toFixed(2)}}%</div>
+  </div>
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Nombre d'heures jouées</div>
+    <div class="dashboard-statistic-value">{{playTime}}h</div>
+  </div>
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Nombre d'heures de connexion</div>
+    <div class="dashboard-statistic-value">{{connectionTime}}h</div>
+  </div>
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Meilleur Score Sprint Solo</div>
+    <div class="dashboard-statistic-value">{{soloHighScore}}</div>
+  </div>
+  <div class="dashboard-statistic-container">
+    <div class="dashboard-statistic-title">Meileur Score Sprint Coop</div>
+    <div class="dashboard-statistic-value">{{coopHighScore}}</div>
+  </div>
+</app-account-section>
+<app-account-section title="Historique des parties jouées">
+  <ng-container *ngIf="chartOptions !== undefined">
+    <apx-chart
+    id="dashboard-wl-chart"
+    [series]="chartOptions.series"
+    [chart]="chartOptions.chart"
+    [xaxis]="chartOptions.xaxis"
+    [title]="chartOptions.title"
+    ></apx-chart>
+  </ng-container>
+</app-account-section>
+<app-account-section title="Historique détaillé des parties et des connexions">
+  <ng-container *ngFor="let game of games">
+    <div class="dashboard-game-container">
+      <div class="dashboard-statistic-container">
+        <div class="dashboard-statistic-title">Mode de jeu</div>
+        <div class="dashboard-statistic-value">{{this.prettyGameMode(game.gameType)}}</div>
+      </div>
+      <div class="dashboard-statistic-container">
+        <div class="dashboard-statistic-title">Joué le</div>
+        <div class="dashboard-statistic-value">{{this.getDate(game.startDate)}}</div>
+      </div>
+      <div class="dashboard-statistic-container">
+        <div class="dashboard-statistic-title">Temps de jeu</div>
+        <div class="dashboard-statistic-value">{{this.getGameTime(game)}}</div>
+      </div>
+  
+      <ng-container [ngSwitch]="game.gameType">
+        <ng-container *ngSwitchCase="gameType.CLASSIC">
+  
+          <div class="dashboard-statistic-container">
+              <div class="dashboard-statistic-title">Resultat de la partie</div>
+              <div class="dashboard-statistic-value">{{this.prettyGameResult(game.gameResult)}}</div>
+            </div>
+            <div class="dashboard-statistic-container">
+              <div class="dashboard-statistic-title">Équipe 1 : {{game.team[0].score}}</div>
+              <div class="dashboard-list-container">
+              <ng-container *ngFor="let player of game.team[0].playerNames">
+                  <div class="dashboard-statistic-value">{{player}}</div>
+              </ng-container>  
+              </div>
+            </div>
+            <div class="dashboard-statistic-container">
+              <div class="dashboard-statistic-title">Équipe 2 : {{game.team[1].score}}</div>
+              <div class="dashboard-list-container">
+                <ng-container *ngFor="let player of game.team[1].playerNames">
+                    <div class="dashboard-statistic-value">{{player}}</div>
+                </ng-container>
+              </div>
+            </div>
+        </ng-container>
+  
+        <ng-container *ngSwitchDefault>
+            <div class="dashboard-statistic-container">
+              <div class="dashboard-statistic-title">Players</div>
+              <div class="dashboard-list-container">
+              <ng-container *ngFor="let player of game.team[0].playerNames">
+                    <div class="dashboard-statistic-value">{{player}}</div>
+              </ng-container>
+              </div>
+            </div>
+            <div class="dashboard-statistic-container">
+              <div class="dashboard-statistic-title">Score</div>
+              <div class="dashboard-statistic-value">{{game.team[0].score}}</div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+</app-account-section>
+<app-account-section title="Historique des connexions">
+  <ng-container *ngFor="let login of logins">
+    <ng-container *ngIf='login.end !== undefined'>
+      <div class="dashboard-statistic-container">
+        <div class="dashboard-statistic-title">Connexion</div>
+        <div class="dashboard-statistic-value">{{this.getDate(login.start)}}</div>
+        <div class="dashboard-statistic-title">Déconnexion</div>
+        <div class="dashboard-statistic-value">{{this.getDate(login.end)}}</div>
+      </div>
+    </ng-container>
+  </ng-container>
+</app-account-section>

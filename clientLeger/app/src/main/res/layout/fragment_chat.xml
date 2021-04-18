@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout>
+    <data>
+        <variable
+            name="vm"
+            type="com.projet.clientleger.ui.chat.ChatViewModel" />
+    </data>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,53 +13,145 @@
     android:background="@drawable/chat_background"
     android:orientation="vertical"
     tools:context=".ui.chat.ChatFragment">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMessages"
+    <View
+        android:id="@+id/headerSpaceBuffer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/chatSendBox" />
-    <!--    <androidx.core.widget.NestedScrollView-->
-    <!--        android:id="@+id/scrollbar"-->
-    <!--        android:layout_width="fill_parent"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        android:layout_weight="1">-->
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"/>
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/chat_header_black"
+        android:layout_weight="0">
+        <!--        android:layout_alignParentTop="true"-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/iconsHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:clickable="true">
+            <ImageView
+                android:id="@+id/chatIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_chat"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/chatTextHeader"/>
+            <TextView
+                android:id="@+id/chatTextHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chat"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@+id/chatIcon"/>
+            <Button
+                android:id="@+id/toggleRoomslistBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rooms"
+                android:textColor="@color/white"
+                android:textAllCaps="false"
+                android:drawableLeft="@drawable/ic_rooms"
+                android:minWidth="1dp"
+                android:minHeight="1dp"
+                android:backgroundTint="@color/hover_btn"
+                android:layout_marginRight="4dp"
+                app:layout_constraintRight_toLeftOf="@id/toggleFriendslistBtn"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+            <Button
+                android:id="@+id/toggleFriendslistBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_friendslist_btn"
+                android:textColor="@color/white"
+                android:text="@string/friends"
+                android:textAllCaps="false"
+                android:minWidth="1dp"
+                android:minHeight="1dp"
+                android:backgroundTint="@color/hover_btn"
+                app:layout_constraintRight_toLeftOf="@id/hideIcon"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+            <ImageView
+                android:id="@+id/hideIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_hide_chat"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTabs"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@color/tabs_black"/>
+    </LinearLayout>
 
-    <!--        <LinearLayout-->
-    <!--            android:id="@+id/messageBox"-->
-    <!--            android:layout_width="fill_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:orientation="vertical">-->
+    <FrameLayout
+        android:id="@+id/messageContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+<!--        android:layout_above="@id/chatSendBox"-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMessages"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <TextView
+            android:id="@+id/noMessagesView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No messages, big sad"
+            android:visibility="gone"/>
+    </FrameLayout>
 
-    <!--            <TextView-->
-    <!--                android:id="@+id/chatText"-->
-    <!--                android:layout_width="fill_parent"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:text="works!"-->
-    <!--                android:textSize="20sp" />-->
-    <!--        </LinearLayout>-->
-
-    <!--    </androidx.core.widget.NestedScrollView>-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chatSendBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:background="@drawable/chat_input_background"
-        android:layout_centerHorizontal="true"
         android:padding="10dp"
-        android:layout_margin="20dp"
-        android:elevation="15dp">
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="10dp"
+        android:elevation="15dp"
+        android:layout_weight="0">
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_centerHorizontal="true"-->
+
+        <ImageButton
+            android:id="@+id/guessingToggleBtn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintDimensionRatio="1:1"
+            android:background="@drawable/ic_lightbulb"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/chatBox"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
         <EditText
             android:id="@+id/chatBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
-            android:layout_weight="0.8"
+            android:layout_weight="0.5"
             android:background="@android:color/transparent"
-            app:layout_constraintLeft_toLeftOf="parent"
+            android:text="@={vm.messageContentLiveData}"
+            android:singleLine="true"
+            app:layout_constraintLeft_toRightOf="@id/guessingToggleBtn"
             app:layout_constraintRight_toLeftOf="@id/sendButton"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
@@ -68,4 +166,5 @@
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</RelativeLayout>
+</LinearLayout>
+</layout>

@@ -1,5 +1,4 @@
 /* tslint:disable:no-magic-numbers */
-import { EditorUtils } from '@utils/color/editor-utils';
 import { Rectangle } from 'src/app/models/shapes/rectangle';
 import { Coordinate } from 'src/app/utils/math/coordinate';
 
@@ -7,13 +6,6 @@ describe('Rectangle', () => {
   let rectangle: Rectangle;
   beforeEach(() => {
     rectangle = new Rectangle();
-  });
-  it('Can read shape', () => {
-    rectangle.width = 50;
-    rectangle.height = 60;
-    rectangle.origin = new Coordinate(20, 30);
-    const rectangle2 = EditorUtils.createShape(JSON.parse(JSON.stringify(rectangle)));
-    expect(Object.values(rectangle2)).toEqual(Object.values(rectangle));
   });
   it('should init with width = 0', () => {
     expect(rectangle.width).toBe(0);

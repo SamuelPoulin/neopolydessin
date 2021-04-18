@@ -4,7 +4,7 @@ import { Coordinate } from 'src/app/utils/math/coordinate';
 export class Path extends BaseShape {
   static readonly PATH_STYLE: string = 'round';
   private _trace: string;
-  protected points: Coordinate[];
+  points: Coordinate[];
 
   get trace(): string {
     return this._trace;
@@ -38,7 +38,6 @@ export class Path extends BaseShape {
         this.addPoint(point);
       });
     }
-    this.applyTransform();
   }
 
   constructor(c?: Coordinate, id?: number) {
@@ -48,7 +47,6 @@ export class Path extends BaseShape {
     if (c) {
       this.addPoint(c);
     }
-    this.applyTransform();
   }
 
   readShape(data: Path): void {
@@ -57,7 +55,6 @@ export class Path extends BaseShape {
     data.points.forEach((p) => {
       this.addPoint(Coordinate.copy(p));
     });
-    this.applyTransform();
   }
 
   addPoint(c: Coordinate): void {
@@ -71,12 +68,10 @@ export class Path extends BaseShape {
 
   updateProperties(): void {
     super.updateProperties();
-
     this.svgNode.style.fill = Path.CSS_NONE;
-
     this.svgNode.style.stroke = this.primaryColor.rgbString;
+    // TODO default a 1 opacity if no Alpha term.
     this.svgNode.style.strokeOpacity = this.primaryColor.a.toString();
-
     this.svgNode.style.strokeLinecap = Path.PATH_STYLE;
     this.svgNode.style.strokeLinejoin = Path.PATH_STYLE;
   }

@@ -25,21 +25,34 @@ import { ColorLightnessComponent } from 'src/app/components/shared/color-picker/
 import { CustomInputComponent } from 'src/app/components/shared/inputs/custom-input/custom-input.component';
 import { HexInputComponent } from 'src/app/components/shared/inputs/hex-input/hex-input.component';
 import { NumberInputComponent } from 'src/app/components/shared/inputs/number-input/number-input.component';
+import { LayoutModule } from '@angular/cdk/layout';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgxElectronModule } from 'ngx-electron';
+import { ColorPickerModule } from 'ngx-color-picker';
 import { AbstractModalComponent } from './abstract-modal/abstract-modal.component';
 import { ConfirmModalComponent } from './abstract-modal/confirm-modal/confirm-modal/confirm-modal.component';
 import { ColorHistoryComponent } from './color-picker/color-history/color-history.component';
 import { ColorPickerComponent } from './color-picker/color-picker.component';
 import { EmailInputComponent } from './inputs/email-input/email-input.component';
 import { IconButtonComponent } from './inputs/icon-button/icon-button.component';
-import { NameInputComponent } from './inputs/name-input/name-input.component';
+import { DrawingNameInputComponent } from './inputs/drawing-name-input/drawing-name-input.component';
 import { EnumPropertyInputComponent } from './inputs/property-inputs/enum-property-input/enum-property-input.component';
 import { NumericPropertyInputComponent } from './inputs/property-inputs/numeric-property-input/numeric-property-input.component';
 import { TagInputComponent } from './inputs/tag-input/tag-input.component';
 import { TagListInputComponent } from './inputs/tag-list-input/tag-list-input.component';
 import { UsernameInputComponent } from './inputs/username-input/username-input.component';
+import { NameInputComponent } from './inputs/name-input/name-input.component';
+import { PasswordInputComponent } from './inputs/password-input/password-input.component';
+import { GamemodeTitleComponent } from './gamemode-title/gamemode-title.component';
+import { AvatarComponent } from './avatar/avatar.component';
+import { TeamComponent } from './team/team.component';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 @NgModule({
   imports: [
+    NgxElectronModule,
+    BrowserModule,
+    LayoutModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -61,6 +74,7 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     MatSelectModule,
     MatTreeModule,
     MatTooltipModule,
+    ColorPickerModule,
   ],
   declarations: [
     AbstractModalComponent,
@@ -73,13 +87,19 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     HexInputComponent,
     TagInputComponent,
     TagListInputComponent,
-    NameInputComponent,
+    DrawingNameInputComponent,
     UsernameInputComponent,
+    NameInputComponent,
     ColorHistoryComponent,
     ConfirmModalComponent,
     NumericPropertyInputComponent,
     EnumPropertyInputComponent,
     IconButtonComponent,
+    PasswordInputComponent,
+    GamemodeTitleComponent,
+    AvatarComponent,
+    TeamComponent,
+    TutorialComponent,
   ],
   exports: [
     AbstractModalComponent,
@@ -102,8 +122,9 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     HexInputComponent,
     TagInputComponent,
     TagListInputComponent,
-    NameInputComponent,
+    DrawingNameInputComponent,
     UsernameInputComponent,
+    NameInputComponent,
     ColorHistoryComponent,
     AlphaComponent,
     MatExpansionModule,
@@ -114,6 +135,12 @@ import { UsernameInputComponent } from './inputs/username-input/username-input.c
     NumericPropertyInputComponent,
     EnumPropertyInputComponent,
     IconButtonComponent,
+    PasswordInputComponent,
+    GamemodeTitleComponent,
+    AvatarComponent,
+    TeamComponent,
+    TutorialComponent,
+    ColorPickerModule,
   ],
 })
 export class SharedModule {}

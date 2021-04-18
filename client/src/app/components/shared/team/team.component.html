@@ -1,0 +1,32 @@
+<div class="team-container">
+  <div class="players-title">{{name}}<ng-container *ngIf="scoreIndex !== undefined">&nbsp;-&nbsp;{{score}} Pts</ng-container></div>
+  <div *ngFor="let player of team" class="player-container ennemy-container"
+    [style.border-left]="ennemy !== undefined && '2px solid red'">
+    <app-avatar class="player-avatar" [username]="player.username" [avatarId]="player.avatarId" size="35" fontSize="20"></app-avatar>
+    <div class="player-username">{{player.username}}</div>
+    <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.DRAWER">brush</mat-icon>
+    <mat-icon class="player-role-icon" *ngIf="player.playerRole === playerRole.GUESSER">help</mat-icon>
+    <mat-icon class="player-role-icon" *ngIf="player.isBot">smart_toy</mat-icon>
+    <mat-icon class="player-role-icon player-owner-role" *ngIf="player.isOwner">gamepad</mat-icon>
+    <ng-container *ngIf="gameService.isHost && !player.isBot && !gameService.isInGame && !player.isOwner">
+      <div class="remove-button-container">
+        <button mat-icon-button (click)="this.removePlayer(player.accountId)">
+          <mat-icon class="menu-button-icon remove-button">close</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="gameService.isHost && gameService.gameType === 'classic' && player.isBot && !gameService.isInGame">
+      <div class="remove-button-container">
+        <button mat-icon-button (click)="this.removeBot(player.username)">
+          <mat-icon class="menu-button-icon remove-button">close</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+  <ng-container *ngIf="gameService.isHost && gameService.gameType === 'classic' && this.canAddBot()">
+    <button mat-flat-button class="menu-button" (click)="this.addBot()">
+      <mat-icon class="menu-button-icon add-button">add</mat-icon>
+      Joueur virtuel
+    </button>
+  </ng-container>
+</div>

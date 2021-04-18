@@ -1,0 +1,65 @@
+#dashboard-wl-chart {
+  width: 100%;
+  margin: 10px 10px 0px 0px;
+  border-radius: 5px;
+  background-color: #FBFBFB;
+}
+
+.dashboard-game-container {
+  border: #000000;
+  border-radius: 2%;
+  border-width: 3px;
+  border-style: solid;
+  min-width: 32%;
+  max-width: 50%;
+}
+
+.dashboard-statistic-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 10px 10px 0px 0px;
+  flex-grow: 1;
+  min-height: 85px;
+  border-radius: 5px;
+  background-color: #FBFBFB;
+}
+
+.dashboard-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-grow: 1;
+}
+
+.dashboard-statistic-title {
+  display: flex;
+  word-break: break-word;
+  font-size: 24px;
+  padding-left: 25px;
+}
+
+.dashboard-statistic-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 4vmin;
+  padding: 0px 12px;
+}
+
+@media only screen and (max-width: 715px) {
+  .dashboard-statistic-container {
+    height: 65px;
+  }
+
+  .dashboard-statistic-title {
+    font-size: 18px;
+  }
+
+  .dashboard-statistic-value {
+    font-size: 24px;
+    min-width: 75px;
+  }
+}

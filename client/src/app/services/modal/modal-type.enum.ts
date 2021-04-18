@@ -6,5 +6,9 @@ export enum ModalType {
   EXPORT = 'export',
   CHOOSE_EXPORT_SAVE = 'choose-export-save',
   GALLERY = 'gallery',
-  CHAT = 'chat'
+  CHAT = 'chat',
+  UPLOAD = 'upload',
+  ADD_FRIEND = 'add_friend',
+  CREATE_CHAT_ROOM = 'create_chat_room',
+  CHOOSE_GAMEMODE = 'choose-gamemode',
 }

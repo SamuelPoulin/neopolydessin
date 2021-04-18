@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { CommandReceiver } from '@models/commands/command-receiver';
-import { Drawing } from '@models/drawing';
+import { Path } from '@models/shapes/path';
 import { ShapeError } from '@models/shapes/shape-error/shape-error';
 import { GridProperties } from '@tool-properties/grid-properties/grid-properties';
-import { PenTool } from '@tools/creator-tools/stroke-tools/pen-tool/pen-tool';
+import { PenTool } from '@tools/creator-tools/pen-tool/pen-tool';
 import { EraserTool } from '@tools/editing-tools/eraser-tool/eraser-tool';
 import { Tool } from '@tools/tool';
 import { ToolType } from '@tools/tool-type.enum';
+import { Color } from '@utils/color/color';
 import { EditorUtils } from '@utils/color/editor-utils';
+import { Coordinate } from '@utils/math/coordinate';
+import { VIEWPORT_DIMENSION } from '@common/communication/viewport';
+import { Subscription } from 'rxjs';
 import { DrawingSurfaceComponent } from 'src/app/components/pages/editor/drawing-surface/drawing-surface.component';
 import { BaseShape } from 'src/app/models/shapes/base-shape';
 import { ColorsService } from 'src/app/services/colors.service';
 import { APIService } from './api.service';
-import { LocalSaveService } from './localsave.service';
+import { GameService } from './game.service';
+import { SocketService } from './socket-service.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,22 +29,40 @@ export class EditorService {
   private previewShapes: BaseShape[];
   private readonly _commandReceiver: CommandReceiver;
 
+  private removePathSubscription: Subscription;
+  private addPathSubscription: Subscription;
+  private clearSubscription: Subscription;
+
   readonly gridProperties: GridProperties;
   view: DrawingSurfaceComponent;
   loading: boolean;
+
+  isFreeEdit: boolean = false;
 
   get commandReceiver(): CommandReceiver {
     return this._commandReceiver;
   }
 
-  constructor(public colorsService: ColorsService, private localSaveService: LocalSaveService) {
+  get scalingToClient(): number {
+    return this.view ? this.view.width / VIEWPORT_DIMENSION : 1;
+  }
+
+  get scalingToServer(): number {
+    return this.view ? VIEWPORT_DIMENSION / this.view.width : 1;
+  }
+
+  constructor(public colorsService: ColorsService, public socketService: SocketService, public gameService: GameService) {
     this._commandReceiver = new CommandReceiver();
-    this.commandReceiver.on('action', () => {
-      this.saveLocally();
-    });
 
     this.tools = new Map<ToolType, Tool>();
-    this.initTools();
+
+    this.initListeners();
+    this.gameService.roleChanged.subscribe(() => {
+      this.initListeners();
+    });
+    this.gameService.drawingChanged.subscribe(() => {
+      this.resetDrawing();
+    });
 
     this.shapesBuffer = new Array<BaseShape>();
     this.shapes = new Array<BaseShape>();
@@ -50,6 +73,10 @@ export class EditorService {
   }
 
   resetDrawing(): void {
+    this.applyShapesBuffer();
+    if (this.view) {
+      this.shapes.forEach(this.view.removeShape, this.view);
+    }
     this.shapesBuffer.length = 0;
     this.shapes.length = 0;
     this.previewShapes.length = 0;
@@ -76,30 +103,49 @@ export class EditorService {
     });
   }
 
-  importLocalDrawing(): void {
-    Object.values(JSON.parse(this.localSaveService.drawing.data)).forEach((shapeData) => {
-      const shape = EditorUtils.createShape(shapeData as BaseShape);
-      this.addShapeToBuffer(shape);
-    });
-    this.applyShapesBuffer();
-  }
-
-  saveLocally(): void {
-    if (this.view) {
-      this.localSaveService.takeSnapshot(
-        new Drawing('localsave', [], this.exportDrawing(), this.view.color.hex, this.view.width, this.view.height, ''),
-      );
-    }
-  }
-
   private initTools(): void {
+    this.tools.forEach((tool) => {
+      if (tool.removeListeners) tool.removeListeners();
+    });
+
     this.tools.set(ToolType.Pen, new PenTool(this));
     this.tools.set(ToolType.Eraser, new EraserTool(this));
   }
 
+  initListeners(): void {
+    this.initTools();
+
+    this.removePathSubscription?.unsubscribe();
+    this.addPathSubscription?.unsubscribe();
+    this.clearSubscription?.unsubscribe();
+
+    this.clearSubscription = this.socketService.receiveScores().subscribe(() => this.resetDrawing());
+
+    if (!this.gameService.canDraw && !this.isFreeEdit) {
+      this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
+        const shape = this.findShapeById(id, true);
+        if (shape) {
+          this.removeShape(shape);
+        }
+      });
+      this.addPathSubscription = this.socketService.receiveAddPath().subscribe((data) => {
+        const shape = new Path();
+        shape.primaryColor = Color.ahex(data.brush.color);
+        shape.strokeWidth = data.brush.strokeWidth * this.scalingToClient;
+        shape.serverId = data.id;
+        data.path.forEach((coord: Coordinate) => {
+          shape.addPoint(Coordinate.copy(coord).scale(this.scalingToClient));
+        });
+        this.shapes.push(shape);
+        this.view.addShape(shape);
+        shape.updateProperties();
+      });
+    }
+  }
+
   applyShapesBuffer(): void {
     this.shapes.push(...this.shapesBuffer);
-    this.shapesBuffer = [];
+    this.shapesBuffer.length = 0;
     this.clearShapesBuffer();
   }
 
@@ -111,8 +157,8 @@ export class EditorService {
     };
     this.shapesBuffer.forEach(removeShapes);
     this.previewShapes.forEach(removeShapes);
-    this.shapesBuffer = [];
-    this.previewShapes = [];
+    this.shapesBuffer.length = 0;
+    this.previewShapes.length = 0;
   }
 
   addPreviewShape(shape: BaseShape): void {
@@ -139,6 +185,7 @@ export class EditorService {
   }
 
   removeShapeFromView(shape: BaseShape): void {
+    this.socketService.sendRemovePath(shape.serverId);
     this.view.removeShape(shape);
   }
 
@@ -150,11 +197,20 @@ export class EditorService {
     }
   }
 
-  findShapeById(id: number): BaseShape | undefined {
-    const matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+  findShapeById(id: number, useServerID: boolean = false): BaseShape | undefined {
+    let matchingShapes;
+    if (useServerID) {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.serverId === id);
+    } else {
+      matchingShapes = this.shapes.filter((shape: BaseShape) => shape.id === id);
+    }
     if (matchingShapes.length > 1) {
       throw ShapeError.idCollision();
     }
     return matchingShapes.length ? matchingShapes[0] : undefined;
+  }
+
+  setReady() {
+    this.socketService.sendReady();
   }
 }

@@ -1,0 +1,19 @@
+#gamemode {
+  color: #2F2F2F;
+  font-size: 32px;
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+#gamemode-container {
+  display: flex;
+  align-items: center;
+}
+
+.gamemode-icon {
+  color: #2F2F2F;
+}
+
+.gamemode-icon-flipped {
+  transform: scaleX(-1);
+}

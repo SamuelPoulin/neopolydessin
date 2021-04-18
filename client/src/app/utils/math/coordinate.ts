@@ -1,3 +1,4 @@
+import { Coord } from '@common/communication/drawing-sequence';
 import { Direction } from '@utils/math/direction.enum';
 import { MathUtils } from './math-utils';
 
@@ -25,7 +26,7 @@ export class Coordinate {
     return this.apply(c, Math.abs);
   }
 
-  static copy(c: Coordinate): Coordinate {
+  static copy(c: Coordinate | Coord): Coordinate {
     return new Coordinate(c.x, c.y);
   }
 
@@ -83,6 +84,10 @@ export class Coordinate {
 
   static angle(c1: Coordinate, c2: Coordinate): number {
     return Math.atan2(c1.y - c2.y, c1.x - c2.x);
+  }
+
+  scale(factor: number): Coordinate {
+    return new Coordinate(this.x * factor, this.y * factor);
   }
 
   rotate(angle: number, center: Coordinate): Coordinate {

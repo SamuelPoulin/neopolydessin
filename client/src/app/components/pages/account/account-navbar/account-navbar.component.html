@@ -1,0 +1,41 @@
+<div id="navbar-container" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'" [style.left]="!isBigScreen && closed ? '-265px' : '0px'">
+  <div id="navbar">
+    <div id="navbar-top-buttons" class="navbar-section">
+      <button class="navbar-button" mat-button [routerLink]="''">
+        <mat-icon class="navbar-button-icon">arrow_back_ios</mat-icon>
+        Retour
+      </button>
+    </div>
+    <div>
+      <label for="avatarInput">
+        <app-avatar [username]="username" [updateFlag]="this.userService.updateAvatar" mainUser [size]="100" [fontSize]="48" ></app-avatar>
+      </label>
+      <input id="avatarInput" type="file" (change)="uploadAvatar($event)"/> 
+    </div>
+    <div id="navbar-user">
+      <div id="navbar-user-name">{{firstName + ' ' + lastName}}</div>
+      <div id="navbar-user-username">@{{username}}</div>
+    </div>
+    <div id="navbar-middle-buttons" class="navbar-section">
+      <button class="navbar-button" mat-button [routerLink]="'./'" (click)="toggleClosed()">
+        <mat-icon class="navbar-button-icon">leaderboard</mat-icon>
+        Tableau de bord
+      </button>
+      <button class="navbar-button" mat-button [routerLink]="'profile'" (click)="toggleClosed()">
+        <mat-icon class="navbar-button-icon">tune</mat-icon>
+        Paramètres de compte
+      </button>
+    </div>
+    <div class="navbar-section">
+      <button mat-flat-button color="warn" id="logout-button" class="navbar-button logout" (click)="logout()">
+        <mat-icon id="logout-icon" class="navbar-button-icon" style="transform: rotate(180deg)">logout</mat-icon>
+        Déconnexion
+      </button>
+    </div>
+  </div>
+  <ng-container *ngIf="!isBigScreen">
+    <button mat-button id="navbar-toggler" (click)="toggleClosed()">
+      <mat-icon class="navbar-button-icon">switch_left</mat-icon>
+    </button>
+  </ng-container>
+</div>

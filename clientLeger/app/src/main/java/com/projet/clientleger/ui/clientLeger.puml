@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/deployment-diagram
+'https://plantuml.com/class-diagram
+
+package roomslist {}
+package register {}
+
+package mainmenu {}
+
+package lobbylist{}
+
+package lobby {}
+
+package game {}
+
+package friendslist {}
+
+package drawboard {}
+
+package connexion {}
+
+package chat {}
+
+package accountmanagement{
+
+    package dashboard {}
+
+    package profile {}
+}
+
+accountmanagement .[#black].> chat : uses
+game .[#black].> chat : uses
+lobby .[#black].> chat : uses
+lobbylist .[#black].> chat : uses
+mainmenu .[#black].> chat : uses
+game .[#black].> drawboard : uses
+
+accountmanagement .[#black].> friendslist : uses
+game .[#black].> friendslist : uses
+lobby .[#black].> friendslist : uses
+lobbylist .[#black].> friendslist : uses
+mainmenu .[#black].> friendslist : uses
+
+friendslist .[#black].> roomslist : uses
+@enduml

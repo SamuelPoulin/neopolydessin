@@ -1,16 +1,15 @@
 /* tslint:disable:no-string-literal */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
 import { EraserToolbarComponent } from '@components/pages/editor/toolbar/eraser-toolbar/eraser-toolbar.component';
 import { GridToolbarComponent } from '@components/pages/editor/toolbar/grid-toolbar/grid-toolbar.component';
 import { ToolbarType } from '@components/pages/editor/toolbar/toolbar/toolbar-type.enum';
+import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
 import { PenToolbarComponent } from 'src/app/components/pages/editor/toolbar/pen-toolbar/pen-toolbar.component';
 import { ToolbarComponent } from 'src/app/components/pages/editor/toolbar/toolbar/toolbar.component';
-import { UserGuideModule } from 'src/app/components/pages/user-guide/user-guide.module';
-import { UserGuideModalComponent } from 'src/app/components/pages/user-guide/user-guide/user-guide-modal.component';
 import { SharedModule } from 'src/app/components/shared/shared.module';
 import { ToolType } from 'src/app/models/tools/tool-type.enum';
 import { Color } from 'src/app/utils/color/color';
@@ -20,20 +19,19 @@ describe('ToolbarComponent', () => {
   let component: ToolbarComponent;
   let fixture: ComponentFixture<ToolbarComponent>;
 
-  let router: Router;
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule, UserGuideModule],
+      imports: [SharedModule],
       declarations: [ToolbarComponent, PenToolbarComponent, EraserToolbarComponent, GridToolbarComponent],
-    })
-      .overrideModule(BrowserDynamicTestingModule, { set: { entryComponents: [UserGuideModalComponent] } })
-      .compileComponents();
+      providers: [
+        { provide: EditorService, useClass: MockEditorService },
+        { provide: TutorialService, useValue: MockTutorialService },
+      ],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ToolbarComponent);
-    router = TestBed.inject(Router);
     component = fixture.componentInstance;
 
     fixture.detectChanges();
@@ -41,16 +39,6 @@ describe('ToolbarComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should go home', () => {
-    const spy = spyOn(router, 'navigate');
-
-    const backButton = fixture.debugElement.nativeElement.querySelector('#back-button');
-
-    backButton.click();
-
-    expect(spy).toHaveBeenCalledWith(['']);
   });
 
   it('should select the pen tool', () => {
@@ -93,25 +81,6 @@ describe('ToolbarComponent', () => {
     component.colorPicker.colorChanged.emit(component.colorPicker.color);
 
     expect(component.secondaryColor.hexString).toEqual(Color.GREEN.hexString);
-  });
-
-  it('should emit editBackgroundChanged on update background button clicked', () => {
-    const backgroundChangedSpy = spyOn(component.editorBackgroundChanged, 'emit');
-    component.editColor(1);
-    fixture.detectChanges();
-    component.colorPicker.color = Color.GREEN;
-
-    fixture.debugElement.nativeElement.querySelector('#btn-update-background').click();
-
-    expect(backgroundChangedSpy).toHaveBeenCalledWith(Color.GREEN);
-  });
-
-  it('should open the help modal when clicking the help button', () => {
-    const guideButtonClickedSpy = spyOn(component.guideButtonClicked, 'emit');
-    const helpButton = fixture.debugElement.nativeElement.querySelector('#help-button');
-    helpButton.click();
-
-    expect(guideButtonClickedSpy).toHaveBeenCalled();
   });
 
   it('can get toolbar icons', () => {

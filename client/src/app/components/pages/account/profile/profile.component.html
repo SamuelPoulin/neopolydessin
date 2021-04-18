@@ -1,0 +1,9 @@
+<app-account-section title="Paramètres">
+  <div id="profile-fields-container">
+    <app-name-input [(value)]="firstName">Prénom</app-name-input>
+    <app-name-input [(value)]="lastName">Nom</app-name-input>
+    <app-username-input [(value)]="username">Nom d'utilisateur</app-username-input>
+    <app-email-input [(value)]="email">Email</app-email-input>
+    <button mat-raised-button color="warn" (click)="this.updateAccount()">Modifier mon compte</button>
+  </div>
+</app-account-section>
