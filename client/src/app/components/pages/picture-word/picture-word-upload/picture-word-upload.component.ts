@@ -28,6 +28,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   readonly minimumHints: number = 3;
   drawingId: string = '';
   displayPreview: boolean = false;
+  saveDrawing: boolean = false;
   imageString: SafeResourceUrl = ImageString.WHITE;
   sequence: DrawingSequence;
   previewTimeout: NodeJS.Timeout;
@@ -97,7 +98,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       .beforeClosed()
       .toPromise()
       .then(() => {
-        this.cancel();
+        if (!this.saveDrawing) this.cancel();
       });
   }
 
@@ -129,6 +130,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   exit(): void {
     this.save().then(() => {
+      this.saveDrawing = true;
       this.dialogRef.close();
     });
   }
