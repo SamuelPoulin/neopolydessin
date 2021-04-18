@@ -11,10 +11,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
@@ -61,6 +63,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
     var selectedDifficulty: Difficulty = Difficulty.EASY
     lateinit var binding: ActivityMainmenuBinding
     val vm: MainMenuViewModel by viewModels()
+    var isPrivate: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,7 +135,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         } else {
             visibility = View.GONE
             action = resources.getString(R.string.join)
-            title = resources.getString(R.string.joinGame)
+            title = resources.getString(R.string.lobbyList)
         }
         val dialogView = layoutInflater.inflate(R.layout.dialog_gamemode, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
@@ -141,6 +144,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.name.visibility = visibility
+        dialog.privacyBtn.visibility = visibility
         dialog.actionBtn.text = action
         dialog.title.text = title
 
@@ -165,9 +169,24 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
             dialog.dismiss()
         }
 
+        dialogView.privacyBtn.setOnClickListener {
+            togglePrivacy(it as Button)
+        }
+
         dialogView.cancelButton.setOnClickListener {
             vm.playSound(SoundId.ERROR.value)
             dialog.dismiss()
+        }
+    }
+
+    private fun togglePrivacy(buttonView: Button){
+        isPrivate = !isPrivate
+        if(isPrivate){
+            buttonView.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
+            buttonView.text = "Partie privée"
+        } else {
+            buttonView.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
+            buttonView.text = "Partie publique"
         }
     }
 

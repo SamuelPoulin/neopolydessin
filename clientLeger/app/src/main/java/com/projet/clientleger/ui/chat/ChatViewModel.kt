@@ -61,10 +61,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         this.convos.postValue(this.convos.value!!)
     }
 
-    private fun toMessagesChat() {
-
-    }
-
     fun updateConvos(updatedConvos: ArrayList<Convo>) {
         convos.value?.let { convosList ->
             convosList.clear()
@@ -115,10 +111,6 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
         var adjustedText: String = messageContent.replace("\\s+".toRegex(), " ")
         adjustedText = adjustedText.trimStart()
         return adjustedText
-    }
-
-    private fun notifyUpdateTab(convoId: String) {
-        // TODO
     }
 
     fun clear() {

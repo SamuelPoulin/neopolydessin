@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 import { SharedModule } from '../../shared.module';
@@ -19,6 +21,7 @@ describe('StatusBarComponent', () => {
       providers: [
         { provide: UserService, useValue: MockUserService },
         { provide: GameService, useValue: MockGameService },
+        { provide: TutorialService, useValue: MockTutorialService },
       ],
     }).compileComponents();
   });

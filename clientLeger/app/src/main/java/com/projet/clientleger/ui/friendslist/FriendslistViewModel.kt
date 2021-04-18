@@ -94,7 +94,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
             var requestIndex = friendSimplifiedList.indexOfFirst { it.status == FriendStatus.ACCEPTED }
             if (requestIndex < 0)
-                requestIndex = friendSimplifiedList.size - 1
+                requestIndex = friendSimplifiedList.size
             friendSimplifiedList.add(requestIndex, FriendSimplified("Amis"))
 
             friendsLiveData.postValue(friendSimplifiedList)

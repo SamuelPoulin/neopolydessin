@@ -11,14 +11,14 @@ app-drawing-surface {
   position: relative;
 }
 
-app-grid{
+app-grid {
   position: absolute;
   top: 0;
   left: 0;
   pointer-events: none;
 }
 
-mat-spinner{
+mat-spinner {
   top: 50%;
   left: 50%;
 }
@@ -76,10 +76,25 @@ app-chat {
 
   font-size: 20px;
 
-  mat-icon, #game-area-timer-value {
+  mat-icon,
+  #game-area-timer-value {
     font-size: 50px;
     color: #2f2f2f
   }
+}
+
+#game-area-role-tooltip {
+  display: flex;
+  align-items: center;
+
+  font-size: 20px;
+
+  mat-icon,
+  #game-area-tooltip-value {
+    font-size: 44px;
+    color: #2f2f2f
+  }
+
 }
 
 app-gamemode-title {

@@ -5,21 +5,38 @@
       <div id="server-browser-table-container">
         <table mat-table id="server-browser-table" [dataSource]="dataSource">
           <ng-container matColumnDef="lobbyName">
-            <th mat-header-cell *matHeaderCellDef> Lobby Name </th>
+            <th mat-header-cell *matHeaderCellDef> Nom du salon </th>
             <td mat-cell *matCellDef="let lobby"> {{lobby.lobbyName}} </td>
           </ng-container>
           <ng-container matColumnDef="playerInfo">
-            <th mat-header-cell *matHeaderCellDef> Players </th>
-            <td mat-cell *matCellDef="let lobby">{{lobby.nbPlayerInLobby}}/4</td>
+            <th mat-header-cell *matHeaderCellDef> Joueurs </th>
+            <td mat-cell *matCellDef="let lobby">{{lobby.nbPlayerInLobby}}/{{lobby.maxSize}}</td>
           </ng-container>
           <ng-container matColumnDef="gameType">
-            <th mat-header-cell *matHeaderCellDef> Gamemode </th>
+            <th mat-header-cell *matHeaderCellDef> Mode de jeu
+              <mat-select [(value)]="selectedGamemode" (valueChange)="getLobbies()">
+                <mat-option *ngFor="let gamemode of gamemodes" [value]="gamemode">
+                  {{gamemode}}
+                </mat-option>
+              </mat-select>
+            </th>
             <td mat-cell *matCellDef="let lobby"> {{getGameTypeName(lobby.gameType)}} </td>
           </ng-container>
+          <ng-container matColumnDef="difficulty">
+            <th mat-header-cell *matHeaderCellDef> Difficulté
+              <mat-select [(value)]="selectedDifficulty" (valueChange)="getLobbies()">
+                <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty">
+                  {{difficulty}}
+                </mat-option>
+              </mat-select>  
+            </th>
+            <td mat-cell *matCellDef="let lobby"> {{getDifficultyName(lobby.difficulty)}}    
+            </td>
+          </ng-container>
           <ng-container matColumnDef="joinButton">
-            <th mat-header-cell *matHeaderCellDef></th>
+            <th mat-header-cell *matHeaderCellDef id="button-header"> </th>
             <td mat-cell class="join-button-cell" *matCellDef="let lobby">
-              <button mat-flat-button color="warn" class="menu-button join-button"
+              <button mat-flat-button class="menu-button join-button"
                 (click)="joinLobby(lobby.lobbyId, lobby.gameType, lobby.difficulty)">
                 Rejoindre
                 <mat-icon class="menu-button-icon join-button-icon">arrow_forward</mat-icon>
@@ -31,7 +48,7 @@
             *matHeaderRowDef="displayedColumns; sticky: true"></tr>
           <tr mat-row class="server-browser-row" *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
-        <div id="server-browser-empty-message" *ngIf="showEmptyMessage">Il n'y a présentement aucun lobby public.</div>
+        <div id="server-browser-empty-message" *ngIf="showEmptyMessage">Il n'y a présentement aucun salon disponible</div>
       </div>
     </div>
   </div>

@@ -55,7 +55,7 @@ export class PenTool extends CreatorTool {
 
     this.endSubscription = this.editorService.socketService.receiveEndPath().subscribe((coord: Coordinate) => {
       this.shape.addPoint(Coordinate.copy(coord).scale(this.editorService.scalingToClient));
-      this.applyShape();
+      this.applyShape(this.editorService.gameService.canDraw);
     });
   }
 
@@ -95,7 +95,6 @@ export class PenTool extends CreatorTool {
       if (this.isActive) {
         this.applyShape();
         this.editorService.socketService.sendEndPath(this.mousePosition.scale(this.editorService.scalingToServer));
-        this.editorService.checkTutorial();
       }
     };
 

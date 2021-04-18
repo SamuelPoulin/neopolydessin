@@ -24,13 +24,14 @@ class ChatSocketService @Inject constructor(private val socketService: SocketSer
     fun receivePlayerConnection(): Observable<MessageSystem> {
         return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_CONNECTION.value) { (playerInfo, timestamp) ->
             val info = Json.decodeFromString(Player.serializer(), playerInfo.toString())
-            MessageSystem(info.username, timestamp as Long)
+            MessageSystem("${info.username} a rejoins la partie", timestamp as Long)
         }
     }
 
     fun receivePlayerDisconnection(): Observable<MessageSystem> {
-        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_DISCONNECT.value) { (username, timestamp) ->
-            MessageSystem(username.toString(), timestamp as Long)
+        return socketService.receiveFromSocket(ChatSocketEndpoints.RECEIVE_PLAYER_DISCONNECT.value) { (playerInfo, timestamp) ->
+            val info = Json.decodeFromString(Player.serializer(), playerInfo.toString())
+            MessageSystem("${info.username} a quitté la partie", timestamp as Long)
         }
     }
 

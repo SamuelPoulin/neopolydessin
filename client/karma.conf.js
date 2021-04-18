@@ -26,7 +26,7 @@ module.exports = (config) => {
       fixWebpackSourcePaths: true,
       combineBrowserReports: true,
     },
-    reporters: ['spec', 'kjhtml'],
+    reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     browserNoActivityTimeout: 10000,

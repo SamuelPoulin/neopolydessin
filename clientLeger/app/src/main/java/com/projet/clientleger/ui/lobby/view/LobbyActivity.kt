@@ -71,6 +71,32 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         vm.receiveKick().subscribe {
             leaveLobby(false)
         }
+
+        vm.isPrivate.observe(this){
+            if(it){
+                binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
+                binding.privacyBtn.text = "Partie privée"
+            } else{
+                binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
+                binding.privacyBtn.text = "Partie publique"
+            }
+        }
+
+        vm.userIsOwner.observe(this){ isOwner ->
+            for(rv in rvTeams) {
+                (rv.adapter as TeamAdapter?)?.let{
+                    it.userIsOwner = isOwner
+                    it.notifyDataSetChanged()
+                }
+            }
+            if(isOwner){
+                binding.startGameButton.visibility = View.VISIBLE
+                binding.privacyBtn.visibility = View.VISIBLE
+            } else{
+                binding.startGameButton.visibility = View.INVISIBLE
+                binding.privacyBtn.visibility = View.INVISIBLE
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,7 +161,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.toolbar.title = vm.gameName
         vm.gameType = lobbyInfo.gameType
         vm.difficulty = lobbyInfo.difficulty
-        vm.isPrivate = lobbyInfo.isPrivate
+        vm.isPrivate.postValue(lobbyInfo.isPrivate)
     }
 
     private fun fetchIntentData() {
@@ -144,7 +170,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         vm.gameType = (intent.getSerializableExtra("gameType") as GameType?) ?: GameType.CLASSIC
         vm.difficulty = (intent.getSerializableExtra("difficulty") as Difficulty?)
                 ?: Difficulty.EASY
-        vm.isPrivate = intent.getBooleanExtra("isPrivate", false)
+        vm.isPrivate.value = intent.getBooleanExtra("isPrivate", false)
     }
 
     override fun onBackPressed() {
@@ -200,15 +226,6 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 val owner = players.find { it.isOwner }
                 if (owner != null) {
                     vm.updateOwner(owner)
-                    for (team in rvTeams) {
-                        team.adapter?.let { teamAdapter ->
-                            (teamAdapter as TeamAdapter).updateGameOwner(owner)
-                            binding.startGameButton.visibility = when (owner.accountId == vm.getAccountInfo().accountId) {
-                                true -> View.VISIBLE
-                                false -> View.INVISIBLE
-                            }
-                        }
-                    }
                 }
                 teams[i].clear()
                 teams[i].addAll(players)
@@ -235,7 +252,9 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         binding.startGameButton.setOnClickListener {
             startGame()
         }
-
+        binding.privacyBtn.setOnClickListener {
+            vm.togglePrivacySetting()
+        }
     }
 
     private fun startGame() {

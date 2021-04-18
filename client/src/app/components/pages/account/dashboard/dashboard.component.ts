@@ -19,6 +19,8 @@ export type ChartOptions = {
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+  private static NB_DAYS_PER_WEEK: number = 7; //eslint-disable-line
+  private static MS_PER_DAY: number = 86400000; //eslint-disable-line
   private static MS_TO_MINS: number = 60000; // eslint-disable-line
   private static MS_TO_HOURS: number = 3600000; // eslint-disable-line
   private static MONTHS: string[] = [
@@ -193,18 +195,16 @@ export class DashboardComponent {
     return (milliseconds / DashboardComponent.MS_TO_HOURS).toFixed(2);
   }
 
-  private unique(value: string, index: number, array: string[]) {
-    return array.indexOf(value) === index;
-  }
-
   private getChartXAxis(): string[] {
-    const gameDates = this.games.slice(0)
-      .sort((a: Game, b: Game) => a.startDate - b.startDate)
-      .map((game) => {
-        return this.getDateMonth(game.startDate);
-      })
-      .filter(this.unique);
-    return gameDates;
+    let day = Date.now();
+    const lastWeek: string[] = [];
+    lastWeek.unshift(this.getDateMonth(day));
+    for (let i = 0; i < DashboardComponent.NB_DAYS_PER_WEEK - 1; i++) {
+      day -= DashboardComponent.MS_PER_DAY;
+      const dateMonth = this.getDateMonth(day);
+      lastWeek.unshift(dateMonth);
+    }
+    return lastWeek;
   }
 
 }

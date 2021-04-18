@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { LocalSaveService } from './localsave.service';
+import { CanActivate } from '@angular/router';
 import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private userService: UserService, private router: Router, private localSaveService: LocalSaveService) {}
+  constructor(private userService: UserService) {}
 
   async canActivate() {
     return new Promise<boolean>((resolve) => {
@@ -17,8 +16,7 @@ export class AuthGuard implements CanActivate {
           resolve(true);
         })
         .catch(() => {
-          this.router.navigate(['/login']);
-          this.localSaveService.clearData();
+          this.userService.logout();
           resolve(false);
         });
     });
