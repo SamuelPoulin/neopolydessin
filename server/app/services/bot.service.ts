@@ -30,14 +30,16 @@ export class BotService {
   }
 
   draw(drawing: DrawingSequence, hints: string[]): void {
-    clearInterval(this.pathTimer);
-    this.drawing = drawing;
-    this.currentCoordIndex = -1;
-    this.currentSegmentIndex = 0;
-    this.bots[this.currentBot].hintIndex = 0;
-    this.bots[this.currentBot].hints = hints;
-    this.bots[this.currentBot].onStartDraw();
-    this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
+    if (this.bots.length > 0) {
+      clearInterval(this.pathTimer);
+      this.drawing = drawing;
+      this.currentCoordIndex = -1;
+      this.currentSegmentIndex = 0;
+      this.bots[this.currentBot].hintIndex = 0;
+      this.bots[this.currentBot].hints = hints;
+      this.bots[this.currentBot].onStartDraw();
+      this.drawPath(this.drawing.stack[this.currentSegmentIndex], 0);
+    }
   }
 
   switchBot(drawingTeamNumber: number): void {
@@ -49,20 +51,24 @@ export class BotService {
   }
 
   resetDrawing(): void {
-    this.resetDrawingWithoutBotQuote();
-    this.bots[this.currentBot].onResetDrawing();
+    if (this.bots.length > 0) {
+      this.resetDrawingWithoutBotQuote();
+      this.bots[this.currentBot].onResetDrawing();
+    }
   }
 
   resetDrawingWithoutBotQuote(): void {
-    clearInterval(this.pathTimer);
-    clearInterval(this.hintCooldown);
-    this.hintAvailable = true;
-    this.currentCoordIndex = -1;
-    this.currentSegmentIndex = 0;
-    if (this.bots[this.currentBot].hints) {
-      this.bots[this.currentBot].hints.length = 0;
+    if (this.bots.length > 0) {
+      clearInterval(this.pathTimer);
+      clearInterval(this.hintCooldown);
+      this.hintAvailable = true;
+      this.currentCoordIndex = -1;
+      this.currentSegmentIndex = 0;
+      if (this.bots[this.currentBot].hints) {
+        this.bots[this.currentBot].hints.length = 0;
+      }
+      this.bots[this.currentBot].hintIndex = 0;
     }
-    this.bots[this.currentBot].hintIndex = 0;
   }
 
   pause(): void {
@@ -70,7 +76,9 @@ export class BotService {
   }
 
   resume(): void {
-    this.drawPath(this.drawing.stack[this.currentSegmentIndex], this.currentCoordIndex + 1);
+    if (this.bots.length > 0) {
+      this.drawPath(this.drawing.stack[this.currentSegmentIndex], this.currentCoordIndex + 1);
+    }
   }
 
   playerGuess(guessStatus: GuessResponse, guessTries?: number, guessLeft?: number): void {

@@ -184,8 +184,6 @@ export class DashboardComponent {
     this.logins.forEach((login) => {
       if (login.end) {
         timeConnected += login.end - login.start;
-      } else {
-        timeConnected += Date.now() - login.start;
       }
     });
     return timeConnected;
