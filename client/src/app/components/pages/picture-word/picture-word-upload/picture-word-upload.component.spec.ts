@@ -6,12 +6,16 @@ import { APIService } from '@services/api.service';
 import { MockAPIService } from '@services/api.service.spec';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
+import { of } from 'rxjs';
 
 import { PictureWordUploadComponent } from './picture-word-upload.component';
 
 describe('PictureWordUploadComponent', () => {
   let component: PictureWordUploadComponent;
   let fixture: ComponentFixture<PictureWordUploadComponent>;
+  const MockMatDialogRef = jasmine.createSpyObj('MatDialogRef', {
+    beforeClosed: of(),
+  });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -20,7 +24,7 @@ describe('PictureWordUploadComponent', () => {
       providers: [
         { provide: EditorService, useValue: MockEditorService },
         { provide: APIService, useValue: MockAPIService },
-        { provide: MatDialogRef, useValue: {} },
+        { provide: MatDialogRef, useValue: MockMatDialogRef },
       ],
     }).compileComponents();
   });

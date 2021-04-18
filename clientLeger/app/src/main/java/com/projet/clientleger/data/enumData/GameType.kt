@@ -20,11 +20,12 @@ enum class GameType(val value:String) {
         const val FR_SOLO = "Sprint Solo"
         const val FR_COOP = "Sprint Co-op"
 
-        fun fromFrenchToEnum(gameType: String): GameType{
+        fun fromFrenchToEnum(gameType: String): GameType?{
             return when (gameType){
+                FR_CLASSIC -> CLASSIC
                 FR_SOLO -> SPRINT_SOLO
                 FR_COOP -> SPRINT_COOP
-                else -> CLASSIC
+                else -> null
             }
         }
 
@@ -34,7 +35,6 @@ enum class GameType(val value:String) {
                 SPRINT_SOLO.value ->SPRINT_SOLO
                 else -> SPRINT_COOP
             }
-
         }
     }
 }

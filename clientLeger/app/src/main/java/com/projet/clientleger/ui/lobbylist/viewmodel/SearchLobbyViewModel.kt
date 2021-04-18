@@ -13,40 +13,39 @@ import javax.inject.Inject
 import io.reactivex.rxjava3.core.Observable
 
 @HiltViewModel
-class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository,private val audioService: AudioService):ViewModel() {
-    val lobbies: MutableLiveData<ArrayList<LobbyInfo>> = MutableLiveData(ArrayList())
-    lateinit var selectedGameType: GameType
-    lateinit var selectedDifficulty: Difficulty
+class SearchLobbyViewModel @Inject constructor(private val lobbyRepository: LobbyRepository, private val audioService: AudioService) : ViewModel() {
+    val displayedLobbies: MutableLiveData<ArrayList<LobbyInfo>> = MutableLiveData(ArrayList())
+    var selectedGameType: GameType? = null
+    var selectedDifficulty: Difficulty? = null
+    var lobbies: ArrayList<LobbyInfo> = ArrayList()
 
     fun init() {
         lobbyRepository.receiveUpdateLobbyList().subscribe {
-            filterLobbies(it)
-            lobbies.postValue(it)
+            lobbies = it
+            filterLobbies()
         }
-        lobbyRepository.receivedAllLobbies(selectedGameType, selectedDifficulty).subscribe{
-            lobbies.postValue(it)
+        lobbyRepository.receivedAllLobbies(selectedGameType, selectedDifficulty).subscribe {
+            lobbies = it
+            filterLobbies()
         }
     }
 
-    fun receiveAllLobbies(gameType: GameType, difficulty: Difficulty) : Observable<ArrayList<LobbyInfo>>{
-        return lobbyRepository.receivedAllLobbies(gameType, difficulty)
+    fun filterLobbies() {
+        val filteredLobbies = ArrayList<LobbyInfo>()
+        filteredLobbies.addAll(lobbies)
+        if (selectedDifficulty != null)
+            filteredLobbies.removeIf { it.difficulty != selectedDifficulty }
+        if (selectedGameType != null)
+            filteredLobbies.removeIf { it.gameType != selectedGameType }
+        displayedLobbies.postValue(filteredLobbies)
     }
 
-    fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
-        return lobbyRepository.receiveJoinedLobbyInfo()
-    }
-
-    fun joinLobby(lobbyId: String){
-        lobbyRepository.joinLobby(lobbyId)
-    }
-
-    fun filterLobbies(unfilteredLobbies: ArrayList<LobbyInfo>){
-        unfilteredLobbies.removeIf {it.difficulty != selectedDifficulty || it.gameType != selectedGameType}
-    }
-    fun unsubscribe(){
+    fun unsubscribe() {
         lobbyRepository.unsubscribeLobbyList()
     }
-    fun playSound(soundId:Int){
+
+    fun playSound(soundId: Int) {
         audioService.playSound(soundId)
     }
+
 }

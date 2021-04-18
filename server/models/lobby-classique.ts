@@ -26,7 +26,6 @@ export class LobbyClassique extends Lobby {
   protected clockTimeout: NodeJS.Timeout;
 
   private readonly END_SCORE: number = 5;
-  private drawingTeamNumber: number;
   private drawers: Entity[];
 
   private guessTries: number;
@@ -131,17 +130,16 @@ export class LobbyClassique extends Lobby {
         if (guessStatus === GuessResponse.CORRECT) {
           this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
           this.startRoundTimer();
+          if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
+            this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+          }
         } else {
           if (this.currentGameState === CurrentGameState.REPLY) {
             this.startRoundTimer();
           } else {
-            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
-              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
-            } else {
-              this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
-              if (this.guessLeft <= 0) {
-                this.startReply();
-              }
+            this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+            if (this.guessLeft <= 0) {
+              this.startReply();
             }
           }
         }
@@ -154,6 +152,7 @@ export class LobbyClassique extends Lobby {
     this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.guessLeft = this.guessTries;
     this.drawingCommands.resetDrawing();
+    this.botService.resetDrawingWithoutBotQuote();
     this.setRoles();
 
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
@@ -230,7 +229,7 @@ export class LobbyClassique extends Lobby {
 
     const botInDrawingTeam = teams[this.drawingTeamNumber].findIndex((player) => player.isBot);
     if (botInDrawingTeam > -1) {
-      this.botService.currentBot = this.drawingTeamNumber;
+      this.botService.switchBot(this.drawingTeamNumber);
       teams[this.drawingTeamNumber][botInDrawingTeam].playerRole = PlayerRole.DRAWER;
       this.drawers[this.drawingTeamNumber] = teams[this.drawingTeamNumber][botInDrawingTeam];
       teams[this.drawingTeamNumber][(botInDrawingTeam + 1) % 2].playerRole = PlayerRole.GUESSER;

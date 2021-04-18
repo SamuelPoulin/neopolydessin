@@ -69,6 +69,8 @@ export abstract class Lobby {
   lobbyName: string;
   currentGameState: CurrentGameState;
 
+  protected drawingTeamNumber: number;
+
   protected io: Server;
   protected clockTimeout: NodeJS.Timeout;
 
@@ -351,7 +353,9 @@ export abstract class Lobby {
             senderUsername: player.username
           };
           this.io.in(this.lobbyId).emit(SocketMessages.RECEIVE_MESSAGE, messageWithUsername);
-          if (sentMsg.content.includes('indice')) {
+          if (sentMsg.content.includes('indice')
+            && player.teamNumber === this.drawingTeamNumber
+            && !this.teamDoesntHaveBot(player.teamNumber)) {
             this.botService.requestHint();
           }
         }

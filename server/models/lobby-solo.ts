@@ -42,6 +42,7 @@ export class LobbySolo extends Lobby {
     this.addOnCorrectGuess = diffMods.timeAddedOnCorrectGuess;
     this.timeLeftSeconds = diffMods.soloCoopTime;
     this.teamScores = [0];
+    this.drawingTeamNumber = 0;
     this.privateLobby = true;
     this.players.push(this.botService.getBot(0));
   }

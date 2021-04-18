@@ -89,7 +89,7 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent): void {
-    if (this.gameService.canDraw) {
+    if (this.gameService.canDraw || this.editorService.isFreeEdit) {
       this.keyboardListener.handle(event);
     }
   }

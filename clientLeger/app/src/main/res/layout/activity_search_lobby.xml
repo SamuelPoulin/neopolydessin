@@ -19,55 +19,66 @@
 
         <LinearLayout
             android:id="@+id/lobbyHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toTopOf="@id/rvGames"
-            android:background="@drawable/item_lobbyinfo_background"
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:background="@drawable/item_lobbyinfo_background">
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.25"
-                android:textSize="30dp"
-                android:textColor="@color/black"
-                android:text="Lobby Name"
-                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.20"
+                style="@style/lobbylistHeader"
+                android:text="Nom du lobby"
                 />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/playerNb"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.25"
-                android:textSize="30dp"
-                android:textColor="@color/black"
-                android:text="Game Owner"
-                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.20"
+                android:text="Joueurs"
+                style="@style/lobbylistHeader"
                 />
-
-            <TextView
-                android:id="@+id/textView3"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/gamemodeDropdown"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.25"
-                android:textSize="30dp"
-                android:textColor="@color/black"
-                android:text="Game Mode"
-                android:textAlignment="center"/>
+                android:layout_weight="0.20"
+                android:hint="Mode de jeu"
+                app:boxBackgroundColor="@android:color/transparent"
+                app:hintTextAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+                <AutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    android:text="Tous"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/textView4"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/difficultyDropdown"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.25"
-                android:textSize="30dp"
-                android:textColor="@color/black"
-                android:text="Game Capacity"
-                android:textAlignment="center"
+                android:layout_weight="0.20"
+                android:hint="Difficulté"
+                app:boxBackgroundColor="@android:color/transparent"
+                app:hintTextAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+                <AutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="none"
+                    android:text="Toutes"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.20"
                 />
     </LinearLayout>
 

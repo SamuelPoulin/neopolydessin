@@ -8,11 +8,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class LobbyInfo(val lobbyId: String,
-                     val lobbyName: String,
-                     val ownerUsername: String,
-                     val nbPlayerInLobby: Int,
-                     val gameType: GameType,
-                     val difficulty: Difficulty,
-                     val maxSize: Int,
-                     val isPrivate: Boolean) : Parcelable
+data class LobbyInfo(val lobbyId: String = "",
+                     val lobbyName: String = "",
+                     val ownerUsername: String = "",
+                     val nbPlayerInLobby: Int = 0,
+                     val gameType: GameType = GameType.CLASSIC,
+                     val difficulty: Difficulty = Difficulty.EASY,
+                     val maxSize: Int = 0,
+                     val isPrivate: Boolean = false) : Parcelable

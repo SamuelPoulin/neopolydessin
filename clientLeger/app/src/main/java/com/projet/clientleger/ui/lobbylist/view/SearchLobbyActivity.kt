@@ -3,6 +3,9 @@ package com.projet.clientleger.ui.lobbylist.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -41,13 +44,14 @@ class SearchLobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         setContentView(binding.root)
         binding.lifecycleOwner = this
 
-        getIntentData()
         setupLobbiesRv()
         setupToolbar()
-
-        vm.lobbies.observe(this){
+        setupDropdowns()
+        vm.displayedLobbies.observe(this){
             lobbyList.clear()
             lobbyList.addAll(it)
+            if(lobbyList.isEmpty())
+                lobbyList.add(LobbyInfo(isPrivate = true))
             binding.rvGames.adapter?.notifyDataSetChanged()
         }
 
@@ -58,14 +62,27 @@ class SearchLobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         vm.init()
     }
 
+    private fun setupDropdowns(){
+        val adapterGamemode = ArrayAdapter(this, R.layout.item_dropdown, resources.getStringArray(R.array.gamemodesLobbylist))
+        val dropdownGamemode = binding.gamemodeDropdown.editText as AutoCompleteTextView
+        dropdownGamemode.setAdapter(adapterGamemode)
+        dropdownGamemode.setOnItemClickListener { parent, view, position, id ->
+            vm.selectedGameType = GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
+            vm.filterLobbies()
+        }
+
+        val adapterDifficulty = ArrayAdapter(this, R.layout.item_dropdown, resources.getStringArray(R.array.difficultyLobbylist))
+        val dropdownDifficulty = binding.difficultyDropdown.editText as AutoCompleteTextView
+        dropdownDifficulty.setAdapter(adapterDifficulty)
+        dropdownDifficulty.setOnItemClickListener { parent, view, position, id ->
+            vm.selectedDifficulty = Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
+            vm.filterLobbies()
+        }
+    }
+
     private fun setupLobbiesRv(){
         binding.rvGames.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         binding.rvGames.adapter = GameLobbyInfoAdapter(lobbyList, ::joinLobby)
-    }
-
-    private fun getIntentData(){
-        vm.selectedGameType = intent.getSerializableExtra("gameType") as GameType? ?: GameType.CLASSIC
-        vm.selectedDifficulty = intent.getSerializableExtra("difficulty") as Difficulty? ?: Difficulty.EASY
     }
 
     private fun setupToolbar(){
