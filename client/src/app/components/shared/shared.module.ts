@@ -28,6 +28,7 @@ import { NumberInputComponent } from 'src/app/components/shared/inputs/number-in
 import { LayoutModule } from '@angular/cdk/layout';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxElectronModule } from 'ngx-electron';
+import { ColorPickerModule } from 'ngx-color-picker';
 import { AbstractModalComponent } from './abstract-modal/abstract-modal.component';
 import { ConfirmModalComponent } from './abstract-modal/confirm-modal/confirm-modal/confirm-modal.component';
 import { ColorHistoryComponent } from './color-picker/color-history/color-history.component';
@@ -73,6 +74,7 @@ import { TutorialComponent } from './tutorial/tutorial.component';
     MatSelectModule,
     MatTreeModule,
     MatTooltipModule,
+    ColorPickerModule,
   ],
   declarations: [
     AbstractModalComponent,
@@ -138,6 +140,7 @@ import { TutorialComponent } from './tutorial/tutorial.component';
     AvatarComponent,
     TeamComponent,
     TutorialComponent,
+    ColorPickerModule,
   ],
 })
 export class SharedModule {}

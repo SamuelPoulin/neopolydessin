@@ -14,6 +14,7 @@ import { BaseShape } from '@models/shapes/base-shape';
 import { Path } from '@models/shapes/path';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ImageString } from '@utils/color/image-string';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-picture-word-upload',
@@ -24,6 +25,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   static readonly DEFAULT_THRESHOLD: number = 200;
 
   readonly size: number = 500;
+  readonly minimumHints: number = 3;
   drawingId: string = '';
   displayPreview: boolean = false;
   imageString: SafeResourceUrl = ImageString.WHITE;
@@ -31,30 +33,64 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   previewTimeout: NodeJS.Timeout;
 
   word: string = '';
-  hints: string[] = [];
+  displayedHints: { value: string }[] = [];
   difficulty: Difficulty;
   drawMode: DrawMode;
-  color: Color;
+  _color: Color;
   imageData: string = '';
   threshold: number = PictureWordUploadComponent.DEFAULT_THRESHOLD;
 
-  drawModes: string[] = ['conventional', 'random', 'panlr', 'panrl', 'pantb', 'panbt', 'center'];
-  difficulties: string[] = ['easy', 'intermediate', 'hard'];
+  drawModes: { name: string; value: string }[] = [
+    { name: 'Conventionnel', value: DrawMode.CONVENTIONAL },
+    { name: 'Aléatoire', value: DrawMode.RANDOM },
+    { name: 'Gauche à droite', value: DrawMode.PAN_L_TO_R },
+    { name: 'Droite à gauche', value: DrawMode.PAN_R_TO_L },
+    { name: 'Haut en bas', value: DrawMode.PAN_T_TO_B },
+    { name: 'Bas en haut', value: DrawMode.PAN_B_TO_T },
+    { name: 'Centré', value: DrawMode.CENTER_FIRST },
+  ];
+  difficulties: { name: string; value: string }[] = [
+    { name: 'Facile', value: Difficulty.EASY },
+    { name: 'Intermédiaire', value: Difficulty.INTERMEDIATE },
+    { name: 'Difficile', value: Difficulty.HARD },
+  ];
 
   @ViewChild('preview') preview: ElementRef;
   @ViewChild('uploadLabel') uploadLabel: ElementRef;
+
+  get color(): string {
+    return this._color.hexString;
+  }
+
+  set color(hex: string) {
+    this._color = Color.hex(hex);
+  }
+
+  get hints(): string[] {
+    const hints: string[] = [];
+    this.displayedHints.forEach((hint) => {
+      hints.push(hint.value);
+    });
+    return hints;
+  }
 
   constructor(
     dialogRef: MatDialogRef<AbstractModalComponent>,
     private api: APIService,
     private editorService: EditorService,
     protected sanitizer: DomSanitizer,
+    private snackBar: MatSnackBar,
   ) {
     super(dialogRef);
+    this._color = Color.BLACK;
 
     if (this.dialogRef.id === 'drawing') {
       const blob = new Blob([this.editorService.view.svg.outerHTML], { type: 'image/svg+xml' });
       this.imageString = sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
+    }
+
+    for (let i = 0; i < this.minimumHints; ++i) {
+      this.displayedHints.push({ value: '' });
     }
 
     this.dialogRef
@@ -71,6 +107,18 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     } else {
       return this.upload();
     }
+  }
+
+  updateHint(value: string, id: number): void {
+    this.displayedHints[id].value = value;
+  }
+
+  addHint(): void {
+    this.displayedHints.push({ value: '' });
+  }
+
+  removeHint(id: number) {
+    this.displayedHints.splice(id, 1);
   }
 
   cancel(): void {
@@ -91,25 +139,28 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       hints: this.hints,
       difficulty: this.difficulty,
       drawMode: this.drawMode,
-      color: this.color.hexString,
+      color: this.color,
     };
 
-    return this.api.updateDrawing(id, data).then((sequence) => {
-      this.displayPreview = true;
-      this.drawPreview(sequence);
-    });
+    return this.api
+      .updateDrawing(id, data)
+      .then((sequence) => {
+        this.displayPreview = true;
+        this.sequence = sequence;
+        this.drawPreview(sequence);
+      })
+      .catch(() => this.showError());
   }
 
   async upload(): Promise<void> {
-    this.hints = ['1', '2', '3'];
-    this.color = Color.BLACK;
-
     const upload = this.dialogRef.id === 'drawing' ? this.uploadDrawing() : this.uploadPicture();
 
-    return upload.then((id) => {
-      this.drawingId = id;
-      this.showPreview(id);
-    });
+    return upload
+      .then((id) => {
+        this.drawingId = id;
+        this.showPreview(id);
+      })
+      .catch(() => this.showError());
   }
 
   private async uploadDrawing(): Promise<string> {
@@ -148,7 +199,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       hints: this.hints,
       difficulty: this.difficulty,
       drawMode: this.drawMode,
-      color: this.color.hexString,
+      color: this.color,
       threshold: this.threshold,
       picture: this.imageData,
     };
@@ -182,10 +233,21 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   }
 
   showPreview(id: string) {
-    this.api.getDrawingPreview(id).then((sequence: DrawingSequence) => {
-      this.sequence = sequence;
-      this.displayPreview = true;
-      this.drawPreview(sequence);
+    this.api
+      .getDrawingPreview(id)
+      .then((sequence: DrawingSequence) => {
+        this.sequence = sequence;
+        this.displayPreview = true;
+        this.drawPreview(sequence);
+      })
+      .catch(() => this.showError());
+  }
+
+  showError() {
+    this.snackBar.open('Erreur lors de la création', 'Ok', {
+      duration: 2000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
     });
   }
 
@@ -207,7 +269,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
         const timePerPoint = timePerSegment / segment.path.length;
 
         ctx.beginPath();
-        ctx.strokeStyle = Color.ahex(segment.brushInfo.color).rgbString;
+        ctx.strokeStyle = segment.brushInfo.color;
         ctx.lineWidth = segment.brushInfo.strokeWidth;
 
         for (const [index, coord] of segment.path.entries()) {
