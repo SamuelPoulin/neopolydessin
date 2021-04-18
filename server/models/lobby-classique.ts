@@ -102,34 +102,20 @@ export class LobbyClassique extends Lobby {
             guessStatus = GuessResponse.CORRECT;
             this.teamScores[guesser.teamNumber]++;
             this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_TEAMS_SCORE, this.getTeamsScoreArray());
-            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
-              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
-            }
-            this.startRoundTimer();
             break;
           }
           case 1:
           case 2: {
             guessStatus = GuessResponse.CLOSE;
-            this.guessLeft--;
-            if (this.currentGameState === CurrentGameState.REPLY) {
-              this.startRoundTimer();
-            } else {
-              if (this.guessLeft <= 0) {
-                this.startReply();
-              }
+            if (this.currentGameState !== CurrentGameState.REPLY) {
+              this.guessLeft--;
             }
             break;
           }
           default: {
             guessStatus = GuessResponse.WRONG;
-            this.guessLeft--;
-            if (this.currentGameState === CurrentGameState.REPLY) {
-              this.startRoundTimer();
-            } else {
-              if (this.guessLeft <= 0) {
-                this.startReply();
-              }
+            if (this.currentGameState !== CurrentGameState.REPLY) {
+              this.guessLeft--;
             }
             break;
           }
@@ -140,17 +126,49 @@ export class LobbyClassique extends Lobby {
           guessStatus,
           senderUsername: guesser.username
         };
+
         this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
-        this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+        if (guessStatus === GuessResponse.CORRECT) {
+          this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+          this.startRoundTimer();
+        } else {
+          if (this.currentGameState === CurrentGameState.REPLY) {
+            this.startRoundTimer();
+          } else {
+            if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
+              this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
+            } else {
+              this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+              if (this.guessLeft <= 0) {
+                this.startReply();
+              }
+            }
+          }
+        }
       }
     });
   }
 
   protected startRoundTimer() {
+    clearInterval(this.clockTimeout);
     this.drawingTeamNumber = (this.drawingTeamNumber + 1) % 2;
     this.guessLeft = this.guessTries;
-    this.setRoles();
     this.drawingCommands.resetDrawing();
+    this.setRoles();
+
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
+    this.currentGameState = CurrentGameState.DRAWING;
+
+    this.timeLeftSeconds = this.drawPhaseTime;
+    this.startTimerGuessToClient();
+    this.clockTimeout = setInterval(() => {
+      --this.timeLeftSeconds;
+      if (this.timeLeftSeconds <= 0) {
+        this.endRoundTimer();
+        this.startReply();
+      }
+    }, this.MS_PER_SEC);
+
     this.pictureWordService.getRandomWord(this.difficulty).then((pictureWord) => {
       this.wordToGuess = pictureWord.word;
       const drawer = this.drawers[this.drawingTeamNumber];
@@ -160,21 +178,6 @@ export class LobbyClassique extends Lobby {
         this.botService.draw(pictureWord.sequence, pictureWord.hints);
       }
     });
-
-    clearInterval(this.clockTimeout);
-
-    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
-    this.currentGameState = CurrentGameState.DRAWING;
-    this.timeLeftSeconds = this.drawPhaseTime;
-    this.startTimerGuessToClient();
-
-    this.clockTimeout = setInterval(() => {
-      --this.timeLeftSeconds;
-      if (this.timeLeftSeconds <= 0) {
-        this.endRoundTimer();
-        this.startReply();
-      }
-    }, this.MS_PER_SEC);
   }
 
   private endRoundTimer() {

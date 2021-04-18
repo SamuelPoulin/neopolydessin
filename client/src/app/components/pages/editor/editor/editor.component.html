@@ -28,6 +28,11 @@
           <mat-icon [inline]="true">timer</mat-icon>
           <div id="game-area-timer-value">{{timeLeft}}</div>
         </div>
+        <div id="game-area-role-tooltip">
+          <mat-icon [inline]="true" *ngIf="gameService.currentRole === playerRole.DRAWER">brush</mat-icon>
+          <mat-icon [inline]="true" *ngIf="gameService.currentRole === playerRole.GUESSER">help</mat-icon>
+          <div id="game-area-tooltip-value">{{playerRoleMessage()}}</div>
+        </div>
       </div>
       <div id="game-area-teams-container">
         <div id="game-area-teams">
