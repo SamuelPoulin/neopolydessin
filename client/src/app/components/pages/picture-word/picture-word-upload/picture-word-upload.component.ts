@@ -40,6 +40,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   _color: Color;
   imageData: string = '';
   threshold: number = PictureWordUploadComponent.DEFAULT_THRESHOLD;
+  thresholdChanged: boolean = false;
 
   drawModes: { name: string; value: string }[] = [
     { name: 'Conventionnel', value: DrawMode.CONVENTIONAL },
@@ -104,7 +105,13 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   async save(): Promise<void> {
     if (this.drawingId) {
-      return this.update(this.drawingId);
+      if (!this.thresholdChanged) {
+        return this.update(this.drawingId);
+      } else {
+        this.thresholdChanged = false;
+        this.cancel();
+        this.upload();
+      }
     } else {
       return this.upload();
     }
@@ -120,6 +127,10 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   removeHint(id: number) {
     this.displayedHints.splice(id, 1);
+  }
+
+  onThresholdChanged(): void {
+    this.thresholdChanged = true;
   }
 
   cancel(): void {
