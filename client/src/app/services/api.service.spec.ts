@@ -5,7 +5,6 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SharedModule } from '@components/shared/shared.module';
-import { Drawing } from '@models/drawing';
 import { of } from 'rxjs';
 import { APIService } from './api.service';
 
@@ -19,13 +18,13 @@ export const MockAPIService = jasmine.createSpyObj('APIService', {
   getFriendsList: Promise.resolve({ friends: [] }),
   getDashBoardInfo: Promise.resolve({
     gameHistory: { games: [] },
-    logins: []
+    logins: [],
   }),
 });
 
 MockAPIService.friendslistUpdated = of();
 
-describe('APIService', () => {
+fdescribe('APIService', () => {
   let apiService: APIService;
   let httpTestingController: HttpTestingController;
   let notification: MatSnackBar;
@@ -45,30 +44,6 @@ describe('APIService', () => {
 
   it('should be created', () => {
     expect(apiService).toBeTruthy();
-  });
-
-  it('should get call http get on getAllDrawings', async () => {
-    const getSpy = spyOn(apiService['http'], 'get').and.returnValue(of(Drawing));
-
-    apiService.getAllDrawings().then(() => {
-      expect(getSpy).toHaveBeenCalled();
-    });
-  });
-
-  it('should get call http get on searchDrawings', async () => {
-    const getSpy = spyOn(apiService['http'], 'get').and.returnValue(of(Drawing));
-
-    apiService.searchDrawings('testname', 'testtag').then(() => {
-      expect(getSpy).toHaveBeenCalled();
-    });
-  });
-
-  it('should get call http delete on deleteDrawings', async () => {
-    const deleteSpy = spyOn(apiService['http'], 'delete').and.returnValue(of(Drawing));
-
-    apiService.deleteDrawing('testid').then(() => {
-      expect(deleteSpy).toHaveBeenCalled();
-    });
   });
 
   it('can handle message response', () => {
