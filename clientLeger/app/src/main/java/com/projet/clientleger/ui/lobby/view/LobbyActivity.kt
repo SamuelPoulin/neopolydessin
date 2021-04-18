@@ -174,7 +174,10 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
     }
 
     override fun onBackPressed() {
+        println("loading dialog: $loadingDialog")
         loadingDialog?.let {
+            println("back pressed")
+            it.dismiss()
             leaveLobby(true)
         }
     }
@@ -198,6 +201,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
         if (requestNeeded)
             vm.leaveLobby()
         chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
+        println("Finish activity")
         finish()
     }
 
