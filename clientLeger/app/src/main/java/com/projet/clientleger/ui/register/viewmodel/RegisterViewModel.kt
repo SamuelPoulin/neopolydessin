@@ -8,6 +8,7 @@ import com.projet.clientleger.data.api.model.RegisterResponse
 import com.projet.clientleger.data.repository.RegisterRepository
 import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,7 +21,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
     val registerPasswordLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerPasswordConfirmLiveData: MutableLiveData<String> = MutableLiveData("")
 
-    suspend fun registerAccount(): RegisterResponse {
+    suspend fun registerAccount(): Observable<RegisterResponse> {
         val register = RegisterModel(
                 registerFistNameLiveData.value?.trim(),
                 registerLastNameLiveData.value?.trim(),

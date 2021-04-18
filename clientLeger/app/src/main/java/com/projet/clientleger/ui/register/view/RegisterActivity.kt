@@ -47,23 +47,25 @@ class RegisterActivity : AppCompatActivity() {
     fun registerAccount() {
         loadingBtn(true)
         lifecycleScope.launch {
-            val res = vm.registerAccount()
-            if (res.isSucessful) {
-                vm.playSound(SoundId.CONNECTED.value)
-                vm.clearForm()
-                setUserTokens(res.accessToken, res.refreshToken)
-                gotoMainmenu()
-            } else {
-                vm.playSound(SoundId.ERROR.value)
-                vm.clearPasswords()
-                showToast(res.message)
+            vm.registerAccount().subscribe { res ->
+                if (res.isSucessful) {
+                    vm.playSound(SoundId.CONNECTED.value)
+                    vm.clearForm()
+                    setUserTokens(res.accessToken, res.refreshToken)
+                    gotoMainmenu()
+                } else {
+                    vm.playSound(SoundId.ERROR.value)
+                    vm.clearPasswords()
+                    showToast(res.message)
+                }
+                loadingBtn(false)
             }
-            loadingBtn(false)
         }
     }
 
     private fun gotoMainmenu(){
         startActivity(Intent(this, MainmenuActivity::class.java))
+        finish()
     }
 
     fun loadingBtn(isLoading: Boolean) {
@@ -88,8 +90,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        this.finish()
-        startActivity(Intent(this, ConnexionActivity::class.java))
+        finish()
         return super.onOptionsItemSelected(item)
     }
 

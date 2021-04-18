@@ -1,126 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:minHeight="500dp"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:minWidth="0dp"
     android:background="@drawable/round_corners">
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Placeholder"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_margin="20dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/name"
-        app:layout_constraintVertical_chainStyle="spread"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="@string/gameName"
-        android:layout_margin="20dp"
-        android:textColorHint="@color/black"
-        app:layout_constraintWidth_percent="0.5"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintBottom_toTopOf="@id/gamemodeSpinnerContainer">
-        <EditText
-            android:id="@+id/gameName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:imeOptions="actionDone"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <LinearLayout
-        android:id="@+id/gamemodeSpinnerContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintWidth_percent="0.3"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name"
-        app:layout_constraintBottom_toTopOf="@id/difficultySpinnerContainer">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/gamemode"
-            android:layout_marginStart="10dp"/>
-        <Spinner
-            android:id="@+id/gamemodeSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/spinnerStyle"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/difficultySpinnerContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintWidth_percent="0.3"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/gamemodeSpinnerContainer"
         app:layout_constraintBottom_toTopOf="@id/actionBtn">
         <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/difficulty"
-            android:layout_marginStart="10dp"/>
-        <Spinner
-            android:id="@+id/difficultySpinner"
+            android:text="Placeholder"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="40dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/spinnerStyle"/>
+            android:hint="@string/gameName"
+            android:layout_marginBottom="20dp"
+            android:textColorHint="@color/black"
+            app:boxBackgroundColor="@color/inputTint">
+            <EditText
+                android:id="@+id/gameName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:imeOptions="actionDone"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/gamemodeDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mode de jeu"
+            android:layout_marginBottom="20dp"
+            app:boxBackgroundColor="@color/inputTint"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+            <AutoCompleteTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="none"
+                android:text="Classique"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/difficultyDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Difficulté"
+            android:layout_marginBottom="20dp"
+            app:boxBackgroundColor="@color/inputTint"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+            <AutoCompleteTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="none"
+                android:text="Facile"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/privacyBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:text="Partie publique"
+            android:backgroundTint="@color/green"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/privacyBtn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAllCaps="false"
-        android:text="Partie publique"
-        android:backgroundTint="@color/green"
-        android:textStyle="bold"
-        app:layout_constraintWidth_percent="0.5"
-        app:layout_constraintTop_toBottomOf="@id/difficultySpinnerContainer"
-        app:layout_constraintBottom_toTopOf="@id/actionBtn"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
 
     <Button
         android:id="@+id/actionBtn"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="@string/create"
-        android:backgroundTint="@color/lightGreen"
+        android:text="@string/start"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
         android:textAllCaps="false"
-        app:layout_constraintWidth_percent="0.2"
+        style="?attr/materialButtonOutlinedStyle"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <Button
         android:id="@+id/cancelButton"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="@string/cancel"
-        android:backgroundTint="@color/register_error"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
         android:textAllCaps="false"
-        app:layout_constraintWidth_percent="0.2"
+        style="?attr/materialButtonOutlinedStyle"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

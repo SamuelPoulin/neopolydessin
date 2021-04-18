@@ -2,7 +2,7 @@ import { DrawMode } from './draw-mode';
 import { BrushInfo } from './brush-info';
 import { Difficulty } from './lobby';
 
-interface PictureWord {
+export interface PictureWord {
     word: string,
     hints: string[],
     difficulty: Difficulty,

@@ -72,7 +72,7 @@
                 style="@style/MenuBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/createGame"
+                android:text="@string/menu_create_game"
                 android:drawableLeft="@drawable/ic_paint_white"
                 app:layout_constraintBottom_toTopOf="@+id/joinGamebtn"
                 app:layout_constraintLeft_toLeftOf="parent"

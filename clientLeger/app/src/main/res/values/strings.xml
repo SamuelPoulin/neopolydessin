@@ -29,7 +29,7 @@
     <string name="picword">Mot-image</string>
     <string name="lobbyList">Liste des parties</string>
     <string name="joinGame">Rejoindre une partie</string>
-    <string name="createGame">Créer une partie</string>
+    <string name="createGame">Choisir le mode de jeu</string>
     <string name="mainmenu">Menu pincipal</string>
     <string name="cancel">Annuler</string>
     <string name="gameName">Nom de la partie</string>
@@ -99,4 +99,7 @@
     <string name="score_sprint_solo">Meilleur Score Sprint Solo</string>
     <string name="score_sprint_coop">Meilleur Score Sprint Coop</string>
     <string name="bot_player">Joueur virtuel</string>
+    <string name="emptyLobbylistMsg">Il n\'y a présentement auncun lobby disponible</string>
+    <string name="start">Commencer</string>
+    <string name="menu_create_game">Créer une partie</string>
 </resources>

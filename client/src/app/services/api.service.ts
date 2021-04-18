@@ -4,7 +4,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Drawing } from '@models/drawing';
 import { environment } from 'src/environments/environment';
-import { PictureWordDrawing, PictureWordPicture } from '@common/communication/picture-word';
+import { PictureWordDrawing, PictureWord, UpdatePictureWord, PictureWordPicture } from '@common/communication/picture-word';
 import { DrawingSequence } from '@common/communication/drawing-sequence';
 import { AccountInfo, PublicAccountInfo } from '@common/communication/account';
 import { FriendsList } from '@common/communication/friends';
@@ -151,7 +151,7 @@ export class APIService {
     });
   }
 
-  async getDrawingPreview(id: string) {
+  async getDrawingPreview(id: string): Promise<DrawingSequence> {
     return new Promise<DrawingSequence>((resolve, reject) => {
       if (this.localSaveService.accessToken) {
         let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
@@ -161,6 +161,50 @@ export class APIService {
           .get<DrawingSequence>(url, { headers })
           .subscribe(
             (response: DrawingSequence) => {
+              resolve(response);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async updateDrawing(id: string, data: UpdatePictureWord): Promise<DrawingSequence> {
+    return new Promise<DrawingSequence>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/' + id;
+        this.http
+          .post<DrawingSequence>(url, data, { headers })
+          .subscribe(
+            (response: DrawingSequence) => {
+              resolve(response);
+            },
+            (e) => {
+              reject(e);
+            },
+          );
+      } else {
+        reject();
+      }
+    });
+  }
+
+  async deleteDrawing(id: string): Promise<PictureWord> {
+    return new Promise<PictureWord>((resolve, reject) => {
+      if (this.localSaveService.accessToken) {
+        let headers = new HttpHeaders().set('Content-Type', 'application/json; charset=utf-8');
+        headers = headers.set('authorization', this.localSaveService.accessToken);
+        const url = APIService.API_PICTUREWORD_ROUTE + '/' + id;
+        this.http
+          .delete<PictureWord>(url, { headers })
+          .subscribe(
+            (response: PictureWord) => {
               resolve(response);
             },
             (e) => {
@@ -334,15 +378,6 @@ export class APIService {
 
       this.http.get<Drawing[]>(url).subscribe((drawings: Drawing[]) => {
         resolve(drawings);
-      });
-    });
-  }
-
-  async deleteDrawing(id: string): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const url = APIService.API_BASE_URL + APIService.API_DATABASE_ROUTE + APIService.API_DRAWINGS_ROUTE + '/' + id;
-      this.http.delete(url, { responseType: 'text' }).subscribe(() => {
-        resolve();
       });
     });
   }

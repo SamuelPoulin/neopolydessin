@@ -32,4 +32,5 @@
     <color name="tabs_black">#292929</color>
     <color name="hover_btn">#464646</color>
     <color name="messageInfo">#696969</color>
+    <color name="inputTint">#F5F5F5</color>
 </resources>

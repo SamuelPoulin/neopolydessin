@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projet.clientleger.R
@@ -35,12 +36,19 @@ class GameLobbyInfoAdapter(private val lobbyList: List<LobbyInfo>,
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val lobbyInfo = lobbyList[position]
-        viewHolder.lobbyNameTextView.text = lobbyInfo.lobbyName
-        viewHolder.gameModeTextView.text = lobbyInfo.gameType.toFrenchString()
-        viewHolder.difficultyTextView.text = lobbyInfo.difficulty.toFrenchString()
-        viewHolder.gameCapacityTextView.text = "${lobbyInfo.nbPlayerInLobby} / ${lobbyInfo.maxSize}"
-        viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyInfo) }
-        disableFullGame(viewHolder,position)
+        if(lobbyInfo.isPrivate){
+            viewHolder.itemView.findViewById<TextView>(R.id.emptyListMsg).visibility = View.VISIBLE
+            viewHolder.itemView.findViewById<LinearLayout>(R.id.infoContainer).visibility = View.GONE
+        } else {
+            viewHolder.itemView.findViewById<TextView>(R.id.emptyListMsg).visibility = View.GONE
+            viewHolder.itemView.findViewById<LinearLayout>(R.id.infoContainer).visibility = View.VISIBLE
+            viewHolder.lobbyNameTextView.text = lobbyInfo.lobbyName
+            viewHolder.gameModeTextView.text = lobbyInfo.gameType.toFrenchString()
+            viewHolder.difficultyTextView.text = lobbyInfo.difficulty.toFrenchString()
+            viewHolder.gameCapacityTextView.text = "${lobbyInfo.nbPlayerInLobby} / ${lobbyInfo.maxSize}"
+            viewHolder.itemView.findViewById<Button>(R.id.joinGamebtn).setOnClickListener { joinLobbyCallback.invoke(lobbyInfo) }
+            disableFullGame(viewHolder,position)
+        }
     }
 
     private fun disableFullGame(viewHolder: ViewHolder, position: Int){
