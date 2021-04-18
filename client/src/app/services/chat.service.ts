@@ -76,11 +76,15 @@ export class ChatService {
     // Main Electron
     if (this.electronService.isElectronApp && !this.standalone) {
       this.electronService.ipcRenderer.on('chat-ready', () => {
-        this.chatPoppedOut = true;
-        this.updatePoppedOutChat();
+        this.nz.run(() => {
+          this.chatPoppedOut = true;
+          this.updatePoppedOutChat();
+        });
       });
       this.electronService.ipcRenderer.on('chat-closed', () => {
-        this.chatPoppedOut = false;
+        this.nz.run(() => {
+          this.chatPoppedOut = false;
+        });
       });
       this.electronService.ipcRenderer.on('chat-action-send-message', (event, arg) => {
         this.sendMessage(arg);
