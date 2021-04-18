@@ -21,8 +21,7 @@
         android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/tab_grey"
+        style="@style/friendUsername"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="@id/icon"
         app:layout_constraintBottom_toBottomOf="parent"/>
@@ -33,13 +32,12 @@
         android:layout_height="0dp"
         android:background="@drawable/friend_status_background"
         android:backgroundTint="@color/lightGreen"
-        android:elevation="5dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginStart="5dp"
         app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintRight_toLeftOf="@id/inviteBtn"
+        app:layout_constraintLeft_toRightOf="@id/username"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintHeight_percent="0.2"
         />
 
     <ImageButton

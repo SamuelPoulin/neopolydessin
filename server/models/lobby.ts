@@ -35,6 +35,7 @@ export interface ServerPlayer extends Player {
 
 const DEFAULT_TEAM_SIZE: number = 4;
 const SOLO_TEAM_SIZE: number = 2;
+const COOP_TEAM_SIZE: number = 5;
 
 export interface DifficultyModifiers {
   timeAddedOnCorrectGuess: number;
@@ -52,13 +53,13 @@ export abstract class Lobby {
   readonly GAME_SIZE_MAP: Map<GameType, number> = new Map<GameType, number>([
     [GameType.CLASSIC, DEFAULT_TEAM_SIZE],
     [GameType.SPRINT_SOLO, SOLO_TEAM_SIZE],
-    [GameType.SPRINT_COOP, DEFAULT_TEAM_SIZE]
+    [GameType.SPRINT_COOP, COOP_TEAM_SIZE]
   ]);
 
   readonly DIFFICULTY_MODIFIERS: Map<Difficulty, DifficultyModifiers> = new Map<Difficulty, DifficultyModifiers>([
-    [Difficulty.EASY, { timeAddedOnCorrectGuess: 30, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
-    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 20, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
-    [Difficulty.HARD, { timeAddedOnCorrectGuess: 10, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
+    [Difficulty.EASY, { timeAddedOnCorrectGuess: 10, soloCoopTime: 120, guessTries: 3, classicTime: 90, replyTime: 30, }],
+    [Difficulty.INTERMEDIATE, { timeAddedOnCorrectGuess: 10, soloCoopTime: 60, guessTries: 2, classicTime: 60, replyTime: 20, }],
+    [Difficulty.HARD, { timeAddedOnCorrectGuess: 5, soloCoopTime: 30, guessTries: 1, classicTime: 30, replyTime: 10, }]
   ]);
 
   lobbyId: string;
@@ -66,13 +67,13 @@ export abstract class Lobby {
   difficulty: Difficulty;
   privateLobby: boolean;
   lobbyName: string;
+  currentGameState: CurrentGameState;
 
   protected io: Server;
   protected clockTimeout: NodeJS.Timeout;
 
   protected size: number;
   protected wordToGuess: string;
-  protected currentGameState: CurrentGameState;
   protected drawingCommands: DrawingService;
   protected timeLeftSeconds: number;
   protected gameStartTime: number;
@@ -265,6 +266,7 @@ export abstract class Lobby {
       const owner = this.getLobbyOwner();
       if (owner && owner.socket.id === socket.id) {
         this.currentGameState = CurrentGameState.IN_GAME;
+        SocketIo.UPDATE_GAME_LIST.notify();
         this.gameStartTime = Date.now();
         this.io.in(this.lobbyId).emit(SocketLobby.START_GAME_CLIENT, this.toLobbyInfo());
       }
@@ -390,18 +392,21 @@ export abstract class Lobby {
   }
 
   protected unbindLobbyEndPoints(socket: Socket) {
+    socket.removeAllListeners(SocketLobby.ADD_BOT);
+    socket.removeAllListeners(SocketLobby.REMOVE_BOT);
+    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
+    socket.removeAllListeners(SocketLobby.REMOVE_PLAYER);
     socket.removeAllListeners(SocketDrawing.START_PATH);
     socket.removeAllListeners(SocketDrawing.UPDATE_PATH);
     socket.removeAllListeners(SocketDrawing.END_PATH);
     socket.removeAllListeners(SocketDrawing.ERASE_ID);
-    socket.removeAllListeners(SocketDrawing.ERASE_ID_BC);
     socket.removeAllListeners(SocketDrawing.ADD_PATH);
-    socket.removeAllListeners(SocketDrawing.ADD_PATH_BC);
-    socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.CHANGE_PRIVACY_SETTING);
-    socket.removeAllListeners(SocketLobby.START_GAME_SERVER);
-    socket.removeAllListeners(SocketLobby.LOADING_OVER);
+    socket.removeAllListeners(SocketMessages.SEND_MESSAGE);
     socket.removeAllListeners(SocketLobby.SEND_INVITE);
+    socket.removeAllListeners(SocketLobby.LOADING_OVER);
+    socket.removeAllListeners(SocketLobby.LEAVE_LOBBY);
+    socket.removeAllListeners(SocketLobby.PLAYER_GUESS);
   }
 
   protected findPlayerBySocket(socket: Socket): Player | undefined {
@@ -409,10 +414,16 @@ export abstract class Lobby {
   }
 
   protected endGame(reason: ReasonEndGame): void {
+    clearInterval(this.clockTimeout);
+    this.currentGameState = CurrentGameState.GAME_OVER;
+    this.botService.resetDrawingWithoutBotQuote();
+    this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
+    this.players.forEach((player) => {
+      if (!player.isBot) {
+        this.unbindLobbyEndPoints((player as ServerPlayer).socket);
+      }
+    });
     this.updatePlayersGameHistory(reason).then(() => {
-      this.currentGameState = CurrentGameState.GAME_OVER;
-      clearInterval(this.clockTimeout);
-      this.io.in(this.lobbyId).emit(SocketLobby.END_GAME, reason);
       SocketIo.GAME_SUCCESSFULLY_ENDED.notify(this.lobbyId);
     });
   }

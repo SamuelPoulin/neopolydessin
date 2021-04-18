@@ -1,9 +1,23 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { CurrentGameState, Difficulty, GameType, LobbyInfo, Player, PlayerRole, TeamScore } from '@common/communication/lobby';
+import {
+  CurrentGameState,
+  Difficulty,
+  GameType,
+  LobbyInfo,
+  Player,
+  PlayerRole,
+  ReasonEndGame,
+  TeamScore,
+} from '@common/communication/lobby';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
+
+interface GameEndState {
+  won: boolean;
+  score: number;
+}
 
 @Injectable()
 export class GameService {
@@ -12,6 +26,7 @@ export class GameService {
 
   isInGame: boolean = false;
   canDraw: boolean = false;
+  lastGameEndState: GameEndState | null = null;
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
   drawingChanged: EventEmitter<void> = new EventEmitter<void>();
@@ -39,6 +54,7 @@ export class GameService {
   timeRemaining: number;
   canGuess: boolean;
   canStartGame: boolean;
+  currentRole: PlayerRole;
 
   loggedInSubscription: Subscription;
 
@@ -72,8 +88,13 @@ export class GameService {
       this.nextTimestamp = Date.now() - timeInfo.serverTime + timeInfo.timestamp;
       this.startCount();
     });
-    this.endGameSubscription = this.socketService.receiveGameEnd().subscribe(() => {
-      this.leaveGame();
+    this.endGameSubscription = this.socketService.receiveGameEnd().subscribe((reason) => {
+      if (reason === ReasonEndGame.WINNING_SCORE_REACHED) {
+        this.lastGameEndState = { won: this.wonLastGame(), score: this.lastGameScore() };
+        this.router.navigate(['/gameend']);
+      } else {
+        this.leaveGame();
+      }
     });
     this.startClientGameSubscription = this.socketService.receiveGameStart().subscribe(() => {
       this.isInGame = true;
@@ -83,6 +104,7 @@ export class GameService {
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.account.username) {
+          this.currentRole = player.playerRole;
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
           this.canGuessChanged.emit();
           this.canDraw = player.playerRole === PlayerRole.DRAWER;
@@ -183,5 +205,19 @@ export class GameService {
   clearGameInfo() {
     this.gameType = undefined;
     this.difficulty = undefined;
+  }
+
+  wonLastGame(): boolean {
+    const winningIndex = this.scores[0].score > this.scores[1].score ? 0 : 1;
+
+    return this.teams[winningIndex].findIndex((player) => player.username === this.userService.account.username) !== -1;
+  }
+
+  lastGameScore(): number {
+    for (const player of this.teams[0]) {
+      if (player.username === this.userService.account.username) return this.scores[0].score;
+    }
+
+    return this.scores[1].score;
   }
 }

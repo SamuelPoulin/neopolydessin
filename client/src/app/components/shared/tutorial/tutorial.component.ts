@@ -9,6 +9,10 @@ import { TutorialService } from '@services/tutorial.service';
 export class TutorialComponent {
   constructor(public tutorialService: TutorialService) {}
 
+  continue() {
+    this.tutorialService.continue();
+  }
+
   get hint() {
     return this.tutorialService.currentHint;
   }

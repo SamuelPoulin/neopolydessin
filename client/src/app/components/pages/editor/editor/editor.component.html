@@ -1,10 +1,13 @@
 <app-tutorial></app-tutorial>
 <div id="editor-container" (mouseup)='handleMouseEvent($event)'>
-  <app-status-bar quit previousPage=""></app-status-bar>
-  <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
-    (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)" 
-    (mouseenter)='setToolbarState(true)'>
-  </app-toolbar>
+  <app-status-bar quit previousPage="" disableDashboard></app-status-bar>
+
+  <ng-container *ngIf="gameService.canDraw || editorService.isFreeEdit">
+    <app-toolbar #toolbar id='toolbar' [(currentToolType)]=currentToolType
+      (editorBackgroundChanged)="changeBackground($event)" (mouseleave)="setToolbarState(false)" 
+      (mouseenter)='setToolbarState(true)'>
+    </app-toolbar>
+  </ng-container>
 
   <div *ngIf="editorService.isFreeEdit; then freeEditor else gameEditor"></div>
   <ng-template #gameEditor>
@@ -24,6 +27,11 @@
         <div id="game-area-timer">
           <mat-icon [inline]="true">timer</mat-icon>
           <div id="game-area-timer-value">{{timeLeft}}</div>
+        </div>
+        <div id="game-area-role-tooltip">
+          <mat-icon [inline]="true" *ngIf="gameService.currentRole === playerRole.DRAWER">brush</mat-icon>
+          <mat-icon [inline]="true" *ngIf="gameService.currentRole === playerRole.GUESSER">help</mat-icon>
+          <div id="game-area-tooltip-value">{{playerRoleMessage()}}</div>
         </div>
       </div>
       <div id="game-area-teams-container">

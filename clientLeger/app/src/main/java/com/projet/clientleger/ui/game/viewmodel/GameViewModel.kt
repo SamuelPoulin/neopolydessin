@@ -13,6 +13,7 @@ import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.repository.GameRepository
 import com.projet.clientleger.data.service.AudioService
+import com.projet.clientleger.data.service.AvatarStorageService
 import com.projet.clientleger.data.service.TutorialService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Observable
@@ -20,7 +21,7 @@ import javax.inject.Inject
 const val FIRST_TEAM = 0
 const val SECOND_TEAM = 0
 @HiltViewModel
-class GameViewModel @Inject constructor(private val gameRepository: GameRepository,private val tutorialService: TutorialService, private val audioService: AudioService): ViewModel() {
+class GameViewModel @Inject constructor(private val gameRepository: GameRepository,private val tutorialService: TutorialService, private val audioService: AudioService, private val avatarStorageService: AvatarStorageService): ViewModel() {
     private lateinit var fragmentManager: FragmentManager
     val currentRoleLiveData: MutableLiveData<PlayerRole> = MutableLiveData()
     val playersLiveData: MutableLiveData<ArrayList<PlayerInfo>> = MutableLiveData(ArrayList())
@@ -29,11 +30,16 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     val teamScores:MutableLiveData<ArrayList<TeamScore>> = MutableLiveData()
     //val firstTeamScores:MutableLiveData<Int> = MutableLiveData()
     //val secondTeamScore:MutableLiveData<Int> = MutableLiveData()
-    val accountInfo = gameRepository.getAccountInfo()
+    private val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
 
         gameRepository.receiveRoles().subscribe{
+            for(player in it){
+                val avatar = avatarStorageService.getAvatar(player.accountId)
+                if(avatar != null)
+                    player.avatar = avatar
+            }
             playersLiveData.postValue(it)
             updateCurrentRole(it)
         }

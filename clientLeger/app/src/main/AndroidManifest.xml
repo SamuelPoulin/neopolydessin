@@ -58,7 +58,8 @@
             android:screenOrientation="landscape"/>
         <activity
             android:name=".ui.register.view.RegisterActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"/>
         <activity android:name=".ui.accountmanagement.view.AccountManagementActivity"
             android:screenOrientation="landscape"/>
     </application>

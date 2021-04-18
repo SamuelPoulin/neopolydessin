@@ -6,7 +6,7 @@ import { Message } from '../../common/communication/chat-message';
 import { PrivateMessage, PrivateMessageTo } from '../../common/communication/private-message';
 import { SocketConnection } from '../../common/socketendpoints/socket-connection';
 import { SocketMessages } from '../../common/socketendpoints/socket-messages';
-import { Friend, FriendsList, FriendWithConnection } from '../../common/communication/friends';
+import { Friend, FriendsList, FriendStatus, FriendWithConnection } from '../../common/communication/friends';
 import { Lobby } from '../models/lobby';
 import { NotificationType, SocketFriendActions, SocketFriendListNotifications } from '../../common/socketendpoints/socket-friend-actions';
 import loginsModel from '../models/schemas/logins';
@@ -14,7 +14,7 @@ import { LobbySolo } from '../models/lobby-solo';
 import { LobbyClassique } from '../models/lobby-classique';
 import { LobbyCoop } from '../models/lobby-coop';
 import messagesHistoryModel from '../models/schemas/messages-history';
-import { Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
+import { CurrentGameState, Difficulty, GameType, LobbyInfo, LobbyOpts } from '../../common/communication/lobby';
 import { SocketLobby } from '../../common/socketendpoints/socket-lobby';
 import { AccountFriend } from '../../common/communication/account';
 import * as jwtUtils from './utils/jwt-util';
@@ -63,7 +63,8 @@ export class SocketIo {
     SocketIo.UPDATE_GAME_LIST.subscribe(() => {
       const updatedLobbies = this.lobbyList
         .filter((lobby) => {
-          return !lobby.privateLobby && lobby.gameType !== GameType.SPRINT_SOLO && lobby.lobbyHasRoom();
+          return !lobby.privateLobby && lobby.gameType !== GameType.SPRINT_SOLO
+            && lobby.currentGameState === CurrentGameState.LOBBY && lobby.lobbyHasRoom();
         }).map((lobby) => {
           return lobby.getLobbySummary();
         });
@@ -122,7 +123,7 @@ export class SocketIo {
   checkOnlineStatus(friends: Friend[]): FriendWithConnection[] {
     return friends.map((friend) => {
       let isOnline: boolean = false;
-      if (friend && friend.friendId) {
+      if (friend && friend.status !== FriendStatus.PENDING && friend.friendId) {
         if (this.socketIdService.GetSocketIdOfAccountId(friend.friendId._id.toString())) {
           isOnline = true;
         }
@@ -143,7 +144,7 @@ export class SocketIo {
       this.chatRoomService.bindIoEvents(socket);
 
       socket.on(SocketLobby.GET_ALL_LOBBIES, (lobbyOpts: LobbyOpts, callback: (lobbiesCallback: LobbyInfo[]) => void) => {
-        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby);
+        let lobbies = this.lobbyList.filter((lobby) => !lobby.privateLobby && lobby.currentGameState === CurrentGameState.LOBBY);
         lobbies = lobbyOpts.gameType ? lobbies.filter((lobby) => lobby.gameType === lobbyOpts.gameType) : lobbies;
         lobbies = lobbyOpts.difficulty ? lobbies.filter((lobby) => lobby.difficulty === lobbyOpts.difficulty) : lobbies;
         callback(lobbies.map((lobby) => lobby.getLobbySummary()));
@@ -152,7 +153,7 @@ export class SocketIo {
       socket.on(SocketLobby.JOIN_LOBBY, async (lobbyId: string, callback: (lobbyInfo: LobbyInfo | null) => void) => {
         const lobbyToJoin = this.findLobby(lobbyId);
         const playerId: string | undefined = this.socketIdService.GetAccountIdOfSocketId(socket.id);
-        if (lobbyToJoin && playerId && !lobbyToJoin.findPlayerById(playerId) && lobbyToJoin.lobbyHasRoom()) {
+        if (lobbyToJoin && playerId && this.canJoinLobby(lobbyToJoin, playerId)) {
           lobbyToJoin.addPlayer(playerId, socket);
           callback(lobbyToJoin.getLobbySummary());
         } else {
@@ -296,6 +297,10 @@ export class SocketIo {
 
   private findLobby(lobbyId: string): Lobby | undefined {
     return this.lobbyList.find((lobby) => lobby.lobbyId === lobbyId);
+  }
+
+  private canJoinLobby(lobby: Lobby, playerId: string): boolean {
+    return !lobby.findPlayerById(playerId) && lobby.lobbyHasRoom() && lobby.currentGameState === CurrentGameState.LOBBY;
   }
 
   private validateMessageLength(msg: Message): boolean {
