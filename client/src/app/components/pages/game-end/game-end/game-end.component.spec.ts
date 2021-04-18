@@ -7,6 +7,8 @@ import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
+import { TutorialService } from '@services/tutorial.service';
+import { MockTutorialService } from '@services/tutorial.service.spec';
 import { UserService } from '@services/user.service';
 import { MockUserService } from '@services/user.service.spec';
 
@@ -24,6 +26,7 @@ describe('GameEndComponent', () => {
         { provide: GameService, useValue: MockGameService },
         { provide: ChatService, useValue: MockChatService },
         { provide: UserService, useValue: MockUserService },
+        { provide: TutorialService, useValue: MockTutorialService },
       ],
     }).compileComponents();
   });
