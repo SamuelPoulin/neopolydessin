@@ -65,7 +65,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/timer_icon_des"
-                    android:src="@drawable/ic_timer_green"
+                    android:src="@drawable/ic_timer"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintLeft_toLeftOf="parent" />
@@ -75,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/timer_over"
-                    android:textColor="@color/green"
+                    android:textColor="@color/chat_header_black"
                     android:textSize="35sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"

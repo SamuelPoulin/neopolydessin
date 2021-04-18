@@ -9,10 +9,7 @@ import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
+import com.google.android.material.textfield.TextInputLayout
 import com.projet.clientleger.DaggerPolydessinApplication_HiltComponents_SingletonC.builder
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
@@ -43,24 +41,24 @@ import kotlinx.android.synthetic.main.dialog_gamemode.view.*
 import javax.inject.Inject
 
 const val WELCOME_MESSAGE =
-    "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
+        "Bienvenue dans Polydessin ! \ndans ce tutoriel, nous allons vous montrer comment utiliser l'application comme un pro !"
 const val INTRO_CREATE_GAME_MESSAGE =
-    "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
+        "Premièrement, voici l'onglet te permettant de créer une partie.\nCela te permet de créer une partie personnalisée selon tes préférences, notamment le mode de jeu ainsi que la difficulté"
 const val INTRO_JOIN_GAME_MESSAGE =
-    "Le bouton Rejoindre Une Partie sert à rejoindre une partie déjà existante pour jouer avec d'autres utilisateurs de l'application.\ntu peux également rechercher une partie selon tes préférences de difficulté et de mode de jeu"
+        "Le bouton Rejoindre Une Partie sert à rejoindre une partie déjà existante pour jouer avec d'autres utilisateurs de l'application.\ntu peux également rechercher une partie selon tes préférences de difficulté et de mode de jeu"
 const val INTRO_DASHBOARD_MESSAGE =
-    "Le tableau de bord permet de voir toutes les statistiques de ton compte, n'hésites pas à aller regarder cela suite au tutoriel !"
+        "Le tableau de bord permet de voir toutes les statistiques de ton compte, n'hésites pas à aller regarder cela suite au tutoriel !"
 const val INTRO_TOOLBAR_MESSAGE =
-    "La barre d'outil permet de se déconnecter et d'accéder à la liste d'amis\nVous pouvez ainsi ajouter et écrire à des amis ici si vous voulez être en mesure de jouer avec eux"
+        "La barre d'outil permet de se déconnecter et d'accéder à la liste d'amis\nVous pouvez ainsi ajouter et écrire à des amis ici si vous voulez être en mesure de jouer avec eux"
 const val INTRO_CHATBOX_MESSAGE =
-    "Vous pouvez également écrire aux autres utilisateurs connectés à l'application par le boîte de chat ici"
+        "Vous pouvez également écrire aux autres utilisateurs connectés à l'application par le boîte de chat ici"
 const val INTRO_START_GAME_MESSAGE =
-    "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
+        "Nous allons maintenant apprendre comment jouer !\nAppuyez sur Créer une partie pour commencer"
 
 @AndroidEntryPoint
 class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
-    var selectedGameType: GameType = GameType.CLASSIC
-    var selectedDifficulty: Difficulty = Difficulty.EASY
+    var selectedGameType: GameType? = GameType.CLASSIC
+    var selectedDifficulty: Difficulty? = Difficulty.EASY
     lateinit var binding: ActivityMainmenuBinding
     val vm: MainMenuViewModel by viewModels()
     var isPrivate: Boolean = false
@@ -90,7 +88,8 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
         binding.joinGamebtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
-            showGameDialog(false)
+            val intent = Intent(this, SearchLobbyActivity::class.java)
+            startActivity(intent)
         }
         binding.createGameBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
@@ -98,7 +97,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 val intent = Intent(this, GameTutorialActivity::class.java)
                 startActivity(intent)
             } else {
-                showGameDialog(true)
+                showGameDialog()
             }
         }
         binding.userGuideBtn.setOnClickListener {
@@ -124,19 +123,13 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         vm.createShowcaseSequence(sequence)
     }
 
-    private fun showGameDialog(isCreating: Boolean) {
+    private fun showGameDialog() {
         val visibility: Int
         val action: String
         val title: String
-        if (isCreating) {
-            visibility = View.VISIBLE
-            action = resources.getString(R.string.create)
-            title = resources.getString(R.string.createGame)
-        } else {
-            visibility = View.GONE
-            action = resources.getString(R.string.join)
-            title = resources.getString(R.string.lobbyList)
-        }
+        visibility = View.VISIBLE
+        action = resources.getString(R.string.start)
+        title = resources.getString(R.string.createGame)
         val dialogView = layoutInflater.inflate(R.layout.dialog_gamemode, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
         dialog.show()
@@ -144,6 +137,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.name.visibility = visibility
+        dialog.name.editText?.setText("Partie de ${vm.getUsername()}")
         dialog.privacyBtn.visibility = visibility
         dialog.actionBtn.text = action
         dialog.title.text = title
@@ -152,16 +146,10 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         setupDifficultySpinner(dialogView)
 
         dialogView.actionBtn.setOnClickListener {
-            val intent: Intent
-            if (isCreating) {
-                vm.playSound(SoundId.CONNECTED.value)
-                intent = Intent(this, LobbyActivity::class.java)
-                intent.putExtra("gameName", getGameName(dialog))
-                intent.putExtra("isPrivate", false)
-            } else {
-                vm.playSound(SoundId.CONFIRM.value)
-                intent = Intent(this, SearchLobbyActivity::class.java)
-            }
+            vm.playSound(SoundId.CONNECTED.value)
+            val intent = Intent(this, LobbyActivity::class.java)
+            intent.putExtra("gameName", getGameName(dialog))
+            intent.putExtra("isPrivate", false)
 
             intent.putExtra("gameType", selectedGameType)
             intent.putExtra("difficulty", selectedDifficulty)
@@ -179,9 +167,9 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
     }
 
-    private fun togglePrivacy(buttonView: Button){
+    private fun togglePrivacy(buttonView: Button) {
         isPrivate = !isPrivate
-        if(isPrivate){
+        if (isPrivate) {
             buttonView.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
             buttonView.text = "Partie privée"
         } else {
@@ -200,45 +188,27 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     private fun setupGamemodeSpinner(dialogView: View) {
         val adapterGamemode =
-            ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.gamemodes))
-        adapterGamemode.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        val spinnerGamemode = dialogView.findViewById<Spinner>(R.id.gamemodeSpinner)
-        spinnerGamemode.adapter = adapterGamemode
+                ArrayAdapter(this, R.layout.item_dropdown, resources.getStringArray(R.array.gamemodes))
+        val dropdownGamemode = dialogView.findViewById<TextInputLayout>(R.id.gamemodeDropdown).editText as AutoCompleteTextView
+        dropdownGamemode.setAdapter(adapterGamemode)
 
-        spinnerGamemode.onItemSelectedListener = object :
-            AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View, position: Int, id: Long
-            ) {
-                vm.playSound(SoundId.SELECTED.value)
-                selectedGameType =
+        dropdownGamemode.setOnItemClickListener { parent, view, position, id ->
+            vm.playSound(SoundId.SELECTED.value)
+            selectedGameType =
                     GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
     private fun setupDifficultySpinner(dialogView: View) {
         val adapterDifficulty =
-            ArrayAdapter(this, R.layout.spinner_item, resources.getStringArray(R.array.difficulty))
-        adapterDifficulty.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        val spinnerDifficulty = dialogView.findViewById<Spinner>(R.id.difficultySpinner)
-        spinnerDifficulty.adapter = adapterDifficulty
+                ArrayAdapter(this, R.layout.item_dropdown, resources.getStringArray(R.array.difficulty))
+        val dropdownDifficulty = dialogView.findViewById<TextInputLayout>(R.id.difficultyDropdown).editText as AutoCompleteTextView
+        dropdownDifficulty.setAdapter(adapterDifficulty)
 
-        spinnerDifficulty.onItemSelectedListener = object :
-            AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View, position: Int, id: Long
-            ) {
-                vm.playSound(SoundId.SELECTED.value)
-                selectedDifficulty =
+        dropdownDifficulty.setOnItemClickListener { parent, view, position, id ->
+            vm.playSound(SoundId.SELECTED.value)
+            selectedDifficulty =
                     Difficulty.fromFrenchToEnum(adapterDifficulty.getItem(position).toString())
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 

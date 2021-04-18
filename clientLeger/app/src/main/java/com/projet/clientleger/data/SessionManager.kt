@@ -65,7 +65,7 @@ open class SessionManager @Inject constructor(
     }
 
     fun saveCreds(accessToken: String, refreshToken: String): Observable<Boolean> {
-        return Observable.create<Boolean> { emiter ->
+        return Observable.create { emiter ->
             userPrefs?.edit {
                 putString(ACCESS_TOKEN, accessToken)
                 putString(REFRESH_TOKEN, refreshToken)

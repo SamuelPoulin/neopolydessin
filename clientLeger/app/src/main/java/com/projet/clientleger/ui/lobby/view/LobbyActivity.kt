@@ -175,6 +175,7 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onBackPressed() {
         loadingDialog?.let {
+            it.dismiss()
             leaveLobby(true)
         }
     }

@@ -250,12 +250,6 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             override fun onTick(millisUntilFinished:Long){
                 if(millisUntilFinished <= TIME_ALMOST_UP){
                     vm.playSound(SoundId.TICK.value)
-                    binding.timer.setTextColor(Color.RED)
-                    binding.timerIcon.setImageResource(R.drawable.ic_timer_red)
-                }
-                else{
-                    binding.timer.setTextColor(Color.GREEN)
-                    binding.timerIcon.setImageResource(R.drawable.ic_timer_green)
                 }
                 val secRemaining = (((millisUntilFinished / MILLIS_IN_SEC)) % SEC_IN_MIN).toInt()
                 val minRemaining:Int = (((millisUntilFinished / MILLIS_IN_SEC) - secRemaining) / SEC_IN_MIN).toInt()
