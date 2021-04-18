@@ -9,6 +9,7 @@ import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.data.repository.AccountManagementRepository
 import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,5 +26,8 @@ class AccountManagementViewModel @Inject constructor(private val accountManageme
     }
     fun getAvatarBitmap():Bitmap{
         return sessionManager.getAccountInfo().avatar
+    }
+    suspend fun uploadAvatar(image:RequestBody){
+        accountManagementRepository.updateAvatar(image)
     }
 }

@@ -95,4 +95,7 @@
     <string name="rooms">Salons</string>
     <string name="rooms_chat">Salons de discussion</string>
     <string name="pending">En attente...</string>
+    <string name="modify_image">Cliquez pour modifier l\'image</string>
+    <string name="score_sprint_solo">Meilleur Score Sprint Solo</string>
+    <string name="score_sprint_coop">Meilleur Score Sprint Coop</string>
 </resources>

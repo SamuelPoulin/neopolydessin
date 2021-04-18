@@ -33,11 +33,12 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <LinearLayout
+                    android:id="@+id/gamesPlayedLayout"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:background="@drawable/round_button"
                     android:gravity="center"
-                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintHeight_percent="0.2"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/statisticLabel">
 
@@ -54,19 +55,20 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:text="51"
                         android:textColor="@color/black"
                         android:textSize="50sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/hoursPlayedLayout"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:background="@drawable/round_button"
                     android:gravity="center"
+                    app:layout_constraintTop_toBottomOf="@id/statisticLabel"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintHeight_percent="0.2"
                     app:layout_constraintLeft_toLeftOf="parent">
 
                     <TextView
@@ -82,7 +84,32 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:text="25h"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintHeight_percent="0.2"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/score_sprint_solo"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/bestSoloScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
                         android:textColor="@color/black"
                         android:textSize="50sp"
                         android:textStyle="bold" />
@@ -111,7 +138,7 @@
                     android:layout_height="0dp"
                     android:background="@drawable/round_button"
                     android:gravity="center"
-                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintHeight_percent="0.2"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/emptyLabel">
 
@@ -128,7 +155,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:text="21%"
                         android:textColor="@color/black"
                         android:textSize="50sp"
                         android:textStyle="bold" />
@@ -139,8 +165,9 @@
                     android:layout_height="0dp"
                     android:background="@drawable/round_button"
                     android:gravity="center"
+                    app:layout_constraintTop_toBottomOf="@id/emptyLabel"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintHeight_percent="0.3"
+                    app:layout_constraintHeight_percent="0.2"
                     app:layout_constraintLeft_toLeftOf="parent">
 
                     <TextView
@@ -156,7 +183,32 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:text="38h"
+                        android:textColor="@color/black"
+                        android:textSize="50sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@drawable/round_button"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHeight_percent="0.2"
+                    app:layout_constraintLeft_toLeftOf="parent">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="0.5"
+                        android:text="@string/score_sprint_coop"
+                        android:textSize="25sp" />
+
+                    <TextView
+                        android:id="@+id/bestCoopScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
                         android:textColor="@color/black"
                         android:textSize="50sp"
                         android:textStyle="bold" />

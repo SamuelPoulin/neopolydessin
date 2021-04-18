@@ -1,10 +1,12 @@
 package com.projet.clientleger.ui.accountmanagement.view
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil.setContentView
@@ -21,11 +23,15 @@ import com.projet.clientleger.ui.accountmanagement.dashboard.view.DOUBLE_DIGIT
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DashboardFragment
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.SECONDS_IN_MIN
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
-import com.projet.clientleger.ui.accountmanagement.settings.SettingsFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_account_management.*
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
+import java.nio.Buffer
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.floor
@@ -41,9 +47,6 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
 
     @Inject
     lateinit var profileFragment: ProfileFragment
-
-    @Inject
-    lateinit var settingsFragment: SettingsFragment
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +64,6 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
                 when (checkedId) {
                     R.id.dashboardBtn -> changeFragment(dashboardFragment)
                     R.id.userProfileBtn -> changeFragment(profileFragment)
-                    R.id.accountSettings -> changeFragment(settingsFragment)
                 }
             }
         }
@@ -76,18 +78,25 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
         binding.logoutBtn.setOnClickListener {
             finish()
         }
+        val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val imageUri = data!!.data
+                //val imageStream = contentResolver.openInputStream(imageUri!!)
+                //val selectedImage = BitmapFactory.decodeStream(imageStream)
+                val file = File(imageUri!!.path!!)
+                val fbody = MultipartBody.create(MediaType.parse("image/jpeg"),file)
+
+                lifecycleScope.launch{
+                    vm.uploadAvatar(fbody)
+                }
+            }
+        }
         binding.avatar.setOnClickListener {
             val photoPickerIntent = Intent(Intent.ACTION_PICK)
             photoPickerIntent.type = "image/*"
-            startActivityForResult(photoPickerIntent, RESULT_OK)
+            resultLauncher.launch(photoPickerIntent)
         }
-    }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        val imageUri = data!!.data
-        val imageStream = contentResolver.openInputStream(imageUri!!)
-        val selectedImage = BitmapFactory.decodeStream(imageStream)
-        binding.avatar.setImageBitmap(selectedImage)
     }
     fun fetchAccountInfos(){
         lifecycleScope.launch{

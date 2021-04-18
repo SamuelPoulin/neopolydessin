@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.projet.clientleger.R
+import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.model.account.AccountDashboard
 import com.projet.clientleger.databinding.DashboardFragmentBinding
 import com.projet.clientleger.ui.accountmanagement.dashboard.ConnectionAdapter
@@ -41,7 +42,7 @@ const val LAST_DAY_IN_WEEK = -1
 const val FIRST_DAY_IN_WEEK = 6
 
 @AndroidEntryPoint
-class DashboardFragment @Inject constructor(): Fragment() {
+class DashboardFragment @Inject constructor(private val sessionManager: SessionManager): Fragment() {
     val vm: DashboardViewModel by viewModels()
     private var binding: DashboardFragmentBinding? = null
     lateinit var accountDashboard:AccountDashboard
@@ -126,9 +127,11 @@ class DashboardFragment @Inject constructor(): Fragment() {
     fun applyAccountValues(account: AccountDashboard) {
         accountDashboard = account
         binding!!.nbGamesPlayed.text = accountDashboard.gameHistory.nbGamePlayed
-        binding!!.nbHoursPlayed.text = "${formatTimeToHours(account.gameHistory.totalTimePlayed).toString()}h"
+        binding!!.nbHoursPlayed.text =  formatTimeHours(account.gameHistory.totalTimePlayed)
         binding!!.winPercentage.text = "${account.gameHistory.winPercentage.toInt().toString()}%"
         binding!!.averageGameTime.text = activity.formatTimeMinSecFormat(account.gameHistory.averageGameTime)
+        binding!!.bestSoloScore.text = accountDashboard.gameHistory.bestScoreSolo.toString()
+        binding!!.bestCoopScore.text= accountDashboard.gameHistory.bestScoreCoop.toString()
         setBarChart()
         isAccountDefined = true
         showHistoryDialog.setOnClickListener {
@@ -142,13 +145,18 @@ class DashboardFragment @Inject constructor(): Fragment() {
         dialog.connectionHistory.layoutManager = LinearLayoutManager(requireActivity())
         dialog.connectionHistory.adapter = ConnectionAdapter(accountDashboard.logins)
         dialog.gameHistory.layoutManager = LinearLayoutManager(requireActivity())
-        dialog.gameHistory.adapter = GameHistoryAdapter(accountDashboard.gameHistory.games)
+        dialog.gameHistory.adapter = GameHistoryAdapter(accountDashboard.gameHistory.games,sessionManager)
         dialog.dismissBtn.setOnClickListener {
             dialog.dismiss()
         }
     }
     private fun formatTimeToHours(time: Long):Long{
         return TimeUnit.MILLISECONDS.toHours(time)
+    }
+    private fun formatTimeHours(time:Long):String{
+        val hours = TimeUnit.MILLISECONDS.toHours(time)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(time) - 60*hours
+        return "${hours}h$minutes"
     }
     private fun getDaysAgo(daysAgo: Int): Date {
         val calendar = Calendar.getInstance()

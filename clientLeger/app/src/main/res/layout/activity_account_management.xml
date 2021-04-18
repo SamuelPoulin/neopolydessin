@@ -36,10 +36,16 @@
                     android:scaleType="fitCenter"
                     android:adjustViewBounds="true"/>
                 <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/modify_image"
+                    android:textStyle="italic"
+                    android:gravity="center"/>
+                <TextView
                     android:id="@+id/username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bobino"
+                    android:text="Bobby"
                     android:textAlignment="center"
                     android:textSize="30sp"
                     android:textStyle="bold" />
@@ -89,20 +95,11 @@
                     style="@style/ManagementToggleBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/userProfile"
-                    app:icon="@drawable/ic_profile"
-                    app:iconGravity="start"
-                    app:iconPadding="10dp" />
-
-                <Button
-                    android:id="@+id/accountSettings"
-                    style="@style/ManagementToggleBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/accountSettings"
                     app:icon="@drawable/ic_tune"
                     app:iconGravity="start"
                     app:iconPadding="10dp" />
+
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <Button
