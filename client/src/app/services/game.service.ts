@@ -54,6 +54,7 @@ export class GameService {
   timeRemaining: number;
   canGuess: boolean;
   canStartGame: boolean;
+  currentRole: PlayerRole;
 
   loggedInSubscription: Subscription;
 
@@ -103,6 +104,7 @@ export class GameService {
       this.resetTeams();
       for (const player of players) {
         if (player.username === this.userService.account.username) {
+          this.currentRole = player.playerRole;
           this.canGuess = player.playerRole === PlayerRole.GUESSER;
           this.canGuessChanged.emit();
           this.canDraw = player.playerRole === PlayerRole.DRAWER;

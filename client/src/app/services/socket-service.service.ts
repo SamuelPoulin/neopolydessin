@@ -223,10 +223,15 @@ export class SocketService {
     });
   }
 
-  getLobbyList(gameType?: GameType, difficulty?: Difficulty): Observable<LobbyInfo[]> {
+  receiveUpdateLobbies(): Observable<LobbyInfo[]> {
     return new Observable<LobbyInfo[]>((obs) => {
-      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => obs.next(lobbies));
       this.socket.on(SocketLobby.UPDATE_LOBBIES, (lobbies: LobbyInfo[]) => obs.next(lobbies));
+    });
+  }
+
+  async getLobbyList(gameType?: GameType, difficulty?: Difficulty): Promise<LobbyInfo[]> {
+    return new Promise<LobbyInfo[]>((resolve, reject) => {
+      this.socket.emit(SocketLobby.GET_ALL_LOBBIES, { gameType, difficulty }, (lobbies: LobbyInfo[]) => resolve(lobbies));
     });
   }
 

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GameType } from '@common/communication/lobby';
+import { GameType, PlayerRole } from '@common/communication/lobby';
 import { EditorKeyboardListener } from '@components/pages/editor/editor/editor-keyboard-listener';
 import { Drawing } from '@models/drawing';
 import { ChatService } from '@services/chat.service';
@@ -139,5 +139,20 @@ export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get splitTeams(): boolean {
     return this.gameService.gameType === GameType.CLASSIC;
+  }
+
+  playerRoleMessage(): string {
+    switch (this.gameService.currentRole) {
+      case PlayerRole.DRAWER:
+        return 'À vous de dessiner';
+      case PlayerRole.GUESSER:
+        return 'À vous de deviner';
+      case PlayerRole.PASSIVE:
+        return 'Attendez votre tour';
+    }
+  }
+
+  get playerRole() {
+    return PlayerRole;
   }
 }
