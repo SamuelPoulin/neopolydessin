@@ -137,6 +137,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.name.visibility = visibility
+        dialog.name.editText?.setText("Partie de ${vm.getUsername()}")
         dialog.privacyBtn.visibility = visibility
         dialog.actionBtn.text = action
         dialog.title.text = title

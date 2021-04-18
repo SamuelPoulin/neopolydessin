@@ -17,6 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainMenuViewModel @Inject constructor(private val mainmenuRepository: MainmenuRepository, private val tutorialService: TutorialService, private val audioService: AudioService): ViewModel(){
 
+
+
     fun connectSocket(accessToken: String){
         mainmenuRepository.connectSocket(accessToken)
     }

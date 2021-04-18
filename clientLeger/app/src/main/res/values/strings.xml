@@ -98,4 +98,5 @@
     <string name="bot_player">Joueur virtuel</string>
     <string name="emptyLobbylistMsg">Il n\'y a présentement auncun lobby disponible</string>
     <string name="start">Commencer</string>
+    <string name="menu_create_game">Créer une partie</string>
 </resources>
