@@ -23,6 +23,8 @@ import { SocketService } from './socket-service.service';
   providedIn: 'root',
 })
 export class EditorService {
+  private static readonly SNAPSHOT_INTERVAL: number = 500;
+
   readonly tools: Map<ToolType, Tool>;
   readonly shapes: BaseShape[];
   private shapesBuffer: BaseShape[];
@@ -31,13 +33,17 @@ export class EditorService {
 
   private removePathSubscription: Subscription;
   private addPathSubscription: Subscription;
-  private clearSubscription: Subscription;
 
   readonly gridProperties: GridProperties;
   view: DrawingSurfaceComponent;
   loading: boolean;
 
   isFreeEdit: boolean = false;
+
+  recordedDrawings: BaseShape[][][];
+  private drawingIndex: number;
+  private snapshotIndex: number;
+  private recordInterval: NodeJS.Timeout;
 
   get commandReceiver(): CommandReceiver {
     return this._commandReceiver;
@@ -60,8 +66,25 @@ export class EditorService {
     this.gameService.roleChanged.subscribe(() => {
       this.initListeners();
     });
+    this.gameService.gameStarted.subscribe(() => {
+      this.recordedDrawings = [];
+      this.drawingIndex = -1;
+    });
     this.gameService.drawingChanged.subscribe(() => {
+      if (this.recordInterval) clearTimeout(this.recordInterval);
       this.resetDrawing();
+      this.drawingIndex++;
+      this.recordedDrawings[this.drawingIndex] = [];
+      this.snapshotIndex = 0;
+      this.recordInterval = setInterval(() => {
+        this.recordedDrawings[this.drawingIndex][this.snapshotIndex] = [];
+        this.recordedDrawings[this.drawingIndex][this.snapshotIndex].push(...this.shapes);
+        this.snapshotIndex++;
+        console.log(this.recordedDrawings);
+      }, EditorService.SNAPSHOT_INTERVAL);
+    });
+    this.gameService.gameEnded.subscribe(() => {
+      if (this.recordInterval) clearTimeout(this.recordInterval);
     });
 
     this.shapesBuffer = new Array<BaseShape>();
@@ -117,9 +140,6 @@ export class EditorService {
 
     this.removePathSubscription?.unsubscribe();
     this.addPathSubscription?.unsubscribe();
-    this.clearSubscription?.unsubscribe();
-
-    this.clearSubscription = this.socketService.receiveScores().subscribe(() => this.resetDrawing());
 
     if (!this.gameService.canDraw && !this.isFreeEdit) {
       this.removePathSubscription = this.socketService.receiveRemovePath().subscribe((id: number) => {
