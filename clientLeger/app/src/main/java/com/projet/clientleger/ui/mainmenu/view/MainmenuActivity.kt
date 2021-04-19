@@ -124,6 +124,8 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
     }
 
     private fun showGameDialog() {
+        selectedGameType = GameType.CLASSIC
+        selectedDifficulty = Difficulty.EASY
         val visibility: Int
         val action: String
         val title: String

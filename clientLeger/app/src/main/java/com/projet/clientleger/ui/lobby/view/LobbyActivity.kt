@@ -92,7 +92,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             }
             if (isOwner) {
                 binding.startGameButton.visibility = View.VISIBLE
-                binding.privacyBtn.visibility = View.VISIBLE
+                if(vm.gameType != GameType.SPRINT_SOLO)
+                    binding.privacyBtn.visibility = View.VISIBLE
             } else {
                 binding.startGameButton.visibility = View.INVISIBLE
                 binding.privacyBtn.visibility = View.INVISIBLE
@@ -193,7 +194,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             binding.teamLabel2.visibility = View.GONE
             binding.teamContent2.visibility = View.GONE
         }
-
+        if(vm.gameType == GameType.SPRINT_SOLO)
+            binding.privacyBtn.visibility = View.GONE
         binding.gameType.text = vm.gameType.toFrenchString()
         binding.difficulty.text = vm.difficulty.toFrenchString()
         binding.startGameButton.visibility = View.INVISIBLE
