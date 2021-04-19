@@ -427,6 +427,7 @@ export class ChatService {
         if (this.chatPoppedOut) {
           this.electronService.ipcRenderer.send('chat-quit');
         }
+        this.chatState.currentRoomIndex = 0;
       }),
     );
   }
