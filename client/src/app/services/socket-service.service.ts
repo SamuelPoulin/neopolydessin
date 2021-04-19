@@ -329,7 +329,6 @@ export class SocketService {
   getPlayerJoined(): Observable<Player> {
     return new Observable<Player>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: Player) => {
-        // todo - use new format
         obs.next(player);
       });
     });
@@ -375,10 +374,10 @@ export class SocketService {
     });
   }
 
-  receiveStartPath(): Observable<{ id: number; coord: Coordinate; brush: BrushInfo }> {
-    return new Observable<{ id: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
+  receiveStartPath(): Observable<{ id: number; zIndex: number; coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ id: number; zIndex: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
       this.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coordinate, brush: BrushInfo) => {
-        obs.next({ id, coord, brush });
+        obs.next({ id, zIndex, coord, brush });
       });
     });
   }
