@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatService } from '@services/chat.service';
 
@@ -10,7 +11,7 @@ import { ChatService } from '@services/chat.service';
 export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
 
-  constructor(private chatService: ChatService) {
+  constructor(private chatService: ChatService, private router: Router) {
     this.friend = { friendId: { _id: '', avatar: '', username: '' }, isOnline: false, status: FriendStatus.PENDING, received: false };
   }
 
@@ -58,5 +59,9 @@ export class ChatFriendComponent {
     if (this.friend.friendId?._id && this.friend.friendId.username) {
       this.chatService.createDM(this.friend.friendId.username, this.friend.friendId._id);
     }
+  }
+
+  get canInvite() {
+    return this.chatService.inGame && this.router.url === '/lobby/';
   }
 }

@@ -750,6 +750,10 @@ export class ChatService {
     return this.electronService.isElectronApp && this.standalone;
   }
 
+  get inGame(): boolean {
+    return this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME) !== -1;
+  }
+
   popOut() {
     this.electronService.ipcRenderer.send('chat-init');
   }
