@@ -13,7 +13,7 @@ import { MockUserService } from '@services/user.service.spec';
 
 import { PictureWordBrowserComponent } from './picture-word-browser.component';
 
-fdescribe('PictureWordBrowserComponent', () => {
+describe('PictureWordBrowserComponent', () => {
   let component: PictureWordBrowserComponent;
   let fixture: ComponentFixture<PictureWordBrowserComponent>;
 

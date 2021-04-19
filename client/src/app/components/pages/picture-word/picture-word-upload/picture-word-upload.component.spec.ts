@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 
 import { PictureWordUploadComponent } from './picture-word-upload.component';
 
-fdescribe('PictureWordUploadComponent', () => {
+describe('PictureWordUploadComponent', () => {
   let component: PictureWordUploadComponent;
   let fixture: ComponentFixture<PictureWordUploadComponent>;
   const MockMatDialogRef = jasmine.createSpyObj('MatDialogRef', {
