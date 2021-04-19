@@ -232,12 +232,6 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
         }
-        vm.reveiceBoardwipeNotice().subscribe{
-            vm.playSound(SoundId.BOARDWIPE.value)
-            lifecycleScope.launch {
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
-            }
-        }
     }
 
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
