@@ -118,7 +118,7 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
         sequence.add(SequenceModel(INTRO_JOIN_GAME_MESSAGE, binding.joinGamebtn, this, false))
         sequence.add(SequenceModel(INTRO_DASHBOARD_MESSAGE, binding.accountBtn, this, false))
         sequence.add(SequenceModel(INTRO_TOOLBAR_MESSAGE, binding.toolbar, this, false))
-        sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot, this, false))
+        //sequence.add(SequenceModel(INTRO_CHATBOX_MESSAGE, binding.chatRoot, this, false))
         sequence.add(SequenceModel(INTRO_START_GAME_MESSAGE, binding.createGameBtn, this, true))
         vm.createShowcaseSequence(sequence)
     }
