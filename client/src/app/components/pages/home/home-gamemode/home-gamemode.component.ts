@@ -64,7 +64,7 @@ export class HomeGamemodeComponent extends AbstractModalComponent {
           this.tutorialService.next(TutorialStep.START_GAME);
         }
       })
-      .catch((e) => {
+      .catch(() => {
         this.snackBar.open('Erreur lors de la création de la partie.', 'Ok', {
           duration: 2000,
           horizontalPosition: 'center',
