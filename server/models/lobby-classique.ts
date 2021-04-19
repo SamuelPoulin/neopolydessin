@@ -128,7 +128,9 @@ export class LobbyClassique extends Lobby {
 
         this.io.in(this.lobbyId).emit(SocketLobby.GUESS_BROADCAST, guessReturn);
         if (guessStatus === GuessResponse.CORRECT) {
-          this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+          if (!this.teamDoesntHaveBot(this.drawingTeamNumber)) {
+            this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+          }
           this.startRoundTimer();
           if (this.teamScores[guesser.teamNumber] === this.END_SCORE) {
             this.endGame(ReasonEndGame.WINNING_SCORE_REACHED);
@@ -137,7 +139,9 @@ export class LobbyClassique extends Lobby {
           if (this.currentGameState === CurrentGameState.REPLY) {
             this.startRoundTimer();
           } else {
-            this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+            if (!this.teamDoesntHaveBot(this.drawingTeamNumber)) {
+              this.botService.playerGuess(guessStatus, this.guessTries, this.guessLeft);
+            }
             if (this.guessLeft <= 0) {
               this.startReply();
             }
