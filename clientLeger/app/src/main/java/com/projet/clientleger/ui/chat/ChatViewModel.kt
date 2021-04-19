@@ -5,6 +5,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.projet.clientleger.data.api.model.chat.IGuessMessage
 import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.enumData.SoundId
@@ -13,6 +14,7 @@ import com.projet.clientleger.data.model.chat.*
 import com.projet.clientleger.data.repository.ChatRepository
 import com.projet.clientleger.data.service.AudioService
 import com.projet.clientleger.data.service.ChatStorageService
+import com.projet.clientleger.data.service.TutorialService
 import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +27,7 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.random.Random
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val audioService: AudioService) : ViewModel() {
+class ChatViewModel @Inject constructor(private val chatRepository: ChatRepository, private val audioService: AudioService, private val tutorialService: TutorialService) : ViewModel() {
     companion object {
         const val NB_MESSAGES_PER_PAGE = 20
         const val GAME_TAB_ID = "GAME"
@@ -38,6 +40,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     val isGuessing: MutableLiveData<Boolean> = MutableLiveData(false)
     val isGuesser: MutableLiveData<Boolean> = MutableLiveData(false)
     val currentConvo: MutableLiveData<Convo> = MutableLiveData(Convo())
+
 
     private fun manageGuessSound(status:GuessStatus){
         if(status == GuessStatus.CORRECT){
@@ -101,7 +104,7 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
 
     private fun sendGameMessage(content: String) {
         if (isGuessing.value!!) {
-            chatRepository.sendGuess(content)
+                chatRepository.sendGuess(content)
         } else {
             chatRepository.sendMessage(Message(formatMessageContent(content)))
         }
@@ -118,5 +121,8 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
     }
     fun playSound(soundId:Int){
         audioService.playSound(soundId)
+    }
+    fun isTutorialActive():Boolean{
+        return tutorialService.isTutorialActive()
     }
 }

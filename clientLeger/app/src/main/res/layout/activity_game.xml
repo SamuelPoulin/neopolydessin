@@ -176,6 +176,16 @@
                 tools:ignore="RtlSymmetry" />
 
             <Button
+                android:id="@+id/continueTutorial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#FF7246"
+                android:text="@string/continue_tutorial"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toTopOf="@id/logoutBtn"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+            <Button
                 android:id="@+id/logoutBtn"
                 style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                 android:layout_width="wrap_content"
@@ -194,7 +204,6 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/chatRoot"
-            android:name="com.projet.clientleger.ui.chat.ChatFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"

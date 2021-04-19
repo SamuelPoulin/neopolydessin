@@ -39,6 +39,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.IAcceptGameInviteListener
+import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
@@ -64,6 +65,9 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     @Inject
     lateinit var drawboardFragment: DrawboardFragment
+
+    @Inject
+    lateinit var chatFragment: ChatFragment
 
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
@@ -106,11 +110,13 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         supportFragmentManager.commit{
             add(R.id.drawboardContainer, drawboardFragment)
+            add(R.id.chatRoot,chatFragment)
         }
 
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
+        binding.continueTutorial.visibility = View.INVISIBLE
         vm.onPlayerReady()
     }
 
