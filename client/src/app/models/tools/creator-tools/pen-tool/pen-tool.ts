@@ -31,8 +31,8 @@ export class PenTool extends CreatorTool {
     return new Path(coord);
   }
 
-  protected startShape(coord: Coordinate = this.mousePosition): void {
-    super.startShape(coord);
+  protected startShape(coord: Coordinate = this.mousePosition, zIndex: number = 1): void {
+    super.startShape(coord, zIndex);
     this.shape.addPoint(coord);
   }
 
@@ -44,7 +44,7 @@ export class PenTool extends CreatorTool {
           // eslint-disable-next-line
           pathData.brush.color.length > 7 ? Color.ahex(pathData.brush.color) : Color.hex(pathData.brush.color);
         this.toolProperties.strokeWidth.value = pathData.brush.strokeWidth * this.editorService.scalingToClient;
-        this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient));
+        this.startShape(Coordinate.copy(pathData.coord).scale(this.editorService.scalingToClient), pathData.zIndex);
         this.shape.zIndex = pathData.zIndex;
         this.shape.serverId = pathData.id;
         this.shape.updateProperties();
