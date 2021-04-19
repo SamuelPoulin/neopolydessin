@@ -33,7 +33,9 @@
         </div>
       </ng-container>
       <ng-container *ngFor="let friend of friends">
-        <app-chat-friend [friend]="friend"></app-chat-friend>
+        <ng-container *ngIf="friend.friendId">
+          <app-chat-friend [friend]="friend"></app-chat-friend>
+        </ng-container>
       </ng-container>
     </div>
   </div>
