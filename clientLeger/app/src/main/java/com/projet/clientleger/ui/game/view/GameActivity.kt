@@ -159,6 +159,7 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
 
         if(isMessageFromServer){
+            checkGameOutcome()
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
@@ -168,11 +169,15 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 finish() }
         }
         else{
+            dialog.gameOutcome.visibility = View.INVISIBLE
+            dialog.gameScore.visibility = View.INVISIBLE
             dialog.continueBtn.setOnClickListener {
                 vm.playSound(SoundId.SELECTED.value)
                 dialog.dismiss()
             }
         }
+    }
+    private fun checkGameOutcome(){
     }
     @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
