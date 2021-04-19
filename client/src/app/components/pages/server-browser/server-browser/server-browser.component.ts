@@ -37,7 +37,6 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   getLobbies() {
-    console.log('get');
     this.socketService
       .getLobbyList(
         this.selectedGamemode === 'Tous' ? undefined : this.gamemode,
