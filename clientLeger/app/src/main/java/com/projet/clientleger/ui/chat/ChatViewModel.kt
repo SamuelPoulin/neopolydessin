@@ -102,8 +102,13 @@ class ChatViewModel @Inject constructor(private val chatRepository: ChatReposito
                     spamCounter == 0 -> {
                         Handler(Looper.getMainLooper()).postDelayed(::resetSpamCount, 3000)
                         spamCounter++
+                        when (currentConvo.value!!.tabInfo.tabType) {
+                            TabType.GAME -> sendGameMessage(it)
+                            TabType.FRIEND -> chatRepository.sendPrivateMessage(it, currentConvo.value!!.tabInfo.convoId)
+                            else -> chatRepository.sendRoomMessage(currentConvo.value!!.tabInfo.convoId, it)
+                        }
                     }
-                    spamCounter < 5 -> {
+                    spamCounter < MAX_SPAM_COUNT -> {
                         spamCounter++
                         when (currentConvo.value!!.tabInfo.tabType) {
                             TabType.GAME -> sendGameMessage(it)

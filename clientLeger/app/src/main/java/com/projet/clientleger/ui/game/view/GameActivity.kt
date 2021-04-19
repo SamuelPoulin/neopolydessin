@@ -72,7 +72,7 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
-    private val team2:ArrayList<PlayerInfo> = ArrayList()
+    private val team2: ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
     private var chatService: ChatStorageService? = null
 
@@ -231,9 +231,10 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             if(it.size > 0)
                 binding.team1Score.text = it[0].score.toString()
             if(it.size > 1)
-                binding.team2Label.text = it[1].score.toString()
+                binding.team2Score.text = it[1].score.toString()
         }
         vm.receiveEndGameNotice().subscribe{
+            timer?.cancel()
             lifecycleScope.launch {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
@@ -241,7 +242,7 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
     }
 
     private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
-        
+        // TODO idk man
     }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
@@ -263,10 +264,10 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             override fun onFinish(){}
         }
         timer?.start()
-
     }
 
     override fun onDestroy() {
+        timer?.cancel()
         vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
