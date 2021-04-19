@@ -31,6 +31,7 @@ class SocketService @Inject constructor() {
 
     fun disconnect(){
         socket.disconnect()
+        println("socket disconnected")
     }
 
     fun <T> receiveFromSocket(

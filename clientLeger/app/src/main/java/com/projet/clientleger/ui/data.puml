@@ -1,0 +1,71 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package service {
+    class AudioService {}
+    class AvatarStorageService {}
+    class ChatStorageService {}
+    class DrawingCommandsService {}
+    class TutorialService {}
+}
+class SessionManager {}
+package repository {
+    class AccountManagementRepository {}
+    class ChatRepository {}
+    class ConnextionRepository {}
+    class DrawboardRepository {}
+    class FriendslistRepository {}
+    class GameRepository {}
+    class LobbyRepository {}
+    class MainmenuRepository {}
+    class RegisterRepository {}
+    class RoomslistRepository {}
+}
+
+package model {
+    package account {
+        class AccountInfo
+        class LoginInfo
+        class UpdateAccountModel
+    }
+    package chat {
+        class Convo {}
+        class GuessMessageInfo {}
+        class GuessMessageSoloCoopInfo {}
+        interface IGuessMessageInfo {}
+        interface IGuessMessageSoloCoopInfo {}
+        interface IMessage {}
+        interface IMessageChat {}
+        interface IMessageSystem {}
+        class IMessageSystem {}
+        class MessageChat {}
+        class MessageId {}
+        class MessageSystem {}
+        class TabInfo {}
+    }
+    package command {
+        interface Command
+        class DrawPathCommand
+        class ErasePathCommand
+    }
+    package friendslist {
+        class Friend
+        class FriendId
+        class FriendNotification
+        class FriendSimplified
+        class Friendslist
+    }
+    package lobby {
+        class LobbyInfo
+        class PlayerInfo
+    }
+
+    class PlayerAvatar
+    class BrushInfo
+    class BufferedPathData
+    class Coordinate
+    class PathData
+    class User
+}
+
+@enduml

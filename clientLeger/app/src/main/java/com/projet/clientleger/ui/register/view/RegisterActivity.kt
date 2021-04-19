@@ -20,6 +20,9 @@ import com.projet.clientleger.ui.connexion.view.ConnexionActivity
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 
 import kotlinx.coroutines.launch
 
@@ -46,24 +49,25 @@ class RegisterActivity : AppCompatActivity() {
 
     fun registerAccount() {
         loadingBtn(true)
-        lifecycleScope.launch {
+        CoroutineScope(Job() + Dispatchers.Main).launch {
             val res = vm.registerAccount()
             if (res.isSucessful) {
                 vm.playSound(SoundId.CONNECTED.value)
                 vm.clearForm()
                 setUserTokens(res.accessToken, res.refreshToken)
-                gotoMainmenu()
+                lifecycleScope.launch { gotoMainmenu() }
             } else {
                 vm.playSound(SoundId.ERROR.value)
                 vm.clearPasswords()
-                showToast(res.message)
+                lifecycleScope.launch { showToast(res.message) }
             }
             loadingBtn(false)
         }
     }
 
-    private fun gotoMainmenu(){
+    private fun gotoMainmenu() {
         startActivity(Intent(this, MainmenuActivity::class.java))
+        finish()
     }
 
     fun loadingBtn(isLoading: Boolean) {
@@ -78,8 +82,8 @@ class RegisterActivity : AppCompatActivity() {
 
     fun setUserTokens(accessToken: String, refreshToken: String) {
         getSharedPreferences(
-            getString(R.string.user_creds),
-            Context.MODE_PRIVATE
+                getString(R.string.user_creds),
+                Context.MODE_PRIVATE
         ).edit {
             putString("accessToken", accessToken)
             putString("refreshToken", refreshToken)
@@ -88,8 +92,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        this.finish()
-        startActivity(Intent(this, ConnexionActivity::class.java))
+        finish()
         return super.onOptionsItemSelected(item)
     }
 
@@ -158,37 +161,37 @@ class RegisterActivity : AppCompatActivity() {
 
     fun setTextColorError(textView: TextView) {
         textView.setTextColor(
-            ContextCompat.getColor(
-                this,
-                R.color.register_error
-            )
+                ContextCompat.getColor(
+                        this,
+                        R.color.register_error
+                )
         )
     }
 
     fun setTextColorValid(textView: TextView) {
         textView.setTextColor(
-            ContextCompat.getColor(
-                this,
-                R.color.register_valid
-            )
+                ContextCompat.getColor(
+                        this,
+                        R.color.register_valid
+                )
         )
     }
 
     fun setTextIconError(textView: TextView) {
         textView.setCompoundDrawablesWithIntrinsicBounds(
-            R.drawable.ic_baseline_close_24,
-            0,
-            0,
-            0
+                R.drawable.ic_baseline_close_24,
+                0,
+                0,
+                0
         )
     }
 
     fun setTextIconValid(textView: TextView) {
         textView.setCompoundDrawablesWithIntrinsicBounds(
-            R.drawable.ic_baseline_done_24,
-            0,
-            0,
-            0
+                R.drawable.ic_baseline_done_24,
+                0,
+                0,
+                0
         )
     }
 

@@ -8,6 +8,7 @@ import com.projet.clientleger.data.api.model.RegisterResponse
 import com.projet.clientleger.data.repository.RegisterRepository
 import com.projet.clientleger.data.service.AudioService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 
 @HiltViewModel

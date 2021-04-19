@@ -21,27 +21,13 @@ const val BASE_DELAY = 300
 class TutorialService @Inject constructor() {
     private var isTutorialActive:Boolean = false
 
-    fun userGuide(model:SequenceModel){
-            MaterialShowcaseView.Builder(model.activity)
-                    .renderOverNavigationBar()
-                    .setShape(RectangleShape(Rect()))
-                    .setSkipText(QUIT_TUTORIAL_LABEL)
-                    .setTarget(model.target)
-                    .setDismissOnTargetTouch(true)
-                    .setTargetTouchable(true)
-                    .setContentText(model.message)
-                    .setDelay(BASE_DELAY)
-                    .show()
-        isTutorialActive = true
-        }
     fun isTutorialActive():Boolean{
         return isTutorialActive
     }
     fun finishTutorial(){
         isTutorialActive = false
     }
-    fun createShowcaseSequence(models:ArrayList<SequenceModel>){
-        isTutorialActive = true
+    fun createGameShowcaseSequence(models:ArrayList<SequenceModel>){
         val sequence = MaterialShowcaseSequence(models[0].activity)
         val config = ShowcaseConfig()
         sequence.setConfig(config)
@@ -50,10 +36,26 @@ class TutorialService @Inject constructor() {
                 sequence.addSequenceItem(addInteractiveShowcaseInSequence(models[i]))
             }
             else if(i == models.size - 1){
-                sequence.addSequenceItem(addLastShowcaseInSequence(models[i]))
+                sequence.addSequenceItem(addLastGameShowcase(models[i]))
             }
             else{
+                sequence.addSequenceItem(addGameShowcase(models[i]))
+            }
+        }
+        sequence.start()
+        isTutorialActive = true
+    }
+    fun createMenuShowcaseSequence(models:ArrayList<SequenceModel>){
+        isTutorialActive = true
+        val sequence = MaterialShowcaseSequence(models[0].activity)
+        val config = ShowcaseConfig()
+        sequence.setConfig(config)
+        for(i in 0 until models.size){
+            if(i<models.size - 1){
                 sequence.addSequenceItem(addShowcase(models[i]))
+            }
+            else{
+                sequence.addSequenceItem(addLastShowcaseInSequence(models[i]))
             }
         }
         sequence.start()
@@ -80,6 +82,28 @@ class TutorialService @Inject constructor() {
             .setDelay(BASE_DELAY)
             .build()
     }
+    private fun addLastGameShowcase(model:SequenceModel):MaterialShowcaseView{
+        return MaterialShowcaseView.Builder(model.activity)
+                .renderOverNavigationBar()
+                .setShape(RectangleShape(Rect()))
+                .setSkipText(QUIT_TUTORIAL_LABEL)
+                .setTarget(model.target)
+                .setListener(object:IShowcaseListener{
+                    override fun onShowcaseDisplayed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                    override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                })
+                .setDismissOnTargetTouch(true)
+                .setTargetTouchable(true)
+                .setContentText(model.message)
+                .setDelay(BASE_DELAY)
+                .build()
+    }
     private fun addInteractiveShowcaseInSequence(model:SequenceModel):MaterialShowcaseView{
         return MaterialShowcaseView.Builder(model.activity)
                 .renderOverNavigationBar()
@@ -91,7 +115,8 @@ class TutorialService @Inject constructor() {
                     }
 
                     override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
-                        isTutorialActive = false
+                        isTutorialActive = true
+
                     }
 
                 })
@@ -123,5 +148,27 @@ class TutorialService @Inject constructor() {
             .setContentText(model.message)
             .setDelay(BASE_DELAY)
             .build()
+    }
+    private fun addGameShowcase(model:SequenceModel):MaterialShowcaseView{
+        return MaterialShowcaseView.Builder(model.activity)
+                .renderOverNavigationBar()
+                .setShape(RectangleShape(Rect()))
+                .setDismissText(NEXT_LABEL)
+                .setDismissTextColor(Color.GREEN)
+                .setSkipText(QUIT_TUTORIAL_LABEL)
+                .setListener(object:IShowcaseListener{
+                    override fun onShowcaseDisplayed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                    override fun onShowcaseDismissed(showcaseView: MaterialShowcaseView?) {
+                        isTutorialActive = true
+                    }
+
+                })
+                .setTarget(model.target)
+                .setContentText(model.message)
+                .setDelay(BASE_DELAY)
+                .build()
     }
 }

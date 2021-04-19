@@ -113,7 +113,7 @@ class ChatStorageService @Inject constructor() : Service() {
         }
     }
 
-    private fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo, isSystem: Boolean = false) {
+    fun receiveMessage(newMessage: IMessage, tabInfo: TabInfo, isSystem: Boolean = false) {
         val newMessageConvo = convos.find { it.tabInfo.convoId == tabInfo.convoId }
         if (newMessageConvo != null) {
             newMessageConvo.messages.add(newMessage)

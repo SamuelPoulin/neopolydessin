@@ -76,9 +76,10 @@ let chatWindow;
 ipcMain.on('chat-init', (event, arg) => {
   chatWindow = new BrowserWindow({
     icon: url.format(path.join(__dirname, '/resources/icon.png')),
-    width: 450,
+    width: 400,
     height: 750,
     frame: false,
+    resizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       enableRemoteModule: true,
@@ -111,6 +112,18 @@ ipcMain.on('chat-init', (event, arg) => {
 ipcMain.on('chat-update', (event, arg) => {
   if(chatWindow) {
     chatWindow.webContents.send('chat-update', arg);
+  }
+});
+
+ipcMain.on('chat-quit', (event, arg) => {
+  if(chatWindow) {
+    chatWindow.close();
+  }
+});
+
+ipcMain.on('chat-scrolldown', (event, arg) => {
+  if(chatWindow) {
+    chatWindow.webContents.send('chat-scrolldown');
   }
 });
 

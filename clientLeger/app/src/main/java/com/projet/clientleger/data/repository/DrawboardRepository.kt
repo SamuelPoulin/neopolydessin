@@ -43,4 +43,8 @@ class DrawboardRepository @Inject constructor(private val drawingSocketService: 
     fun sendPath(pathId: Int){
         drawingSocketService.sendPath(pathId)
     }
+
+    fun unsubscribe(){
+        drawingSocketService.unsubscribe()
+    }
 }

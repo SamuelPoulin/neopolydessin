@@ -4,6 +4,7 @@ import com.projet.clientleger.data.SessionManager
 import com.projet.clientleger.data.api.http.ApiRegisterInterface
 import com.projet.clientleger.data.api.model.RegisterModel
 import com.projet.clientleger.data.api.model.RegisterResponse
+import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 import javax.net.ssl.HttpsURLConnection
 
@@ -11,33 +12,29 @@ open class RegisterRepository @Inject constructor(private val sessionManager: Se
 
     open suspend fun registerAccount(registerModel: RegisterModel): RegisterResponse {
         val res = apiRegisterInterface.registerAccount(registerModel)
-        sessionManager.request(registerModel, apiRegisterInterface::registerAccount)
         return when (res.code()) {
-
             HttpsURLConnection.HTTP_INTERNAL_ERROR -> RegisterResponse(
-                false,
-                "Erreur du serveur",
-                "",
-                ""
+                    false,
+                    "Erreur du serveur",
+                    "",
+                    ""
             )
-
             HttpsURLConnection.HTTP_BAD_REQUEST -> RegisterResponse(
-                false,
-                "Nom d'utilisateur ou adresse courielle déjà utilisé",
-                "",
-                ""
+                    false,
+                    "Nom d'utilisateur ou adresse courielle déjà utilisé",
+                    "",
+                    ""
             )
             HttpsURLConnection.HTTP_OK -> {
                 sessionManager.saveCreds(res.body()!!.accessToken, res.body()!!.refreshToken)
                 RegisterResponse(
-                    true,
-                    "",
-                    res.body()!!.accessToken,
-                    res.body()!!.accessToken
+                        true,
+                        "",
+                        res.body()!!.accessToken,
+                        res.body()!!.accessToken
                 )
             }
             else -> RegisterResponse(false, "Erreur inconnue", "", "")
-
         }
     }
 }

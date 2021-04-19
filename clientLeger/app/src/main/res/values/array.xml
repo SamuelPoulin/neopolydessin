@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <array name="gamemodesLobbylist">
+        <item>Tous</item>
+        <item>Classique</item>
+        <item>Sprint Co-op</item>
+    </array>
+    <array name="difficultyLobbylist">
+        <item>Toutes</item>
+        <item>Facile</item>
+        <item>Intermediaire</item>
+        <item>Difficile</item>
+    </array>
     <array name="gamemodes">
         <item>Classique</item>
         <item>Sprint Solo</item>

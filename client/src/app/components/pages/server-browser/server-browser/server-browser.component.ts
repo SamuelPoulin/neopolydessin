@@ -37,22 +37,22 @@ export class ServerBrowserComponent implements OnInit {
   }
 
   getLobbies() {
-    console.log('get');
-    this.socketService.getLobbyList(
-      this.selectedGamemode === 'Tous' ? undefined : this.gamemode,
-      this.selectedDifficulty === 'Toutes' ? undefined : this.difficulty
-    ).then((lobbies) => {
-      this.dataSource.data = lobbies;
-      this.lobbyCount = lobbies.length;
-    });
+    this.socketService
+      .getLobbyList(
+        this.selectedGamemode === 'Tous' ? undefined : this.gamemode,
+        this.selectedDifficulty === 'Toutes' ? undefined : this.difficulty,
+      )
+      .then((lobbies) => {
+        this.dataSource.data = lobbies;
+        this.lobbyCount = lobbies.length;
+      });
   }
 
   joinLobby(lobbyId: string, gameType: GameType, difficulty: Difficulty): void {
-    this.socketService.joinLobby(lobbyId)
-      .then((lobbyInfo) => {
-        this.gameService.setGameInfo(lobbyInfo);
-        this.router.navigate([`/lobby/${lobbyId}`]);
-      });
+    this.socketService.joinLobby(lobbyId).then((lobbyInfo) => {
+      this.gameService.setGameInfo(lobbyInfo);
+      this.router.navigate([`/lobby/${lobbyId}`]);
+    });
   }
 
   getGameTypeName(gameType: GameType) {
