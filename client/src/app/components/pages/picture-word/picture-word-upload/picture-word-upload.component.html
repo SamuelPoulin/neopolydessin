@@ -32,7 +32,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <app-number-input class="bottom-input" min="1" max="255" [(numberValue)]="threshold" (change)=onThresholdChanged()>Threshold</app-number-input>
+        <app-number-input *ngIf="dialogRef.id !== 'drawing'" class="bottom-input" min="1" max="255" [(numberValue)]="threshold" (change)=onThresholdChanged()>Threshold</app-number-input>
       </div>
 
     </div>

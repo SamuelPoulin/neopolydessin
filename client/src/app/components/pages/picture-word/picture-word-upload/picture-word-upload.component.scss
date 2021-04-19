@@ -25,6 +25,7 @@
 #color-input {
   float: right;
   margin-bottom: 20px;
+  margin-right: 2%;
 }
 
 #color-btn {
@@ -37,11 +38,11 @@
 
 #bottom-inputs {
   display: flex;
-  justify-content: space-between;
 }
 
 .bottom-input {
   width: 32%;
+  margin-right: 1%;
   display: inline-block;
 }
 
