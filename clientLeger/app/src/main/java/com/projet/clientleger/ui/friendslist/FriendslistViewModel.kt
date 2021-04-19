@@ -49,7 +49,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
         return friendslistRepository.receiveInvite()
     }
 
-    private fun getFriendslist() {
+    fun getFriendslist() {
         CoroutineScope(Job() + Dispatchers.Main).launch {
             updateFriends(friendslistRepository.getFriends())
         }
