@@ -33,6 +33,7 @@ export class ChatService {
 
   socketService: SocketService;
   gameService: GameService;
+  tutorialService: TutorialService;
 
   chatState: ChatState;
 
@@ -45,7 +46,6 @@ export class ChatService {
     private nz: NgZone,
     private snackBar: MatSnackBar,
     private audiovisualService: AudiovisualService,
-    private tutorialService: TutorialService,
   ) {
     this.initChatState();
 
@@ -59,6 +59,7 @@ export class ChatService {
     } else {
       this.socketService = this.injector.get(SocketService) as SocketService;
       this.gameService = this.injector.get(GameService) as GameService;
+      this.tutorialService = this.injector.get(TutorialService) as TutorialService;
 
       this.initMainChat();
 
