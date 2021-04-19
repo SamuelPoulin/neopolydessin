@@ -57,7 +57,6 @@ export class ChatService {
         });
       });
     } else {
-      console.log('Hi');
       this.socketService = this.injector.get(SocketService) as SocketService;
       this.gameService = this.injector.get(GameService) as GameService;
       this.tutorialService = this.injector.get(TutorialService) as TutorialService;
