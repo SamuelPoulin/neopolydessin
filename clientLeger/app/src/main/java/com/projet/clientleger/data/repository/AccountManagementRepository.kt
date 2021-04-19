@@ -17,9 +17,9 @@ import retrofit2.Response
 import javax.net.ssl.HttpsURLConnection
 
 open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager){
-    open suspend fun getAccountInfos():AccountDashboard? {
+    open suspend fun getAccountInfos(): AccountDashboard? {
         val res = apiDashboardInterface.getAccount()
-        return res.body()
+        return if( res.code() == HttpsURLConnection.HTTP_OK ) res.body()!! else null
     }
     open suspend fun updateAccountInfos(account:UpdateAccountModel){
         apiDashboardInterface.updateAccount(account)

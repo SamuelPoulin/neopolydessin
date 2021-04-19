@@ -89,6 +89,9 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportFragmentManager.setFragmentResultListener("ready", this){ s: String, bundle: Bundle ->
+            vm.onPlayerReady()
+        }
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -117,7 +120,6 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
         binding.continueTutorial.visibility = View.INVISIBLE
-        vm.onPlayerReady()
     }
 
     override fun onStart() {
@@ -190,16 +192,20 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 PlayerRole.GUESSER -> R.drawable.ic_guessing
                 else -> 0
             }
+            val instruction = when(it){
+                PlayerRole.DRAWER -> "Dessinez"
+                PlayerRole.GUESSER -> "Devinez"
+                else -> "Attendez"
+            }
+            binding.roleInstruction.text = instruction
             if(icon != 0){
                 binding.currentRole.setImageResource(icon)
                 binding.currentRole.visibility = View.VISIBLE
             } else
-                binding.currentRole.visibility = View.INVISIBLE
+                binding.currentRole.visibility = View.GONE
         }
 
         vm.playersLiveData.observe(this){
-            if(team1.isEmpty())
-                updatePlayersAvatar(it)
             team1.clear()
             team2.clear()
             for(player in it){
@@ -241,9 +247,6 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
     }
 
-    private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
-        // TODO idk man
-    }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
         timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
