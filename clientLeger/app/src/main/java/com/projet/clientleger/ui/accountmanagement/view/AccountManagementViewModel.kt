@@ -16,7 +16,9 @@ import javax.inject.Inject
 class AccountManagementViewModel @Inject constructor(private val accountManagementRepository: AccountManagementRepository,private val audioService: AudioService, private val sessionManager: SessionManager):ViewModel() {
     lateinit var accountInfos: AccountDashboard
     suspend fun getAccountInfos(){
-        accountInfos = accountManagementRepository.getAccountInfos()!!
+        val info = accountManagementRepository.getAccountInfos()
+        if(info != null)
+            accountInfos = info
     }
     suspend fun updateAccountInfos(account:UpdateAccountModel){
         accountManagementRepository.updateAccountInfos(account)
@@ -27,7 +29,7 @@ class AccountManagementViewModel @Inject constructor(private val accountManageme
     fun getAvatarBitmap():Bitmap{
         return sessionManager.getAccountInfo().avatar
     }
-    suspend fun uploadAvatar(image: MultipartBody.Part): Observable<Boolean> {
+    suspend fun uploadAvatar(image: MultipartBody.Part): String? {
         return accountManagementRepository.updateAvatar(image)
     }
 }

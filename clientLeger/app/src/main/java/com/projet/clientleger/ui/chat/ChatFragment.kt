@@ -290,8 +290,10 @@ class ChatFragment @Inject constructor() : Fragment() {
             }
             chatService?.receiveMessage(GuessMessageInfo(entry, System.currentTimeMillis(), vm.accountInfo.username, guessStatus), TabInfo(LobbyViewModel.GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID,TabType.GAME))
         }
-        else if (vm.isTutorialActive()){
-            vm.sendMessage()
+        else if (!vm.isTutorialActive()){
+            val error = vm.sendMessage()
+            if(error != null)
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
         binding?.chatBox?.text?.clear()
     }

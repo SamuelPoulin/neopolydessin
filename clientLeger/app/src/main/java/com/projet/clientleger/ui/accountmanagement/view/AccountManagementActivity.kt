@@ -23,6 +23,9 @@ import com.projet.clientleger.ui.accountmanagement.dashboard.view.SECONDS_IN_MIN
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -35,7 +38,7 @@ import kotlin.math.floor
 class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener {
     private val fragmentManager: FragmentManager = supportFragmentManager
     lateinit var binding: ActivityAccountManagementBinding
-    private val vm:AccountManagementViewModel by viewModels()
+    private val vm: AccountManagementViewModel by viewModels()
 
     @Inject
     lateinit var dashboardFragment: DashboardFragment
@@ -62,7 +65,7 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
                 }
             }
         }
-        lifecycleScope.launch{
+        lifecycleScope.launch {
             vm.getAccountInfos()
             binding.avatar.setImageBitmap(vm.getAvatarBitmap())
             binding.username.text = vm.accountInfos.username
@@ -86,13 +89,12 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
                     it.close()
                     val file = File(filePath)
                     val filePart = MultipartBody.Part.createFormData("file", file.name, MultipartBody.create(MediaType.parse("image/*"), file))
-                    lifecycleScope.launch{
-                        vm.uploadAvatar(filePart).subscribe{ isSuccess ->
-                            if (isSuccess)
-                                binding.avatar.setImageBitmap(vm.getAvatarBitmap())
-                            else
-                                Toast.makeText(this@AccountManagementActivity, "Erreur lors de l'envoie de l'avatar, veuillez réessayer!", Toast.LENGTH_LONG).show()
-                        }
+                    CoroutineScope(Job() + Dispatchers.IO).launch {
+                        val errorMsg = vm.uploadAvatar(filePart)
+                        if (errorMsg == null)
+                            lifecycleScope.launch { binding.avatar.setImageBitmap(vm.getAvatarBitmap()) }
+                        else
+                            lifecycleScope.launch { Toast.makeText(this@AccountManagementActivity, "Erreur lors de l'envoie de l'avatar, veuillez réessayer!", Toast.LENGTH_LONG).show() }
                     }
                 }
             }
@@ -104,8 +106,8 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
         }
     }
 
-    fun fetchAccountInfos(){
-        lifecycleScope.launch{
+    fun fetchAccountInfos() {
+        lifecycleScope.launch {
             vm.getAccountInfos()
             binding.username.text = vm.accountInfos.username
             binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
@@ -115,25 +117,28 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
 
     private fun changeFragment(fragment: Fragment) {
         val fragmentFound = fragmentManager.findFragmentByTag("fragment")
-        if(fragmentFound != fragment) {
+        if (fragmentFound != fragment) {
             fragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment, "fragment")
-                .commit()
+                    .replace(R.id.fragmentContainer, fragment, "fragment")
+                    .commit()
         }
     }
-    suspend fun changeProfileInfos(account:UpdateAccountModel){
+
+    suspend fun changeProfileInfos(account: UpdateAccountModel) {
         vm.updateAccountInfos(account)
     }
-    fun formatTimeMinSecFormat(timer: Float):String{
+
+    fun formatTimeMinSecFormat(timer: Float): String {
         val time = timer.toLong()
         val min = floor((TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN).toDouble()).toInt()
         val sec = TimeUnit.MILLISECONDS.toSeconds(time) / SECONDS_IN_MIN
         var result = "$min:$sec"
-        if(sec < DOUBLE_DIGIT){
+        if (sec < DOUBLE_DIGIT) {
             result = "$min:0$sec"
         }
         return result
     }
+
     override fun acceptInvite(info: Pair<String, String>) {
         intent = Intent(this, LobbyActivity::class.java)
         intent.putExtra("lobbyId", info.second)

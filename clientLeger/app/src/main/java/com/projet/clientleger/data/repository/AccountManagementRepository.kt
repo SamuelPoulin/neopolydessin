@@ -16,30 +16,23 @@ import retrofit2.Callback
 import retrofit2.Response
 import javax.net.ssl.HttpsURLConnection
 
-open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager){
-    open suspend fun getAccountInfos():AccountDashboard? {
-        val res = apiDashboardInterface.getAccount()
-        return res.body()
+open class AccountManagementRepository @Inject constructor(private val apiDashboardInterface: ApiDashboardInterface, private val sessionManager: SessionManager) {
+    open suspend fun getAccountInfos(): AccountDashboard? {
+        val res = sessionManager.request(apiDashboardInterface::getAccount)
+        return if (res.code() == HttpsURLConnection.HTTP_OK) res.body()!! else null
     }
-    open suspend fun updateAccountInfos(account:UpdateAccountModel){
-        apiDashboardInterface.updateAccount(account)
-    }
-    open suspend fun updateAvatar(image: MultipartBody.Part): Observable<Boolean> {
-        return Observable.create { emitter ->
-            apiDashboardInterface.uploadAvatar(image).enqueue(object : Callback<ResponseBody> {
-                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                    if(response.code() == HttpsURLConnection.HTTP_OK){
-                        sessionManager.refreshAccountInfo().subscribe{
-                            emitter.onNext(it)
-                        }
-                    } else
-                        emitter.onNext(false)
-                }
 
-                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                    emitter.onNext(false)
-                }
-            })
-        }
+    open suspend fun updateAccountInfos(account: UpdateAccountModel) {
+        sessionManager.request(account, apiDashboardInterface::updateAccount)
+    }
+
+    open suspend fun updateAvatar(image: MultipartBody.Part): String? {
+        val res = sessionManager.request(image, apiDashboardInterface::uploadAvatar)
+        var errorMsg: String? = null
+        if (res.code() == HttpsURLConnection.HTTP_OK)
+            sessionManager.refreshAccountInfo()
+        else
+            errorMsg = "Erreur lors de l'envoie de l'avatar, veuillez réessayer!"
+        return errorMsg
     }
 }

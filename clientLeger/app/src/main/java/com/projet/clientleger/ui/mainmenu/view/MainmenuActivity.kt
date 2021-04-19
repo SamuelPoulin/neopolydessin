@@ -196,6 +196,10 @@ class MainmenuActivity : AppCompatActivity(), IAcceptGameInviteListener {
             vm.playSound(SoundId.SELECTED.value)
             selectedGameType =
                     GameType.fromFrenchToEnum(adapterGamemode.getItem(position).toString())
+            if(selectedGameType == GameType.SPRINT_SOLO)
+                dialogView.privacyBtn.visibility = View.INVISIBLE
+            else
+                dialogView.privacyBtn.visibility = View.VISIBLE
         }
     }
 

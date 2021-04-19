@@ -72,7 +72,7 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
-    private val team2:ArrayList<PlayerInfo> = ArrayList()
+    private val team2: ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
     private var chatService: ChatStorageService? = null
 
@@ -89,6 +89,9 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportFragmentManager.setFragmentResultListener("ready", this){ s: String, bundle: Bundle ->
+            vm.onPlayerReady()
+        }
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -117,7 +120,6 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
         binding.continueTutorial.visibility = View.INVISIBLE
-        vm.onPlayerReady()
     }
 
     override fun onStart() {
@@ -190,16 +192,20 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 PlayerRole.GUESSER -> R.drawable.ic_guessing
                 else -> 0
             }
+            val instruction = when(it){
+                PlayerRole.DRAWER -> "Dessinez"
+                PlayerRole.GUESSER -> "Devinez"
+                else -> "Attendez"
+            }
+            binding.roleInstruction.text = instruction
             if(icon != 0){
                 binding.currentRole.setImageResource(icon)
                 binding.currentRole.visibility = View.VISIBLE
             } else
-                binding.currentRole.visibility = View.INVISIBLE
+                binding.currentRole.visibility = View.GONE
         }
 
         vm.playersLiveData.observe(this){
-            if(team1.isEmpty())
-                updatePlayersAvatar(it)
             team1.clear()
             team2.clear()
             for(player in it){
@@ -231,24 +237,16 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             if(it.size > 0)
                 binding.team1Score.text = it[0].score.toString()
             if(it.size > 1)
-                binding.team2Label.text = it[1].score.toString()
+                binding.team2Score.text = it[1].score.toString()
         }
         vm.receiveEndGameNotice().subscribe{
+            timer?.cancel()
             lifecycleScope.launch {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
         }
-        vm.reveiceBoardwipeNotice().subscribe{
-            vm.playSound(SoundId.BOARDWIPE.value)
-            lifecycleScope.launch {
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
-            }
-        }
     }
 
-    private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
-        
-    }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
         timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
@@ -269,10 +267,10 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             override fun onFinish(){}
         }
         timer?.start()
-
     }
 
     override fun onDestroy() {
+        timer?.cancel()
         vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()
