@@ -28,6 +28,10 @@
   min-height: calc(100vh - 195px);
 }
 
+#chatrooms-container {
+  padding-bottom: 50px;
+}
+
 .chat-rooms-section-title {
   font-size: 24px;
   font-weight: 500;
@@ -36,7 +40,7 @@
 }
 
 .chat-rooms-button {
-  color:white;
+  color: white;
   background-color: #464646;
   height: 35px;
   font-weight: 500;

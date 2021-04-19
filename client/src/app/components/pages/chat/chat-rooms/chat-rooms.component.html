@@ -18,8 +18,10 @@
         Aucun salon de discussion n'existe.
       </div>
     </ng-container>
-    <ng-container *ngFor="let chatRoom of joinableRooms">
-      <app-chat-room [room]="chatRoom"></app-chat-room>
-    </ng-container>
+    <div id="chatrooms-container">
+      <ng-container *ngFor="let chatRoom of joinableRooms">
+        <app-chat-room [room]="chatRoom"></app-chat-room>
+      </ng-container>
+    </div>
   </div>
 </div>
