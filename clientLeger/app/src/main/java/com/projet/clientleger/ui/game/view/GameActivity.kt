@@ -27,12 +27,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.lobby.Player
-import com.projet.clientleger.data.enumData.GameType
-import com.projet.clientleger.data.enumData.PlayerRole
-import com.projet.clientleger.data.enumData.ReasonEndGame
-import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.enumData.*
 import com.projet.clientleger.data.model.chat.TabInfo
-import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.ChatStorageService
@@ -171,14 +167,24 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
 
         if(isMessageFromServer){
-            getEndGameStatement()
             val endGameStatement = getEndGameStatement()
             when(endGameStatement){
-                GAME_LOST -> dialog.gameOutcome.setTextColor(Color.RED)
-                GAME_TIED -> dialog.gameOutcome.setTextColor(Color.BLUE)
+                GameResult.NONE ->{
+                    dialog.gameOutcome.visibility = View.GONE
+                    dialog.gameScore.visibility = View.GONE
+                }
+                GameResult.COOP ->{
+                    dialog.gameOutcome.visibility = View.GONE
+                }
+                else -> {
+                    if(endGameStatement == GameResult.LOSE)
+                        dialog.gameOutcome.setTextColor(Color.RED)
+                }
             }
-            dialog.gameOutcome.text = endGameStatement
-            dialog.gameScore.text = "Vous avez accumulé ${getScore()}pts"
+
+            dialog.gameOutcome.text = endGameStatement.value
+            dialog.gameScore.text = "Vous avez accumulé ${getScore()} points"
+
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
@@ -202,9 +208,9 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             else -> vm.teamScores.value!![1].score!!
         }
     }
-    private fun getEndGameStatement():String{
+    private fun getEndGameStatement(): GameResult{
         return if(vm.teamScores.value!!.size == 1){
-            GAME_TIED
+            GameResult.COOP
         }
         else{
             when(isPlayerInTeam(team1)){
@@ -222,11 +228,11 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
         return result
     }
-    private fun getGameOutcome(scores:ArrayList<TeamScore>, allyTeam:Int, enemyTeam:Int):String{
+    private fun getGameOutcome(scores:ArrayList<TeamScore>, allyTeam:Int, enemyTeam:Int): GameResult{
         return when{
-            scores[allyTeam].score!! > scores[enemyTeam].score!! -> GAME_WON
-            scores[enemyTeam].score!! > scores[allyTeam].score!! -> GAME_LOST
-            else -> GAME_TIED
+            scores[allyTeam].score!! > scores[enemyTeam].score!! -> GameResult.WIN
+            scores[enemyTeam].score!! > scores[allyTeam].score!! -> GameResult.LOSE
+            else -> GameResult.NONE
         }
     }
     @SuppressLint("SetTextI18n")
