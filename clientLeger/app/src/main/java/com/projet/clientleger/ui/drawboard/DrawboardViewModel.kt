@@ -39,6 +39,7 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     var isUndoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
     var isRedoPossibleLiveData:MutableLiveData<Boolean> = MutableLiveData()
     var localStartPathCpt = 0
+    var currentPath: BufferedPathData? = null
 
     init {
         drawboardRepository.receiveStartPath().subscribe {
@@ -102,7 +103,15 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     private fun receiveStartPath(startPoint: PathData) {
         val newPath = BufferedPathData(startPoint)
         newPath.addStartCoord(startPoint.coords.first())
-        paths.value?.add(newPath)
+        paths.value?.let { list ->
+            var insertIndex = 0
+            if(list.isNotEmpty())
+                insertIndex = list.indexOfFirst { it.data.z >= newPath.data.z }
+            if(insertIndex < 0)
+                insertIndex = list.size - 1
+            list.add(insertIndex, newPath)
+        }
+        currentPath = newPath
         paths.postValue(paths.value)
     }
     fun startLocalPath(coord:Coordinate){
@@ -129,11 +138,9 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
 
     fun receiveUpdateCurrentPath(coord: Coordinate) {
         if(paths.value!!.isNotEmpty()){
-            paths.value?.last()?.addCoord(coord)
+            currentPath?.addCoord(coord)
             paths.postValue(paths.value)
         }
-        //paths.value?.last()?.addCoord(coord)
-        //paths.postValue(paths.value)
     }
 
     fun updateCurrentPath(coords: Coordinate) {
@@ -151,20 +158,18 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
         }
     }
     fun receiveEndPath(coord: Coordinate) {
-        paths.value?.last()?.addEndCoord(coord)
+        currentPath?.addEndCoord(coord)
         paths.postValue(paths.value)
     }
-
-
 
     private fun addPath(pathData: PathData){
         val pathExtended = BufferedPathData(pathData)
         paths.value!!.add(pathExtended)
-        paths.value!!.sortBy { it.data.pathId }
+        paths.value!!.sortBy { it.data.z }
         paths.postValue(paths.value)
     }
 
-    fun deletePath(pathId: Int){
+    private fun deletePath(pathId: Int){
         for(i in 0 until paths.value!!.size){
             paths.value!!.removeIf{
                 it.data.pathId == pathId
@@ -229,5 +234,9 @@ class DrawboardViewModel @Inject constructor(private val drawboardRepository: Dr
     }
     fun playSound(soundId:Int){
         audioService.playSound(soundId)
+    }
+
+    fun unsubscribe(){
+        drawboardRepository.unsubscribe()
     }
 }

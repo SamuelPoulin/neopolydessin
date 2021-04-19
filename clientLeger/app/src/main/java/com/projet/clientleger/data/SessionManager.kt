@@ -64,59 +64,44 @@ open class SessionManager @Inject constructor(
         }
     }
 
-    fun saveCreds(accessToken: String, refreshToken: String): Observable<Boolean> {
-        return Observable.create { emiter ->
-            userPrefs?.edit {
-                putString(ACCESS_TOKEN, accessToken)
-                putString(REFRESH_TOKEN, refreshToken)
-                apply()
+    suspend fun saveCreds(accessToken: String, refreshToken: String) {
+        userPrefs?.edit {
+            putString(ACCESS_TOKEN, accessToken)
+            putString(REFRESH_TOKEN, refreshToken)
+            apply()
+        }
+        tokenInterceptor.setAccessToken(accessToken)
+        socketService.connect(accessToken)
+        refreshAccountInfo()
+    }
+
+    suspend fun refreshAccountInfo() {
+        val res = apiSessionManagerInterface.getAccountInfo()
+        when (res.code()) {
+            HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body())
+            HttpsURLConnection.HTTP_UNAUTHORIZED -> {
+                logoutAndRestart(SESSION_EXPIRED)
             }
-            tokenInterceptor.setAccessToken(accessToken)
-            socketService.connect(accessToken)
-            scope.launch {
-                val res = apiSessionManagerInterface.getAccountInfo()
-                when (res.code()) {
-                    HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body()).subscribe {
-                        emiter.onNext(true)
-                    }
-                    HttpsURLConnection.HTTP_UNAUTHORIZED -> {
-                        logoutAndRestart(SESSION_EXPIRED)
-                        emiter.onNext(false)
-                    }
-                    else -> {
-                        logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
-                        emiter.onNext(false)
-                    }
-                }
+            else -> {
+                logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
             }
         }
     }
 
-    private fun saveAccountInfo(info: Account?): Observable<Boolean> {
-        return Observable.create { emitter ->
-            if (info != null) {
-                apiAvatarInterface.getAvatar(info.avatar).enqueue(object : Callback<ResponseBody> {
-                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        val avatar: Bitmap? = if (response.code() == HttpsURLConnection.HTTP_OK) {
-                            val bitmap = BitmapFactory.decodeStream(response.body()!!.byteStream())
-                            BitmapConversion.toRoundedBitmap(bitmap)
-                        } else {
-                            if (context != null) {
-                                BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
-                            } else {
-                                null
-                            }
-                        }
-                        accountInfo = info.toAccountInfo(avatar)
-                        emitter.onNext(true)
-                    }
-
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        //TODO("Not yet implemented")
-                        emitter.onNext(false)
-                    }
-                })
+    private suspend fun saveAccountInfo(info: Account?) {
+        if (info != null) {
+            val res = request(info.avatar, apiAvatarInterface::getAvatar)
+            val avatar: Bitmap? = if (res.code() == HttpsURLConnection.HTTP_OK) {
+                val bitmap = BitmapFactory.decodeStream(res.body()!!.byteStream())
+                BitmapConversion.toRoundedBitmap(bitmap)
+            } else {
+                if (context != null) {
+                    BitmapConversion.vectorDrawableToBitmap(context, R.drawable.ic_missing_player)
+                } else {
+                    null
+                }
             }
+            accountInfo = info.toAccountInfo(avatar)
         }
     }
 
@@ -180,17 +165,6 @@ open class SessionManager @Inject constructor(
         if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
             refreshAccessToken()
             res = callback.invoke()
-        }
-        return res
-    }
-
-    open fun <S, T> request(toSend: S, callBack: KFunction<Call<T>>): Response<T> {
-        var res = callBack.call(toSend).execute()
-        if (res.code() == HttpsURLConnection.HTTP_UNAUTHORIZED || res.code() == HttpsURLConnection.HTTP_FORBIDDEN) {
-            scope.launch {
-                refreshAccessToken()
-            }
-            res = callBack.call(toSend).execute()
         }
         return res
     }

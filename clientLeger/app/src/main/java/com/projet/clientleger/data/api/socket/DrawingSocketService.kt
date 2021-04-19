@@ -86,4 +86,9 @@ class DrawingSocketService @Inject constructor(val socketService: SocketService)
             Json.decodeFromString(Coordinate.serializer(), res[0].toString())
         }
     }
+
+    fun unsubscribe(){
+        for(endpoint in DrawingSocketEndpoints.values())
+            socketService.socket.off(endpoint.endpoint)
+    }
 }

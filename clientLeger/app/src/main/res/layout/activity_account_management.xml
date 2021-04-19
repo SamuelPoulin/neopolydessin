@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:baselineAligned="false"
@@ -30,12 +31,25 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
-
+                <ImageButton
+                    android:id="@+id/avatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="126dp"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/ic_missing_player"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/modify_image"
+                    android:textStyle="italic"
+                    android:gravity="center"/>
                 <TextView
                     android:id="@+id/username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bobino"
+                    android:text="Bobby"
                     android:textAlignment="center"
                     android:textSize="30sp"
                     android:textStyle="bold" />
@@ -85,20 +99,11 @@
                     style="@style/ManagementToggleBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/userProfile"
-                    app:icon="@drawable/ic_profile"
-                    app:iconGravity="start"
-                    app:iconPadding="10dp" />
-
-                <Button
-                    android:id="@+id/accountSettings"
-                    style="@style/ManagementToggleBtn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/accountSettings"
                     app:icon="@drawable/ic_tune"
                     app:iconGravity="start"
                     app:iconPadding="10dp" />
+
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <Button

@@ -47,5 +47,4 @@ export abstract class CreatorTool extends Tool {
       this.editorService.addShapeToBuffer(this.shape);
     }
   }
-
 }

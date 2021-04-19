@@ -51,10 +51,7 @@ export class DashboardComponent {
   games: Game[];
   logins: { start: number; end?: number }[];
 
-  constructor(
-    private apiService: APIService
-  ) {
-
+  constructor(private apiService: APIService) {
     this.apiService.getDashBoardInfo().then((info) => {
       this.playTime = this.toHours(info.gameHistory.totalTimePlayed);
       this.gamesPlayed = info.gameHistory.nbGamePlayed;
@@ -107,7 +104,7 @@ export class DashboardComponent {
             name: 'Parties solo et coop',
             color: '#ebc634',
             data: soloCoopGames,
-          }
+          },
         ],
         chart: {
           height: 350,
@@ -152,7 +149,6 @@ export class DashboardComponent {
       case GameResult.NEUTRAL:
         return 'Neutre';
     }
-
   }
 
   getGameTime(game: Game): string {
@@ -165,9 +161,11 @@ export class DashboardComponent {
 
   getDate(timestamp: number): string {
     const date = new Date(timestamp);
-    return this.getDateMonth(timestamp)
-      + ` à ${this.formatTime(date.getHours())}:${this.formatTime(date.getMinutes())}`
-      + `:${this.formatTime(date.getSeconds())}`;
+    return (
+      this.getDateMonth(timestamp) +
+      ` à ${this.formatTime(date.getHours())}:${this.formatTime(date.getMinutes())}` +
+      `:${this.formatTime(date.getSeconds())}`
+    );
   }
 
   private getDateMonth(timestamp: number): string {
@@ -204,5 +202,4 @@ export class DashboardComponent {
     }
     return lastWeek;
   }
-
 }
