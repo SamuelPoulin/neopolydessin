@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import { FriendStatus, FriendWithConnection } from '@common/communication/friends';
 import { ChatService } from '@services/chat.service';
 
@@ -11,7 +10,7 @@ import { ChatService } from '@services/chat.service';
 export class ChatFriendComponent {
   @Input() friend: FriendWithConnection;
 
-  constructor(private chatService: ChatService, private router: Router) {
+  constructor(private chatService: ChatService) {
     this.friend = { friendId: { _id: '', avatar: '', username: '' }, isOnline: false, status: FriendStatus.PENDING, received: false };
   }
 
@@ -62,6 +61,6 @@ export class ChatFriendComponent {
   }
 
   get canInvite() {
-    return this.chatService.inGame && this.router.url === '/lobby/';
+    return this.friend.isOnline && this.chatService.chatState.inGame;
   }
 }

@@ -234,6 +234,7 @@ export class ChatService {
             newMessage: false,
           });
         }
+        this.chatState.inGame = true;
         this.updatePoppedOutChat();
       }),
     );
@@ -241,6 +242,8 @@ export class ChatService {
     this.subscriptions.push(
       this.socketService.leftGame.subscribe(() => {
         this.closeRoom(ChatService.GAME_ROOM_NAME);
+        this.chatState.inGame = false;
+        this.updatePoppedOutChat();
       }),
     );
 
@@ -439,6 +442,7 @@ export class ChatService {
       guessing: false,
       friendslistOpened: false,
       chatRoomsOpened: false,
+      inGame: false,
     };
 
     this.chatRoomChanged = new EventEmitter<void>();
@@ -748,10 +752,6 @@ export class ChatService {
 
   get shouldUseMainProcess(): boolean {
     return this.electronService.isElectronApp && this.standalone;
-  }
-
-  get inGame(): boolean {
-    return this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME) !== -1;
   }
 
   popOut() {
