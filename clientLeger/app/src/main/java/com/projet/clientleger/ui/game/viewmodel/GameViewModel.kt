@@ -34,6 +34,9 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     private val accountInfo = gameRepository.getAccountInfo()
     fun init(fragmentManager: FragmentManager){
         this.fragmentManager = fragmentManager
+        val baseTeamScores = ArrayList<TeamScore>()
+        baseTeamScores.add(TeamScore(0,0))
+        teamScores.postValue(baseTeamScores)
 
         gameRepository.receiveRoles().subscribe{
             for(player in it){
