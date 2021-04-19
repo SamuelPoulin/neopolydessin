@@ -159,7 +159,6 @@ describe('EditorService', () => {
 
     expect(service['shapes']).toEqual([path]);
     expect(service['shapesBuffer']).toEqual([rectangle, rectangle, path2]);
-    expect(service.view.addShape).toHaveBeenCalledWith(path2);
   });
   it('adds shape to buffer if view is undefined', () => {
     const ellipse = new Rectangle();
