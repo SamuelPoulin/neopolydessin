@@ -29,7 +29,7 @@ class AccountManagementViewModel @Inject constructor(private val accountManageme
     fun getAvatarBitmap():Bitmap{
         return sessionManager.getAccountInfo().avatar
     }
-    suspend fun uploadAvatar(image: MultipartBody.Part): Observable<Boolean> {
+    suspend fun uploadAvatar(image: MultipartBody.Part): String? {
         return accountManagementRepository.updateAvatar(image)
     }
 }

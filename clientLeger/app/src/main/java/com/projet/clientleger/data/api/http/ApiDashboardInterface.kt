@@ -22,7 +22,7 @@ interface ApiDashboardInterface {
     suspend fun updateAccount(@Body updateAccountModel: UpdateAccountModel):Response<Account>
     @Multipart
     @POST(avatarPath + "upload")
-    fun uploadAvatar(
+    suspend fun uploadAvatar(
         @Part file:MultipartBody.Part
-    ):Call<ResponseBody>
+    ):Response<Any>
 }

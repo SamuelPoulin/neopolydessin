@@ -21,7 +21,7 @@ class RegisterViewModel @Inject constructor(private val registerRepository: Regi
     val registerPasswordLiveData: MutableLiveData<String> = MutableLiveData("")
     val registerPasswordConfirmLiveData: MutableLiveData<String> = MutableLiveData("")
 
-    suspend fun registerAccount(): Observable<RegisterResponse> {
+    suspend fun registerAccount(): RegisterResponse {
         val register = RegisterModel(
                 registerFistNameLiveData.value?.trim(),
                 registerLastNameLiveData.value?.trim(),
