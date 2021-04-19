@@ -65,7 +65,6 @@ open class SessionManager @Inject constructor(
     }
 
     fun saveCreds(accessToken: String, refreshToken: String): Observable<Boolean> {
-        return Observable.create { emiter ->
             userPrefs?.edit {
                 putString(ACCESS_TOKEN, accessToken)
                 putString(REFRESH_TOKEN, refreshToken)
@@ -73,19 +72,24 @@ open class SessionManager @Inject constructor(
             }
             tokenInterceptor.setAccessToken(accessToken)
             socketService.connect(accessToken)
+            return refreshAccountInfo()
+    }
+
+    fun refreshAccountInfo(): Observable<Boolean> {
+        return Observable.create { emitter ->
             scope.launch {
                 val res = apiSessionManagerInterface.getAccountInfo()
                 when (res.code()) {
                     HttpsURLConnection.HTTP_OK -> saveAccountInfo(res.body()).subscribe {
-                        emiter.onNext(true)
+                        emitter.onNext(true)
                     }
                     HttpsURLConnection.HTTP_UNAUTHORIZED -> {
                         logoutAndRestart(SESSION_EXPIRED)
-                        emiter.onNext(false)
+                        emitter.onNext(false)
                     }
                     else -> {
                         logoutAndRestart(ApiErrorMessages.UNKNOWN_ERROR)
-                        emiter.onNext(false)
+                        emitter.onNext(false)
                     }
                 }
             }

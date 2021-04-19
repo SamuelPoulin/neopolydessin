@@ -1,17 +1,18 @@
 package com.projet.clientleger.ui.accountmanagement.view
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil.setContentView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.projet.clientleger.R
-import com.projet.clientleger.data.api.model.account.Account
 import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.account.UpdateAccountModel
 import com.projet.clientleger.databinding.ActivityAccountManagementBinding
@@ -20,10 +21,12 @@ import com.projet.clientleger.ui.accountmanagement.dashboard.view.DOUBLE_DIGIT
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.DashboardFragment
 import com.projet.clientleger.ui.accountmanagement.dashboard.view.SECONDS_IN_MIN
 import com.projet.clientleger.ui.accountmanagement.profile.ProfileFragment
-import com.projet.clientleger.ui.accountmanagement.settings.SettingsFragment
 import com.projet.clientleger.ui.lobby.view.LobbyActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.floor
@@ -39,9 +42,6 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
 
     @Inject
     lateinit var profileFragment: ProfileFragment
-
-    @Inject
-    lateinit var settingsFragment: SettingsFragment
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,12 +59,12 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
                 when (checkedId) {
                     R.id.dashboardBtn -> changeFragment(dashboardFragment)
                     R.id.userProfileBtn -> changeFragment(profileFragment)
-                    R.id.accountSettings -> changeFragment(settingsFragment)
                 }
             }
         }
         lifecycleScope.launch{
             vm.getAccountInfos()
+            binding.avatar.setImageBitmap(vm.getAvatarBitmap())
             binding.username.text = vm.accountInfos.username
             binding.name.text = "${vm.accountInfos.firstName} ${vm.accountInfos.lastName} "
             binding.email.text = vm.accountInfos.email
@@ -73,7 +73,37 @@ class AccountManagementActivity : AppCompatActivity(), IAcceptGameInviteListener
         binding.logoutBtn.setOnClickListener {
             finish()
         }
+        val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                val imageUri = data!!.data!!
+                val projection: Array<String> = arrayOf(MediaStore.Images.Media.DATA)
+                val cursor = contentResolver.query(imageUri, projection, null, null, null)
+                cursor?.let {
+                    it.moveToFirst()
+                    val index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                    val filePath = it.getString(index)
+                    it.close()
+                    val file = File(filePath)
+                    val filePart = MultipartBody.Part.createFormData("file", file.name, MultipartBody.create(MediaType.parse("image/*"), file))
+                    lifecycleScope.launch{
+                        vm.uploadAvatar(filePart).subscribe{ isSuccess ->
+                            if (isSuccess)
+                                binding.avatar.setImageBitmap(vm.getAvatarBitmap())
+                            else
+                                Toast.makeText(this@AccountManagementActivity, "Erreur lors de l'envoie de l'avatar, veuillez réessayer!", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+        binding.avatar.setOnClickListener {
+            val photoPickerIntent = Intent(Intent.ACTION_PICK)
+            photoPickerIntent.type = "image/*"
+            resultLauncher.launch(photoPickerIntent)
+        }
     }
+
     fun fetchAccountInfos(){
         lifecycleScope.launch{
             vm.getAccountInfos()
