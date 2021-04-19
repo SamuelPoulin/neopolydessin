@@ -196,4 +196,9 @@ class GameTutorialActivity: AppCompatActivity()  {
         models.add(SequenceModel(CHAT_TUTORIAL_SUCESS,binding.chatRoot,this,false))
         vm.createSequence(models)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        finish()
+    }
 }

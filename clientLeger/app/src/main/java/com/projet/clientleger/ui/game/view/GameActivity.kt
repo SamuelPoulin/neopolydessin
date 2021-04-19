@@ -25,6 +25,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.enumData.GameType
 import com.projet.clientleger.data.enumData.PlayerRole
@@ -59,6 +60,9 @@ const val TIME_ALMOST_UP:Int= 15000
 const val TWO_DIGITS:Int = 10
 const val SEC_IN_MIN:Int = 60
 const val QUIT_GAME_MESSAGE:String = "Voulez vous vraiment quitter?"
+const val GAME_WON = "Victoire"
+const val GAME_LOST = "Défaite"
+const val GAME_TIED = "Égalité"
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
@@ -167,7 +171,14 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
 
         if(isMessageFromServer){
-            checkGameOutcome()
+            getEndGameStatement()
+            val endGameStatement = getEndGameStatement()
+            when(endGameStatement){
+                GAME_LOST -> dialog.gameOutcome.setTextColor(Color.RED)
+                GAME_TIED -> dialog.gameOutcome.setTextColor(Color.BLUE)
+            }
+            dialog.gameOutcome.text = endGameStatement
+            dialog.gameScore.text = "Vous avez accumulé ${getScore()}pts"
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
@@ -185,7 +196,38 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             }
         }
     }
-    private fun checkGameOutcome(){
+    private fun getScore():Int{
+        return when(isPlayerInTeam(team1)){
+            true -> vm.teamScores.value!![0].score!!
+            else -> vm.teamScores.value!![1].score!!
+        }
+    }
+    private fun getEndGameStatement():String{
+        return if(vm.teamScores.value!!.size == 1){
+            GAME_TIED
+        }
+        else{
+            when(isPlayerInTeam(team1)){
+                true -> getGameOutcome(vm.teamScores.value!!,0,1)
+                else -> getGameOutcome(vm.teamScores.value!!,1,0)
+            }
+        }
+    }
+    private fun isPlayerInTeam(team:ArrayList<PlayerInfo>):Boolean{
+        var result = false
+        for(i in 0 until team.size){
+            if(team[i].username == vm.getUsername()){
+                result = true
+            }
+        }
+        return result
+    }
+    private fun getGameOutcome(scores:ArrayList<TeamScore>, allyTeam:Int, enemyTeam:Int):String{
+        return when{
+            scores[allyTeam].score!! > scores[enemyTeam].score!! -> GAME_WON
+            scores[enemyTeam].score!! > scores[allyTeam].score!! -> GAME_LOST
+            else -> GAME_TIED
+        }
     }
     @SuppressLint("SetTextI18n")
     private fun setSubscriptions(){
