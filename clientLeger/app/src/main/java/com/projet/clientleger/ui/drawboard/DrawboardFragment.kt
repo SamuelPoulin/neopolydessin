@@ -98,6 +98,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        vm.unsubscribe()
         binding = null
     }
 
@@ -242,5 +243,4 @@ class DrawboardFragment @Inject constructor(): Fragment() {
         models.add(SequenceModel(TRY_DRAWING,binding!!.drawingBoardContainer,requireActivity(),true))
         return models
     }
-
 }
