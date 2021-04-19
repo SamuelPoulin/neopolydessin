@@ -34,7 +34,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
                 }
             }
         }
-        friendslistRepository.receiveAvatarNotificatino().subscribe{ pair ->
+        friendslistRepository.receiveAvatarNotificatino().subscribe { pair ->
             CoroutineScope(Job() + Dispatchers.IO).launch {
                 avatarStorageService.updateFriendAvatar(pair.first, pair.second)
                 friendsLiveData.value?.let { friends ->
@@ -43,7 +43,6 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
                 }
             }
         }
-
     }
 
     fun receiveInvite(): Observable<Pair<String, String>> {
@@ -60,7 +59,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
 
     }
 
-    suspend fun deleteFriend(friendId: String){
+    suspend fun deleteFriend(friendId: String) {
         updateFriends(friendslistRepository.deleteFriend(friendId))
     }
 
@@ -81,7 +80,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
             val friendSimplifiedList = ArrayList<FriendSimplified>()
             avatarStorageService.addFriends(friendslist)
             for (friend in friendslist) {
-                if (friend.friendId != null){
+                if (friend.friendId != null) {
                     val avatar = avatarStorageService.getFriendAvatar(friend.friendId!!._id!!)
                     friendSimplifiedList.add(FriendSimplified(friend, avatar))
                 }
@@ -105,7 +104,7 @@ class FriendslistViewModel @Inject constructor(private val friendslistRepository
         audioService.playSound(soundId)
     }
 
-    fun inviteFriend(friendId: String){
+    fun inviteFriend(friendId: String) {
         friendslistRepository.inviteFriend(friendId)
     }
 }

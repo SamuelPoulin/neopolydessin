@@ -8,6 +8,7 @@ import com.projet.clientleger.data.api.model.SequenceModel
 import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.Timer
 import com.projet.clientleger.data.api.model.lobby.Player
+import com.projet.clientleger.data.enumData.GameState
 import com.projet.clientleger.data.enumData.PlayerRole
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
@@ -54,7 +55,7 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
             teamScores.postValue(it)
         }
         gameRepository.receiveGameState().subscribe{
-            if(it == "draw"){
+            if(it == GameState.DRAWING){
                 fragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
             }
         }
@@ -75,20 +76,15 @@ class GameViewModel @Inject constructor(private val gameRepository: GameReposito
     fun receiveEndGameNotice():Observable<String>{
         return gameRepository.receiveEndGameNotice()
     }
-    fun reveiceBoardwipeNotice():Observable<String>{
-        return gameRepository.receiveBoardwipeNotice()
-    }
+
     fun unsubscribe(){
         gameRepository.unsubscribe()
     }
     fun onLeaveGame(){
         gameRepository.onLeaveGame()
     }
-    fun isTutorialActive():Boolean{
-        return tutorialService.isTutorialActive()
-    }
     fun createSequence(models:ArrayList<SequenceModel>){
-        tutorialService.createShowcaseSequence(models)
+        tutorialService.createGameShowcaseSequence(models)
     }
     fun getUsername():String{
         return gameRepository.getUsername()

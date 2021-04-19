@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.slider.Slider
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
@@ -20,6 +21,9 @@ import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.Coordinate
 import com.projet.clientleger.data.model.PathData
 import com.projet.clientleger.databinding.DrawboardFragmentBinding
+import com.projet.clientleger.ui.game.view.GameTutorialActivity
+import com.projet.clientleger.ui.game.view.GameTutorialActivity_GeneratedInjector
+import com.projet.clientleger.ui.game.view.GameTutorialActivity_MembersInjector
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,9 +33,11 @@ const val CHOOSE_PEN = "Avant de dessiner, il faut choisir son outil de dessin. 
 const val PEN_PREVIEW_MESSAGE = "Tu as bien choisi le crayon !" +
         "\nMaintenant, tu peux choisir la largeur de ton trait à l'aide de la barre bleue ici"
 const val TRY_DRAWING = "Tu es maintenant prêt à dessiner !\n" +
-        "Fais ton premier trait pour progresser"
-const val BUTTON_PANNEL_DEMO = "Maintenant que tu comprends la base de dessiner, nous porterons notre" +
-        "\nattention sur les différents buttons utiles au dessin"
+        "Fais ton premier dessin ! dessines une pomme avec les outils à ta disposition," +
+        "c'est-à-dire le crayon, l'efface et l'outil de couleur. Quand tu as terminé, cliques " +
+        "sur le bouton terminer le tutoriel"
+const val BUTTON_PANNEL_DEMO = "Voici maintenant tous les outils à ta disposition pour dessiner dans " +
+        "Polydessin"
 const val UNDO_BUTTON_DEMO = "Le bouton Annuler te permet d'annuler ta dernière action au besoin"
 const val REDO_BUTTON_DEMO = "Le bouton Refaire sert à refaire une action que tu aurais annulé par accident"
 const val TRASH_BUTTON_DEMO = "Finalement, le bouton Poubelle représente l'efface, lorsque choisi," +
@@ -92,6 +98,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        vm.unsubscribe()
         binding = null
     }
 
@@ -163,6 +170,7 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     }
 
     private fun handlePenViewEvent(event: MotionEvent) {
+        println("Nous sommes dans le tutoriel? ${vm.isTutorialActive()}")
         if(vm.isTutorialActive()){
             when(event.action){
                 MotionEvent.ACTION_DOWN -> {
@@ -226,14 +234,13 @@ class DrawboardFragment @Inject constructor(): Fragment() {
     fun getTutorialSequence():ArrayList<SequenceModel>{
         val models = ArrayList<SequenceModel>()
         models.add(SequenceModel(DRAWBOARD_MESSAGE, binding!!.drawingBoardContainer,requireActivity(),false))
-        models.add(SequenceModel(CHOOSE_PEN, binding!!.pencilBtn, requireActivity(),true))
-        models.add(SequenceModel(PEN_PREVIEW_MESSAGE, binding!!.strokeWidthSlider,requireActivity(),true))
-        models.add(SequenceModel(TRY_DRAWING,binding!!.drawingBoardContainer,requireActivity(),true))
         models.add(SequenceModel(BUTTON_PANNEL_DEMO,binding!!.buttonPanel,requireActivity(),false))
         models.add(SequenceModel(UNDO_BUTTON_DEMO,binding!!.undoBtn,requireActivity(),false))
         models.add(SequenceModel(REDO_BUTTON_DEMO,binding!!.redoBtn,requireActivity(),false))
         models.add(SequenceModel(TRASH_BUTTON_DEMO,binding!!.eraserBtn,requireActivity(),false))
+        models.add(SequenceModel(CHOOSE_PEN, binding!!.pencilBtn, requireActivity(),true))
+        models.add(SequenceModel(PEN_PREVIEW_MESSAGE, binding!!.strokeWidthSlider,requireActivity(),true))
+        models.add(SequenceModel(TRY_DRAWING,binding!!.drawingBoardContainer,requireActivity(),true))
         return models
     }
-
 }

@@ -50,14 +50,10 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
         socketService.socket.off(GameSocketEndPoints.RECEIVE_WORD_GUESS.value)
         socketService.socket.off(GameSocketEndPoints.SET_TIME.value)
         socketService.socket.off(GameSocketEndPoints.END_GAME_TRIGGER.value)
-        socketService.socket.off(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value)
+        socketService.socket.off(GameSocketEndPoints.UPDATE_GAME_STATE.value)
         socketService.socket.off(GameSocketEndPoints.RECEIVE_TEAM_SCORES.value)
     }
-    fun receiveBoardwipeNotice():Observable<String>{
-        return socketService.receiveFromSocket(GameSocketEndPoints.RECEIVE_BOARDWIPE_NOTICE.value){ (gamestatus) ->
-            gamestatus as String
-        }
-    }
+
     fun onLeaveGame(){
         socketService.socket.emit(GameSocketEndPoints.ON_LEAVE.value)
     }
@@ -77,12 +73,4 @@ class GameSocketService @Inject constructor(private val socketService: SocketSer
             state as String
         }
     }
-
-//    fun getPlayersAvatar(players: ArrayList<PlayerInfo>): ArrayList<PlayerInfo>{
-//        for(player in players)
-//        {
-//            var avatar: Bitmap? = null
-//
-//        }
-//    }
 }
