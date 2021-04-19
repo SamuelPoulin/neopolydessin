@@ -67,9 +67,9 @@ export class EditorUtils {
   /**
    * Based on: https://stackoverflow.com/questions/3768565/drawing-an-svg-file-on-a-html5-canvas
    */
-  static createDataURL(surface: DrawingSurfaceComponent): string {
+  static createDataURL(svg: SVGElement): string {
     const xmlSerializer = new XMLSerializer();
-    const svgString = xmlSerializer.serializeToString(surface.svg);
+    const svgString = xmlSerializer.serializeToString(svg);
     return 'data:image/svg+xml,' + encodeURIComponent(svgString);
   }
   static createSerializedString(surface: DrawingSurfaceComponent): string {

@@ -23,7 +23,7 @@ import { SocketService } from './socket-service.service';
   providedIn: 'root',
 })
 export class EditorService {
-  private static readonly SNAPSHOT_INTERVAL: number = 500;
+  static readonly SNAPSHOT_INTERVAL: number = 50;
 
   readonly tools: Map<ToolType, Tool>;
   readonly shapes: BaseShape[];
@@ -40,7 +40,7 @@ export class EditorService {
 
   isFreeEdit: boolean = false;
 
-  recordedDrawings: BaseShape[][][];
+  recordedDrawings: string[][];
   private drawingIndex: number;
   private snapshotIndex: number;
   private recordInterval: NodeJS.Timeout;
@@ -77,8 +77,7 @@ export class EditorService {
       this.recordedDrawings[this.drawingIndex] = [];
       this.snapshotIndex = 0;
       this.recordInterval = setInterval(() => {
-        this.recordedDrawings[this.drawingIndex][this.snapshotIndex] = [];
-        this.recordedDrawings[this.drawingIndex][this.snapshotIndex].push(...this.shapes);
+        this.recordedDrawings[this.drawingIndex][this.snapshotIndex] = EditorUtils.createDataURL(this.view.svg);
         this.snapshotIndex++;
         console.log(this.recordedDrawings);
       }, EditorService.SNAPSHOT_INTERVAL);
