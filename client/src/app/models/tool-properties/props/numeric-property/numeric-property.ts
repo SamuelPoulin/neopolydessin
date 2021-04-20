@@ -2,7 +2,6 @@ import { Property } from '@tool-properties/props/property';
 import { MathUtils } from '@utils/math/math-utils';
 
 export class NumericProperty implements Property<number> {
-  // todo setter?
   private _value: number;
   minValue: number;
   maxValue: number;

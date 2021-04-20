@@ -1,5 +1,6 @@
 import { EventEmitter } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { PlayerRole } from '../../../../common/communication/lobby';
 import { GameService } from './game.service';
@@ -16,6 +17,8 @@ export const MockGameService = jasmine.createSpyObj('GameService', {
 MockGameService.roleChanged = new EventEmitter<PlayerRole>();
 MockGameService.canGuessChanged = new EventEmitter<void>();
 MockGameService.drawingChanged = new EventEmitter<void>();
+MockGameService.gameStarted = new EventEmitter<void>();
+MockGameService.gameEnded = new EventEmitter<void>();
 MockGameService.teams = [[], []];
 MockGameService.scores = [
   { teamNumber: 0, score: 0 },
@@ -31,6 +34,7 @@ describe('GameService', () => {
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: UserService, useValue: MockUserService },
+        { provide: MatSnackBar, useValue: {} },
         GameService,
       ],
     }).compileComponents();

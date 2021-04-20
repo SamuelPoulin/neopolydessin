@@ -29,7 +29,7 @@
     </icon-button>
   </div>
 </div>
-<mat-drawer-container>
+<mat-drawer-container [style.height]="electronContainer ? 'calc(100vh - 60px)' : 'calc(100vh - 90px)'">
   <mat-drawer #drawer mode="side">
     <mat-drawer-content [ngSwitch]="currentToolType">
       <div *ngIf=!toolbarType>
