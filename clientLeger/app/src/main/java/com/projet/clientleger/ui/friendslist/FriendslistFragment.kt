@@ -52,6 +52,11 @@ class FriendslistFragment @Inject constructor() : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        vm.getFriendslist()
+    }
+
     override fun onStart() {
         super.onStart()
 

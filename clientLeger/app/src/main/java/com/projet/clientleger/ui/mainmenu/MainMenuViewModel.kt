@@ -18,13 +18,6 @@ import javax.inject.Inject
 class MainMenuViewModel @Inject constructor(private val mainmenuRepository: MainmenuRepository, private val tutorialService: TutorialService, private val audioService: AudioService): ViewModel(){
 
 
-
-    fun connectSocket(accessToken: String){
-        mainmenuRepository.connectSocket(accessToken)
-    }
-    fun createGame(lobbyName:String, gameMode: GameType, difficulty: Difficulty, isPrivate:Boolean){
-        mainmenuRepository.createGame(lobbyName, gameMode,difficulty,isPrivate)
-    }
     fun getUsername():String{
         return mainmenuRepository.getUsername()
     }
