@@ -73,7 +73,7 @@ export class ExportDrawingComponent extends AbstractModalComponent {
     const ctx: CanvasRenderingContext2D = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     const gif = new GIF({
-      workerScript: '/assets/gif.worker.js',
+      workerScript: 'assets/gif.worker.js',
       repeat: 0,
       width: this.size,
       height: this.size,
