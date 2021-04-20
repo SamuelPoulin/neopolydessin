@@ -37,10 +37,6 @@ class ConnexionActivity : AppCompatActivity() {
             vm.playSound(SoundId.CLICK.value)
             connectBtn()
         }
-        binding.forgottenPasswordBtn.setOnClickListener {
-            vm.playSound(SoundId.CLICK.value)
-            forgottenPasswordBtn()
-        }
         binding.createAccountBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
             createAccountBtn()
@@ -66,10 +62,6 @@ class ConnexionActivity : AppCompatActivity() {
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun forgottenPasswordBtn() {
-        //TODO: bouton de récupération de mot de passe non-implémenté
     }
 
     private fun createAccountBtn() {

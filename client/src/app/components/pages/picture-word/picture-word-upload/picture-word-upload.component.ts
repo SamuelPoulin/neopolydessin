@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AbstractModalComponent } from '@components/shared/abstract-modal/abstract-modal.component';
@@ -6,7 +7,7 @@ import { PictureWordDrawing, PictureWordPath, PictureWordPicture, UpdatePictureW
 import { Difficulty } from '@common/communication/lobby';
 import { DrawMode } from '@common/communication/draw-mode';
 import { Color } from '@utils/color/color';
-import { DrawingSequence } from '@common/communication/drawing-sequence';
+import { DrawingSequence, Segment } from '@common/communication/drawing-sequence';
 import { Coordinate } from '@utils/math/coordinate';
 import { VIEWPORT_DIMENSION } from '@common/communication/viewport';
 import { EditorService } from '@services/editor.service';
@@ -40,6 +41,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
   _color: Color;
   imageData: string = '';
   threshold: number = PictureWordUploadComponent.DEFAULT_THRESHOLD;
+  thresholdChanged: boolean = false;
 
   drawModes: { name: string; value: string }[] = [
     { name: 'Conventionnel', value: DrawMode.CONVENTIONAL },
@@ -104,7 +106,13 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   async save(): Promise<void> {
     if (this.drawingId) {
-      return this.update(this.drawingId);
+      if (!this.thresholdChanged) {
+        return this.update(this.drawingId);
+      } else {
+        this.thresholdChanged = false;
+        this.cancel();
+        this.upload();
+      }
     } else {
       return this.upload();
     }
@@ -120,6 +128,10 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
 
   removeHint(id: number) {
     this.displayedHints.splice(id, 1);
+  }
+
+  onThresholdChanged(): void {
+    this.thresholdChanged = true;
   }
 
   cancel(): void {
@@ -141,7 +153,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       hints: this.hints,
       difficulty: this.difficulty,
       drawMode: this.drawMode,
-      color: this.color,
+      color: this._color.ahexString,
     };
 
     return this.api
@@ -201,7 +213,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
       hints: this.hints,
       difficulty: this.difficulty,
       drawMode: this.drawMode,
-      color: this.color,
+      color: this._color.ahexString,
       threshold: this.threshold,
       picture: this.imageData,
     };
@@ -253,9 +265,17 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
     });
   }
 
-  async drawPreview(sequence: DrawingSequence) {
+  drawPreview(sequence: DrawingSequence) {
     if (this.previewTimeout) clearTimeout(this.previewTimeout);
 
+    if (this.dialogRef.id === 'drawing') {
+      this.drawingPreview(sequence);
+    } else {
+      this.imagePreview(sequence);
+    }
+  }
+
+  async imagePreview(sequence: DrawingSequence) {
     const ratio = this.size / VIEWPORT_DIMENSION;
     const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
     if (ctx) {
@@ -271,7 +291,7 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
         const timePerPoint = timePerSegment / segment.path.length;
 
         ctx.beginPath();
-        ctx.strokeStyle = segment.brushInfo.color;
+        ctx.strokeStyle = Color.ahex(segment.brushInfo.color).rgbaString;
         ctx.lineWidth = segment.brushInfo.strokeWidth;
 
         for (const [index, coord] of segment.path.entries()) {
@@ -294,5 +314,65 @@ export class PictureWordUploadComponent extends AbstractModalComponent {
         ctx.stroke();
       }
     }
+  }
+
+  async drawingPreview(sequence: DrawingSequence) {
+    const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
+    if (ctx) {
+      const totalTime = 5000;
+      const timeoutOffset = 0.1;
+      const timePerSegment = totalTime / sequence.stack.length;
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const segments: Segment[] = [];
+
+      for (const segment of sequence.stack) {
+        const segmentStart = Date.now();
+        const timePerPoint = timePerSegment / segment.path.length;
+
+        segments.push(segment);
+        segments.sort((a, b): number => {
+          return a.zIndex - b.zIndex;
+        });
+
+        for (const [index] of segment.path.entries()) {
+          ctx.clearRect(0, 0, this.size, this.size);
+          segments.forEach((path) => {
+            if (path === segment) {
+              this.drawPath(ctx, path, index);
+            } else {
+              this.drawPath(ctx, path);
+            }
+          });
+
+          const now = Date.now();
+          if (now < segmentStart + (timePerPoint - timeoutOffset) * index) {
+            await new Promise((resolve) => {
+              this.previewTimeout = setTimeout(resolve, timePerPoint - (now - segmentStart + timePerPoint * index));
+            });
+          }
+        }
+      }
+    }
+  }
+
+  drawPath(ctx: CanvasRenderingContext2D, segment: Segment, limit: number = 0) {
+    const ratio = this.size / VIEWPORT_DIMENSION;
+    ctx.beginPath();
+    ctx.strokeStyle = Color.ahex(segment.brushInfo.color).rgbaString;
+    ctx.lineWidth = segment.brushInfo.strokeWidth;
+    for (const [index, coord] of segment.path.entries()) {
+      if (!limit || index <= limit) {
+        const c = Coordinate.copy(coord).scale(ratio);
+        if (index === 0) {
+          ctx.moveTo(c.x, c.y);
+        } else {
+          ctx.lineTo(c.x, c.y);
+        }
+      }
+    }
+    ctx.stroke();
   }
 }

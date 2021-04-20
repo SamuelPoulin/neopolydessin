@@ -23,9 +23,10 @@ export abstract class CreatorTool extends Tool {
     return result;
   }
 
-  protected startShape(coord: Coordinate): void {
+  protected startShape(coord: Coordinate, zIndex: number = 1): void {
     this.isActive = true;
     this.shape = this.createShape(coord);
+    this.shape.zIndex = zIndex;
     this.updateProperties();
     this.addShape();
   }

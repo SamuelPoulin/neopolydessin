@@ -234,6 +234,7 @@ export class ChatService {
             newMessage: false,
           });
         }
+        this.chatState.inGame = true;
         this.updatePoppedOutChat();
       }),
     );
@@ -241,6 +242,8 @@ export class ChatService {
     this.subscriptions.push(
       this.socketService.leftGame.subscribe(() => {
         this.closeRoom(ChatService.GAME_ROOM_NAME);
+        this.chatState.inGame = false;
+        this.updatePoppedOutChat();
       }),
     );
 
@@ -424,6 +427,7 @@ export class ChatService {
         if (this.chatPoppedOut) {
           this.electronService.ipcRenderer.send('chat-quit');
         }
+        this.chatState.currentRoomIndex = 0;
       }),
     );
   }
@@ -439,6 +443,7 @@ export class ChatService {
       guessing: false,
       friendslistOpened: false,
       chatRoomsOpened: false,
+      inGame: false,
     };
 
     this.chatRoomChanged = new EventEmitter<void>();

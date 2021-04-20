@@ -1,3 +1,4 @@
+<button id="register-back-button" mat-icon-button routerLink="/login"><mat-icon>arrow_back</mat-icon></button>
 <div id="login-page" [style.top]="electronContainer && '30px'" [style.height]="electronContainer && 'calc(100vh - 30px)'">
   <img id="login-page-image" src="assets/icon.png" />
   <div id="login-page-title">Créer votre compte</div>
@@ -7,8 +8,8 @@
   </div>
   <app-username-input class="input" [(value)]="username">Nom d'utilisateur</app-username-input>
   <app-username-input class="input" [(value)]="email">Email</app-username-input>
-  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="password">Mot de passe</app-password-input>
-  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="passwordConfirm">Confirmer le mot de passe</app-password-input>
+  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="password" (keyup.enter)="register()">Mot de passe</app-password-input>
+  <app-password-input class="input" (valueChange)="updatePassword()" [(value)]="passwordConfirm" (keyup.enter)="register()">Confirmer le mot de passe</app-password-input>
   <div id="register-requirements">
     <div *ngFor="let rule of passwordRules" [class]="rule.class">
       <mat-icon>{{rule.icon}}</mat-icon>

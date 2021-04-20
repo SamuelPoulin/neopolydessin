@@ -50,6 +50,7 @@ class ChatStorageService @Inject constructor() : Service() {
     var convosListeners: ArrayList<(ArrayList<Convo>) -> Unit> = ArrayList()
     private var currentConvoListeners: ArrayList<() -> Unit> = ArrayList()
     private var currentTabListeners: ArrayList<(TabInfo?) -> Unit> = ArrayList()
+    private var guessReceivedListeners: ArrayList<(GuessStatus) -> Unit> = ArrayList()
 
     //Hashmap: AccountId - username
     private val friendslistUsernames: HashMap<String, String> = HashMap()
@@ -91,6 +92,7 @@ class ChatStorageService @Inject constructor() : Service() {
             receiveMessage(chatVersion, tabInfo)
         }
         chatRepository.receiveGuess().subscribe {
+            emitGuessReceived(it.guessStatus)
             manageGuessSound(it.guessStatus)
             val tabInfo = TabInfo(LobbyViewModel.GAME_TAB_NAME, ChatViewModel.GAME_TAB_ID, TabType.GAME)
             receiveMessage(it, tabInfo)
@@ -205,6 +207,10 @@ class ChatStorageService @Inject constructor() : Service() {
         }
     }
 
+    fun subscribeGuessReceived(listener: (GuessStatus) -> Unit){
+        guessReceivedListeners.add(listener)
+    }
+
     fun subscribeCurrentConvoChange(listener: () -> Unit) {
         currentConvoListeners.add(listener)
     }
@@ -225,6 +231,11 @@ class ChatStorageService @Inject constructor() : Service() {
             emitCurrentTabChange()
             emitConvosChange()
         }
+    }
+
+    private fun emitGuessReceived(status: GuessStatus){
+        for(listener in guessReceivedListeners)
+            listener.invoke(status)
     }
 
     private fun emitConvosChange() {
