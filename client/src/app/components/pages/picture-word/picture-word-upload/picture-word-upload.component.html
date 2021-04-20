@@ -41,7 +41,7 @@
         <app-custom-input class="hint-input" [(value)]="displayedHints[i].value">Indice {{i + 1}}</app-custom-input>
         <mat-icon *ngIf="i >= minimumHints" class="remove-hint" (click)="removeHint(i)">clear</mat-icon>
       </div>
-      <button id="add-hint" (click)="addHint()">Ajouter un indice</button>
+      <button mat-stroked-button id="add-hint" (click)="addHint()">Ajouter un indice</button>
     </div>
 
     <img [src]="imageString" [style.height.px]="size" [style.width.px]="size" [style.display]="displayPreview ? 'none' : 'block'" id="uploaded-image">

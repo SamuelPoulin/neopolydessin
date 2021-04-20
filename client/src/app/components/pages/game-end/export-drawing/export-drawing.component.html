@@ -4,8 +4,10 @@
     <canvas #preview [width]="size" [height]="size"></canvas>
     <canvas #canvas [width]="size" [height]="size" style="display: none;"></canvas>
     <div id="arrows">
-      <button mat-stroked-button (click)="cyclePreviews(-1)"><mat-icon>arrow_back</mat-icon></button>
-      <button mat-stroked-button (click)="cyclePreviews(1)"><mat-icon>arrow_forward</mat-icon></button>
+      <button mat-stroked-button (click)="cyclePreviews(-1)" [disabled]="previewId === 0"><mat-icon>arrow_back</mat-icon></button>
+      <button mat-stroked-button (click)="cyclePreviews(1)" [disabled]="previewId === editorService.recordedDrawings.length - 1 || editorService.recordedDrawings.length === 0">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
     </div>
 
     <div id="download-wrapper">

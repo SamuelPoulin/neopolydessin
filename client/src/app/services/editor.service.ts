@@ -23,7 +23,7 @@ import { SocketService } from './socket-service.service';
   providedIn: 'root',
 })
 export class EditorService {
-  static readonly SNAPSHOT_INTERVAL: number = 50;
+  static readonly SNAPSHOT_INTERVAL: number = 100;
 
   readonly tools: Map<ToolType, Tool>;
   readonly shapes: BaseShape[];
@@ -61,6 +61,7 @@ export class EditorService {
     this._commandReceiver = new CommandReceiver();
 
     this.tools = new Map<ToolType, Tool>();
+    this.recordedDrawings = [];
 
     this.initListeners();
     this.gameService.roleChanged.subscribe(() => {

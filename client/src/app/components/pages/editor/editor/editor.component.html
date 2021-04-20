@@ -59,10 +59,8 @@
           (mouseleave)="handleMouseEvent($event)" (contextmenu)="handleMouseEvent($event)">
           <app-grid [width]=surfaceWidth [height]=surfaceHeight></app-grid>
         </app-drawing-surface>
-        <button (click)="saveDrawing()">Enregistrer</button>
+        <button mat-stroked-button id="save-drawing-button" (click)="saveDrawing()">Enregistrer</button>
       </div>
     </div>
   </ng-template>
-
-  <button (click)="dialog.openByName(modalTypes.EXPORT)">Enregistrer</button>      <!-- REMOVE -->
 </div>

@@ -8,7 +8,7 @@
         <div *ngIf="wonLastGame" id="game-won-outcome-text" class="game-outcome-text">Victoire</div>
         <div *ngIf="!wonLastGame" id="game-lost-outcome-text" class="game-outcome-text">Défaite</div>
         <div id="game-outcome-score">Vous avez accumulé {{lastGameScore}}pts</div>
-        <button id="download-button" mat-flat-button class="menu-button menu-main-button">
+        <button id="download-button" mat-flat-button class="menu-button menu-main-button" (click)="openExport()">
           Exporter les dessins
           <mat-icon id="download-button-icon" class="menu-button-icon menu-button-main-icon">file_download</mat-icon>
         </button>

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AudiovisualService } from '@services/audiovisual.service';
 import { ChatService } from '@services/chat.service';
 import { GameService } from '@services/game.service';
+import { ModalDialogService } from '@services/modal/modal-dialog.service';
+import { ModalType } from '@services/modal/modal-type.enum';
 
 @Component({
   selector: 'app-game-end',
@@ -17,6 +19,7 @@ export class GameEndComponent implements OnInit {
     private gameService: GameService,
     private audiovisualService: AudiovisualService,
     private router: Router,
+    private dialog: ModalDialogService,
   ) {}
 
   ngOnInit() {
@@ -51,5 +54,9 @@ export class GameEndComponent implements OnInit {
     } else {
       return 0;
     }
+  }
+
+  openExport() {
+    this.dialog.openByName(ModalType.EXPORT);
   }
 }

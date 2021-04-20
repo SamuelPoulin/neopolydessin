@@ -11,7 +11,7 @@ import GIF from 'gif.js';
 })
 export class ExportDrawingComponent extends AbstractModalComponent {
   readonly size: number = 500;
-  private readonly previewInterval: number = 50;
+  private readonly previewInterval: number = 20;
   private previewTimeout: NodeJS.Timeout;
 
   previewId: number = 0;
@@ -25,7 +25,7 @@ export class ExportDrawingComponent extends AbstractModalComponent {
   @ViewChild('preview') preview: ElementRef;
   @ViewChild('canvas') canvas: ElementRef;
 
-  constructor(private editorService: EditorService, dialogRef: MatDialogRef<AbstractModalComponent>) {
+  constructor(public editorService: EditorService, dialogRef: MatDialogRef<AbstractModalComponent>) {
     super(dialogRef);
 
     dialogRef.afterOpened().subscribe(() => {
@@ -44,12 +44,12 @@ export class ExportDrawingComponent extends AbstractModalComponent {
     this.previewId = 0;
     this.dataStrings = [];
     this.isLoading = false;
-    this.editorService.gameService.gameEnded.emit(); // REMOVE
 
     this.displayDrawing(this.editorService.recordedDrawings[this.previewId]);
   }
 
   async download() {
+    if (this.editorService.recordedDrawings.length === 0) return;
     this.isLoading = true;
     const data = await this.exportDrawing(this.editorService.recordedDrawings[this.previewId]);
 
@@ -104,6 +104,7 @@ export class ExportDrawingComponent extends AbstractModalComponent {
 
   async displayDrawing(svgList: string[]): Promise<void> {
     if (this.previewTimeout) clearTimeout(this.previewTimeout);
+    if (this.editorService.recordedDrawings.length === 0) return;
 
     const image = new Image();
     const ctx: CanvasRenderingContext2D = this.preview.nativeElement.getContext('2d');
