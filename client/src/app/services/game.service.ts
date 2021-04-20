@@ -31,6 +31,8 @@ export class GameService {
   roleChanged: EventEmitter<PlayerRole> = new EventEmitter<PlayerRole>();
   canGuessChanged: EventEmitter<void> = new EventEmitter<void>();
   drawingChanged: EventEmitter<void> = new EventEmitter<void>();
+  gameStarted: EventEmitter<void> = new EventEmitter<void>();
+  gameEnded: EventEmitter<void> = new EventEmitter<void>();
   isHost: boolean = false;
   wordToDraw: string = '';
 
@@ -96,6 +98,7 @@ export class GameService {
     });
     this.endGameSubscription = this.socketService.receiveGameEnd().subscribe((reason) => {
       if (reason === ReasonEndGame.WINNING_SCORE_REACHED) {
+        this.gameEnded.emit();
         this.lastGameEndState = { won: this.wonLastGame(), score: this.lastGameScore() };
         this.router.navigate(['/gameend']);
       } else if (reason === ReasonEndGame.PLAYER_DISCONNECT) {
@@ -113,6 +116,7 @@ export class GameService {
       }
     });
     this.startClientGameSubscription = this.socketService.receiveGameStart().subscribe(() => {
+      this.gameStarted.emit();
       this.isInGame = true;
       this.router.navigate(['edit']);
     });

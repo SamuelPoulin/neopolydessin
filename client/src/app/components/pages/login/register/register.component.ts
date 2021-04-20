@@ -64,7 +64,7 @@ export class RegisterComponent {
   };
 
   private isPasswordLong = (registerComponent: RegisterComponent): boolean => {
-    return registerComponent.password.length > registerComponent.minPasswordLength;
+    return registerComponent.password.length >= registerComponent.minPasswordLength;
   };
 
   get electronContainer(): Element | null {

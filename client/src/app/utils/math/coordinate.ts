@@ -91,7 +91,6 @@ export class Coordinate {
   }
 
   rotate(angle: number, center: Coordinate): Coordinate {
-    // todo - test
     angle = -MathUtils.toRad(angle);
     const angleToPoint = -Coordinate.angle(this, center) + angle;
     const delta = Coordinate.distance(this, center);

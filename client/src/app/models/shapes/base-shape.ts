@@ -92,7 +92,6 @@ export abstract class BaseShape {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static jsonReplacer(key: string, value: any): any {
     // for use with JSON.Stringify
-    // todo - utile?
     return key === 'svgNode' ? undefined : value;
   }
 
