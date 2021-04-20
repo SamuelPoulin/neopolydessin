@@ -18,7 +18,7 @@
         Aucun salon de discussion n'existe.
       </div>
     </ng-container>
-    <div id="chatrooms-container">
+    <div id="chatrooms-container" [style.padding-bottom]="electronContainer ? '90px' : '50px'">
       <ng-container *ngFor="let chatRoom of joinableRooms">
         <app-chat-room [room]="chatRoom"></app-chat-room>
       </ng-container>
