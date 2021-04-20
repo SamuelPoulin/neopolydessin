@@ -9,29 +9,6 @@
         android:layout_height="match_parent"
         tools:context=".ui.game.view.GameActivity">
 
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:id="@+id/gameInfoBar"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:background="@drawable/round_corner_outlined"-->
-        <!--            android:orientation="horizontal"-->
-        <!--            app:layout_constraintBottom_toTopOf="@+id/drawboardContainer"-->
-        <!--            app:layout_constraintTop_toTopOf="parent">-->
-
-
-        <!--            <TextView-->
-        <!--                android:id="@+id/role"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:paddingEnd="20dp"-->
-        <!--                android:textColor="@color/black"-->
-        <!--                android:textSize="35sp"-->
-        <!--                android:textStyle="bold"-->
-        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--                app:layout_constraintRight_toRightOf="parent"-->
-        <!--                tools:ignore="RtlSymmetry" />-->
-        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/drawboardContainer"
             android:layout_width="match_parent"
@@ -81,14 +58,35 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toRightOf="@id/timerIcon" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <ImageView
-                android:id="@+id/currentRole"
-                android:layout_width="50dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/roleContainer"
+                android:layout_width="match_parent"
                 android:layout_height="50dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/timerContainer" />
+                app:layout_constraintTop_toBottomOf="@id/timerContainer">
+                <ImageView
+                    android:id="@+id/currentRole"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginRight="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/roleInstruction"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="packed"/>
+                <TextView
+                    android:id="@+id/roleInstruction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/chat_header_black"
+                    app:layout_constraintLeft_toRightOf="@id/currentRole"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:id="@+id/team1LabelContainer"
@@ -96,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/currentRole">
+                app:layout_constraintTop_toBottomOf="@+id/roleContainer">
 
                 <TextView
                     android:id="@+id/team1Label"
@@ -176,6 +174,16 @@
                 tools:ignore="RtlSymmetry" />
 
             <Button
+                android:id="@+id/continueTutorial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#FF7246"
+                android:text="@string/continue_tutorial"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toTopOf="@id/logoutBtn"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+            <Button
                 android:id="@+id/logoutBtn"
                 style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                 android:layout_width="wrap_content"
@@ -194,7 +202,6 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/chatRoot"
-            android:name="com.projet.clientleger.ui.chat.ChatFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"

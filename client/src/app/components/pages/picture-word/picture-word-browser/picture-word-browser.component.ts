@@ -10,7 +10,7 @@ import { ModalType } from '@services/modal/modal-type.enum';
   styleUrls: ['./picture-word-browser.component.scss'],
 })
 export class PictureWordBrowserComponent {
-  constructor(private modalService: ModalDialogService, private router: Router, private editorService: EditorService) { }
+  constructor(private modalService: ModalDialogService, private router: Router, private editorService: EditorService) {}
 
   get electronContainer(): Element | null {
     return document.querySelector('.container-after-titlebar');

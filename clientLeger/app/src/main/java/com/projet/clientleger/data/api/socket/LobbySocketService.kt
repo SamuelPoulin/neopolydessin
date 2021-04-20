@@ -102,7 +102,11 @@ class LobbySocketService @Inject constructor(private val socketService: SocketSe
     fun joinLobby(lobbyId: String): Observable<LobbyInfo> {
         return Observable.create { emitter ->
             socketService.socket.emit(LobbySocketEndpoints.JOIN_LOBBY.value, lobbyId, Ack { (lobby) ->
-                emitter.onNext((Json.decodeFromString(Lobby.serializer(), lobby.toString()) as Lobby).toInfo())
+                if(lobby == null)
+                    emitter.onNext(LobbyInfo())
+                else {
+                    emitter.onNext((Json.decodeFromString(Lobby.serializer(), lobby.toString())).toInfo())
+                }
             })
         }
     }

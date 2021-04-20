@@ -1,10 +1,14 @@
 package com.projet.clientleger.ui.game.view
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.IBinder
 import android.util.AttributeSet
 import android.view.View
 import androidx.activity.viewModels
@@ -16,8 +20,14 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
 import com.projet.clientleger.data.api.model.SequenceModel
+import com.projet.clientleger.data.enumData.PlayerRole
+import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.model.lobby.PlayerInfo
+import com.projet.clientleger.data.service.ChatStorageService
 import com.projet.clientleger.databinding.ActivityGameBinding
+import com.projet.clientleger.ui.chat.ChatFragment
+import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
 import com.projet.clientleger.ui.game.viewmodel.GameViewModel
@@ -38,14 +48,36 @@ const val DRAWBOARD_INTRO = "Nous passons maintenant à la partie intéressante 
 const val INTRO_CONCLUSION = "Félicitation, vous avez terminé le tutoriel de Polydessin!" +
         "\nVous pouvez rester et vous familiariser avec le jeu, mais prenez en compte que les boutons Annuler et Refaire ne sont pas disponibles dans le tutoriel" +
         "\nPour revenir au menu principal et commencer à jouer, appuyez sur le bouton quitter en bas à gauche de l'écran"
+const val DRAWBOARD_CONCLUSION = "Félicitation, vous avez officiellement dessiné votre premier sur Polydessin! " +
+        "Nous allons maintenant changer de rôle, vous devez désormais deviner le dessin"
+const val CHAT_TUTORIAL_SUCESS = "Vous avez deviné notre mot avec succès, bravo ! " +
+        "Voila qui conclue alors notre tutoriel, vous pouvez rester et vous amuser avec le dessin " +
+        "autant que vous voulez. Quand vous serez prêt à partir, appuyez sur le bouton quitter en bas à gauche de l'écran"
 @AndroidEntryPoint
 class GameTutorialActivity: AppCompatActivity()  {
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
 
+    private var chatService: ChatStorageService? = null
+
+
+    private val chatConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            chatService = (service as ChatStorageService.LocalBinder).getService()
+            chatService?.addNewConvo(TabInfo(LobbyViewModel.GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID,TabType.GAME),true)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            chatService = null
+        }
+    }
+
     @Inject
     lateinit var drawboardFragment:DrawboardFragment
+
+    @Inject
+    lateinit var chatFragment:ChatFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,11 +103,35 @@ class GameTutorialActivity: AppCompatActivity()  {
 
         supportFragmentManager.commit{
             add(R.id.drawboardContainer, drawboardFragment)
+            add(R.id.chatRoot,chatFragment)
         }
 
         supportFragmentManager.setFragmentResultListener("ready",this){requestKey, bundle ->
             startTutorialSequence()
         }
+        binding.continueTutorial.setOnClickListener {
+            continueTutorial()
+        }
+        supportFragmentManager.setFragmentResultListener("finishTutorial",this){ requestKey, bundle ->
+            finishTutorial()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if(chatService == null) {
+            Intent(this, ChatStorageService::class.java).also { intent ->
+                bindService(intent, chatConnection, Context.BIND_IMPORTANT)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        chatService?.let {
+            unbindService(chatConnection)
+        }
+
     }
 
     private fun startTutorialSequence(){
@@ -88,7 +144,18 @@ class GameTutorialActivity: AppCompatActivity()  {
         for(i in 0 until drawBoardSequenceModels.size){
             models.add(drawBoardSequenceModels[i])
         }
-        models.add(SequenceModel(INTRO_CONCLUSION, binding.drawboardContainer,this,false))
+        vm.createSequence(models)
+    }
+    private fun continueTutorial(){
+        binding.continueTutorial.visibility = View.INVISIBLE
+        binding.currentRole.setImageResource(R.drawable.ic_guessing)
+        supportFragmentManager.setFragmentResult("isGuessing", bundleOf("boolean" to true))
+        val models:ArrayList<SequenceModel> = ArrayList()
+        models.add(SequenceModel(DRAWBOARD_CONCLUSION,binding.drawboardContainer,this,false))
+        val chatSequenceModels = chatFragment.getTutorialSequence()
+        for(i in 0 until chatSequenceModels.size){
+            models.add(chatSequenceModels[i])
+        }
         vm.createSequence(models)
     }
 
@@ -123,5 +190,15 @@ class GameTutorialActivity: AppCompatActivity()  {
             dialog.continueBtn.setOnClickListener {
                 dialog.dismiss()
             }
+    }
+    private fun finishTutorial(){
+        val models:ArrayList<SequenceModel> = ArrayList()
+        models.add(SequenceModel(CHAT_TUTORIAL_SUCESS,binding.chatRoot,this,false))
+        vm.createSequence(models)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        finish()
     }
 }

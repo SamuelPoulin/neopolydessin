@@ -171,8 +171,8 @@ export class SocketService {
 
   receivePlayerDisconnections(): Observable<SystemMessage> {
     return new Observable<SystemMessage>((obs) => {
-      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (username: string, timeStamp: number) =>
-        obs.next({ timestamp: timeStamp, content: `${username} a quitté la discussion.` }),
+      this.socket.on(SocketMessages.PLAYER_DISCONNECTION, (playerInfo: Player, timeStamp: number) =>
+        obs.next({ timestamp: timeStamp, content: `${playerInfo.username} a quitté la discussion.` }),
       );
     });
   }
@@ -329,7 +329,6 @@ export class SocketService {
   getPlayerJoined(): Observable<Player> {
     return new Observable<Player>((obs) => {
       this.socket.on(SocketMessages.PLAYER_CONNECTION, (player: Player) => {
-        // todo - use new format
         obs.next(player);
       });
     });
@@ -375,10 +374,10 @@ export class SocketService {
     });
   }
 
-  receiveStartPath(): Observable<{ id: number; coord: Coordinate; brush: BrushInfo }> {
-    return new Observable<{ id: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
+  receiveStartPath(): Observable<{ id: number; zIndex: number; coord: Coordinate; brush: BrushInfo }> {
+    return new Observable<{ id: number; zIndex: number; coord: Coordinate; brush: BrushInfo }>((obs) => {
       this.socket.on(SocketDrawing.START_PATH_BC, (id: number, zIndex: number, coord: Coordinate, brush: BrushInfo) => {
-        obs.next({ id, coord, brush });
+        obs.next({ id, zIndex, coord, brush });
       });
     });
   }

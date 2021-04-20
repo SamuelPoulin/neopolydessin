@@ -8,6 +8,7 @@ import com.projet.clientleger.data.api.model.lobby.Player
 import com.projet.clientleger.data.model.account.AccountInfo
 import com.projet.clientleger.data.model.friendslist.Friend
 import com.projet.clientleger.utils.BitmapConversion
+import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.HttpsURLConnection
@@ -17,7 +18,7 @@ class AvatarStorageService @Inject constructor(val sessionManager: SessionManage
     private val gameAvatars: HashMap<String, Bitmap> = HashMap()
     private val friendsAvatars: HashMap<String, Bitmap> = HashMap()
 
-    fun addFriends(friends: ArrayList<Friend>) {
+    suspend fun addFriends(friends: ArrayList<Friend>) {
         for (friend in friends) {
             if (isValidFriend(friend)) {
                 val resAvatar = sessionManager.request(friend.friendId!!.avatar, apiAvatarInterface::getAvatar)
@@ -27,22 +28,22 @@ class AvatarStorageService @Inject constructor(val sessionManager: SessionManage
                 }
             }
         }
-
     }
 
     fun isValidFriend(friend: Friend): Boolean {
         return !friendsAvatars.containsKey(friend.friendId?._id) && friend.friendId != null && friend.friendId?._id != null
     }
 
-    fun updateFriendAvatar(friendId: String, avatarId: String){
+    suspend fun updateFriendAvatar(friendId: String, avatarId: String) {
         val resAvatar = sessionManager.request(avatarId, apiAvatarInterface::getAvatar)
         if (resAvatar.code() == HttpsURLConnection.HTTP_OK) {
             val avatar = BitmapFactory.decodeStream(resAvatar.body()!!.byteStream())
             friendsAvatars[friendId] = BitmapConversion.toRoundedBitmap(avatar)
         }
+
     }
 
-    fun addPlayer(player: Player) {
+    suspend fun addPlayer(player: Player) {
         if (gameAvatars.containsKey(player.accountId))
             return
 

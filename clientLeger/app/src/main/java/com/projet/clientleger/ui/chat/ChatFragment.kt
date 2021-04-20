@@ -4,9 +4,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Bundle
-import android.os.IBinder
+import android.graphics.drawable.Drawable
+import android.os.*
 import android.text.Html
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -14,14 +15,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.SequenceModel
+import com.projet.clientleger.data.enumData.GuessStatus
 import com.projet.clientleger.data.enumData.TabType
 import com.projet.clientleger.data.enumData.SoundId
+import com.projet.clientleger.data.model.chat.GuessMessageInfo
 import com.projet.clientleger.data.model.friendslist.FriendSimplified
 import com.projet.clientleger.data.model.chat.TabInfo
 import com.projet.clientleger.data.service.ChatStorageService
@@ -29,9 +35,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.regex.Pattern
 import javax.inject.Inject
 import com.projet.clientleger.databinding.FragmentChatBinding
+import com.projet.clientleger.ui.game.view.MILLIS_IN_SEC
+import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
+import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
 
 private const val MESSAGE_CONTENT_ERROR: String =
     "Le message ne doit pas être vide et ne doit pas dépasser 200 caractères"
+const val CHAT_BOX_TUTORIAL = "Vous pouvez voir que la boite de chat est devenu verte, c'est donc à vous " +
+        "de deviner ! Étant donné que c'est votre première fois on vous laisse une chance, nous allons vous " +
+        "dire le mot à deviner, c'est-à-dire le mot suivant : Pomme. " +
+        "Écrivez le mot dans la barre et appuyez sur envoyer pour valider votre essai"
 
 @AndroidEntryPoint
 class ChatFragment @Inject constructor() : Fragment() {
@@ -42,6 +57,14 @@ class ChatFragment @Inject constructor() : Fragment() {
     var screenSize: Int = -1
     var baseWidth: Int = -1
     private var chatService: ChatStorageService? = null
+    var countDownTimer: CountDownTimer = object: CountDownTimer(2000, 2){
+        override fun onTick(millisUntilFinished: Long) {
+        }
+
+        override fun onFinish() {
+            binding?.guessResult?.visibility = View.GONE
+        }
+    }
 
     private val chatConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -128,22 +151,24 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun resize(height: Int){
-        if(baseHeight < 0)
+        if(baseHeight < 0 )
             baseHeight = binding!!.root.height
         if(height > 0 && baseHeight == binding!!.root.layoutParams.height) {
             val params = binding!!.root.layoutParams
             params.height = baseHeight - height
             binding?.let {
+                it.rvTabs.visibility = View.GONE
                 it.root.requestLayout()
-                it.rvMessages.adapter?.notifyDataSetChanged()
+                //it.rvMessages.adapter?.notifyDataSetChanged()
                 it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
             }
         } else if(height < 0 && binding!!.root.layoutParams.height != baseHeight){
             val params = binding!!.root.layoutParams
             params.height = baseHeight
             binding?.let {
+                it.rvTabs.visibility = View.VISIBLE
                 it.root.requestLayout()
-                it.rvMessages.adapter?.notifyDataSetChanged()
+                //it.rvMessages.adapter?.notifyDataSetChanged()
                 it.rvMessages.scrollToPosition(vm.messagesLiveData.value!!.size - 1)
             }
         }
@@ -215,6 +240,35 @@ class ChatFragment @Inject constructor() : Fragment() {
             service.subscribeConvosChange(vm::updateConvos)
             service.subscribeCurrentConvoChange(vm::updateCurrentConvo)
             service.subscribeCurrentTabChange(vm::changeCurrentTab)
+            service.subscribeGuessReceived(::showGuessResult)
+        }
+    }
+
+    private fun showGuessResult(status: GuessStatus){
+        lifecycleScope.launch {
+            binding?.let { mBinding ->
+                countDownTimer.cancel()
+                val icon: Int
+                val color: Int
+                when(status){
+                    GuessStatus.CORRECT -> {
+                        icon = R.drawable.ic_correct_guess
+                        color = R.color.lightGreen
+                    }
+                    GuessStatus.CLOSE -> {
+                        icon = R.drawable.ic_close_guess
+                        color = R.color.mustard_yellow
+                    }
+                    GuessStatus.WRONG -> {
+                        icon = R.drawable.ic_wrong
+                        color = R.color.red
+                    }
+                }
+                mBinding.guessResult.setImageDrawable(ContextCompat.getDrawable(requireContext(), icon))
+                mBinding.guessResult.backgroundTintList = ContextCompat.getColorStateList(requireContext(), color)
+                mBinding.guessResult.visibility = View.VISIBLE
+                countDownTimer.start()
+            }
         }
     }
 
@@ -270,10 +324,20 @@ class ChatFragment @Inject constructor() : Fragment() {
     }
 
     private fun sendMessage() {
-        vm.sendMessage()
-
-        //TODO show loading message
-
+        if(vm.isTutorialActive() && vm.isGuessing.value!!){
+            val entry = binding?.chatBox?.text.toString()
+            var guessStatus = GuessStatus.WRONG
+            if(entry.toLowerCase(Locale.ROOT) == "pomme"){
+                guessStatus = GuessStatus.CORRECT
+                setFragmentResult("finishTutorial",  bundleOf())
+            }
+            chatService?.receiveMessage(GuessMessageInfo(entry, System.currentTimeMillis(), vm.accountInfo.username, guessStatus), TabInfo(LobbyViewModel.GAME_TAB_NAME,ChatViewModel.GAME_TAB_ID,TabType.GAME))
+        }
+        else if (!vm.isTutorialActive()){
+            val error = vm.sendMessage()
+            if(error != null)
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }
         binding?.chatBox?.text?.clear()
     }
     private fun isMessageValidFormat(message: String): Boolean {
@@ -321,5 +385,10 @@ class ChatFragment @Inject constructor() : Fragment() {
     override fun onDestroy() {
         binding = null
         super.onDestroy()
+    }
+    fun getTutorialSequence():ArrayList<SequenceModel>{
+        val models:ArrayList<SequenceModel> = ArrayList()
+        models.add(SequenceModel(CHAT_BOX_TUTORIAL,binding!!.chatSendBox,requireActivity(),false))
+        return models
     }
 }

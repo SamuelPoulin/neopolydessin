@@ -12,37 +12,27 @@ import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.AvatarStorageService
 import com.projet.clientleger.data.service.ChatStorageService
 import io.reactivex.rxjava3.core.Observable
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class LobbyRepository @Inject constructor(private val lobbySocketService: LobbySocketService,
                                           private val sessionManager: SessionManager,
                                           private val avatarStorageService: AvatarStorageService) {
     val accountInfo = sessionManager.getAccountInfo()
-    fun receivePlayerJoin(): Observable<PlayerInfo> {
-        return Observable.create { emitter ->
-            lobbySocketService.receivePlayerJoin().subscribe{
-                avatarStorageService.addPlayer(it)
-                emitter.onNext(it.toPlayerInfo(avatarStorageService.getAvatar(it.accountId)))
-            }
-        }
-    }
 
-    fun receivePlayerLeave(): Observable<String>{
-        return lobbySocketService.receivePlayerLeave()
-    }
-
-    fun unsubscribeLobby(){
+    fun unsubscribeLobby() {
         lobbySocketService.unsubscribeLobby()
     }
-    fun unsubscribeLobbyList(){
+
+    fun unsubscribeLobbyList() {
         lobbySocketService.unsubscribeLobbyList()
     }
 
-    fun receivedAllLobbies(gameType: GameType?, difficulty: Difficulty?) : Observable<ArrayList<LobbyInfo>>{
-        return lobbySocketService.receiveAllLobbies(gameType,difficulty)
+    fun receivedAllLobbies(gameType: GameType?, difficulty: Difficulty?): Observable<ArrayList<LobbyInfo>> {
+        return lobbySocketService.receiveAllLobbies(gameType, difficulty)
     }
 
-    fun leaveLobby(){
+    fun leaveLobby() {
         lobbySocketService.leaveLobby()
     }
 
@@ -50,18 +40,21 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.createGame(gameName, gameType, difficulty, isPrivate)
     }
 
-    fun receiveJoinedLobbyInfo() : Observable<ArrayList<PlayerInfo>>{
+    fun receiveJoinedLobbyInfo(): Observable<ArrayList<PlayerInfo>> {
         return Observable.create { emitter ->
-            lobbySocketService.receiveJoinedLobbyInfo().subscribe{
-                val list = ArrayList<PlayerInfo>()
-                for(player in it){
-                    if(accountInfo.accountId == player.accountId)
-                        avatarStorageService.addPlayer(accountInfo)
-                    else
-                        avatarStorageService.addPlayer(player)
-                    list.add(player.toPlayerInfo(avatarStorageService.getAvatar(player.accountId)))
+            lobbySocketService.receiveJoinedLobbyInfo().subscribe {
+                CoroutineScope(Job() + Dispatchers.IO).launch {
+                    val list = ArrayList<PlayerInfo>()
+                    for (player in it) {
+                        if (accountInfo.accountId == player.accountId)
+                            avatarStorageService.addPlayer(accountInfo)
+                        else
+                            avatarStorageService.addPlayer(player)
+
+                        list.add(player.toPlayerInfo(avatarStorageService.getAvatar(player.accountId)))
+                    }
+                    emitter.onNext(list)
                 }
-                emitter.onNext(list)
             }
         }
     }
@@ -70,34 +63,35 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.joinLobby(lobbyId)
     }
 
-    fun startGame(){
+    fun startGame() {
         lobbySocketService.startGame()
     }
-    fun getUsername(): String{
+
+    fun getUsername(): String {
         return sessionManager.getUsername()
     }
 
-    fun receiveStartGame():Observable<String>{
+    fun receiveStartGame(): Observable<String> {
         return lobbySocketService.receiveStartGame()
     }
 
-    fun getUserInfo(): AccountInfo{
+    fun getUserInfo(): AccountInfo {
         return sessionManager.getAccountInfo()
     }
 
-    fun clearAvatarStorage(){
+    fun clearAvatarStorage() {
         avatarStorageService.clear()
     }
 
-    fun addBot(teamNumber: Int){
+    fun addBot(teamNumber: Int) {
         lobbySocketService.addBot(teamNumber)
     }
 
-    fun removeBot(username: String){
+    fun removeBot(username: String) {
         lobbySocketService.removeBot(username)
     }
 
-    fun kickPlayer(playerId: String){
+    fun kickPlayer(playerId: String) {
         lobbySocketService.kickPlayer(playerId)
     }
 
@@ -109,7 +103,7 @@ class LobbyRepository @Inject constructor(private val lobbySocketService: LobbyS
         return lobbySocketService.receiveUpdateLobbyList()
     }
 
-    fun sendPrivacySetting(isPrivate: Boolean){
+    fun sendPrivacySetting(isPrivate: Boolean) {
         lobbySocketService.sendPrivacySetting(isPrivate)
     }
 

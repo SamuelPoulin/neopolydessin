@@ -24,7 +24,7 @@
     <string name="accountSettings">Paramètres</string>
     <string name="disconnect">Deconnexion</string>
     <string name="profile">Profil</string>
-    <string name="userGuide">Guide utilisateur</string>
+    <string name="userGuide">Tutoriel</string>
     <string name="play">Jouer</string>
     <string name="picword">Mot-image</string>
     <string name="lobbyList">Liste des parties</string>
@@ -95,7 +95,11 @@
     <string name="rooms">Salons</string>
     <string name="rooms_chat">Salons de discussion</string>
     <string name="pending">En attente...</string>
+    <string name="modify_image">Cliquez pour modifier l\'image</string>
+    <string name="score_sprint_solo">Meilleur Score Sprint Solo</string>
+    <string name="score_sprint_coop">Meilleur Score Sprint Coop</string>
     <string name="bot_player">Joueur virtuel</string>
+    <string name="continue_tutorial">Continuer Le tutoriel</string>
     <string name="emptyLobbylistMsg">Il n\'y a présentement auncun lobby disponible</string>
     <string name="start">Commencer</string>
     <string name="menu_create_game">Créer une partie</string>

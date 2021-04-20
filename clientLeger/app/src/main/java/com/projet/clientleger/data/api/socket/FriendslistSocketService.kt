@@ -43,7 +43,6 @@ class FriendslistSocketService @Inject constructor(val socketService: SocketServ
 
     fun receiveInvite(): Observable<Pair<String, String>>{
         return socketService.receiveFromSocket(FriendslistSocketEndpoint.RECEIVE_INVITE.value){ (username, lobbyId) ->
-                println("invite received")
                 Pair(username as String, lobbyId as String)
         }
     }

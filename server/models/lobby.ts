@@ -447,7 +447,7 @@ export abstract class Lobby {
     return teamScoreArray;
   }
 
-  private teamDoesntHaveBot(teamNumber: number): boolean {
+  protected teamDoesntHaveBot(teamNumber: number): boolean {
     return !this.players.find((player) => player.isBot && player.teamNumber === teamNumber);
   }
 

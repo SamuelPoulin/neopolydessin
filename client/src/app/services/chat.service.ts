@@ -33,6 +33,7 @@ export class ChatService {
 
   socketService: SocketService;
   gameService: GameService;
+  tutorialService: TutorialService;
 
   chatState: ChatState;
 
@@ -45,7 +46,6 @@ export class ChatService {
     private nz: NgZone,
     private snackBar: MatSnackBar,
     private audiovisualService: AudiovisualService,
-    private tutorialService: TutorialService,
   ) {
     this.initChatState();
 
@@ -56,9 +56,15 @@ export class ChatService {
           this.chatState = arg;
         });
       });
+      this.electronService.ipcRenderer.on('chat-scrolldown', (event, arg) => {
+        this.nz.run(() => {
+          this.chatRoomChanged.emit();
+        });
+      });
     } else {
       this.socketService = this.injector.get(SocketService) as SocketService;
       this.gameService = this.injector.get(GameService) as GameService;
+      this.tutorialService = this.injector.get(TutorialService) as TutorialService;
 
       this.initMainChat();
 
@@ -150,10 +156,14 @@ export class ChatService {
         const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
         if (roomIndex > -1) {
           this.chatState.rooms[roomIndex].messages.push(message);
+          if (this.chatState.currentRoomIndex !== roomIndex) {
+            this.chatState.rooms[roomIndex].newMessage = true;
+            this.audiovisualService.playSound(GameSound.CHAT_NOTIFICATION);
+          }
         }
 
-        this.chatRoomChanged.emit();
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       }),
     );
 
@@ -224,6 +234,7 @@ export class ChatService {
             newMessage: false,
           });
         }
+        this.chatState.inGame = true;
         this.updatePoppedOutChat();
       }),
     );
@@ -231,6 +242,8 @@ export class ChatService {
     this.subscriptions.push(
       this.socketService.leftGame.subscribe(() => {
         this.closeRoom(ChatService.GAME_ROOM_NAME);
+        this.chatState.inGame = false;
+        this.updatePoppedOutChat();
       }),
     );
 
@@ -298,8 +311,8 @@ export class ChatService {
           }
         }
 
-        this.chatRoomChanged.emit();
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       }),
     );
 
@@ -354,21 +367,27 @@ export class ChatService {
           }
         }
 
-        this.chatRoomChanged.emit();
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       }),
     );
 
     this.subscriptions.push(
       this.socketService.receivePlayerConnections().subscribe((message) => {
-        this.handleMessage(message);
+        const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+        if (roomIndex !== -1) {
+          this.chatState.rooms[roomIndex].messages.push({ timestamp: message.timestamp, content: message.content } as SystemMessage);
+        }
         this.updatePoppedOutChat();
       }),
     );
 
     this.subscriptions.push(
       this.socketService.receivePlayerDisconnections().subscribe((message) => {
-        this.handleMessage(message);
+        const roomIndex = this.chatState.rooms.findIndex((room) => room.type === ChatRoomType.GAME);
+        if (roomIndex !== -1) {
+          this.chatState.rooms[roomIndex].messages.push({ timestamp: message.timestamp, content: message.content } as SystemMessage);
+        }
         this.updatePoppedOutChat();
       }),
     );
@@ -405,6 +424,10 @@ export class ChatService {
       this.tutorialService.tutorialStarted.subscribe(() => {
         this.chatState.friendslistOpened = false;
         this.chatState.chatRoomsOpened = false;
+        if (this.chatPoppedOut) {
+          this.electronService.ipcRenderer.send('chat-quit');
+        }
+        this.chatState.currentRoomIndex = 0;
       }),
     );
   }
@@ -420,6 +443,7 @@ export class ChatService {
       guessing: false,
       friendslistOpened: false,
       chatRoomsOpened: false,
+      inGame: false,
     };
 
     this.chatRoomChanged = new EventEmitter<void>();
@@ -452,6 +476,13 @@ export class ChatService {
     }
   }
 
+  scrollToBottom() {
+    this.chatRoomChanged.emit();
+    if (this.chatPoppedOut) {
+      this.electronService.ipcRenderer.send('chat-scrolldown');
+    }
+  }
+
   updateFriendsList(friendslist: FriendsList) {
     this.chatState.friends = [];
     this.chatState.friendRequests = [];
@@ -462,10 +493,6 @@ export class ChatService {
         this.chatState.friendRequests.push(user);
       }
     }
-  }
-
-  handleMessage(message: Message) {
-    console.log(message);
   }
 
   sendMessage(text: string) {
@@ -522,6 +549,7 @@ export class ChatService {
       this.socketService.sendGuess(text);
       this.chatState.guessing = false;
       this.updatePoppedOutChat();
+      this.scrollToBottom();
       if (this.tutorialService.tutorialActive && this.tutorialService.currentStep === TutorialStep.GUESS_DRAWING) {
         this.tutorialService.next(TutorialStep.SEE_GUESS);
       }
@@ -536,8 +564,8 @@ export class ChatService {
       if (roomIndex > -1) {
         this.chatState.rooms.splice(roomIndex, 1);
         this.chatState.currentRoomIndex = 0;
-        this.chatRoomChanged.emit();
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       }
     }
   }
@@ -549,9 +577,9 @@ export class ChatService {
       const roomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
       if (roomIndex > -1) {
         this.chatState.currentRoomIndex = roomIndex;
-        this.chatRoomChanged.emit();
         this.chatState.rooms[roomIndex].newMessage = false;
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       }
     }
   }
@@ -588,12 +616,11 @@ export class ChatService {
           });
           this.focusRoom(friendUsername);
           this.chatState.friendslistOpened = false;
-          this.chatRoomChanged.emit();
           this.updatePoppedOutChat();
+          this.scrollToBottom();
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .catch(() => {});
     }
   }
 
@@ -664,8 +691,8 @@ export class ChatService {
       this.socketService.joinChatRoom(roomName).then(() => {
         this.chatState.currentRoomIndex = this.chatState.rooms.findIndex((room) => room.name === roomName);
         this.chatState.chatRoomsOpened = false;
-        this.chatRoomChanged.emit();
         this.updatePoppedOutChat();
+        this.scrollToBottom();
       });
     }
   }

@@ -11,4 +11,5 @@ export interface ChatState {
   guessing: boolean;
   friendslistOpened: boolean;
   chatRoomsOpened: boolean;
+  inGame: boolean;
 }

@@ -31,7 +31,6 @@
             android:id="@+id/menuContentContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@drawable/round_corner_outlined"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"

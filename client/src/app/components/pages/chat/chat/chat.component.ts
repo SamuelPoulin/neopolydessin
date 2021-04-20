@@ -23,6 +23,10 @@ export class ChatComponent {
   inputValue: string = '';
   emojiMartOpen: boolean = false;
 
+  readonly spamMaximum: number = 5;
+  readonly spamResetDelay: number = 3000;
+  spamCounter: number;
+
   chatRoomChangedSubscription: Subscription;
   isElectronApp: boolean;
 
@@ -35,6 +39,7 @@ export class ChatComponent {
     public router: Router,
   ) {
     ChatComponent.MAX_CHARACTER_COUNT = 200;
+    this.spamCounter = 0;
 
     this.chatRoomChangedSubscription = this.chatService.chatRoomChanged.subscribe(() => {
       this.scrollToBottom();
@@ -46,7 +51,13 @@ export class ChatComponent {
   }
 
   sendMessage(): void {
+    if (this.spamCounter === 0) {
+      setTimeout(() => {
+        this.spamCounter = 0;
+      }, this.spamResetDelay);
+    }
     if (this.inputValid) {
+      this.spamCounter++;
       if (this.chatService.chatState.guessing) {
         this.chatService.sendGuess(this.inputValue);
       } else {
@@ -60,7 +71,11 @@ export class ChatComponent {
   get inputValid(): boolean {
     if (this.inputValue.replace(/ /g, '')) {
       if (this.inputValue.length < ChatComponent.MAX_CHARACTER_COUNT) {
-        return true;
+        if (this.spamCounter < this.spamMaximum) {
+          return true;
+        } else {
+          this.sendNotification('Vous avez envoyer trop de message récemment');
+        }
       } else {
         this.sendNotification('Le message ne doit pas dépasser 200 caractères.');
       }

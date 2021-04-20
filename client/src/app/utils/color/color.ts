@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+
 /**
  * Represents a color.
  * RGB values must be between 0 and 1
@@ -298,6 +300,13 @@ export class Color implements ColorComponents {
   get rgbString(): string {
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     return `rgb(${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)})`;
+  }
+
+  /**
+   * Get RGBA string `rgb(255,255,255,1)`
+   */
+  get rgbaString(): string {
+    return `rgba(${this.r255}, ${this.g255}, ${this.b255}, ${this.a})`;
   }
 
   get hslString(): string {

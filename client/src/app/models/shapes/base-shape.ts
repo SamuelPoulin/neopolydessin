@@ -18,6 +18,7 @@ export abstract class BaseShape {
   secondaryColor: Color;
   primaryColor: Color;
   serverId: number;
+  zIndex: number;
 
   abstract get origin(): Coordinate;
   abstract set origin(c: Coordinate);
@@ -83,6 +84,7 @@ export abstract class BaseShape {
     this.strokeWidth = 1;
     this.secondaryColor = Color.BLACK;
     this.primaryColor = Color.WHITE;
+    this.zIndex = 1;
 
     this.updateProperties();
   }

@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-
+  max-width: 400px;
   height: 100%;
 
   overflow-y: auto;
@@ -96,6 +96,7 @@ system-message {
   color: red;
 
   word-break: break-word;
+
   &:focus {
     outline: none;
   }
@@ -125,11 +126,12 @@ system-message {
   align-items: center;
 }
 
-#chat-friendslist-toggler, #chat-rooms-toggler {
+#chat-friendslist-toggler,
+#chat-rooms-toggler {
   height: 50%;
   padding: 0px 5px;
   color: white;
-  
+
   transition: background-color 0.25s;
 
   &:hover {

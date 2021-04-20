@@ -48,7 +48,7 @@ const PERSONNALITIES: Map<number, BotSentences> = new Map([
       onPlayerIncorrectGuess: 'Vous êtes pas très bon... Pourtant mon dessin est clair.',
       onPlayerRequestsHint: 'Un indice... pour vrai?',
       requestHintOnCooldown: 'Je viens de vous en donner un...',
-      noMoreHints: 'J\'ai rien d\'autre à vous doner',
+      noMoreHints: 'J\'ai rien d\'autre à vous donner',
       guessLeftMessage: (guessTries: number, guessLeft: number) => {
         return `Il reste ${guessLeft} essai sur ${guessTries}`;
       }

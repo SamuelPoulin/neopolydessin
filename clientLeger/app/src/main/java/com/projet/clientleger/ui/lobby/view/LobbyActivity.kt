@@ -36,6 +36,7 @@ import com.projet.clientleger.ui.lobby.viewmodel.LobbyViewModel
 import com.projet.clientleger.utils.BitmapConversion
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.Serializable
+import java.lang.Exception
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -72,27 +73,28 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             leaveLobby(false)
         }
 
-        vm.isPrivate.observe(this){
-            if(it){
+        vm.isPrivate.observe(this) {
+            if (it) {
                 binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
                 binding.privacyBtn.text = "Partie privée"
-            } else{
+            } else {
                 binding.privacyBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.green))
                 binding.privacyBtn.text = "Partie publique"
             }
         }
 
-        vm.userIsOwner.observe(this){ isOwner ->
-            for(rv in rvTeams) {
-                (rv.adapter as TeamAdapter?)?.let{
+        vm.userIsOwner.observe(this) { isOwner ->
+            for (rv in rvTeams) {
+                (rv.adapter as TeamAdapter?)?.let {
                     it.userIsOwner = isOwner
                     it.notifyDataSetChanged()
                 }
             }
-            if(isOwner){
+            if (isOwner) {
                 binding.startGameButton.visibility = View.VISIBLE
-                binding.privacyBtn.visibility = View.VISIBLE
-            } else{
+                if(vm.gameType != GameType.SPRINT_SOLO)
+                    binding.privacyBtn.visibility = View.VISIBLE
+            } else {
                 binding.startGameButton.visibility = View.INVISIBLE
                 binding.privacyBtn.visibility = View.INVISIBLE
             }
@@ -113,9 +115,13 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         if (intent.getBooleanExtra("isJoining", false)) {
             vm.joinLobby().subscribe {
-                updateUiInfo(it)
-                if (it.gameType != GameType.SPRINT_SOLO)
-                    supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to true))
+                if (it.lobbyId.isEmpty())
+                    leaveLobby(false)
+                else {
+                    updateUiInfo(it)
+                    if (it.gameType != GameType.SPRINT_SOLO)
+                        supportFragmentManager.setFragmentResult("canInvite", bundleOf("boolean" to true))
+                }
             }
         } else {
             vm.createGame().subscribe {
@@ -175,8 +181,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onBackPressed() {
         loadingDialog?.let {
-            it.dismiss()
-            leaveLobby(true)
+            if (!it.isShowing)
+                leaveLobby(true)
         }
     }
 
@@ -188,7 +194,8 @@ class LobbyActivity : AppCompatActivity(), IAcceptGameInviteListener {
             binding.teamLabel2.visibility = View.GONE
             binding.teamContent2.visibility = View.GONE
         }
-
+        if(vm.gameType == GameType.SPRINT_SOLO)
+            binding.privacyBtn.visibility = View.GONE
         binding.gameType.text = vm.gameType.toFrenchString()
         binding.difficulty.text = vm.difficulty.toFrenchString()
         binding.startGameButton.visibility = View.INVISIBLE
