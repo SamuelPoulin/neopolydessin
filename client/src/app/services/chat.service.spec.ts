@@ -34,6 +34,7 @@ MockChatService.chatState = {
   guessing: false,
   friendslistOpened: false,
   chatRoomsOpened: false,
+  inGame: false,
 } as ChatState;
 MockChatService.messages = [];
 MockChatService.chatRoomChanged = new EventEmitter<void>();
