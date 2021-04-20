@@ -106,12 +106,8 @@ export class GameService {
         });
         this.leaveGame();
       } else if (reason === ReasonEndGame.TIME_RUN_OUT) {
-        this.snackBar.open("Le temps de la partie s'est écoulé.", 'Ok', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'bottom',
-        });
-        this.leaveGame();
+        this.lastGameEndState = { won: true, score: this.scores[0].score };
+        this.router.navigate(['/gameend']);
       } else {
         this.leaveGame();
       }
