@@ -59,6 +59,7 @@ export class LobbySolo extends Lobby {
 
   protected startGame(): void {
     this.players.forEach((player) => player.playerRole = player.isBot ? PlayerRole.DRAWER : PlayerRole.GUESSER);
+    this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_GAME_STATE, CurrentGameState.DRAWING);
     this.io.in(this.lobbyId).emit(SocketLobby.UPDATE_ROLES, this.toLobbyInfo());
     this.startRoundTimer();
   }
