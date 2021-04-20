@@ -25,13 +25,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projet.clientleger.R
+import com.projet.clientleger.data.api.model.TeamScore
 import com.projet.clientleger.data.api.model.lobby.Player
-import com.projet.clientleger.data.enumData.GameType
-import com.projet.clientleger.data.enumData.PlayerRole
-import com.projet.clientleger.data.enumData.ReasonEndGame
-import com.projet.clientleger.data.enumData.TabType
+import com.projet.clientleger.data.enumData.*
 import com.projet.clientleger.data.model.chat.TabInfo
-import com.projet.clientleger.data.enumData.SoundId
 import com.projet.clientleger.data.model.game.PlayerAvatar
 import com.projet.clientleger.data.model.lobby.PlayerInfo
 import com.projet.clientleger.data.service.ChatStorageService
@@ -39,6 +36,7 @@ import com.projet.clientleger.ui.game.viewmodel.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.projet.clientleger.databinding.ActivityGameBinding
 import com.projet.clientleger.ui.IAcceptGameInviteListener
+import com.projet.clientleger.ui.chat.ChatFragment
 import com.projet.clientleger.ui.chat.ChatViewModel
 import com.projet.clientleger.ui.drawboard.DrawboardFragment
 import com.projet.clientleger.ui.game.PlayersAdapter
@@ -58,6 +56,9 @@ const val TIME_ALMOST_UP:Int= 15000
 const val TWO_DIGITS:Int = 10
 const val SEC_IN_MIN:Int = 60
 const val QUIT_GAME_MESSAGE:String = "Voulez vous vraiment quitter?"
+const val GAME_WON = "Victoire"
+const val GAME_LOST = "Défaite"
+const val GAME_TIED = "Égalité"
 
 @AndroidEntryPoint
 class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
@@ -65,10 +66,13 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
     @Inject
     lateinit var drawboardFragment: DrawboardFragment
 
+    @Inject
+    lateinit var chatFragment: ChatFragment
+
     private val vm: GameViewModel by viewModels()
     lateinit var binding: ActivityGameBinding
     private val team1: ArrayList<PlayerInfo> = ArrayList()
-    private val team2:ArrayList<PlayerInfo> = ArrayList()
+    private val team2: ArrayList<PlayerInfo> = ArrayList()
     private var timer:CountDownTimer? = null
     private var chatService: ChatStorageService? = null
 
@@ -85,6 +89,9 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportFragmentManager.setFragmentResultListener("ready", this){ s: String, bundle: Bundle ->
+            vm.onPlayerReady()
+        }
         vm.init(supportFragmentManager)
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -106,12 +113,13 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
 
         supportFragmentManager.commit{
             add(R.id.drawboardContainer, drawboardFragment)
+            add(R.id.chatRoot,chatFragment)
         }
 
         binding.logoutBtn.setOnClickListener {
             showQuitGameDialog(QUIT_GAME_MESSAGE, false)
         }
-        vm.onPlayerReady()
+        binding.continueTutorial.visibility = View.INVISIBLE
     }
 
     override fun onStart() {
@@ -159,6 +167,24 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
         }
 
         if(isMessageFromServer){
+            val endGameStatement = getEndGameStatement()
+            when(endGameStatement){
+                GameResult.NONE ->{
+                    dialog.gameOutcome.visibility = View.GONE
+                    dialog.gameScore.visibility = View.GONE
+                }
+                GameResult.COOP ->{
+                    dialog.gameOutcome.visibility = View.GONE
+                }
+                else -> {
+                    if(endGameStatement == GameResult.LOSE)
+                        dialog.gameOutcome.setTextColor(Color.RED)
+                }
+            }
+
+            dialog.gameOutcome.text = endGameStatement.value
+            dialog.gameScore.text = "Vous avez accumulé ${getScore()} points"
+
             dialog.continueBtn.visibility = View.GONE
             dialog.setOnDismissListener {
                 chatService?.removeConvo(ChatViewModel.GAME_TAB_ID)
@@ -168,10 +194,45 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 finish() }
         }
         else{
+            dialog.gameOutcome.visibility = View.INVISIBLE
+            dialog.gameScore.visibility = View.INVISIBLE
             dialog.continueBtn.setOnClickListener {
                 vm.playSound(SoundId.SELECTED.value)
                 dialog.dismiss()
             }
+        }
+    }
+    private fun getScore():Int{
+        return when(isPlayerInTeam(team1)){
+            true -> vm.teamScores.value!![0].score!!
+            else -> vm.teamScores.value!![1].score!!
+        }
+    }
+    private fun getEndGameStatement(): GameResult{
+        return if(vm.teamScores.value!!.size == 1){
+            GameResult.COOP
+        }
+        else{
+            when(isPlayerInTeam(team1)){
+                true -> getGameOutcome(vm.teamScores.value!!,0,1)
+                else -> getGameOutcome(vm.teamScores.value!!,1,0)
+            }
+        }
+    }
+    private fun isPlayerInTeam(team:ArrayList<PlayerInfo>):Boolean{
+        var result = false
+        for(i in 0 until team.size){
+            if(team[i].username == vm.getUsername()){
+                result = true
+            }
+        }
+        return result
+    }
+    private fun getGameOutcome(scores:ArrayList<TeamScore>, allyTeam:Int, enemyTeam:Int): GameResult{
+        return when{
+            scores[allyTeam].score!! > scores[enemyTeam].score!! -> GameResult.WIN
+            scores[enemyTeam].score!! > scores[allyTeam].score!! -> GameResult.LOSE
+            else -> GameResult.NONE
         }
     }
     @SuppressLint("SetTextI18n")
@@ -184,16 +245,20 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
                 PlayerRole.GUESSER -> R.drawable.ic_guessing
                 else -> 0
             }
+            val instruction = when(it){
+                PlayerRole.DRAWER -> "Dessinez"
+                PlayerRole.GUESSER -> "Devinez"
+                else -> "Attendez"
+            }
+            binding.roleInstruction.text = instruction
             if(icon != 0){
                 binding.currentRole.setImageResource(icon)
                 binding.currentRole.visibility = View.VISIBLE
             } else
-                binding.currentRole.visibility = View.INVISIBLE
+                binding.currentRole.visibility = View.GONE
         }
 
         vm.playersLiveData.observe(this){
-            if(team1.isEmpty())
-                updatePlayersAvatar(it)
             team1.clear()
             team2.clear()
             for(player in it){
@@ -225,24 +290,16 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             if(it.size > 0)
                 binding.team1Score.text = it[0].score.toString()
             if(it.size > 1)
-                binding.team2Label.text = it[1].score.toString()
+                binding.team2Score.text = it[1].score.toString()
         }
         vm.receiveEndGameNotice().subscribe{
+            timer?.cancel()
             lifecycleScope.launch {
                 showQuitGameDialog(ReasonEndGame.stringToEnum(it).findDialogMessage(), true)
             }
         }
-        vm.reveiceBoardwipeNotice().subscribe{
-            vm.playSound(SoundId.BOARDWIPE.value)
-            lifecycleScope.launch {
-                supportFragmentManager.setFragmentResult("boardwipeNeeded", bundleOf("boolean" to true))
-            }
-        }
     }
 
-    private fun updatePlayersAvatar(playersInfo: ArrayList<PlayerInfo>){
-        
-    }
     private fun setTimer(timeInMilis:Long){
         timer?.cancel()
         timer = object: CountDownTimer(timeInMilis, MILLIS_IN_SEC){
@@ -263,10 +320,10 @@ class GameActivity : AppCompatActivity(), IAcceptGameInviteListener {
             override fun onFinish(){}
         }
         timer?.start()
-
     }
 
     override fun onDestroy() {
+        timer?.cancel()
         vm.onLeaveGame()
         vm.unsubscribe()
         super.onDestroy()

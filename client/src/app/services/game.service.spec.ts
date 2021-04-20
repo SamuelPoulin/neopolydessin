@@ -1,5 +1,6 @@
 import { EventEmitter } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { PlayerRole } from '../../../../common/communication/lobby';
 import { GameService } from './game.service';
@@ -33,6 +34,7 @@ describe('GameService', () => {
       providers: [
         { provide: SocketService, useValue: MockSocketService },
         { provide: UserService, useValue: MockUserService },
+        { provide: MatSnackBar, useValue: {} },
         GameService,
       ],
     }).compileComponents();

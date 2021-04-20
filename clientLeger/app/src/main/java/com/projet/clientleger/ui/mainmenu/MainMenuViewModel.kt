@@ -18,13 +18,6 @@ import javax.inject.Inject
 class MainMenuViewModel @Inject constructor(private val mainmenuRepository: MainmenuRepository, private val tutorialService: TutorialService, private val audioService: AudioService): ViewModel(){
 
 
-
-    fun connectSocket(accessToken: String){
-        mainmenuRepository.connectSocket(accessToken)
-    }
-    fun createGame(lobbyName:String, gameMode: GameType, difficulty: Difficulty, isPrivate:Boolean){
-        mainmenuRepository.createGame(lobbyName, gameMode,difficulty,isPrivate)
-    }
     fun getUsername():String{
         return mainmenuRepository.getUsername()
     }
@@ -34,14 +27,8 @@ class MainMenuViewModel @Inject constructor(private val mainmenuRepository: Main
     fun isTutorialActive():Boolean{
         return tutorialService.isTutorialActive()
     }
-    fun addShowcase(model:SequenceModel){
-        tutorialService.userGuide(model)
-    }
     fun createShowcaseSequence(models:ArrayList<SequenceModel>){
-        tutorialService.createShowcaseSequence(models)
-    }
-    fun setupAudio(context: Context){
-        audioService.setupAudio(context)
+        tutorialService.createMenuShowcaseSequence(models)
     }
     fun playSound(soundId:Int){
         audioService.playSound(soundId)

@@ -16,8 +16,7 @@ import com.projet.clientleger.ui.connexion.viewmodel.ConnexionViewModel
 import com.projet.clientleger.ui.mainmenu.view.MainmenuActivity
 import com.projet.clientleger.ui.register.view.RegisterActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 @AndroidEntryPoint
 class ConnexionActivity : AppCompatActivity() {
@@ -33,14 +32,10 @@ class ConnexionActivity : AppCompatActivity() {
     }
 
 
-    private fun setupButtons(){
+    private fun setupButtons() {
         binding.connectBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
             connectBtn()
-        }
-        binding.forgottenPasswordBtn.setOnClickListener{
-            vm.playSound(SoundId.CLICK.value)
-            forgottenPasswordBtn()
         }
         binding.createAccountBtn.setOnClickListener {
             vm.playSound(SoundId.CLICK.value)
@@ -48,21 +43,20 @@ class ConnexionActivity : AppCompatActivity() {
         }
     }
 
-    private fun connectBtn(){
+    private fun connectBtn() {
         binding.connectBtn.isEnabled = false
-        lifecycleScope.launch {
-            vm.connectAccount(binding.connectionUsername.text.toString(), binding.connectionPassword.text.toString()).subscribe{ res ->
-                binding.connectionPassword.text.clear()
-                if (res.isSucessful) {
-                    vm.playSound(SoundId.CONNECTED.value)
-                    binding.connectionUsername.text.clear()
-                    goToMainMenu()
-                } else {
-            vm.playSound(SoundId.ERROR.value)
-                    showToast(res.message)
-                }
-                binding.connectBtn.isEnabled = true
+        CoroutineScope(Job() + Dispatchers.Main).launch {
+            val res = vm.connectAccount(binding.connectionUsername.text.toString(), binding.connectionPassword.text.toString())
+            binding.connectionPassword.text.clear()
+            if (res.isSucessful) {
+                vm.playSound(SoundId.CONNECTED.value)
+                binding.connectionUsername.text.clear()
+                lifecycleScope.launch { goToMainMenu() }
+            } else {
+                vm.playSound(SoundId.ERROR.value)
+                lifecycleScope.launch { showToast(res.message) }
             }
+            binding.connectBtn.isEnabled = true
         }
     }
 
@@ -70,14 +64,12 @@ class ConnexionActivity : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    private fun forgottenPasswordBtn(){
-        //TODO: bouton de récupération de mot de passe non-implémenté
-    }
-    private fun createAccountBtn(){
+    private fun createAccountBtn() {
         val intent = Intent(this, RegisterActivity::class.java)
         startActivity(intent)
     }
-    private fun goToMainMenu(){
+
+    private fun goToMainMenu() {
         val intent = Intent(this, MainmenuActivity::class.java)
         startActivity(intent)
     }

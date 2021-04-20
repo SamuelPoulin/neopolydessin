@@ -11,6 +11,7 @@ import {
   ReasonEndGame,
   TeamScore,
 } from '@common/communication/lobby';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SocketService } from './socket-service.service';
 import { UserService } from './user.service';
 
@@ -60,7 +61,12 @@ export class GameService {
 
   loggedInSubscription: Subscription;
 
-  constructor(private router: Router, private socketService: SocketService, private userService: UserService) {
+  constructor(
+    private router: Router,
+    private socketService: SocketService,
+    private userService: UserService,
+    private snackBar: MatSnackBar,
+  ) {
     this.loggedInSubscription = this.userService.loggedIn.subscribe(() => this.initSubscriptions());
     this.resetTeams();
     this.canStartGame = false;
@@ -94,6 +100,16 @@ export class GameService {
       if (reason === ReasonEndGame.WINNING_SCORE_REACHED) {
         this.gameEnded.emit();
         this.lastGameEndState = { won: this.wonLastGame(), score: this.lastGameScore() };
+        this.router.navigate(['/gameend']);
+      } else if (reason === ReasonEndGame.PLAYER_DISCONNECT) {
+        this.snackBar.open('Un joueur a quitté la partie.', 'Ok', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        });
+        this.leaveGame();
+      } else if (reason === ReasonEndGame.TIME_RUN_OUT) {
+        this.lastGameEndState = { won: true, score: this.scores[0].score };
         this.router.navigate(['/gameend']);
       } else {
         this.leaveGame();

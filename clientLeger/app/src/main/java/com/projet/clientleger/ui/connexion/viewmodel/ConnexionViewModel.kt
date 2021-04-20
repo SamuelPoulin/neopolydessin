@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConnexionViewModel @Inject constructor(private val connectionRepository: ConnectionRepository, private val audioService: AudioService):ViewModel() {
-    suspend fun connectAccount(username:String, password:String): Observable<RegisterResponse> {
+    suspend fun connectAccount(username:String, password:String): RegisterResponse {
         val model = ConnectionModel(
                 username,
                 password,

@@ -59,4 +59,8 @@ export class ChatFriendComponent {
       this.chatService.createDM(this.friend.friendId.username, this.friend.friendId._id);
     }
   }
+
+  get canInvite() {
+    return this.friend.isOnline && this.chatService.chatState.inGame;
+  }
 }

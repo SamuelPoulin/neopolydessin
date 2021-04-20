@@ -162,6 +162,16 @@ export class EditorService {
     }
   }
 
+  sortShapes(): void {
+    const allShapes = this.shapes.concat(this.shapesBuffer);
+    const sortedShapes = allShapes.sort((a, b): number => {
+      return a.zIndex - b.zIndex;
+    });
+
+    allShapes.forEach(this.view.removeShape, this.view);
+    sortedShapes.forEach(this.view.addShape, this.view);
+  }
+
   applyShapesBuffer(): void {
     this.shapes.push(...this.shapesBuffer);
     this.shapesBuffer.length = 0;
@@ -194,7 +204,7 @@ export class EditorService {
         this.shapesBuffer.push(shape);
       } else if (!this.view.svg.contains(shape.svgNode)) {
         this.shapesBuffer.push(shape);
-        this.view.addShape(shape);
+        this.sortShapes(); // adds shapes to view
       }
     });
   }
