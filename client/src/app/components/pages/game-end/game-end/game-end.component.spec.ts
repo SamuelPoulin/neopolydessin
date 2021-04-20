@@ -5,8 +5,13 @@ import { SharedModule } from '@components/shared/shared.module';
 import { StatusBarModule } from '@components/shared/status-bar/status-bar.module';
 import { ChatService } from '@services/chat.service';
 import { MockChatService } from '@services/chat.service.spec';
+import { EditorService } from '@services/editor.service';
+import { MockEditorService } from '@services/editor.service.spec';
 import { GameService } from '@services/game.service';
 import { MockGameService } from '@services/game.service.spec';
+import { ModalDialogService } from '@services/modal/modal-dialog.service';
+import { SocketService } from '@services/socket-service.service';
+import { MockSocketService } from '@services/socket-service.service.spec';
 import { TutorialService } from '@services/tutorial.service';
 import { MockTutorialService } from '@services/tutorial.service.spec';
 import { UserService } from '@services/user.service';
@@ -27,6 +32,9 @@ describe('GameEndComponent', () => {
         { provide: ChatService, useValue: MockChatService },
         { provide: UserService, useValue: MockUserService },
         { provide: TutorialService, useValue: MockTutorialService },
+        { provide: SocketService, useValue: MockSocketService },
+        { provide: EditorService, useValue: MockEditorService },
+        { provide: ModalDialogService, useValue: {} },
       ],
     }).compileComponents();
   });
