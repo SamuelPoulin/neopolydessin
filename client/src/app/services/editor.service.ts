@@ -79,7 +79,6 @@ export class EditorService {
       this.recordInterval = setInterval(() => {
         this.recordedDrawings[this.drawingIndex][this.snapshotIndex] = EditorUtils.createDataURL(this.view.svg);
         this.snapshotIndex++;
-        console.log(this.recordedDrawings);
       }, EditorService.SNAPSHOT_INTERVAL);
     });
     this.gameService.gameEnded.subscribe(() => {

@@ -2,6 +2,25 @@
 
   <div content>
     <canvas #preview [width]="size" [height]="size"></canvas>
+    <canvas #canvas [width]="size" [height]="size" style="display: none;"></canvas>
+    <div id="arrows">
+      <button mat-stroked-button (click)="cyclePreviews(-1)"><mat-icon>arrow_back</mat-icon></button>
+      <button mat-stroked-button (click)="cyclePreviews(1)"><mat-icon>arrow_forward</mat-icon></button>
+    </div>
+
+    <div id="download-wrapper">
+      <button mat-stroked-button [disabled]="isLoading" (click)="download()">
+        Télécharger
+      </button>
+      <mat-spinner *ngIf="isLoading" id="load-spinner" diameter="20"></mat-spinner>
+    </div>
+
+  </div>
+
+  <div actions id="actions">
+    <button id="btn-confirm" mat-stroked-button (click)="this.dialogRef.close()">
+      Terminer
+    </button>
   </div>
 
 </app-abstract-modal>
