@@ -58,7 +58,6 @@ export class DatabaseService {
   static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    authSource: "admin",
   };
 
   readonly SALT_ROUNDS: number = 10;
