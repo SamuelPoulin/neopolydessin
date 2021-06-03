@@ -1,42 +1,25 @@
 /* eslint-disable max-lines */
-import bcrypt from "bcrypt";
-import {
-  BAD_REQUEST,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  OK,
-  UNAUTHORIZED,
-} from "http-status-codes";
-import { inject, injectable } from "inversify";
-import { ObjectId } from "mongodb";
-import mongoose from "mongoose";
-import gameHistoryModel, {
-  GameHistory,
-} from "../../models/schemas/game-history";
-import { Observable } from "../utils/observable";
-import { login, LoginResponse } from "../../../common/communication/login";
-import { Register } from "../../../common/communication/register";
-import {
-  AccountFriend,
-  AccountInfo,
-  PublicAccountInfo,
-} from "../../../common/communication/account";
-import accountModel, { Account } from "../../models/schemas/account";
-import avatarModel, { Avatar } from "../../models/schemas/avatar";
-import loginsModel, { Login, Logins } from "../../models/schemas/logins";
-import messagesHistoryModel from "../../models/schemas/messages-history";
-import refreshModel, { Refresh } from "../../models/schemas/refresh";
-import * as jwtUtils from "../utils/jwt-util";
-import {
-  DashBoardInfo,
-  Game,
-  GameHistoryDashBoard,
-  GameResult,
-} from "../../../common/communication/dashboard";
-import { GameType } from "../../../common/communication/lobby";
-import { NotificationType } from "../../../common/socketendpoints/socket-friend-actions";
-import Types from "../types";
-import { SocketIdService } from "./socket-id.service";
+import bcrypt from 'bcrypt';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK, UNAUTHORIZED } from 'http-status-codes';
+import { inject, injectable } from 'inversify';
+import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
+import gameHistoryModel, { GameHistory } from '../../models/schemas/game-history';
+import { Observable } from '../utils/observable';
+import { login, LoginResponse } from '../../../common/communication/login';
+import { Register } from '../../../common/communication/register';
+import { AccountFriend, AccountInfo, PublicAccountInfo } from '../../../common/communication/account';
+import accountModel, { Account } from '../../models/schemas/account';
+import avatarModel, { Avatar } from '../../models/schemas/avatar';
+import loginsModel, { Login, Logins } from '../../models/schemas/logins';
+import messagesHistoryModel from '../../models/schemas/messages-history';
+import refreshModel, { Refresh } from '../../models/schemas/refresh';
+import * as jwtUtils from '../utils/jwt-util';
+import { DashBoardInfo, Game, GameHistoryDashBoard, GameResult } from '../../../common/communication/dashboard';
+import { GameType } from '../../../common/communication/lobby';
+import { NotificationType } from '../../../common/socketendpoints/socket-friend-actions';
+import Types from '../types';
+import { SocketIdService } from './socket-id.service';
 export interface Response<T> {
   statusCode: number;
   documents: T;
@@ -49,11 +32,8 @@ export interface ErrorMsg {
 
 @injectable()
 export class DatabaseService {
-  static FRIEND_LIST_NOTIFICATION: Observable<{
-    accountId: string;
-    friends: AccountFriend[];
-    type: NotificationType;
-  }> = new Observable();
+
+  static FRIEND_LIST_NOTIFICATION: Observable<{ accountId: string; friends: AccountFriend[]; type: NotificationType }> = new Observable();
 
   static readonly CONNECTION_OPTIONS: mongoose.ConnectionOptions = {
     useNewUrlParser: true,
@@ -63,18 +43,16 @@ export class DatabaseService {
   readonly SALT_ROUNDS: number = 10;
 
   constructor(
-    @inject(Types.SocketIdService) private socketIdService: SocketIdService
+    @inject(Types.SocketIdService) private socketIdService: SocketIdService,
   ) {
-    if (process.env.NODE_ENV !== "test") {
+    if (process.env.NODE_ENV !== 'test') {
       this.connectDB();
     }
   }
 
   static rejectErrorMessage(err: Error | ErrorMsg): ErrorMsg {
     if (err instanceof Error) {
-      return DatabaseService.rejectMessage(
-        Number(err.message ? err.message : INTERNAL_SERVER_ERROR)
-      );
+      return DatabaseService.rejectMessage(Number(err.message ? err.message : INTERNAL_SERVER_ERROR));
     } else {
       return err;
     }
@@ -85,16 +63,16 @@ export class DatabaseService {
     if (!rejectionMsg) {
       switch (errorCode) {
         case UNAUTHORIZED:
-          rejectionMsg = "Access denied";
+          rejectionMsg = 'Access denied';
           break;
         case NOT_FOUND:
-          rejectionMsg = "Not found";
+          rejectionMsg = 'Not found';
           break;
         case BAD_REQUEST:
-          rejectionMsg = "Bad request";
+          rejectionMsg = 'Bad request';
           break;
         case INTERNAL_SERVER_ERROR:
-          rejectionMsg = "Something went wrong";
+          rejectionMsg = 'Something went wrong';
           break;
       }
     }
@@ -103,10 +81,9 @@ export class DatabaseService {
 
   connectDB(): void {
     if (process.env.MONGODB_KEY) {
-      mongoose
-        .connect(process.env.MONGODB_KEY, DatabaseService.CONNECTION_OPTIONS)
+      mongoose.connect(process.env.MONGODB_KEY, DatabaseService.CONNECTION_OPTIONS)
         .then(() => {
-          console.log("Connected to MongoDB");
+          console.log('Connected to MongoDB');
         })
         .catch((err: mongoose.Error) => {
           console.error(err.message);
@@ -120,14 +97,10 @@ export class DatabaseService {
 
   async getAccountById(id: string): Promise<Response<AccountInfo>> {
     return new Promise<Response<AccountInfo>>((resolve, reject) => {
-      accountModel
-        .findById(new ObjectId(id))
+      accountModel.findById(new ObjectId(id))
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
-          resolve({
-            statusCode: OK,
-            documents: this.accountToAccountInfo(doc),
-          });
+          resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -137,16 +110,12 @@ export class DatabaseService {
 
   async getDashboardById(id: string): Promise<Response<DashBoardInfo>> {
     return new Promise<Response<DashBoardInfo>>((resolve, reject) => {
-      accountModel
-        .findById(new ObjectId(id))
-        .populate("logins", "logins")
-        .populate("gameHistory", "games")
+      accountModel.findById(new ObjectId(id))
+        .populate('logins', 'logins')
+        .populate('gameHistory', 'games')
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
-          resolve({
-            statusCode: OK,
-            documents: this.accountToDashBoardInfo(doc),
-          });
+          resolve({ statusCode: OK, documents: this.accountToDashBoardInfo(doc) });
         })
         .catch((err: Error) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -154,14 +123,10 @@ export class DatabaseService {
     });
   }
 
-  async addGameToGameHistory(
-    id: string,
-    gameInfo: Game
-  ): Promise<Response<GameHistory>> {
+  async addGameToGameHistory(id: string, gameInfo: Game): Promise<Response<GameHistory>> {
     return new Promise<Response<GameHistory>>((resolve, reject) => {
       try {
-        gameHistoryModel
-          .addGame(id, gameInfo)
+        gameHistoryModel.addGame(id, gameInfo)
           .then((gameAdded: GameHistory) => {
             resolve({ statusCode: OK, documents: gameAdded });
           })
@@ -169,40 +134,33 @@ export class DatabaseService {
             reject(DatabaseService.rejectErrorMessage(err));
           });
       } catch {
-        reject(
-          DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString()))
-        );
+        reject(DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString())));
       }
     });
   }
 
+
   async getPublicAccount(id: string): Promise<Response<PublicAccountInfo>> {
     return new Promise<Response<PublicAccountInfo>>((resolve, reject) => {
       try {
-        accountModel
-          .findById(new ObjectId(id))
+        accountModel.findById(new ObjectId(id))
           .then((account: Account) => {
             if (!account) throw new Error(NOT_FOUND.toString());
-            resolve({
-              statusCode: OK,
-              documents: this.accountToPublicAccountInfo(account),
-            });
+            resolve({ statusCode: OK, documents: this.accountToPublicAccountInfo(account) });
           })
           .catch((err: Error) => {
             reject(DatabaseService.rejectErrorMessage(err));
           });
       } catch {
-        reject(
-          DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString()))
-        );
+        reject(DatabaseService.rejectErrorMessage(new Error(NOT_FOUND.toString())));
       }
     });
   }
 
+
   async getAccountByUsername(userName: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
-      accountModel
-        .findOne({ username: userName })
+      accountModel.findOne({ username: userName })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
@@ -215,8 +173,7 @@ export class DatabaseService {
 
   async getAccountByEmail(mail: string): Promise<Response<Account>> {
     return new Promise<Response<Account>>((resolve, reject) => {
-      accountModel
-        .findOne({ email: mail })
+      accountModel.findOne({ email: mail })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           resolve({ statusCode: OK, documents: doc });
@@ -252,8 +209,7 @@ export class DatabaseService {
         .catch(async (err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
           const logins = new loginsModel({
-            accountId: model._id,
-            logins: [],
+            accountId: model._id, logins: []
           });
           return logins.save();
         })
@@ -264,8 +220,7 @@ export class DatabaseService {
         .then(async (result: Avatar) => {
           model.avatar = result._id.toHexString();
           const gameHistory = new gameHistoryModel({
-            accountId: model._id,
-            games: [],
+            accountId: model._id, games: []
           });
           return gameHistory.save();
         })
@@ -279,10 +234,7 @@ export class DatabaseService {
           return model.save();
         })
         .then(async (acc: Account) => {
-          return this.login({
-            username: body.username,
-            password: body.password,
-          });
+          return this.login({ username: body.username, password: body.password });
         })
         .then((tokens: Response<LoginResponse>) => {
           resolve(tokens);
@@ -301,31 +253,25 @@ export class DatabaseService {
       this.getAccountByUsername(loginInfo.username)
         .then(async (results: Response<Account>) => {
           account = results.documents;
-          if (this.socketIdService.GetSocketIdOfAccountId(account.id))
-            throw Error(UNAUTHORIZED.toString());
+          if (this.socketIdService.GetSocketIdOfAccountId(account.id)) throw Error(UNAUTHORIZED.toString());
           return bcrypt.compare(loginInfo.password, account.password);
         })
         .then((match) => {
           if (!match) throw Error(UNAUTHORIZED.toString());
           jwtToken = jwtUtils.encodeAccessToken({ _id: account._id });
           jwtRefreshToken = jwtUtils.encodeRefreshToken({ _id: account._id });
-          return refreshModel.findOneAndDelete({
-            accountId: account._id.toHexString(),
-          });
+          return refreshModel.findOneAndDelete({ accountId: account._id.toHexString() });
         })
         .then(async () => {
           const refresh = new refreshModel({
             _id: new mongoose.Types.ObjectId(),
             accountId: account._id,
-            token: jwtRefreshToken,
+            token: jwtRefreshToken
           });
           return refreshModel.create(refresh);
         })
         .then((doc: Refresh) => {
-          resolve({
-            statusCode: OK,
-            documents: { accessToken: jwtToken, refreshToken: doc.token },
-          });
+          resolve({ statusCode: OK, documents: { accessToken: jwtToken, refreshToken: doc.token } });
         })
         .catch((err: Error | ErrorMsg) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -340,9 +286,7 @@ export class DatabaseService {
         .then((doc: Refresh) => {
           if (!doc) throw Error();
           const decodedPayload = jwtUtils.decodeRefreshToken(doc.token);
-          const newAccesToken = jwtUtils.encodeAccessToken({
-            _id: decodedPayload,
-          });
+          const newAccesToken = jwtUtils.encodeAccessToken({ _id: decodedPayload });
           resolve(newAccesToken);
         })
         .catch((err: Error) => {
@@ -406,7 +350,7 @@ export class DatabaseService {
           DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
             accountId: account.id,
             friends: account.friends,
-            type: NotificationType.userUpdatedAccount,
+            type: NotificationType.userUpdatedAccount
           });
           resolve({ statusCode: OK, documents: account });
         })
@@ -416,10 +360,7 @@ export class DatabaseService {
     });
   }
 
-  async updateAccount(
-    id: string,
-    body: Account
-  ): Promise<Response<AccountInfo>> {
+  async updateAccount(id: string, body: Account): Promise<Response<AccountInfo>> {
     return new Promise<Response<AccountInfo>>((resolve, reject) => {
       this.getAccountByUsername(body.username)
         .then((account: Response<Account>) => {
@@ -434,22 +375,16 @@ export class DatabaseService {
         })
         .catch((err: ErrorMsg) => {
           if (err.statusCode !== NOT_FOUND) throw err;
-          return accountModel.findByIdAndUpdate(new ObjectId(id), body, {
-            useFindAndModify: false,
-            new: true,
-          });
+          return accountModel.findByIdAndUpdate(new ObjectId(id), body, { useFindAndModify: false, new: true });
         })
         .then((doc: Account) => {
           if (!doc) throw new Error(NOT_FOUND.toString());
           DatabaseService.FRIEND_LIST_NOTIFICATION.notify({
             accountId: doc.id,
             friends: doc.friends,
-            type: NotificationType.userUpdatedAccount,
+            type: NotificationType.userUpdatedAccount
           });
-          resolve({
-            statusCode: OK,
-            documents: this.accountToAccountInfo(doc),
-          });
+          resolve({ statusCode: OK, documents: this.accountToAccountInfo(doc) });
         })
         .catch((err: Error | ErrorMsg) => {
           reject(DatabaseService.rejectErrorMessage(err));
@@ -474,7 +409,7 @@ export class DatabaseService {
     return {
       accountId: account.id,
       username: account.username,
-      avatar: account.avatar,
+      avatar: account.avatar
     };
   }
 
@@ -485,20 +420,15 @@ export class DatabaseService {
       lastName: account.lastName,
       username: account.username,
       email: account.email,
-      logins: ((account.logins as unknown) as { _id: string; logins: [Login] })
-        .logins,
+      logins: (account.logins as unknown as { _id: string; logins: [Login] }).logins,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      gameHistory: this.gameHistoryToGameHistoryDashBoard(
-        account.gameHistory as any
-      ),
+      gameHistory: this.gameHistoryToGameHistoryDashBoard(account.gameHistory as any),
       createdDate: account.createdDate,
       avatar: account.avatar,
     };
   }
 
-  private gameHistoryToGameHistoryDashBoard(
-    gameHistory: GameHistory
-  ): GameHistoryDashBoard {
+  private gameHistoryToGameHistoryDashBoard(gameHistory: GameHistory): GameHistoryDashBoard {
     let timePlayed: number = 0;
     let nbWin: number = 0;
     let classiqueGamePlayed: number = 0;
