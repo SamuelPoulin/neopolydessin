@@ -1,5 +1,5 @@
 /* tslint:disable:no-magic-numbers */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,20 +18,22 @@ describe('AlphaComponent', () => {
   let component: AlphaComponent;
   let fixture: ComponentFixture<AlphaComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [BrowserAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
-      declarations: [
-        ColorPickerComponent,
-        ColorHistoryComponent,
-        AlphaComponent,
-        ColorLightnessComponent,
-        NumberInputComponent,
-        CustomInputComponent,
-        HexInputComponent,
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [BrowserAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+        declarations: [
+          ColorPickerComponent,
+          ColorHistoryComponent,
+          AlphaComponent,
+          ColorLightnessComponent,
+          NumberInputComponent,
+          CustomInputComponent,
+          HexInputComponent,
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AlphaComponent);

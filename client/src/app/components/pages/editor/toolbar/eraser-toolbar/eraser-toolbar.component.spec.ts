@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { SharedModule } from '@components/shared/shared.module';
 import { EditorService } from '@services/editor.service';
 import { MockEditorService } from '@services/editor.service.spec';
@@ -10,13 +10,15 @@ describe('EraserToolbarComponent', () => {
   let component: EraserToolbarComponent;
   let fixture: ComponentFixture<EraserToolbarComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [SharedModule],
-      declarations: [EraserToolbarComponent],
-      providers: [{ provide: EditorService, useClass: MockEditorService }],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [SharedModule],
+        declarations: [EraserToolbarComponent],
+        providers: [{ provide: EditorService, useClass: MockEditorService }],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EraserToolbarComponent);

@@ -62,8 +62,8 @@
     "@angular-devkit/build-angular": "^12.0.3",
     "@angular-eslint/eslint-plugin": "^1.2.0",
     "@angular/cli": "~10.2.2",
-    "@angular/compiler-cli": "~10.2.4",
-    "@angular/language-service": "~10.2.4",
+    "@angular/compiler-cli": "~12.0.3",
+    "@angular/language-service": "~12.0.3",
     "@types/canvas-confetti": "^1.4.0",
     "@types/gif.js": "^0.2.0",
     "@types/jasmine": "~3.3.8",
@@ -96,19 +96,19 @@
     "protractor": "~7.0.0",
     "socket.io": "^3.1.1",
     "ts-node": "~7.0.0",
-    "typescript": "~4.0.7"
+    "typescript": "~4.2.4"
   },
   "dependencies": {
-    "@angular/animations": "~10.2.4",
-    "@angular/cdk": "~10.2.7",
-    "@angular/common": "~10.2.4",
-    "@angular/compiler": "~10.2.4",
-    "@angular/core": "~10.2.4",
-    "@angular/forms": "~10.2.4",
-    "@angular/material": "^10.2.7",
-    "@angular/platform-browser": "~10.2.4",
-    "@angular/platform-browser-dynamic": "~10.2.4",
-    "@angular/router": "~10.2.4",
+    "@angular/animations": "~12.0.3",
+    "@angular/cdk": "~12.0.2",
+    "@angular/common": "~12.0.3",
+    "@angular/compiler": "~12.0.3",
+    "@angular/core": "~12.0.3",
+    "@angular/forms": "~12.0.3",
+    "@angular/material": "^12.0.2",
+    "@angular/platform-browser": "~12.0.3",
+    "@angular/platform-browser-dynamic": "~12.0.3",
+    "@angular/router": "~12.0.3",
     "@auth0/angular-jwt": "^5.0.2",
     "@ctrl/ngx-emoji-mart": "^5.0.2",
     "@types/events": "^3.0.0",
@@ -133,6 +133,6 @@
     "socket.io-client": "^3.1.1",
     "tslib": "^2.0.0",
     "utf-8-validate": "^5.0.4",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.11.4"
   }
 }

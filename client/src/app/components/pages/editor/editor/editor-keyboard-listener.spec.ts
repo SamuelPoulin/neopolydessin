@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { EditorComponent } from '@components/pages/editor/editor/editor.component';
 import { keyDown } from '@components/pages/editor/editor/editor.component.spec';
@@ -25,19 +25,21 @@ describe('EditorKeyboardListener', () => {
   let fixture: ComponentFixture<EditorComponent>;
   let keyboardListener: KeyboardListenerService;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
-      providers: [
-        { provide: EditorService, useClass: MockEditorService },
-        { provide: APIService, useValue: MockAPIService },
-        { provide: UserService, useValue: MockUserService },
-        { provide: GameService, useValue: MockGameService },
-        { provide: ChatService, useValue: MockChatService },
-        { provide: SocketService, useValue: MockSocketService },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]), SharedModule, EditorModule],
+        providers: [
+          { provide: EditorService, useClass: MockEditorService },
+          { provide: APIService, useValue: MockAPIService },
+          { provide: UserService, useValue: MockUserService },
+          { provide: GameService, useValue: MockGameService },
+          { provide: ChatService, useValue: MockChatService },
+          { provide: SocketService, useValue: MockSocketService },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditorComponent);

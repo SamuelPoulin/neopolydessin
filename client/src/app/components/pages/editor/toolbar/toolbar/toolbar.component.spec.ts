@@ -1,5 +1,5 @@
 /* tslint:disable:no-string-literal */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EraserToolbarComponent } from '@components/pages/editor/toolbar/eraser-toolbar/eraser-toolbar.component';
 import { GridToolbarComponent } from '@components/pages/editor/toolbar/grid-toolbar/grid-toolbar.component';
@@ -19,16 +19,18 @@ describe('ToolbarComponent', () => {
   let component: ToolbarComponent;
   let fixture: ComponentFixture<ToolbarComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [SharedModule],
-      declarations: [ToolbarComponent, PenToolbarComponent, EraserToolbarComponent, GridToolbarComponent],
-      providers: [
-        { provide: EditorService, useClass: MockEditorService },
-        { provide: TutorialService, useValue: MockTutorialService },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [SharedModule],
+        declarations: [ToolbarComponent, PenToolbarComponent, EraserToolbarComponent, GridToolbarComponent],
+        providers: [
+          { provide: EditorService, useClass: MockEditorService },
+          { provide: TutorialService, useValue: MockTutorialService },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ToolbarComponent);

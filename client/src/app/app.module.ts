@@ -64,7 +64,7 @@ import { AppComponent } from './app.component';
           ],
         },
       ],
-      { useHash: true },
+      { useHash: true, relativeLinkResolution: 'legacy' },
     ),
   ],
   declarations: [AppComponent],

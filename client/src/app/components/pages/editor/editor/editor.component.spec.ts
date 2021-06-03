@@ -1,5 +1,5 @@
 /*tslint:disable:no-string-literal no-magic-numbers max-file-line-count*/
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GridComponent } from '@components/pages/editor/drawing-surface/grid/grid.component';
@@ -61,29 +61,31 @@ describe('EditorComponent', () => {
     openByName: { afterClosed: () => of(true) },
   });
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]),
-        SharedModule,
-        ToolbarModule,
-        ChatModule,
-        StatusBarModule,
-      ],
-      declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
-      providers: [
-        { provide: EditorService, useClass: MockEditorService },
-        { provide: UserService, useValue: MockUserService },
-        { provide: GameService, useValue: MockGameService },
-        { provide: ChatService, useValue: MockChatService },
-        { provide: SocketService, useValue: MockSocketService },
-        {
-          provide: ModalDialogService,
-          useValue: modalDialogServiceSpy,
-        },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+          RouterTestingModule.withRoutes([{ path: 'login', redirectTo: '' }]),
+          SharedModule,
+          ToolbarModule,
+          ChatModule,
+          StatusBarModule,
+        ],
+        declarations: [DrawingSurfaceComponent, EditorComponent, GridComponent],
+        providers: [
+          { provide: EditorService, useClass: MockEditorService },
+          { provide: UserService, useValue: MockUserService },
+          { provide: GameService, useValue: MockGameService },
+          { provide: ChatService, useValue: MockChatService },
+          { provide: SocketService, useValue: MockSocketService },
+          {
+            provide: ModalDialogService,
+            useValue: modalDialogServiceSpy,
+          },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditorComponent);

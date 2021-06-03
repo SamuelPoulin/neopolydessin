@@ -1,5 +1,5 @@
 /* tslint:disable:no-magic-numbers */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,20 +22,22 @@ describe('ColorLightnessComponent', () => {
   let lightnessChangedSpy: Spy;
   let calculateNewColorSpy: Spy;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [BrowserAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
-      declarations: [
-        ColorPickerComponent,
-        AlphaComponent,
-        ColorLightnessComponent,
-        ColorHistoryComponent,
-        NumberInputComponent,
-        CustomInputComponent,
-        HexInputComponent,
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [BrowserAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+        declarations: [
+          ColorPickerComponent,
+          AlphaComponent,
+          ColorLightnessComponent,
+          ColorHistoryComponent,
+          NumberInputComponent,
+          CustomInputComponent,
+          HexInputComponent,
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorLightnessComponent);

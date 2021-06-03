@@ -1,5 +1,5 @@
 /* tslint:disable:no-magic-numbers */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CustomInputComponent } from '@components/shared/inputs/custom-input/custom-input.component';
 import { NumberInputComponent } from '@components/shared/inputs/number-input/number-input.component';
 
@@ -17,20 +17,22 @@ describe('NumericPropertyInputComponent', () => {
   let fixture: ComponentFixture<NumericPropertyInputComponent>;
   let prop: NumericProperty;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        BrowserAnimationsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatSliderModule,
-      ],
-      declarations: [NumericPropertyInputComponent, NumberInputComponent, CustomInputComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+          BrowserAnimationsModule,
+          MatDialogModule,
+          MatFormFieldModule,
+          MatInputModule,
+          FormsModule,
+          ReactiveFormsModule,
+          MatSliderModule,
+        ],
+        declarations: [NumericPropertyInputComponent, NumberInputComponent, CustomInputComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NumericPropertyInputComponent);

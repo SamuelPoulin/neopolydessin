@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -8,23 +8,25 @@ describe('AbstractModalComponent', () => {
   let component: AbstractModalComponent;
   let fixture: ComponentFixture<AbstractModalComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [MatDialogModule, MatFormFieldModule],
-      declarations: [AbstractModalComponent],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        {
-          provide: MatDialogRef,
-          useValue: {
-            close: () => {
-              return;
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [MatDialogModule, MatFormFieldModule],
+        declarations: [AbstractModalComponent],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          {
+            provide: MatDialogRef,
+            useValue: {
+              close: () => {
+                return;
+              },
             },
           },
-        },
-      ],
-    }).compileComponents();
-  }));
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AbstractModalComponent);

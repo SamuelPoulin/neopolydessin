@@ -1,5 +1,5 @@
 import { EventEmitter } from '@angular/core';
-import { async, TestBed } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatState } from '@models/chat/chat-state';
@@ -42,19 +42,21 @@ MockChatService.chatRoomChanged = new EventEmitter<void>();
 describe('ChatService', () => {
   let service: ChatService;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [
-        { provide: SocketService, useValue: MockSocketService },
-        { provide: GameService, useValue: MockGameService },
-        { provide: APIService, useValue: MockAPIService },
-        { provide: UserService, useValue: MockUserService },
-        { provide: ElectronService, useValue: MockElectronService },
-        { provide: MatSnackBar, useValue: {} },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [RouterTestingModule],
+        providers: [
+          { provide: SocketService, useValue: MockSocketService },
+          { provide: GameService, useValue: MockGameService },
+          { provide: APIService, useValue: MockAPIService },
+          { provide: UserService, useValue: MockUserService },
+          { provide: ElectronService, useValue: MockElectronService },
+          { provide: MatSnackBar, useValue: {} },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     service = TestBed.inject(ChatService);

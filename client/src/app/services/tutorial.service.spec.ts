@@ -1,4 +1,4 @@
-import { async, TestBed } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { APIService } from './api.service';
 import { MockAPIService } from './api.service.spec';
@@ -15,16 +15,18 @@ export const MockTutorialService = jasmine.createSpyObj('TutorialService', {
 describe('Tutorial', () => {
   let service: TutorialService;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [
-        { provide: APIService, useValue: MockAPIService },
-        { provide: GameService, useValue: MockGameService },
-        { provide: EditorService, useValue: MockEditorService },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [RouterTestingModule],
+        providers: [
+          { provide: APIService, useValue: MockAPIService },
+          { provide: GameService, useValue: MockGameService },
+          { provide: EditorService, useValue: MockEditorService },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     service = TestBed.inject(TutorialService);

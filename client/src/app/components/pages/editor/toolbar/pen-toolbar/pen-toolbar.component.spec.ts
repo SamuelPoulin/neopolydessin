@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MockEditorService } from '@services/editor.service.spec';
 
 import { PenToolbarComponent } from 'src/app/components/pages/editor/toolbar/pen-toolbar/pen-toolbar.component';
@@ -10,13 +10,15 @@ describe('PenToolbarComponent', () => {
   let component: PenToolbarComponent;
   let fixture: ComponentFixture<PenToolbarComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [SharedModule],
-      declarations: [PenToolbarComponent],
-      providers: [{ provide: EditorService, useClass: MockEditorService }],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [SharedModule],
+        declarations: [PenToolbarComponent],
+        providers: [{ provide: EditorService, useClass: MockEditorService }],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(PenToolbarComponent);

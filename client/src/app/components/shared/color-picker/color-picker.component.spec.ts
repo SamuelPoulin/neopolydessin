@@ -1,6 +1,6 @@
 /* tslint:disable:no-magic-numbers */
 import { DebugElement } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -28,29 +28,31 @@ describe('ColorPickerComponent', () => {
   let drawAllSpy: Spy;
   let colorSquareElement: DebugElement;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        SharedModule,
-        RouterTestingModule,
-        BrowserAnimationsModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-      ],
-      declarations: [
-        ColorPickerComponent,
-        ColorLightnessComponent,
-        ColorHistoryComponent,
-        AlphaComponent,
-        NumberInputComponent,
-        CustomInputComponent,
-        HexInputComponent,
-      ],
-      providers: [{ provide: EditorService, useClass: MockEditorService }],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+          SharedModule,
+          RouterTestingModule,
+          BrowserAnimationsModule,
+          FormsModule,
+          ReactiveFormsModule,
+          MatFormFieldModule,
+          MatInputModule,
+        ],
+        declarations: [
+          ColorPickerComponent,
+          ColorLightnessComponent,
+          ColorHistoryComponent,
+          AlphaComponent,
+          NumberInputComponent,
+          CustomInputComponent,
+          HexInputComponent,
+        ],
+        providers: [{ provide: EditorService, useClass: MockEditorService }],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorPickerComponent);

@@ -1,5 +1,5 @@
 import { EventEmitter } from '@angular/core';
-import { async, TestBed } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 import { SocketService } from './socket-service.service';
@@ -58,12 +58,14 @@ MockSocketService.socketInitiated = new EventEmitter<void>();
 describe('SocketService', () => {
   let service: SocketService;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [{ provide: UserService, useValue: MockUserService }, SocketService],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [RouterTestingModule],
+        providers: [{ provide: UserService, useValue: MockUserService }, SocketService],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     service = TestBed.inject(SocketService);

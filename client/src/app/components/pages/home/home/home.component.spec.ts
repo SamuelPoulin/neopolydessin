@@ -1,5 +1,5 @@
 /* tslint:disable:no-string-literal */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ChatModule } from '@components/pages/chat/chat.module';
@@ -28,24 +28,26 @@ describe('HomeComponent', () => {
   let router: Router;
   const modalDialogServiceSpy = createSpyObj('ModalDialogService', ['openByName']);
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [SharedModule, RouterTestingModule, StatusBarModule, ChatModule],
-      declarations: [HomeComponent],
-      providers: [
-        { provide: SocketService, useValue: MockSocketService },
-        { provide: UserService, useValue: MockUserService },
-        { provide: GameService, useValue: MockGameService },
-        { provide: ChatService, useValue: MockChatService },
-        { provide: ElectronService, useValue: MockElectronService },
-        { provide: TutorialService, useValue: MockTutorialService },
-        {
-          provide: ModalDialogService,
-          useValue: modalDialogServiceSpy,
-        },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [SharedModule, RouterTestingModule, StatusBarModule, ChatModule],
+        declarations: [HomeComponent],
+        providers: [
+          { provide: SocketService, useValue: MockSocketService },
+          { provide: UserService, useValue: MockUserService },
+          { provide: GameService, useValue: MockGameService },
+          { provide: ChatService, useValue: MockChatService },
+          { provide: ElectronService, useValue: MockElectronService },
+          { provide: TutorialService, useValue: MockTutorialService },
+          {
+            provide: ModalDialogService,
+            useValue: modalDialogServiceSpy,
+          },
+        ],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomeComponent);

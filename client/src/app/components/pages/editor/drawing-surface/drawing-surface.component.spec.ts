@@ -1,5 +1,5 @@
 /*tslint:disable:no-string-literal no-any */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { SharedModule } from 'src/app/components/shared/shared.module';
 import { Rectangle } from 'src/app/models/shapes/rectangle';
 
@@ -12,12 +12,14 @@ describe('DrawingSurfaceComponent', () => {
   let fixture: ComponentFixture<DrawingSurfaceComponent>;
   let nativeElementSpyObj: SpyObj<any>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [SharedModule],
-      declarations: [DrawingSurfaceComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [SharedModule],
+        declarations: [DrawingSurfaceComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DrawingSurfaceComponent);
@@ -32,14 +34,14 @@ describe('DrawingSurfaceComponent', () => {
   });
 
   it('can remove shape from the view', () => {
-    component.svg.contains = ()=>true;
+    component.svg.contains = () => true;
     const shape = new Rectangle();
     component.removeShape(shape);
     expect(nativeElementSpyObj.removeChild).toHaveBeenCalledWith(shape.svgNode);
   });
 
   it('does not remove shape if view does not contain the shape', () => {
-    component.svg.contains = ()=>false;
+    component.svg.contains = () => false;
     const shape = new Rectangle();
     component.removeShape(shape);
     expect(nativeElementSpyObj.removeChild).not.toHaveBeenCalled();

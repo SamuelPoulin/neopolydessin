@@ -1,5 +1,5 @@
 /* tslint:disable:no-any */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FormsModule } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
@@ -17,12 +17,14 @@ describe('EnumPropertyInputComponent', () => {
 
   let enumProp: EnumProperty<Enum, Enum>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [MatRadioModule, FormsModule],
-      declarations: [EnumPropertyInputComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [MatRadioModule, FormsModule],
+        declarations: [EnumPropertyInputComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EnumPropertyInputComponent);
